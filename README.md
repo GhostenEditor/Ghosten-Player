@@ -30,7 +30,7 @@
 
 ## 格式支持
 
-Android平台采用的是Androidx Media3播放器，附带FFmpeg的音频解码(可自行设置)，格式编码的支持情况由硬件设备和系统版本决定，经测试：
+Android平台采用的是Androidx Media3播放器，附带FFmpeg的音频解码和AV1视频解码器(可自行设置)，格式编码的支持情况由硬件设备和系统版本决定，详情亲参考[Media3文档](https://developer.android.google.cn/media/media3/exoplayer/supported-formats?hl=zh-cn) ，经测试：
 
 1. Redmi K40 Android 14: 主流的视频文件均能正常解码，部分音频无法解码，可使用FFmpeg正常解码
 2. Mi TV Android 9: 主流的视频文件均能正常解码，部分音频无法解码，可使用FFmpeg正常解码，HDR视频无法播放
@@ -39,15 +39,61 @@ Android平台采用的是Androidx Media3播放器，附带FFmpeg的音频解码(
 
 ## 使用说明
 
-### Android TV
-
-#### 安装
+### 安装
 
 可以使用U盘或当贝市场进行安装
 
-#### 添加网络资源
+### 添加账号
 
-进入设置页面
+进入设置 -> 账号管理，点击加号按钮，进入登录页面(TV端会弹出二维码，使用手机扫描即可)。
+
+选择需要登录的网盘类型
+
+#### 阿里云盘
+
+阿里云盘使用aliyun_open提供的接口进行文件操作，使用refresh_token获取access_token鉴权
+
+1. 刷新令牌: 本项目暂不分发refresh_token，需自行准备，可申请阿里云盘开发账号自行分发，或使用第三方分发的refresh_token，比如 **[alist](https://alist.nn.ci/zh/guide/drivers/aliyundrive_open.html#%E5%88%B7%E6%96%B0%E4%BB%A4%E7%89%8C)** 
+2. Oauth令牌链接: 通常分发refresh_token的供应商会提供对应的刷新接口地址，如果由开发者账号(也就是有客户端ID和密码)，可使用阿里云的鉴权接口[https://openapi.alipan.com/oauth/access_token](https://openapi.alipan.com/oauth/access_token)
+3. 客户端ID: 仅开发者账号提供
+4. 客户端密码: 仅开发者账号提供
+
+点击提交后返回刷新页面即可，TV端在登录成功后会自动刷新页面
+
+![](screenshots/Screenshot_20240412_213545.png)
+
+#### Webdav
+
+填写Webdav对应的IP端口，点击提交后会弹出输出账号密码的弹窗，提交后完成登录。注：目前仅支持Basic编码登录
+
+![](screenshots/Screenshot_20240412_215924.png)
+
+### 添加资源
+
+### 跳过片头片尾
+
+### 整理文件信息
+
+
+## 常见问题
+
+### 播放卡顿
+
+播放卡顿通常是网络卡顿造成的，而网络卡顿通常是以下几个原因
+
+1. 网络带宽不够
+2. 播放设备硬件过时，尤其是TV端，很多TV用的是百兆网卡，亲测小米电视在WiFi模式下，网速跑满2MB/s，有线模式可达到10MB/s
+3. 如使用阿里云盘，则有可能是阿里云盘限速导致
+4. 其他网络问题
+
+### 画面或声音缺失
+
+本项目Android端使用的是media3播放器，外加FFmpeg和AV1的拓展解码器，绝大多数视频都可流畅播放，对于H.265编码的视频则由硬件设备和Android的版本而定。可尝试到设置->播放设置->拓展解码器 修改其选项。
+
+### 刮削媒体信息超时
+
+本项目使用themoviedb的API刮削媒体信息，大陆的用户可能由于DNS污染导致themoviedb无法访问，不同的地区和不同网络供应商可能情况不同。可先找到可用的IP地址，然后进入设置->其他设置->DNS，添加对应的域名和IP即可。如果找不到能够PING通的IP，那就只能通过其他方式解决网络问题了，本项目不提供解决方案。
+
 
 ## Todos
 
@@ -68,3 +114,9 @@ Android平台采用的是Androidx Media3播放器，附带FFmpeg的音频解码(
 ## Improvements
 
 -[x] 提示的展示方式
+
+## 声明
+
+本项目仅作为个人学习使用
+
+本项目不提供任何的内容资源，若出现任何内容侵权行为皆与本项目开发人员无关
