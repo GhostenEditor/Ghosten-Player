@@ -229,10 +229,9 @@ https://github.com/GhostenEditor/Ghosten-Player/assets/121630113/c6ce89c9-52b4-4
 
 ### 画面或声音缺失
 
-本项目Android端使用的是media3播放器，外加FFmpeg和AV1的拓展解码器，绝大多数视频都可流畅播放，对于H.265编码的视频则由硬件设备和Android的版本而定。可尝试到设置->
-播放设置->拓展解码器 修改其选项。
+本项目Android端使用的是media3播放器，外加FFmpeg和AV1的拓展解码器，绝大多数视频都可流畅播放，对于H.265编码的视频则由硬件设备和Android的版本而定。可尝试到设置 → 播放设置 → 拓展解码器 修改其选项。
 
-![Player Settings Page](https://github.com/GhostenEditor/Ghosten-Player/assets/121630113/3888db3a-4a10-47c7-8d1a-ce6f2be9c977)
+<img alt="Player Settings Page" src="https://github.com/GhostenEditor/Ghosten-Player/assets/121630113/3888db3a-4a10-47c7-8d1a-ce6f2be9c977" width="315"/>
 
 ### 刮削媒体信息超时
 
