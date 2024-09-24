@@ -18,20 +18,20 @@
 
 <table>
 <tr>
-<td><img src="https://github.com/user-attachments/assets/52fac788-9a1d-40b0-8fef-2f40f58cc2e3" alt="TV Screenshot 1" width="700"/></td>
-<td><img src="https://github.com/user-attachments/assets/432ea6d3-9c68-4d4c-9a9c-bbfed2718e3c" alt="TV Screenshot 2" width="700"/></td>
+<td><img src="https://github.com/user-attachments/assets/d08bacb8-d660-4ad6-8fbc-e71681f339d9" alt="TV Screenshot 1" width="700"/></td>
+<td><img src="https://github.com/user-attachments/assets/53e0e529-df2a-4b76-ba7c-31d29c2bb6a4" alt="TV Screenshot 2" width="700"/></td>
 </tr>
 <tr>
-<td><img src="https://github.com/user-attachments/assets/f410b30f-f117-4787-8cbd-48fdef6969c8" alt="TV Screenshot 3" width="700"/></td>
-<td><img src="https://github.com/user-attachments/assets/14d0eedd-bcc9-4ebf-a5e6-0b281022c7d6" alt="TV Screenshot 4" width="700"/></td>
+<td><img src="https://github.com/user-attachments/assets/9f677129-8183-44aa-b714-42b8a9ef2df8" alt="TV Screenshot 3" width="700"/></td>
+<td><img src="https://github.com/user-attachments/assets/09f6e0e3-11b1-4db5-8c76-cfaf45be1249" alt="TV Screenshot 4" width="700"/></td>
 </tr>
 <tr>
-<td><img src="https://github.com/user-attachments/assets/ad46187e-26af-4d72-8230-307a53e5de59" alt="TV Screenshot 5" width="700"/></td>
-<td><img src="https://github.com/user-attachments/assets/413dd82a-26e3-429f-af08-e8571dd71e87" alt="TV Screenshot 6" width="700"/></td>
+<td><img src="https://github.com/user-attachments/assets/967731bc-a13c-485b-a360-b71f53da3f53" alt="TV Screenshot 5" width="700"/></td>
+<td><img src="https://github.com/user-attachments/assets/f7559fa5-2294-4bde-bd73-f112ba841c06" alt="TV Screenshot 6" width="700"/></td>
 </tr>
 <tr>
-<td><img src="https://github.com/user-attachments/assets/a5407788-78e8-41b3-b65c-c053bf7a16bd" alt="TV Screenshot 7" width="700"/></td>
-<td><img src="https://github.com/user-attachments/assets/8d74c2c5-a20e-49bd-9a82-377802a61c55" alt="TV Screenshot 8" width="700"/></td>
+<td><img src="https://github.com/user-attachments/assets/e448ac52-81c6-4c2b-acf0-412b05f3dad6" alt="TV Screenshot 7" width="700"/></td>
+<td><img src="https://github.com/user-attachments/assets/b4e523ff-f4ce-408c-a11f-41df1d54954d" alt="TV Screenshot 8" width="700"/></td>
 </tr>
 </table>
 
@@ -43,16 +43,16 @@
 <summary><h3 style="display: inline">Android Phone 截图</h3></summary>
 <table>
 <tr>
-<td><img src="https://github.com/user-attachments/assets/752acb8d-a69c-414d-aa43-1fa6779948ee" alt="Mobile Screenshot 1" width="315"/></td>
-<td><img src="https://github.com/user-attachments/assets/345a95fe-9564-4277-b926-26c7a6cdb992" alt="Mobile Screenshot 2" width="315"/></td>
-<td><img src="https://github.com/user-attachments/assets/592806e9-8418-40c0-9a64-961ecd88046f" alt="Mobile Screenshot 3"  width="315"/></td>
-<td><img src="https://github.com/user-attachments/assets/00a31c22-e290-40f9-9999-05f1c4d46246" alt="Mobile Screenshot 4" width="315"/></td>
+<td><img src="https://github.com/user-attachments/assets/2191a341-e9ac-43e4-a79f-17ba6f979d86" alt="Mobile Screenshot 1" width="315"/></td>
+<td><img src="https://github.com/user-attachments/assets/28ee59ee-0846-49f1-8ead-b16bb67be54c" alt="Mobile Screenshot 2" width="315"/></td>
+<td><img src="https://github.com/user-attachments/assets/92828f5b-5a99-40ff-8f72-4fedbad0aacb" alt="Mobile Screenshot 3"  width="315"/></td>
+<td><img src="https://github.com/user-attachments/assets/a292ac1c-3e7a-44a9-a0a8-d4426422431f" alt="Mobile Screenshot 4" width="315"/></td>
 </tr>
 <tr>
-<td><img src="https://github.com/user-attachments/assets/977589e7-f4f2-4822-b376-bb7c6cd8d76f" alt="Mobile Screenshot 5" width="315"/></td>
-<td><img src="https://github.com/user-attachments/assets/4dd3f893-6f93-4df3-982e-01fb5bc23899" alt="Mobile Screenshot 6" width="315"/></td>
-<td><img src="https://github.com/user-attachments/assets/5d9ce0d5-2fb2-4d48-8681-b4999ce1895a" alt="Mobile Screenshot 7" width="315"/></td>
-<td><img src="https://github.com/user-attachments/assets/9ed1a1be-b670-48a5-bfbb-face69aab70a" alt="Mobile Screenshot 8" width="315"/></td>
+<td><img src="https://github.com/user-attachments/assets/8a7d5de9-abbe-4338-8a94-2215f55dda17" alt="Mobile Screenshot 5" width="315"/></td>
+<td><img src="https://github.com/user-attachments/assets/32f3d4b9-7e1b-4366-8cb5-af517dad5dcb" alt="Mobile Screenshot 6" width="315"/></td>
+<td><img src="https://github.com/user-attachments/assets/34a46f8b-d22b-414c-8f8a-ef94e2044059" alt="Mobile Screenshot 7" width="315"/></td>
+<td><img src="https://github.com/user-attachments/assets/a8add8a5-180e-4a4b-bec3-9f7928a8b647" alt="Mobile Screenshot 8" width="315"/></td>
 </tr>
 </table>
 
@@ -63,22 +63,22 @@
 ## Features
 
 1. 支持 **Android TV** 和 **Android Phone** (桌面端开发中)
-2. [支持 **阿里云盘**、**Webdav** 和 **本地文件** 播放](#添加账号)
+2. [支持阿里云盘、Webdav和本地文件播放](#添加账号)
 3. 纯本地运行，无需后端服务支持 [^3]
 4. [支持跳过片头/片尾](#跳过片头片尾)
 5. 支持视频轨道选择
 6. 支持**内嵌字幕**和**外置字幕**播放[^4]
-7. [支持**文件下载**和**边下边播**](#文件下载)
+7. [支持文件下载和边下边播](#文件下载)
 8. [支持网盘文件的整理](#整理文件信息)
 9. **多账号登录**
 10. 支持中英双语(英文翻译可能不太准确，欢迎指正)
 11. [支持手机端辅助TV端输入](#tv端辅助输入)
 12. 浅色和深色模式
 13. [Hls直播观看](#添加直播源)
-14. [支持**DLNA投屏**](#dlna投屏)
+14. [支持DLNA投屏](#dlna投屏)
 15. 软件体积小 (≈ 15 MB)
 16. [设备间的数据同步](#数据同步)
-17. [自动更新](#自动更新)
+17. 自动更新
 18. 客户端串联[^1]
 
 [^3]: 网盘由网盘提供商提供服务支持，与本项目无关
@@ -134,13 +134,13 @@ _**[Media3文档](https://developer.android.google.cn/media/media3/exoplayer/sup
 | 3 | 客户端ID     | 仅开发者账号提供                                                                                                                                                                                                                                                                                           |
 | 4 | 客户端密码     | 仅开发者账号提供                                                                                                                                                                                                                                                                                           |
 
-<img alt="Alipan Login Page" src="https://github.com/user-attachments/assets/9ff33bea-9084-4e7b-b17c-3884827b7055" width="315"/>
+<img alt="Alipan Login Page" src="https://github.com/user-attachments/assets/49f6a2d0-c1b4-4fd1-8012-027442fe73ce" width="315"/>
 
 #### Webdav
 
 填写Webdav对应的IP端口，输出账号密码，提交后完成登录。注：目前仅支持Basic编码登录
 
-<img alt="Webdav Login Page 1" src="https://github.com/user-attachments/assets/febf8fdf-1883-45e5-be3d-a96672746e54" width="315"/>
+<img alt="Webdav Login Page 1" src="https://github.com/user-attachments/assets/68dd1b9f-9627-4cf4-8c65-d919795f42b8" width="315"/>
 
 ### 添加资源
 
@@ -173,7 +173,7 @@ _**[Media3文档](https://developer.android.google.cn/media/media3/exoplayer/sup
 
 电视剧支持对 **电视剧**，**季**，**单集** 设置跳过片头片尾，也可以在播放器中设置(会作用于当前季)
 
-<img alt="Playlist Create Page" src="https://github.com/user-attachments/assets/ec99ec5b-42fd-4476-9fbb-0996f73feb75" width="315"/>
+<img alt="Skip Intro" src="https://github.com/user-attachments/assets/8a956629-e4f6-458f-aa63-afb6e6742541" width="315"/>
 
 ### 整理文件信息
 
@@ -206,17 +206,17 @@ _**[Media3文档](https://developer.android.google.cn/media/media3/exoplayer/sup
 
 进入直播页面，点击加号，输入直播源名称和地址即可
 
-<img alt="Playlist Create Page" src="https://github.com/user-attachments/assets/eb733e2f-8c42-4fab-89eb-c28f854ada70" width="315"/>
+<img alt="Playlist Create Page" src="https://github.com/user-attachments/assets/51e7b963-0550-4540-92ca-3014ec021ce3" width="315"/>
 
 如遇到无法播放问题，可先尝试刷新直播源
 
-<img alt="Playlist Refresh Page" src="https://github.com/user-attachments/assets/0eb7da46-1f83-4f9e-bf97-2f5059a98345" width="315"/>
+<img alt="Playlist Refresh Page" src="https://github.com/user-attachments/assets/63bacfd0-8bf4-4569-90d3-ce6b98357bcd" width="315"/>
 
 ### DLNA投屏
 
 手机端点击投屏按钮，应用会自行搜索局域网下支持DLNA投屏的设备，选择设备即可使用投屏功能[^5]
 
-<img alt="Playlist Refresh Page" src="https://github.com/user-attachments/assets/9b14ab56-abc6-42ed-90bd-a4ad908893a0" width="315"/>
+<img alt="Player Casting" src="https://github.com/user-attachments/assets/0a165f8e-e897-4c20-ba4b-83ba8ab0cd32" width="315"/>
 
 [^5]: 手机端仅作为媒体服务器的角色，能否正常播放取决于投屏端是否支持该编码格式
 
@@ -228,10 +228,6 @@ _**[Media3文档](https://developer.android.google.cn/media/media3/exoplayer/sup
 
 由于TV端使用遥控器输入链接、账号密码等信息不便，可在TV端点击辅助输入按钮，然后使用手机(需在用以局域网下)
 扫描二维码进入网页，手机端编辑的文本，会推送到TV端聚焦的文本框内
-
-### 自动更新
-
-https://github.com/GhostenEditor/Ghosten-Player/assets/121630113/c6ce89c9-52b4-45bb-8361-eb0c59a00707
 
 ### 文件下载
 
@@ -260,11 +256,11 @@ Todo
 本项目Android端使用的是media3播放器，外加FFmpeg和AV1的拓展解码器，绝大多数视频都可流畅播放，对于H.265编码的视频则由硬件设备和Android的版本而定。可尝试到设置 →
 播放设置 → 拓展解码器 修改其选项。
 
-<img alt="Player Settings Page" src="https://github.com/user-attachments/assets/dd92474c-ffbe-4444-a89a-474f7b1cd68c" width="315"/>
+<img alt="Player Settings Page" src="https://github.com/user-attachments/assets/9c3c32f5-8a1d-410c-9b9e-13a2ec512834" width="315"/>
 
 ### 刮削媒体信息超时
 
-详见DNS部分
+[详见DNS部分](#dns)
 
 ### 数据重置
 
