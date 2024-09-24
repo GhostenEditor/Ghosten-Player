@@ -1,0 +1,8 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.ghosten.api">
+    <application>
+        <service android:name="com.ghosten.api.ApiService"
+                 android:foregroundServiceType="mediaProjection"
+                 android:exported="false"/>
+    </application>
+</manifest>

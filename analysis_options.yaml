@@ -1,0 +1,13 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude: [ build/** ]
+  language:
+    strict-raw-types: true
+
+linter:
+  rules:
+    prefer_single_quotes: true
+    await_only_futures: true
+    avoid_shadowing_type_parameters: false
+    directives_ordering: true

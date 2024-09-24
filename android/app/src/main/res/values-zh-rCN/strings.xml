@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="watch_tv">继续观看电视剧</string>
+    <string name="watch_movie">继续观看电影</string>
+    <string name="flutter_downloader_notification_started">开始下载</string>
+    <string name="flutter_downloader_notification_in_progress">下载中</string>
+    <string name="flutter_downloader_notification_canceled">下载已取消</string>
+    <string name="flutter_downloader_notification_failed">下载失败</string>
+    <string name="flutter_downloader_notification_complete">下载完成</string>
+    <string name="flutter_downloader_notification_paused">下载暂停</string>
+</resources>

@@ -1,0 +1,16 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <color android:color="@color/background"/>
+    </item>
+    <item
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:drawable="@drawable/ic_logo"
+            android:gravity="center" android:width="180dp" android:height="180dp"/>
+    <item
+            android:width="200dp"
+            android:height="80dp"
+            android:bottom="30dp"
+            android:gravity="bottom|center_horizontal"
+            android:drawable="@drawable/ic_brand"/>
+</layer-list>

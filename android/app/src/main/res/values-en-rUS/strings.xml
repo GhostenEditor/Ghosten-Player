@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="watch_tv">Continue Watching TV Series</string>
+    <string name="watch_movie">Continue Watching Movie</string>
+    <string name="flutter_downloader_notification_started">Download started</string>
+    <string name="flutter_downloader_notification_in_progress">Download in progress</string>
+    <string name="flutter_downloader_notification_canceled">Download canceled</string>
+    <string name="flutter_downloader_notification_failed">Download failed</string>
+    <string name="flutter_downloader_notification_complete">Download complete</string>
+    <string name="flutter_downloader_notification_paused">Download paused</string>
+</resources>

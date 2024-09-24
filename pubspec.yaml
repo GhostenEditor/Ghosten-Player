@@ -1,0 +1,60 @@
+name: ghosten_player
+description: "Ghosten Player: A Video Player"
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+version: 1.0.0
+environment:
+  sdk: '>=3.4.3 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+  animations: ^2.0.11
+  api:
+    path: packages/api
+  bluetooth:
+    path: packages/bluetooth
+  cached_network_image: ^3.4.1
+  collection: ^1.18.0
+  date_format: ^2.0.9
+  dio: ^5.7.0
+  file_picker:
+    path: packages/file_picker
+  install_plugin: ^2.1.0
+  player_view:
+    path: packages/player_view
+  provider: ^6.1.1
+  qr_flutter: ^4.1.0
+  rxdart: ^0.27.7
+  shared_preferences: ^2.3.2
+  url_launcher: ^6.3.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+dependency_overrides:
+  flutter:
+    git:
+      url: https://github.com/GhostenEditor/flutter
+      path: packages/flutter
+      ref: release-3.22.2
+  flutter_localizations:
+    git:
+      url: https://github.com/GhostenEditor/flutter
+      path: packages/flutter_localizations
+      ref: release-3.22.2
+
+flutter:
+  uses-material-design: true
+  generate: true
+  assets:
+    - assets/images/
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: fonts/Roboto-Regular.ttf
+
+

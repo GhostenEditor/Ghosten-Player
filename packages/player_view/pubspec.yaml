@@ -1,0 +1,33 @@
+name: player_view
+description: "Video Player Plugin for Ghosten Player"
+version: 1.0.0
+
+environment:
+  sdk: '>=3.4.3 <4.0.0'
+  flutter: '>=3.3.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+  animations: ^2.0.0
+  cached_network_image: ^3.4.0
+  collection: ^1.18.0
+  plugin_platform_interface: ^2.0.2
+  rxdart: ^0.27.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.ghosten.player_view
+        pluginClass: PlayerViewPlugin
+      web:
+        pluginClass: PlayerWeb
+        fileName: src/player_web.dart

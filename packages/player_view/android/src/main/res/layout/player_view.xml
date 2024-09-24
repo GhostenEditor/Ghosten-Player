@@ -1,0 +1,9 @@
+<androidx.media3.ui.PlayerView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/video_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:keepScreenOn="true"
+        app:use_controller="false"
+        app:surface_type="texture_view"/>
