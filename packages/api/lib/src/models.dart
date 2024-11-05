@@ -514,7 +514,7 @@ class UpdateResp {
 
   UpdateResp.fromJson(Json json)
       : assets = List.generate(json['assets'].length, (index) => UpdateRespAsset.fromJson(json['assets'][index])),
-        tagName = Version.fromString(json['tag_name']),
+        tagName = Version.fromString(json['tag_name'].substring(1)),
         comment = json['body'],
         createAt = (json['published_at'] as String).toDateTime();
 }

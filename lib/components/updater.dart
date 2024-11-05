@@ -24,7 +24,6 @@ class UpdateBottomSheet extends StatefulWidget {
 class _UpdateBottomSheetState extends State<UpdateBottomSheet> {
   static Map<String, _DownloadTask> downloading = {};
   bool failed = false;
-  double? progress;
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +78,7 @@ class _UpdateBottomSheetState extends State<UpdateBottomSheet> {
                                 listenable: downloading[widget.url]!.progress,
                                 builder: (context, _) {
                                   return CircularProgressIndicator(
-                                      strokeWidth: 2, value: progress, backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest);
+                                      strokeWidth: 2, value: downloading[widget.url]!.progress.value, backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest);
                                 })),
                       ])
                     : failed
