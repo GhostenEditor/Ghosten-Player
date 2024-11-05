@@ -159,6 +159,7 @@ class SettingsPage extends StatelessWidget {
   }) {
     return PopupMenuButton<T>(
       offset: const Offset(1, 0),
+      tooltip: '',
       onSelected: onSelected,
       itemBuilder: itemBuilder,
       child: ListTile(

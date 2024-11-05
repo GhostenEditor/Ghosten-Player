@@ -43,7 +43,15 @@ class _EpisodeDetailState extends State<EpisodeDetail> with DetailPageMixin<TVEp
 
   @override
   Widget buildFloatImage(BuildContext context, TVEpisode item) {
-    return AspectRatio(aspectRatio: 1.667, child: item.poster != null ? AsyncImage(item.poster!) : const Icon(Icons.image_not_supported, size: 50));
+    return AspectRatio(
+        aspectRatio: 1.667,
+        child: item.poster != null
+            ? AsyncImage(item.poster!)
+            : Icon(
+                Icons.image_not_supported,
+                size: 50,
+                color: Theme.of(context).colorScheme.primaryFixedDim,
+              ));
   }
 
   @override

@@ -132,6 +132,7 @@ class _AccountManageState extends State<AccountManage> {
         childBuilder: (context, item, {required onPage, required onSubmit, required onRefresh, groupValue}) {
           return PopupMenuButton(
             offset: const Offset(1, 0),
+            tooltip: '',
             itemBuilder: (context) => [
               PopupMenuItem(
                 autofocus: kIsAndroidTV,

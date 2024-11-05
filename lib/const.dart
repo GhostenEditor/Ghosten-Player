@@ -1,5 +1,3 @@
-import 'dart:isolate';
-
 const alphaVersion = bool.fromEnvironment('ALPHA_VERSION', defaultValue: false);
 const buildDate = String.fromEnvironment('BUILD_DATE', defaultValue: '2024-03-12');
 const repoAuthor = String.fromEnvironment('REPO_AUTHOR', defaultValue: 'GhostenEditor');
@@ -10,7 +8,5 @@ const headerUserAgent = 'User-Agent';
 const assetsLogo = 'assets/images/logo.png';
 const assetsNoData = 'assets/images/no data.png';
 const appName = 'Ghosten Player';
-const appVersion = '1.0.0';
+const appVersion = '1.0.1';
 const double kQrSize = 240;
-final ReceivePort port = ReceivePort();
-final Stream<dynamic> downloaderStream = port.asBroadcastStream();

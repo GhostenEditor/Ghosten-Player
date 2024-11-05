@@ -159,8 +159,9 @@ class _SeasonDetailState extends State<SeasonDetail> with DetailPageMixin<TVSeas
                           child: item.poster != null
                               ? AsyncImage(item.poster!, ink: true)
                               : Container(
-                                  color: Theme.of(context).colorScheme.onSurface.withAlpha(0x11),
-                                  child: const Center(child: Icon(Icons.image_not_supported_outlined, size: 50)))),
+                                  color: Theme.of(context).colorScheme.primary.withAlpha(0x11),
+                                  child: Center(
+                                      child: Icon(Icons.image_not_supported_outlined, size: 50, color: Theme.of(context).colorScheme.secondaryContainer)))),
                     );
                   }),
                 ],

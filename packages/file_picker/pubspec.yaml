@@ -1,6 +1,6 @@
 name: file_picker
 description: "File Picker Plugin for Ghosten Player"
-version: 1.0.0
+version: 1.0.1
 
 environment:
   sdk: '>=3.4.3 <4.0.0'

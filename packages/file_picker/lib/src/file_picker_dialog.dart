@@ -76,6 +76,7 @@ class _FilePickerDialogState<T> extends State<FilePickerDialog<T>> {
                       animation: primaryAnimation,
                       secondaryAnimation: secondaryAnimation,
                       transitionType: SharedAxisTransitionType.horizontal,
+                      fillColor: Colors.transparent,
                       child: child,
                     );
                   },
@@ -132,6 +133,7 @@ class _FilePickerDialogState<T> extends State<FilePickerDialog<T>> {
       _routes.add(item);
       _stream.add(res);
     } catch (e) {
+      _routes.add(null);
       _stream.addError(e);
     }
   }
@@ -179,13 +181,16 @@ class _ListViewWithScrollbarState extends State<_ListViewWithScrollbar> {
 
   @override
   Widget build(BuildContext context) {
-    return Scrollbar(
-      controller: _scrollController,
-      child: ListView.separated(
+    return Theme(
+      data: Theme.of(context).copyWith(listTileTheme: const ListTileThemeData(contentPadding: EdgeInsetsDirectional.only(start: 16, end: 16))),
+      child: Scrollbar(
         controller: _scrollController,
-        itemBuilder: widget.itemBuilder,
-        separatorBuilder: widget.separatorBuilder,
-        itemCount: widget.itemCount,
+        child: ListView.separated(
+          controller: _scrollController,
+          itemBuilder: widget.itemBuilder,
+          separatorBuilder: widget.separatorBuilder,
+          itemCount: widget.itemCount,
+        ),
       ),
     );
   }
