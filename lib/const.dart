@@ -8,5 +8,5 @@ const headerUserAgent = 'User-Agent';
 const assetsLogo = 'assets/images/logo.png';
 const assetsNoData = 'assets/images/no data.png';
 const appName = 'Ghosten Player';
-const appVersion = '1.0.1';
+const appVersion = '1.0.2';
 const double kQrSize = 240;
