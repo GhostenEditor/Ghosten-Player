@@ -1,6 +1,6 @@
 name: api
 description: "Api Plugin for Ghosten Player"
-version: 0.0.1
+version: 1.0.2
 homepage:
 
 environment:

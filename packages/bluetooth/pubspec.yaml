@@ -1,6 +1,6 @@
 name: bluetooth
 description: "Bluetooth Plugin for Ghosten Player"
-version: 0.0.1
+version: 1.0.0
 homepage:
 
 environment:

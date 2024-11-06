@@ -258,6 +258,16 @@ class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnec
                 return activity.requestPermissions(permissions, REQUEST_STORAGE_PERMISSION)
             }
         }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (activity.checkSelfPermission(Manifest.permission.READ_MEDIA_VIDEO) != PackageManager.PERMISSION_GRANTED
+            ) {
+                val permissions = arrayOf(
+                    Manifest.permission.READ_MEDIA_VIDEO,
+                )
+                methodCallResult = result
+                return activity.requestPermissions(permissions, REQUEST_STORAGE_PERMISSION)
+            }
+        }
         result.success(true)
     }
 
