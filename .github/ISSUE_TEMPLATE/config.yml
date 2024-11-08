@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 提问
+    url: https://github.com/GhostenEditor/Ghosten-Player/discussions/categories/q-a
+    about: 一般使用问题请在讨论区提问，提问前请先搜索避免重复提问题
+  - name: 想法分享
+    url: https://github.com/GhostenEditor/Ghosten-Player/discussions/categories/ideas
+    about: 有功能建议、想法可以在讨论区开贴

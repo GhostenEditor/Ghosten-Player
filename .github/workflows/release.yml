@@ -1,0 +1,97 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+
+      - uses: actions/setup-java@v1
+        with:
+          java-version: '17.x'
+
+      - uses: subosito/flutter-action@v1
+        with:
+          flutter-version: '3.22.2'
+
+      - run: flutter pub get
+
+      - name: Decode Keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
+
+      - name: Create key.properties
+        run: |
+          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" > android/key.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
+          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
+          echo "storeFile=keystore.jks" >> android/key.properties
+
+      - name: Download Libraries
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.TOKEN }}
+          run-id: ${{ secrets.MEDIA3_RUN_ID }}
+          repository: ${{ secrets.MEDIA3_REPOSITORY }}
+
+      - name: Download Libraries
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.TOKEN }}
+          run-id: ${{ secrets.API_RUN_ID }}
+          repository: ${{ secrets.API_REPOSITORY }}
+
+      - name: Move Libraries
+        run: |
+          mkdir android/app/libs
+          mv media3-extension/* android/app/libs
+          mv api/* android/app/libs
+
+      - name: Extract version from pubspec.yaml
+        run: |
+          version=$(grep '^version: ' pubspec.yaml | cut -d ' ' -f 2 | tr -d '\r')
+          echo "VERSION=$version" >> $GITHUB_ENV
+
+      - name: Calculate Build Number
+        run: |
+          MAJOR=$(echo ${{ env.VERSION }} |  cut -d '.' -f 1)
+          MINOR=$(echo ${{ env.VERSION }} |  cut -d '.' -f 2)
+          PATCH=$(echo ${{ env.VERSION }} |  cut -d '.' -f 3)
+          build_number=$((($MAJOR - 1) * 10000 + $MINOR * 100 + $PATCH))
+          echo "BUILD_NUMBER=$build_number" >> $GITHUB_ENV
+
+      - run: |
+          flutter build apk \
+          --split-per-abi \
+          --obfuscate \
+          --split-debug-info=./build/app/outputs/flutter-apk/ \
+          --build-number=${{ env.BUILD_NUMBER }} \
+          --dart-define=BUILD_DATE=$(date "+%F") \
+          --dart-define=BUILD_VERSION=${{ env.VERSION }}
+
+      - name: Check if Tag Exists
+        run: |
+          if git rev-parse "v${{ env.VERSION }}" >/dev/null 2>&1; then
+            echo "TAG_EXISTS=true" >> $GITHUB_ENV
+          else
+            echo "TAG_EXISTS=false" >> $GITHUB_ENV
+          fi
+
+      - name: Modify Tag
+        if: env.TAG_EXISTS == 'true'
+        run: |
+          new_version="${{ env.VERSION }}-build-${{ github.run_number }}"
+          echo "VERSION=$new_version" >> $GITHUB_ENV
+
+      - name: Push APK to Releases
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "build/app/outputs/flutter-apk/app-arm64-v8a-release.apk,build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk"
+          generateReleaseNotes: true
+          draft: true
+          tag: v${{ env.VERSION }}
+          token: ${{ secrets.TOKEN }}

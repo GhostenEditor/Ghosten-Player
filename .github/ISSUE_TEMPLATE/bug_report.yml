@@ -1,0 +1,56 @@
+name: Bug反馈
+description: 请通过这里反馈遇到的 Bug 类问题
+labels: [ bug ]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        非常感谢您的问题反馈，帮助我完善此项目，在此之前，请填写以下表单，方便更好的定位问题。
+
+  - type: input
+    attributes:
+      label: 版本
+      placeholder: 请提供具体版本号如 1.0.0
+    validations:
+      required: true
+
+  - type: dropdown
+    attributes:
+      label: 运行平台
+      description: 您在什么平台上运行的该项目？
+      options:
+        - Android手机
+        - Android平板
+        - Android TV
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: 设备型号
+      placeholder: 比如Redmi K70
+      description: 您使用的设备型号
+
+  - type: input
+    attributes:
+      label: Android版本
+      placeholder: 比如Android13
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: 问题描述
+      description: 请简要描述您遇到的问题，若需要的话，请提供图片
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: 问题复现
+      description: 请提供复现该问题的步骤，方便定位问题所在
+      placeholder: |
+        1.
+        2.
+        3.
+  

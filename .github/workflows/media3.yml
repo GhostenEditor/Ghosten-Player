@@ -1,0 +1,71 @@
+on: workflow_dispatch
+name: Build Media3 Extension
+jobs:
+  build:
+    name: Build Media3 Extension
+    runs-on: ubuntu-latest
+    steps:
+      - run: git clone https://github.com/androidx/media.git
+
+      - working-directory: media
+        run: git checkout tags/1.2.1
+
+      - working-directory: media/libraries/decoder_av1/src/main/jni
+        run: git clone https://github.com/google/cpu_features
+
+      - working-directory: media/libraries/decoder_av1/src/main/jni
+        run: git clone https://chromium.googlesource.com/codecs/libgav1
+
+      - working-directory: media/libraries/decoder_av1/src/main/jni/libgav1
+        run: git clone https://github.com/abseil/abseil-cpp.git third_party/abseil-cpp
+
+      - uses: seanmiddleditch/gha-setup-ninja@master
+
+      - uses: actions/setup-java@v1
+        with:
+          java-version: '17.x'
+
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: '3.16.x'
+
+      - working-directory: media
+        run: ./gradlew :lib-decode-av1:build
+
+      - run: git clone https://github.com/FFmpeg/FFmpeg
+
+      - working-directory: FFmpeg
+        run: git checkout release/6.0
+
+      - uses: nttld/setup-ndk@v1
+        id: setup-ndk
+        with:
+          ndk-version: r26c
+          local-cache: true
+
+      - working-directory: media
+        run: |
+          FFMPEG_MODULE_PATH="${{ github.workspace }}/media/libraries/decoder_ffmpeg/src/main"
+          HOST_PLATFORM="linux-x86_64"
+          ANDROID_ABI=21
+          ENABLED_DECODERS="vorbis,opus,flac,mp3,aac,ac3,eac3,dca"
+          FFMPEG_PATH=${{ github.workspace }}/FFmpeg
+          cd "${FFMPEG_MODULE_PATH}/jni"
+          ln -s "$FFMPEG_PATH" ffmpeg
+          ./build_ffmpeg.sh "${FFMPEG_MODULE_PATH}" "${{steps.setup-ndk.outputs.ndk-path}}" "${HOST_PLATFORM}" "${ANDROID_ABI}" "${ENABLED_DECODERS}"
+          cd "${{ github.workspace }}/media"
+          ./gradlew :lib-decode-ffmpeg:build
+
+      - name: Copy Artifacts
+        run: |
+          mkdir artifacts
+          cp media/libraries/decoder_ffmpeg/buildout/outputs/aar/lib-decoder-ffmpeg-release.aar artifacts/
+          cp media/libraries/decoder_av1/buildout/outputs/aar/lib-decoder-av1-release.aar artifacts/
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: media3-extension
+          path: artifacts/*.aar
+
