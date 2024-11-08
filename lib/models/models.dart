@@ -1,17 +1,20 @@
 import 'package:api/api.dart';
 import 'package:flutter/widgets.dart';
 import 'package:player_view/player.dart';
+import 'package:provider/provider.dart';
 
+import '../providers/user_config.dart';
 import '../utils/utils.dart';
 
 extension FromMedia on ExPlaylistItem {
   static ExPlaylistItem fromEpisode(TVEpisode episode) {
     return ExPlaylistItem(
       id: episode.id,
+      uid: episode.uid,
       sourceType: episode.downloaded ? PlaylistItemSourceType.local : PlaylistItemSourceType.other,
       title: episode.displayTitle(),
       description: '${episode.seriesTitle} S${episode.season} E${episode.episode}${episode.airDate == null ? '' : ' - ${episode.airDate?.format()}'}',
-      url: Uri.parse(episode.url!).replace(scheme: Api.baseUrl.scheme, host: Api.baseUrl.host, port: Api.baseUrl.port),
+      url: mediaUrl(episode.uid),
       poster: episode.poster,
       subtitles: episode.subtitles
           .map((e) => Subtitle(
@@ -31,10 +34,11 @@ extension FromMedia on ExPlaylistItem {
   static ExPlaylistItem fromMovie(Movie movie) {
     return ExPlaylistItem(
       id: movie.id,
+      uid: movie.uid,
       sourceType: movie.downloaded ? PlaylistItemSourceType.local : PlaylistItemSourceType.other,
       title: movie.title ?? movie.filename,
       description: '${movie.originalTitle} - ${movie.airDate?.format()}',
-      url: Uri.parse(movie.url!).replace(scheme: Api.baseUrl.scheme, host: Api.baseUrl.host, port: Api.baseUrl.port),
+      url: mediaUrl(movie.uid),
       poster: movie.poster,
       subtitles: movie.subtitles
           .map((e) => Subtitle(
@@ -51,6 +55,7 @@ extension FromMedia on ExPlaylistItem {
   static ExPlaylistItem fromChannel(Channel channel) {
     return ExPlaylistItem(
         id: channel.id,
+        uid: channel.url,
         sourceType: PlaylistItemSourceType.hls,
         title: channel.title,
         description: channel.category,
@@ -60,8 +65,19 @@ extension FromMedia on ExPlaylistItem {
   }
 }
 
+Uri mediaUrl(String uid) {
+  final userConfig = Provider.of<UserConfig>(navigatorKey.currentContext!, listen: false);
+  final playerConfig = userConfig.playerConfig;
+  return Uri(scheme: Api.baseUrl.scheme, host: Api.baseUrl.host, port: Api.baseUrl.port, path: '/file/download', queryParameters: {
+    'id': uid,
+    if (playerConfig.enableParallel) 'parallels': playerConfig.parallels.toString(),
+    if (playerConfig.enableParallel) 'size': (playerConfig.sliceSize * 1000000).toString(),
+  });
+}
+
 class ExPlaylistItem extends PlaylistItem {
   final int id;
+  final String uid;
   final bool downloadable;
   final EdgeInsets posterPadding;
   final bool canSkipIntro;
@@ -69,6 +85,7 @@ class ExPlaylistItem extends PlaylistItem {
 
   const ExPlaylistItem({
     required this.id,
+    required this.uid,
     required super.url,
     required super.sourceType,
     super.title,
@@ -96,6 +113,7 @@ class ExPlaylistItem extends PlaylistItem {
   }) {
     return ExPlaylistItem(
       id: id,
+      uid: uid,
       url: url ?? this.url,
       sourceType: sourceType ?? this.sourceType,
       title: title ?? this.title,

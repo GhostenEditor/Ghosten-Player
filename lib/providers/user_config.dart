@@ -25,25 +25,37 @@ class PlayerConfig {
   int speed;
   bool? showThumbnails;
   bool enableDecoderFallback;
+  bool enableParallel;
+  int parallels;
+  int sliceSize;
 
   PlayerConfig({
     required this.mode,
     required this.speed,
     required this.showThumbnails,
     required this.enableDecoderFallback,
+    required this.enableParallel,
+    required this.parallels,
+    required this.sliceSize,
   });
 
   PlayerConfig.fromJson(dynamic json)
       : mode = json?['mode'] ?? 1,
         speed = json?['speed'] ?? 30,
         enableDecoderFallback = json?['enableDecoderFallback'] ?? false,
-        showThumbnails = json?['showThumbnails'] ?? false;
+        showThumbnails = json?['showThumbnails'] ?? false,
+        enableParallel = json?['enableParallel'] ?? false,
+        parallels = json?['parallels'] ?? 4,
+        sliceSize = json?['sliceSize'] ?? 5;
 
   Map<String, dynamic> toMap() => {
         'mode': mode,
         'speed': speed,
         'showThumbnails': showThumbnails,
         'enableDecoderFallback': enableDecoderFallback,
+        'enableParallel': enableParallel,
+        'parallels': parallels,
+        'sliceSize': sliceSize,
       };
 }
 
@@ -119,6 +131,21 @@ class UserConfig extends ChangeNotifier {
 
   void setPlayerEnableDecoderFallback(bool enableDecoderFallback) {
     playerConfig.enableDecoderFallback = enableDecoderFallback;
+    save();
+  }
+
+  void setPlayerEnableParallel(bool enableParallel) {
+    playerConfig.enableParallel = enableParallel;
+    save();
+  }
+
+  void setPlayerParallels(int parallels) {
+    playerConfig.parallels = parallels;
+    save();
+  }
+
+  void setPlayerSliceSize(int sliceSize) {
+    playerConfig.sliceSize = sliceSize;
     save();
   }
 

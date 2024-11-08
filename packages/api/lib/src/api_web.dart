@@ -69,8 +69,23 @@ class ApiWeb extends ApiPlatform {
   /// Cast Start
   @override
   Stream<dynamic> dlnaDiscover() async* {
-    final data = await client.post<JsonList>('/dlna/discover/cb');
-    yield* Stream.fromIterable(data!);
+    final data = await client.post<Json>('/dlna/discover/cb');
+    if (data != null) {
+      final sessionId = data['id'];
+      loop:
+      while (true) {
+        await Future.delayed(const Duration(milliseconds: 500));
+        final session = await sessionStatus(sessionId);
+        switch (session.status) {
+          case SessionStatus.progressing:
+            yield session.data;
+          case SessionStatus.finished:
+          case SessionStatus.failed:
+            break loop;
+          default:
+        }
+      }
+    }
   }
 
   ///  Cast End

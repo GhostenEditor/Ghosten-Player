@@ -89,11 +89,12 @@ abstract class ApiPlatform extends PlatformInterface {
   /// Player End
 
   /// DownloadTask Start
-  Future<void> downloadTaskCreate(int id, MediaType type) async {
+  Future<void> downloadTaskCreate(String id, {int? parallels, int? size}) async {
     await requestStoragePermission();
     return client.put('/download/task/create', data: {
       'id': id,
-      'type': type.name,
+      'parallels': parallels,
+      'size': size,
     });
   }
 
@@ -101,8 +102,12 @@ abstract class ApiPlatform extends PlatformInterface {
     return client.post('/download/task/pause/id', data: {'id': id});
   }
 
-  Future<void> downloadTaskResumeById(int id) {
-    return client.post('/download/task/resume/id', data: {'id': id});
+  Future<void> downloadTaskResumeById(int id, {int? parallels, int? size}) {
+    return client.post('/download/task/resume/id', data: {
+      'id': id,
+      'parallels': parallels,
+      'size': size,
+    });
   }
 
   Future<void> downloadTaskDeleteById(int id, {bool deleteFile = false}) {
@@ -177,7 +182,7 @@ abstract class ApiPlatform extends PlatformInterface {
   }
 
   Future<Playlist> playlistQueryById(int id) async {
-    final data = await client.get<Json>('/playlist/query/id');
+    final data = await client.get<Json>('/playlist/query/id', queryParameters: {'id': id});
     return Playlist.fromJson(data!);
   }
 

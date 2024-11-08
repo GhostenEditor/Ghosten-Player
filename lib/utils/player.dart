@@ -29,6 +29,6 @@ Future<void> toPlayerCast(BuildContext context, CastDevice device, List<ExPlayli
     index = 0;
   }
   setPreferredOrientations(true);
-  await navigateToSlideUp(context, PlayerCast(playlist: playlist, index: index, theme: theme, device: device));
+  await navigateTo(context, PlayerCast(playlist: playlist, index: index, theme: theme, device: device));
   setPreferredOrientations(false);
 }

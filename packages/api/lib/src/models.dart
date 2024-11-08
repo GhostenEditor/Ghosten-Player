@@ -100,7 +100,7 @@ class Movie extends Media {
   final List<Studio> studios;
   final List<Keyword> keywords;
   final Duration? lastPlayedPosition;
-  final String? url;
+  final String uid;
   final bool downloaded;
   final String ext;
   final int fileSize;
@@ -117,7 +117,7 @@ class Movie extends Media {
         keywords = (json['keywords'] as JsonList).toKeywords(),
         genres = (json['genres'] as JsonList).toGenres(),
         studios = (json['studios'] as JsonList).toStudios(),
-        url = json['url'],
+        uid = json['uid'],
         downloaded = json['downloaded'] ?? false,
         ext = json['ext'],
         fileSize = json['fileSize'],
@@ -185,7 +185,7 @@ class TVEpisode extends Media {
   final Duration skipIntro;
   final Duration skipEnding;
   final Duration? lastPlayedPosition;
-  final String? url;
+  final String uid;
   final bool downloaded;
   final String ext;
   final int fileSize;
@@ -200,7 +200,7 @@ class TVEpisode extends Media {
         skipIntro = (json['skipIntro'] as int?).toDuration(),
         skipEnding = (json['skipEnding'] as int?).toDuration(),
         lastPlayedPosition = (json['lastPlayedPosition'] as int?).toDuration(),
-        url = json['url'],
+        uid = json['uid'],
         downloaded = json['downloaded'] ?? false,
         ext = json['ext'],
         fileSize = json['fileSize'],

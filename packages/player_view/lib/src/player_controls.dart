@@ -938,7 +938,8 @@ class _PlayerPlaylistViewState extends State<PlayerPlaylistView> {
                       child: item.poster != null
                           ? Image.network(item.poster!)
                           : Container(
-                              color: Theme.of(context).colorScheme.onBackground.withAlpha(0x11), child: const Icon(Icons.image_not_supported, size: 50)),
+                              color: Theme.of(context).colorScheme.surfaceContainerHighest.withAlpha(0x11),
+                              child: const Icon(Icons.image_not_supported, size: 50)),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(10),
@@ -1179,7 +1180,7 @@ class _ThumbnailsListState extends State<_ThumbnailsList> with TickerProviderSta
                               builder: (context, _) => Container(
                                 color: Color.lerp(
                                   Theme.of(context).colorScheme.surface,
-                                  Theme.of(context).colorScheme.surfaceVariant,
+                                  Theme.of(context).colorScheme.surfaceContainerHighest,
                                   _animationController.value,
                                 ),
                                 child: Icon(Icons.image_outlined, size: 40, color: Theme.of(context).colorScheme.primaryContainer),
@@ -1424,7 +1425,7 @@ class _PlayerProgressViewState extends State<PlayerProgressView> {
                           AnimatedFractionallySizedBox(
                               duration: const Duration(milliseconds: 200),
                               widthFactor: _controller.buffered / _controller.duration ?? 0,
-                              child: Container(color: Theme.of(context).colorScheme.surfaceVariant)),
+                              child: Container(color: Theme.of(context).colorScheme.surfaceContainerHighest)),
                           if (_controller.status == PlayerStatus.error || _controller.status == PlayerStatus.idle)
                             Container(color: Theme.of(context).colorScheme.errorContainer)
                           else if (_controller.seeking)

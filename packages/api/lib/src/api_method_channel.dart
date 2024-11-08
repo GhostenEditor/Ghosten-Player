@@ -126,28 +126,36 @@ class Client extends ApiClient {
 
   @override
   Future<T?> delete<T>(String path, {Object? data}) {
-    return _send<T>(path, data as Json?);
+    return _send<T>('DELETE', path, data as Json?);
   }
 
   @override
   Future<T?> get<T>(String path, {Json? queryParameters}) {
-    return _send<T>(path, queryParameters);
+    return _send<T>('GET', path, queryParameters);
   }
 
   @override
   Future<T?> post<T>(String path, {Object? data}) {
-    return _send<T>(path, data as Json?);
+    return _send<T>('POST', path, data as Json?);
   }
 
   @override
   Future<T?> put<T>(String path, {Object? data}) {
-    return _send<T>(path, data as Json?);
+    return _send<T>('PUT', path, data as Json?);
   }
 
-  Future<T?> _send<T>(String method, [Json? data]) {
+  Future<T?> _send<T>(String method, String path, [Json? data]) {
     return _methodChannel
-        .invokeMethod<String>(method, {
-          'data': data != null ? jsonEncode(data) : '',
+        .invokeMethod<String>(path, {
+          'data': data != null
+              ? method == 'GET'
+                  ? Uri(
+                      queryParameters: data.entries.fold({}, (acc, cur) {
+                      acc?[cur.key] = cur.value?.toString();
+                      return acc;
+                    })).toString().substring(1)
+                  : jsonEncode(data)
+              : '',
           'params': jsonEncode({
             'acceptLanguage': Localizations.localeOf(navigatorKey.currentState!.context).languageCode,
           })

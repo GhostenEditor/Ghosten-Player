@@ -3,12 +3,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:player_view/player.dart';
+import 'package:provider/provider.dart';
 
 import '../../components/async_image.dart';
 import '../../components/future_builder_handler.dart';
 import '../../components/gap.dart';
 import '../../mixins/update.dart';
 import '../../models/models.dart';
+import '../../providers/user_config.dart';
 import '../../utils/notification.dart';
 import '../../utils/player.dart';
 import '../../utils/utils.dart';
@@ -112,8 +114,15 @@ class _EpisodeDetailState extends State<EpisodeDetail> with DetailPageMixin<TVEp
         trailing: const Badge(label: Text('Beta')),
         collapsed: true,
         onPressed: () async {
-          final resp =
-              await showNotification(context, Api.downloadTaskCreate(item.id, MediaType.episode), successText: AppLocalizations.of(context)!.tipsForDownload);
+          final playerConfig = Provider.of<UserConfig>(navigatorKey.currentContext!, listen: false).playerConfig;
+          final resp = await showNotification(
+              context,
+              Api.downloadTaskCreate(
+                item.uid,
+                parallels: playerConfig.enableParallel ? playerConfig.parallels : null,
+                size: playerConfig.enableParallel ? playerConfig.sliceSize : null,
+              ),
+              successText: AppLocalizations.of(context)!.tipsForDownload);
           if (resp?.error == null) setState(() => refresh = true);
         },
       ),

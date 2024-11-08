@@ -2,6 +2,7 @@ import 'package:api/api.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide PopupMenuItem;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../components/async_image.dart';
@@ -10,6 +11,7 @@ import '../../components/gap.dart';
 import '../../components/no_data.dart';
 import '../../components/popup_menu.dart';
 import '../../models/models.dart';
+import '../../providers/user_config.dart';
 import '../../utils/notification.dart';
 import '../../utils/player.dart';
 import '../../utils/utils.dart';
@@ -143,7 +145,14 @@ class SystemSettingsDownloader extends StatelessWidget {
                                     autofocus: kIsAndroidTV,
                                     leading: const Icon(Icons.downloading_rounded),
                                     title: Text(AppLocalizations.of(context)!.buttonResume),
-                                    onTap: () => Api.downloadTaskResumeById(item.id),
+                                    onTap: () {
+                                      final playerConfig = Provider.of<UserConfig>(navigatorKey.currentContext!, listen: false).playerConfig;
+                                      Api.downloadTaskResumeById(
+                                        item.id,
+                                        parallels: playerConfig.enableParallel ? playerConfig.parallels : null,
+                                        size: playerConfig.enableParallel ? playerConfig.sliceSize : null,
+                                      );
+                                    },
                                   ),
                                 if (item.status == DownloadTaskStatus.downloading)
                                   PopupMenuItem(
@@ -218,15 +227,6 @@ class SystemSettingsDownloader extends StatelessWidget {
                                   )
                                 ],
                               ),
-                              onTap: () {
-                                switch (item.status) {
-                                  case DownloadTaskStatus.idle:
-                                    Api.downloadTaskResumeById(item.id);
-                                  case DownloadTaskStatus.downloading:
-                                    Api.downloadTaskPauseById(item.id);
-                                  default:
-                                }
-                              },
                               itemBuilder: (context) => [
                                 PopupMenuItem(
                                   autofocus: kIsAndroidTV,

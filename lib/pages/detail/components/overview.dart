@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../components/async_image.dart';
+import '../../../components/blurred_background.dart';
 import '../../../components/gap.dart';
 import '../../../utils/utils.dart';
 
@@ -54,46 +55,61 @@ class Overview<T extends MediaBase> extends StatelessWidget {
               Theme.of(context).colorScheme.surface,
             ],
           )),
-          child: Scaffold(
-            appBar: AppBar(
-              backgroundColor: Colors.transparent,
-              surfaceTintColor: Colors.transparent,
-              elevation: 0,
-              systemOverlayStyle: getSystemUiOverlayStyle(context),
-            ),
-            backgroundColor: Colors.transparent,
-            body: ListView(
-              padding: const EdgeInsets.only(top: 8, left: 32, right: 32, bottom: 32),
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              if (item.poster != null)
+                BlurredBackground(
+                  background: item.poster!,
+                ),
+              if (item.poster != null)
+                Container(
+                  color: Theme.of(context).colorScheme.surface.withAlpha(0x66),
+                ),
+              Scaffold(
+                appBar: AppBar(
+                  backgroundColor: Colors.transparent,
+                  surfaceTintColor: Colors.transparent,
+                  elevation: 0,
+                  systemOverlayStyle: getSystemUiOverlayStyle(context),
+                ),
+                backgroundColor: Colors.transparent,
+                body: ListView(
+                  padding: const EdgeInsets.only(top: 8, left: 32, right: 32, bottom: 32),
                   children: [
-                    if (item.poster != null) AsyncImage(item.poster!, width: 160, radius: const BorderRadius.all(Radius.circular(8))),
-                    if (item.poster != null) Gap.hLG,
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          if (item.title != null) Text(item.title!, style: Theme.of(context).textTheme.titleLarge!.copyWith(height: 2)),
-                          if (item.airDate != null) Text(item.airDate!.format(), style: Theme.of(context).textTheme.labelSmall!.copyWith(height: 2)),
-                          if (description != null) description!,
-                        ],
-                      ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        if (item.poster != null) AsyncImage(item.poster!, width: 160, radius: const BorderRadius.all(Radius.circular(8))),
+                        if (item.poster != null) Gap.hLG,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              if (item.title != null)
+                                Text(item.title!, style: Theme.of(context).textTheme.titleLarge!.copyWith(height: 2, fontWeight: FontWeight.bold)),
+                              if (item.airDate != null)
+                                Text(item.airDate!.format(), style: Theme.of(context).textTheme.labelSmall!.copyWith(height: 2, fontWeight: FontWeight.bold)),
+                              if (description != null) description!,
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
+                    Gap.vLG,
+                    const Divider(),
+                    Gap.vLG,
+                    if (item.overview != null)
+                      SelectableText(
+                        item.overview!,
+                        textAlign: TextAlign.justify,
+                        style: Theme.of(context).textTheme.titleMedium!.copyWith(height: 1.5),
+                      ),
+                    const SafeArea(child: SizedBox()),
                   ],
                 ),
-                Gap.vLG,
-                const Divider(),
-                Gap.vLG,
-                if (item.overview != null)
-                  SelectableText(
-                    item.overview!,
-                    textAlign: TextAlign.justify,
-                    style: Theme.of(context).textTheme.titleMedium!.copyWith(height: 1.5),
-                  ),
-                const SafeArea(child: SizedBox()),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       }),

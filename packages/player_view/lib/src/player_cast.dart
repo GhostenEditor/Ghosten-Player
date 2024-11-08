@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:animations/animations.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -82,263 +83,277 @@ class _PlayerCastState<T extends PlaylistItem> extends State<PlayerCast<T>> {
             begin: Alignment.topLeft,
             end: Alignment.bottomLeft,
             colors: [
-              Theme.of(context).colorScheme.surfaceVariant,
+              Theme.of(context).colorScheme.surfaceContainerHighest,
               Theme.of(context).colorScheme.surface,
             ],
           )),
-          child: Scaffold(
-            appBar: AppBar(
-              backgroundColor: Colors.transparent,
-              leading: IconButton(
-                icon: const BackButtonIcon(),
-                onPressed: () {
-                  Navigator.of(context).pop((index.value, lastPlayedPosition));
-                },
-              ),
-              scrolledUnderElevation: 0,
-              systemOverlayStyle: const SystemUiOverlayStyle(
-                systemNavigationBarIconBrightness: Brightness.light,
-                statusBarIconBrightness: Brightness.light,
-              ),
-            ),
-            backgroundColor: Colors.transparent,
-            floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
-            body: SafeArea(
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 0),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 480),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: ListenableBuilder(
-                              listenable: showPlaylist,
-                              builder: (context, child) {
-                                return PageTransitionSwitcher(
-                                  transitionBuilder: (child, animation, secondaryAnimation) => FadeThroughTransition(
-                                    animation: animation,
-                                    secondaryAnimation: secondaryAnimation,
-                                    fillColor: Colors.transparent,
-                                    child: child,
-                                  ),
-                                  child: !showPlaylist.value
-                                      ? Column(
-                                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                                          children: [
-                                            Expanded(
-                                              child: ListenableBuilder(
-                                                listenable: index,
-                                                builder: (context, child) => Center(
-                                                  child: _PlayerArtwork(
-                                                    key: ValueKey(currentItem),
-                                                    item: currentItem,
-                                                    isPlaying: isPlaying,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              if (currentItem.poster != null)
+                BlurredBackground(
+                  background: currentItem.poster!,
+                ),
+              if (currentItem.poster != null)
+                Container(
+                  color: Theme.of(context).colorScheme.surface.withAlpha(0x33),
+                ),
+              Scaffold(
+                appBar: AppBar(
+                  backgroundColor: Colors.transparent,
+                  leading: IconButton(
+                    icon: const BackButtonIcon(),
+                    onPressed: () {
+                      Navigator.of(context).pop((index.value, lastPlayedPosition));
+                    },
+                  ),
+                  scrolledUnderElevation: 0,
+                  systemOverlayStyle: const SystemUiOverlayStyle(
+                    systemNavigationBarIconBrightness: Brightness.light,
+                    statusBarIconBrightness: Brightness.light,
+                  ),
+                ),
+                backgroundColor: Colors.transparent,
+                floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
+                body: SafeArea(
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 0),
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 480),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: ListenableBuilder(
+                                  listenable: showPlaylist,
+                                  builder: (context, child) {
+                                    return PageTransitionSwitcher(
+                                      transitionBuilder: (child, animation, secondaryAnimation) => FadeThroughTransition(
+                                        animation: animation,
+                                        secondaryAnimation: secondaryAnimation,
+                                        fillColor: Colors.transparent,
+                                        child: child,
+                                      ),
+                                      child: !showPlaylist.value
+                                          ? Column(
+                                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                                              children: [
+                                                Expanded(
+                                                  child: ListenableBuilder(
+                                                    listenable: index,
+                                                    builder: (context, child) => Center(
+                                                      child: _PlayerArtwork(
+                                                        key: ValueKey(currentItem),
+                                                        item: currentItem,
+                                                        isPlaying: isPlaying,
+                                                      ),
+                                                    ),
                                                   ),
                                                 ),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.all(12),
-                                              child: ListenableBuilder(
-                                                  listenable: index,
-                                                  builder: (context, _) => Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                                        children: [
-                                                          if (currentItem.title != null)
-                                                            Text(currentItem.title!,
-                                                                style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
-                                                                overflow: TextOverflow.ellipsis),
-                                                          if (currentItem.description != null)
-                                                            Text(currentItem.description!,
-                                                                style: Theme.of(context).textTheme.bodyLarge, overflow: TextOverflow.ellipsis),
-                                                        ],
-                                                      )),
-                                            ),
-                                          ],
-                                        )
-                                      : Padding(
-                                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                                          child: Scrollbar(
-                                            controller: _scrollController,
-                                            child: ListView.builder(
-                                              controller: _scrollController,
-                                              itemBuilder: (context, index) {
-                                                if (index == 0) {
-                                                  return ListenableBuilder(
-                                                      listenable: this.index,
-                                                      builder: (context, _) {
-                                                        return Padding(
-                                                          padding: const EdgeInsets.all(16),
-                                                          child: Row(
+                                                Padding(
+                                                  padding: const EdgeInsets.all(12),
+                                                  child: ListenableBuilder(
+                                                      listenable: index,
+                                                      builder: (context, _) => Column(
+                                                            crossAxisAlignment: CrossAxisAlignment.start,
                                                             children: [
-                                                              SizedBox(
-                                                                width: 80,
-                                                                height: 80,
+                                                              if (currentItem.title != null)
+                                                                Text(currentItem.title!,
+                                                                    style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
+                                                                    overflow: TextOverflow.ellipsis),
+                                                              if (currentItem.description != null)
+                                                                Text(currentItem.description!,
+                                                                    style: Theme.of(context).textTheme.bodyLarge, overflow: TextOverflow.ellipsis),
+                                                            ],
+                                                          )),
+                                                ),
+                                              ],
+                                            )
+                                          : Padding(
+                                              padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                              child: Scrollbar(
+                                                controller: _scrollController,
+                                                child: ListView.builder(
+                                                  controller: _scrollController,
+                                                  itemBuilder: (context, index) {
+                                                    if (index == 0) {
+                                                      return ListenableBuilder(
+                                                          listenable: this.index,
+                                                          builder: (context, _) {
+                                                            return Padding(
+                                                              padding: const EdgeInsets.all(16),
+                                                              child: Row(
+                                                                children: [
+                                                                  SizedBox(
+                                                                    width: 80,
+                                                                    height: 80,
+                                                                    child: Center(
+                                                                      child: Container(
+                                                                        decoration: BoxDecoration(
+                                                                          borderRadius: const BorderRadius.all(Radius.circular(6)),
+                                                                          color: Theme.of(context).colorScheme.surface,
+                                                                        ),
+                                                                        clipBehavior: Clip.antiAlias,
+                                                                        child: currentItem.poster != null
+                                                                            ? CachedNetworkImage(
+                                                                                imageUrl: currentItem.poster!,
+                                                                                fit: BoxFit.cover,
+                                                                              )
+                                                                            : const SizedBox.expand(child: Icon(Icons.movie_creation_outlined)),
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  const SizedBox(width: 24),
+                                                                  Expanded(
+                                                                    child: Column(
+                                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                                      children: [
+                                                                        if (currentItem.title != null)
+                                                                          Text(currentItem.title!,
+                                                                              style:
+                                                                                  Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
+                                                                              overflow: TextOverflow.ellipsis),
+                                                                        if (currentItem.description != null)
+                                                                          Text(currentItem.description!,
+                                                                              style: Theme.of(context).textTheme.bodyLarge, overflow: TextOverflow.ellipsis),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            );
+                                                          });
+                                                    } else {
+                                                      final item = widget.playlist[index - 1];
+                                                      return ListenableBuilder(
+                                                          listenable: this.index,
+                                                          builder: (context, _) {
+                                                            return ListTile(
+                                                              dense: true,
+                                                              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                                                              leading: AspectRatio(
+                                                                aspectRatio: 1,
                                                                 child: Center(
                                                                   child: Container(
+                                                                    clipBehavior: Clip.antiAlias,
                                                                     decoration: BoxDecoration(
-                                                                      borderRadius: const BorderRadius.all(Radius.circular(6)),
+                                                                      borderRadius: const BorderRadius.all(Radius.circular(2)),
                                                                       color: Theme.of(context).colorScheme.surface,
                                                                     ),
-                                                                    clipBehavior: Clip.antiAlias,
-                                                                    child: currentItem.poster != null
-                                                                        ? CachedNetworkImage(
-                                                                            imageUrl: currentItem.poster!,
-                                                                            fit: BoxFit.cover,
-                                                                          )
+                                                                    child: item.poster != null
+                                                                        ? CachedNetworkImage(imageUrl: item.poster!)
                                                                         : const SizedBox.expand(child: Icon(Icons.movie_creation_outlined)),
                                                                   ),
                                                                 ),
                                                               ),
-                                                              const SizedBox(width: 24),
-                                                              Expanded(
-                                                                child: Column(
-                                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                                  children: [
-                                                                    if (currentItem.title != null)
-                                                                      Text(currentItem.title!,
-                                                                          style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
-                                                                          overflow: TextOverflow.ellipsis),
-                                                                    if (currentItem.description != null)
-                                                                      Text(currentItem.description!,
-                                                                          style: Theme.of(context).textTheme.bodyLarge, overflow: TextOverflow.ellipsis),
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        );
-                                                      });
-                                                } else {
-                                                  final item = widget.playlist[index - 1];
-                                                  return ListenableBuilder(
-                                                      listenable: this.index,
-                                                      builder: (context, _) {
-                                                        return ListTile(
-                                                          dense: true,
-                                                          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                                                          leading: AspectRatio(
-                                                            aspectRatio: 1,
-                                                            child: Center(
-                                                              child: Container(
-                                                                clipBehavior: Clip.antiAlias,
-                                                                decoration: BoxDecoration(
-                                                                  borderRadius: const BorderRadius.all(Radius.circular(2)),
-                                                                  color: Theme.of(context).colorScheme.surface,
-                                                                ),
-                                                                child: item.poster != null
-                                                                    ? CachedNetworkImage(imageUrl: item.poster!)
-                                                                    : const SizedBox.expand(child: Icon(Icons.movie_creation_outlined)),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                          title: Text(item.title ?? ''),
-                                                          subtitle: Text(item.description ?? ''),
-                                                          trailing: index - 1 == this.index.value ? const Icon(Icons.play_circle_rounded) : null,
-                                                          onTap: () => next(index - 1),
-                                                        );
-                                                      });
-                                                }
-                                              },
-                                              itemCount: widget.playlist.length + 1,
+                                                              title: Text(item.title ?? ''),
+                                                              subtitle: Text(item.description ?? ''),
+                                                              trailing: index - 1 == this.index.value ? const Icon(Icons.play_circle_rounded) : null,
+                                                              onTap: () => next(index - 1),
+                                                            );
+                                                          });
+                                                    }
+                                                  },
+                                                  itemCount: widget.playlist.length + 1,
+                                                ),
+                                              ),
                                             ),
-                                          ),
-                                        ),
-                                );
-                              }),
-                        ),
-                        PlayerProgressView(
-                          _controller,
-                          key: ValueKey(device),
-                          seekEnd: device.seek,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 18, bottom: 36),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              ListenableBuilder(
-                                  listenable: index,
-                                  builder: (context, child) => isFirst ? const IconButton(onPressed: null, icon: Icon(null, size: 32)) : child!,
-                                  child: IconButton(onPressed: () => next(index.value - 1), icon: const Icon(Icons.skip_previous_rounded, size: 32))),
-                              IconButton(
-                                onPressed: () async => device.seek(_controller.position - const Duration(seconds: 30)),
-                                icon: const Icon(Icons.fast_rewind_rounded, size: 32),
-                              ),
-                              const SizedBox(width: 12),
-                              ListenableBuilder(
-                                  listenable: isPlaying,
-                                  builder: (context, _) => IconButton(
-                                      onPressed: () {
-                                        if (isPlaying.value) {
-                                          device.pause();
-                                        } else {
-                                          device.play();
-                                        }
-                                        isPlaying.value = !isPlaying.value;
-                                      },
-                                      icon: Icon(isPlaying.value ? Icons.pause : Icons.play_arrow_rounded, size: 36))),
-                              const SizedBox(width: 12),
-                              IconButton(
-                                onPressed: () async => device.seek(_controller.position + const Duration(seconds: 30)),
-                                icon: const Icon(Icons.fast_forward_rounded, size: 32),
-                              ),
-                              ListenableBuilder(
-                                  listenable: index,
-                                  builder: (context, child) => isLast ? const IconButton(onPressed: null, icon: Icon(null, size: 32)) : child!,
-                                  child: IconButton(onPressed: () => next(index.value + 1), icon: const Icon(Icons.skip_next_rounded, size: 32))),
-                            ],
-                          ),
-                        ),
-                        FutureBuilder(
-                          future: device.getVolume(),
-                          builder: (context, snapshot) => PlayerVolume(
-                            key: ValueKey(snapshot.data),
-                            initialVolume: snapshot.data ?? 0,
-                            onUpdate: (volume) => device.setVolume(volume),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              const IconButton(onPressed: null, icon: Icon(null)),
-                              Padding(
-                                padding: const EdgeInsets.all(8),
-                                child: RichText(
-                                  overflow: TextOverflow.ellipsis,
-                                  textAlign: TextAlign.center,
-                                  text: TextSpan(style: Theme.of(context).textTheme.bodyMedium, children: [
-                                    const WidgetSpan(child: Icon(Icons.cast), alignment: PlaceholderAlignment.middle),
-                                    const WidgetSpan(child: SizedBox(width: 12)),
-                                    TextSpan(text: device.friendlyName),
-                                  ]),
-                                ),
-                              ),
-                              ListenableBuilder(
-                                  listenable: showPlaylist,
-                                  builder: (context, _) {
-                                    return IconButton(
-                                        onPressed: () => showPlaylist.value = !showPlaylist.value,
-                                        icon: const Icon(Icons.menu_rounded),
-                                        isSelected: showPlaylist.value);
+                                    );
                                   }),
-                            ],
-                          ),
+                            ),
+                            PlayerProgressView(
+                              _controller,
+                              key: ValueKey(device),
+                              seekEnd: device.seek,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 18, bottom: 36),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  ListenableBuilder(
+                                      listenable: index,
+                                      builder: (context, child) => isFirst ? const IconButton(onPressed: null, icon: Icon(null, size: 32)) : child!,
+                                      child: IconButton(onPressed: () => next(index.value - 1), icon: const Icon(Icons.skip_previous_rounded, size: 32))),
+                                  IconButton(
+                                    onPressed: () async => device.seek(_controller.position - const Duration(seconds: 30)),
+                                    icon: const Icon(Icons.fast_rewind_rounded, size: 32),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  ListenableBuilder(
+                                      listenable: isPlaying,
+                                      builder: (context, _) => IconButton(
+                                          onPressed: () {
+                                            if (isPlaying.value) {
+                                              device.pause();
+                                            } else {
+                                              device.play();
+                                            }
+                                            isPlaying.value = !isPlaying.value;
+                                          },
+                                          icon: Icon(isPlaying.value ? Icons.pause : Icons.play_arrow_rounded, size: 36))),
+                                  const SizedBox(width: 12),
+                                  IconButton(
+                                    onPressed: () async => device.seek(_controller.position + const Duration(seconds: 30)),
+                                    icon: const Icon(Icons.fast_forward_rounded, size: 32),
+                                  ),
+                                  ListenableBuilder(
+                                      listenable: index,
+                                      builder: (context, child) => isLast ? const IconButton(onPressed: null, icon: Icon(null, size: 32)) : child!,
+                                      child: IconButton(onPressed: () => next(index.value + 1), icon: const Icon(Icons.skip_next_rounded, size: 32))),
+                                ],
+                              ),
+                            ),
+                            FutureBuilder(
+                              future: device.getVolume(),
+                              builder: (context, snapshot) => PlayerVolume(
+                                key: ValueKey(snapshot.data),
+                                initialVolume: snapshot.data ?? 0,
+                                onUpdate: (volume) => device.setVolume(volume),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  const IconButton(onPressed: null, icon: Icon(null)),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8),
+                                    child: RichText(
+                                      overflow: TextOverflow.ellipsis,
+                                      textAlign: TextAlign.center,
+                                      text: TextSpan(style: Theme.of(context).textTheme.bodyMedium, children: [
+                                        const WidgetSpan(child: Icon(Icons.cast), alignment: PlaceholderAlignment.middle),
+                                        const WidgetSpan(child: SizedBox(width: 12)),
+                                        TextSpan(text: device.friendlyName),
+                                      ]),
+                                    ),
+                                  ),
+                                  ListenableBuilder(
+                                      listenable: showPlaylist,
+                                      builder: (context, _) {
+                                        return IconButton(
+                                            onPressed: () => showPlaylist.value = !showPlaylist.value,
+                                            icon: const Icon(Icons.menu_rounded),
+                                            isSelected: showPlaylist.value);
+                                      }),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 32),
+                          ],
                         ),
-                        const SizedBox(height: 32),
-                      ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
         );
       }),
@@ -553,5 +568,62 @@ class PlayerCastSearcher extends StatelessWidget {
         },
       ),
     );
+  }
+}
+
+class BlurredBackground extends StatefulWidget {
+  final String background;
+
+  const BlurredBackground({super.key, required this.background});
+
+  @override
+  State<BlurredBackground> createState() => _BlurredBackgroundState();
+}
+
+class _BlurredBackgroundState extends State<BlurredBackground> with SingleTickerProviderStateMixin {
+  late final size = MediaQuery.of(context).size;
+  final blurSize = 50.0;
+  final scaleSize = 3;
+  Offset offset = Offset.zero;
+  Offset vector = const Offset(2, 2);
+
+  late final AnimationController _controller = AnimationController(
+    duration: const Duration(seconds: 10),
+    vsync: this,
+  )..repeat();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) => Transform(
+        transform: transform(),
+        child: child,
+      ),
+      child: ImageFiltered(
+          imageFilter: ImageFilter.blur(sigmaX: blurSize, sigmaY: blurSize),
+          child: CachedNetworkImage(
+            imageUrl: widget.background,
+            fit: BoxFit.cover,
+          )),
+    );
+  }
+
+  Matrix4 transform() {
+    assert(scaleSize >= 2);
+    if (offset.dx < 0 || offset.dx > size.width * (scaleSize - 1)) {
+      vector = Offset(-vector.dx, vector.dy);
+    }
+    if (offset.dy < 0 || offset.dy > size.height * (scaleSize - 1)) {
+      vector = Offset(vector.dx, -vector.dy);
+    }
+    offset += vector;
+    return Matrix4.translationValues(-offset.dx, -offset.dy, 0).scaled(scaleSize.toDouble(), scaleSize.toDouble(), 1.0);
   }
 }
