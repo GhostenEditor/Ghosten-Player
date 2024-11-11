@@ -238,6 +238,8 @@ Todo
 
 多线程播放和下载可以成倍提升网络速度。此功能默认关闭，可进入 设置->播放设置->使用多线程打开文件 打开此选项。
 
+<img alt="Player Settings" src="https://github.com/user-attachments/assets/c66cbdb6-064b-4680-8c53-bd2330c77810" width="315"/>
+
 #### 注意事项
 
 1. 网络提升倍数约等于线程数，此功能仅对网盘限速有效，对网络带宽和硬件的网络限制无效
@@ -269,7 +271,7 @@ Todo
 本项目Android端使用的是media3播放器，外加FFmpeg和AV1的拓展解码器，绝大多数视频都可流畅播放，对于H.265编码的视频则由硬件设备和Android的版本而定。可尝试到设置 →
 播放设置 → 拓展解码器 修改其选项。
 
-<img alt="Player Settings Page" src="https://github.com/user-attachments/assets/9c3c32f5-8a1d-410c-9b9e-13a2ec512834" width="315"/>
+<img alt="Player Settings Page" src="https://github.com/user-attachments/assets/844989b9-6888-4bcb-b726-b32fc27505e8" width="315"/>
 
 ### 刮削媒体信息超时
 
