@@ -297,7 +297,7 @@ Todo
 <tr><td>INTERNET</td><td>获取网络数据</td><td rowspan="3">是</td></tr>
 <tr><td>ACCESS_NETWORK_STATE</td><td rowspan="2">播放媒体文件</td></tr>
 <tr><td>WAKE_LOCK</td></tr>
-<tr><td>REQUEST_INSTALL_PACKAGES</td><td>自动更新</td><td rowspan="10">否</td></tr>
+<tr><td>REQUEST_INSTALL_PACKAGES</td><td>自动更新</td><td rowspan="11">否</td></tr>
 <tr><td>BLUETOOTH_ADVERTISE</td><td rowspan="3">使用蓝牙同步数据</td></tr>
 <tr><td>BLUETOOTH_CONNECT</td></tr>
 <tr><td>BLUETOOTH_SCAN</td></tr>
@@ -307,6 +307,7 @@ Todo
 <tr><td>ACCESS_FINE_LOCATION</td></tr>
 <tr><td>WRITE_EXTERNAL_STORAGE</td><td rowspan="2">文件下载和读取本地媒体文件 (SDK <= 32)</td></tr>
 <tr><td>READ_EXTERNAL_STORAGE</td></tr>
+<tr><td>READ_MEDIA_VIDEO</td><td>读取本地视频文件 (SDK >= 33)</td></tr>
 </tbody>
 </table>
 
