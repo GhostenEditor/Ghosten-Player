@@ -15,7 +15,7 @@ packages:
       path: "packages/api"
       relative: true
     source: path
-    version: "0.0.1"
+    version: "1.1.0"
   async:
     dependency: transitive
     description:
@@ -30,7 +30,7 @@ packages:
       path: "packages/bluetooth"
       relative: true
     source: path
-    version: "0.0.1"
+    version: "1.0.0"
   boolean_selector:
     dependency: transitive
     description:
@@ -384,7 +384,7 @@ packages:
       path: "packages/player_view"
       relative: true
     source: path
-    version: "1.0.0"
+    version: "1.1.0"
   plugin_platform_interface:
     dependency: transitive
     description:

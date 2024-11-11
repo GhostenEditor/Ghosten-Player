@@ -37,7 +37,7 @@ class ErrorMessage<T> extends StatelessWidget {
               children: [
                 Text(exception.message, style: Theme.of(context).textTheme.titleMedium),
                 if (kDebugMode && exception.detail?.isNotEmpty == true) ...[Gap.vLG, Text(exception.detail!)],
-                if (kDebugMode && exception.error?.toString().isNotEmpty == true) ...[Gap.vLG, Text(exception.error.toString())],
+                if (kDebugMode && exception.error?.toString().isNotEmpty == true) ...[Gap.vLG, if (exception.error != null) Text(exception.error.toString())],
               ],
             ),
           ),
@@ -83,7 +83,7 @@ class ErrorMessage<T> extends StatelessWidget {
           DioExceptionType.badResponse || DioExceptionType.unknown => CommonException(
               message: 'HTTP ${error.response?.statusCode}',
               detail: 'URL: ${error.requestOptions.path}',
-              error: error.response,
+              error: error.response?.data,
             ),
         },
       _ when error is ApiException => CommonException(

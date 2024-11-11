@@ -69,17 +69,18 @@
 5. 支持视频轨道选择
 6. 支持**内嵌字幕**和**外置字幕**播放[^4]
 7. [支持文件下载和边下边播](#文件下载)
-8. [支持网盘文件的整理](#整理文件信息)
-9. **多账号登录**
-10. 支持中英双语(英文翻译可能不太准确，欢迎指正)
-11. [支持手机端辅助TV端输入](#tv端辅助输入)
-12. 浅色和深色模式
-13. [Hls直播观看](#添加直播源)
-14. [支持DLNA投屏](#dlna投屏)
-15. 软件体积小 (≈ 15 MB)
-16. [设备间的数据同步](#数据同步)
-17. 自动更新
-18. 客户端串联[^1]
+8. [多线程播放和下载](#多线程播放和下载)[^1]
+9. [支持网盘文件的整理](#整理文件信息)
+10. **多账号登录**
+11. 支持中英双语(英文翻译可能不太准确，欢迎指正)
+12. [支持手机端辅助TV端输入](#tv端辅助输入)
+13. 浅色和深色模式
+14. [Hls直播观看](#添加直播源)
+15. [支持DLNA投屏](#dlna投屏)
+16. 软件体积小 (≈ 15 MB)
+17. [设备间的数据同步](#数据同步)
+18. 自动更新
+19. 客户端串联[^1]
 
 [^3]: 网盘由网盘提供商提供服务支持，与本项目无关
 
@@ -233,6 +234,20 @@ _**[Media3文档](https://developer.android.google.cn/media/media3/exoplayer/sup
 
 Todo
 
+### 多线程播放和下载
+
+多线程播放和下载可以成倍提升网络速度。此功能默认关闭，可进入 设置->播放设置->使用多线程打开文件 打开此选项。
+
+<img alt="Player Settings" src="https://github.com/user-attachments/assets/c66cbdb6-064b-4680-8c53-bd2330c77810" width="315"/>
+
+#### 注意事项
+
+1. 网络提升倍数约等于线程数，此功能仅对网盘限速有效，对网络带宽和硬件的网络限制无效
+2. 若网盘不支持分片下载，该功能会自动失效
+3. 若网盘限制了链接的并发数，则可能会导致报错，建议减小线程数或关闭此功能。如果知道网盘限制的并发数，建议将线程数设置其1/2以内，因为播放视频时会有多个请求的切换，可能会出现链接销毁不及时而触发并发限制
+4. 分片大小越小，视频缓冲的越快，但分片数更多，性能消耗更大。若没有特殊需求，建议保持默认值
+5. 此功能会增加内存的占用，占用量小于等于 **(线程数 - 1) * 分片大小**
+
 ### DNS
 
 本项目使用themoviedb的API刮削媒体信息，大陆的用户可能由于DNS污染导致themoviedb无法访问，不同的地区和不同网络供应商可能情况不同。可先找到可用的IP地址，然后进入设置->
@@ -246,7 +261,7 @@ Todo
 
 1. 网络带宽不够
 2. 播放设备硬件过时，尤其是TV端，很多TV用的是百兆网卡，亲测小米电视在WiFi模式下，网速跑满2MB/s，有线模式可达到10MB/s
-3. 如使用阿里云盘，则有可能是阿里云盘限速导致[^6]
+3. 如使用阿里云盘，则有可能是阿里云盘限速导致[^6]，可以尝试打开[多线程功能](#多线程播放和下载)
 4. 其他网络问题
 
 [^6]: 截至文档编写前，阿里云盘在未开通三方应用权益包时，会限速至512kb/s
@@ -256,7 +271,7 @@ Todo
 本项目Android端使用的是media3播放器，外加FFmpeg和AV1的拓展解码器，绝大多数视频都可流畅播放，对于H.265编码的视频则由硬件设备和Android的版本而定。可尝试到设置 →
 播放设置 → 拓展解码器 修改其选项。
 
-<img alt="Player Settings Page" src="https://github.com/user-attachments/assets/9c3c32f5-8a1d-410c-9b9e-13a2ec512834" width="315"/>
+<img alt="Player Settings Page" src="https://github.com/user-attachments/assets/844989b9-6888-4bcb-b726-b32fc27505e8" width="315"/>
 
 ### 刮削媒体信息超时
 
@@ -282,7 +297,7 @@ Todo
 <tr><td>INTERNET</td><td>获取网络数据</td><td rowspan="3">是</td></tr>
 <tr><td>ACCESS_NETWORK_STATE</td><td rowspan="2">播放媒体文件</td></tr>
 <tr><td>WAKE_LOCK</td></tr>
-<tr><td>REQUEST_INSTALL_PACKAGES</td><td>自动更新</td><td rowspan="10">否</td></tr>
+<tr><td>REQUEST_INSTALL_PACKAGES</td><td>自动更新</td><td rowspan="11">否</td></tr>
 <tr><td>BLUETOOTH_ADVERTISE</td><td rowspan="3">使用蓝牙同步数据</td></tr>
 <tr><td>BLUETOOTH_CONNECT</td></tr>
 <tr><td>BLUETOOTH_SCAN</td></tr>
@@ -292,6 +307,7 @@ Todo
 <tr><td>ACCESS_FINE_LOCATION</td></tr>
 <tr><td>WRITE_EXTERNAL_STORAGE</td><td rowspan="2">文件下载和读取本地媒体文件 (SDK <= 32)</td></tr>
 <tr><td>READ_EXTERNAL_STORAGE</td></tr>
+<tr><td>READ_MEDIA_VIDEO</td><td>读取本地视频文件 (SDK >= 33)</td></tr>
 </tbody>
 </table>
 

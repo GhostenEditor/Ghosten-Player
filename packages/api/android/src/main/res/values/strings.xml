@@ -8,4 +8,7 @@
     <string name="api_response_multiple_choices">Multiple Choices</string>
     <string name="api_response_too_many_requests">Too Many Requests</string>
     <string name="api_response_unauthorized">Unauthorized</string>
+    <string name="api_response_not_implemented">Not Implemented</string>
+    <string name="api_response_method_not_allowed">Method Not Allowed</string>
+    <string name="api_response_gateway_timeout">Gateway Timeout</string>
 </resources>

@@ -119,17 +119,26 @@ class _CommonPlayerPageState extends State<CommonPlayerPage> {
             onTap: () async {
               final item = controller.currentItem;
               if (!context.mounted) return;
+              final playerConfig = Provider.of<UserConfig>(navigatorKey.currentContext!, listen: false).playerConfig;
               switch (widget.playerType) {
                 case PlayerType.tv:
                   showNotification(
                     context,
-                    Api.downloadTaskCreate(item.id, MediaType.episode),
+                    Api.downloadTaskCreate(
+                      item.uid,
+                      parallels: playerConfig.enableParallel ? playerConfig.parallels : null,
+                      size: playerConfig.enableParallel ? playerConfig.sliceSize : null,
+                    ),
                     successText: AppLocalizations.of(context)!.tipsForDownload,
                   );
                 case PlayerType.movie:
                   showNotification(
                     context,
-                    Api.downloadTaskCreate(item.id, MediaType.movie),
+                    Api.downloadTaskCreate(
+                      item.uid,
+                      parallels: playerConfig.enableParallel ? playerConfig.parallels : null,
+                      size: playerConfig.enableParallel ? playerConfig.sliceSize : null,
+                    ),
                     successText: AppLocalizations.of(context)!.tipsForDownload,
                   );
                 case PlayerType.live:

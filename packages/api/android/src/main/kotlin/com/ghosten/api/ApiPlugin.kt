@@ -237,9 +237,12 @@ class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnec
             "401" -> R.string.api_response_unauthorized
             "403" -> R.string.api_response_forbidden
             "404" -> R.string.api_response_not_found
+            "405" -> R.string.api_response_method_not_allowed
             "408" -> R.string.api_response_timeout
             "429" -> R.string.api_response_too_many_requests
             "500" -> R.string.api_response_internal_error
+            "501" -> R.string.api_response_not_implemented
+            "504" -> R.string.api_response_not_implemented
             else -> null
         }
         return if (message != null) activity.getString(message) else null
