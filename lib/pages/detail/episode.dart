@@ -1,5 +1,4 @@
 import 'package:api/api.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:player_view/player.dart';
@@ -10,6 +9,7 @@ import '../../components/future_builder_handler.dart';
 import '../../components/gap.dart';
 import '../../mixins/update.dart';
 import '../../models/models.dart';
+import '../../platform_api.dart';
 import '../../providers/user_config.dart';
 import '../../utils/notification.dart';
 import '../../utils/player.dart';
@@ -83,7 +83,7 @@ class _EpisodeDetailState extends State<EpisodeDetail> with DetailPageMixin<TVEp
       buildPlayAction(context, () => play(item)),
       buildWatchedAction(context, item, MediaType.episode),
       buildFavoriteAction(context, item, MediaType.episode),
-      if (!kIsAndroidTV) buildCastAction(context, (device) => cast(item, device)),
+      if (!PlatformApi.isAndroidTV()) buildCastAction(context, (device) => cast(item, device)),
       ActionDivider(),
       buildSkipFromStartAction(context, item, MediaType.episode, item.skipIntro),
       buildSkipFromEndAction(context, item, MediaType.episode, item.skipEnding),
@@ -113,18 +113,20 @@ class _EpisodeDetailState extends State<EpisodeDetail> with DetailPageMixin<TVEp
         icon: const Icon(Icons.download_outlined),
         trailing: const Badge(label: Text('Beta')),
         collapsed: true,
-        onPressed: () async {
-          final playerConfig = Provider.of<UserConfig>(navigatorKey.currentContext!, listen: false).playerConfig;
-          final resp = await showNotification(
-              context,
-              Api.downloadTaskCreate(
-                item.uid,
-                parallels: playerConfig.enableParallel ? playerConfig.parallels : null,
-                size: playerConfig.enableParallel ? playerConfig.sliceSize : null,
-              ),
-              successText: AppLocalizations.of(context)!.tipsForDownload);
-          if (resp?.error == null) setState(() => refresh = true);
-        },
+        onPressed: item.downloaded
+            ? null
+            : () async {
+                final playerConfig = Provider.of<UserConfig>(navigatorKey.currentContext!, listen: false).playerConfig;
+                final resp = await showNotification(
+                    context,
+                    Api.downloadTaskCreate(
+                      item.url.queryParameters['id']!,
+                      parallels: playerConfig.enableParallel ? playerConfig.parallels : null,
+                      size: playerConfig.enableParallel ? playerConfig.sliceSize : null,
+                    ),
+                    successText: AppLocalizations.of(context)!.tipsForDownload);
+                if (resp?.error == null) setState(() => refresh = true);
+              },
       ),
       if (widget.scrapper.id != null)
         buildHomeAction(context, ImdbUri(MediaType.episode, widget.scrapper.id!, season: item.season, episode: item.episode).toUri()),

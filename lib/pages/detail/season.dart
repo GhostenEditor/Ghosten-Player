@@ -1,5 +1,4 @@
 import 'package:api/api.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:player_view/player.dart';
@@ -10,6 +9,7 @@ import '../../components/gap.dart';
 import '../../components/mobile_builder.dart';
 import '../../mixins/update.dart';
 import '../../models/models.dart';
+import '../../platform_api.dart';
 import '../../utils/player.dart';
 import '../../utils/utils.dart';
 import 'components/drop_cap_text.dart';
@@ -75,7 +75,7 @@ class _SeasonDetailState extends State<SeasonDetail> with DetailPageMixin<TVSeas
       ),
       buildWatchedAction(context, item, MediaType.season),
       buildFavoriteAction(context, item, MediaType.season),
-      if (!kIsAndroidTV) buildCastAction(context, (device) => cast(item, device)),
+      if (!PlatformApi.isAndroidTV()) buildCastAction(context, (device) => cast(item, device)),
       ActionDivider(),
       buildSkipFromStartAction(context, item, MediaType.season, item.skipIntro),
       buildSkipFromEndAction(context, item, MediaType.season, item.skipEnding),

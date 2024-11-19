@@ -10,6 +10,7 @@ class Api {
   static final Stream<double?> needUpdate$ = ApiPlatform.instance.needUpdate$;
 
   static final databasePath = ApiPlatform.instance.databasePath;
+  static final logPath = ApiPlatform.instance.logPath;
   static final supportedHdrTypes = ApiPlatform.instance.supportedHdrTypes;
   static final syncData = ApiPlatform.instance.syncData;
   static final initialized = ApiPlatform.instance.initialized;
@@ -83,6 +84,7 @@ class Api {
   static final updatePlayedStatus = ApiPlatform.instance.updatePlayedStatus;
   static final setSkipTime = ApiPlatform.instance.setSkipTime;
   static final checkUpdate = ApiPlatform.instance.checkUpdate;
+  static final networkDiagnotics = ApiPlatform.instance.networkDiagnotics;
   static final dlnaDiscover = ApiPlatform.instance.dlnaDiscover;
   static final dlnaSetUri = ApiPlatform.instance.dlnaSetUri;
   static final dlnaPlay = ApiPlatform.instance.dlnaPlay;

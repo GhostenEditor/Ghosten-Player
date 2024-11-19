@@ -1,5 +1,4 @@
 import 'package:api/api.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide PopupMenuItem;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -9,6 +8,7 @@ import '../components/focus_card.dart';
 import '../components/future_builder_handler.dart';
 import '../components/gap.dart';
 import '../components/popup_menu.dart';
+import '../platform_api.dart';
 import '../utils/notification.dart';
 import '../utils/utils.dart';
 
@@ -36,7 +36,7 @@ class _LibraryManageState extends State<LibraryManage> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, _) {
         if (!didPop) Navigator.of(context).pop(refresh);
       },
       child: Scaffold(
@@ -57,7 +57,7 @@ class _LibraryManageState extends State<LibraryManage> {
                 itemBuilder: (context, index) {
                   if (index == snapshot.requireData.length) {
                     return FocusCard(
-                      autofocus: kIsAndroidTV && index == 0,
+                      autofocus: PlatformApi.isAndroidTV() && index == 0,
                       child: const Center(
                         child: IconButton.filledTonal(
                           onPressed: null,
@@ -80,7 +80,7 @@ class _LibraryManageState extends State<LibraryManage> {
                   } else {
                     final item = snapshot.requireData[index];
                     return _LibraryItem(
-                      autofocus: kIsAndroidTV && index == 0,
+                      autofocus: PlatformApi.isAndroidTV() && index == 0,
                       key: ValueKey(item.id),
                       item: item,
                       type: widget.type,
@@ -126,7 +126,7 @@ class _LibraryItem extends StatelessWidget {
       autofocus: autofocus,
       itemBuilder: (context) => [
         PopupMenuItem(
-          autofocus: kIsAndroidTV && true,
+          autofocus: PlatformApi.isAndroidTV() && true,
           onTap: () => showNotification(context, refreshMedia(item.id), showSuccess: false),
           leading: const Icon(Icons.sync),
           title: Text(AppLocalizations.of(context)!.buttonSyncDriver),

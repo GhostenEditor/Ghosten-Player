@@ -1,10 +1,10 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide PopupMenuItem;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 import '../../components/gap.dart';
 import '../../components/popup_menu.dart';
+import '../../platform_api.dart';
 import '../../providers/user_config.dart';
 
 class SystemSettingsPlayer extends StatefulWidget {
@@ -41,25 +41,25 @@ class SystemSettingsPlayerState extends State<SystemSettingsPlayer> {
               },
               itemBuilder: (context) => _ExtensionRendererMode.values
                   .map((e) => PopupMenuItem(
-                        autofocus: kIsAndroidTV && e == extensionRendererMode,
+                        autofocus: PlatformApi.isAndroidTV() && e == extensionRendererMode,
                         value: e,
                         title: Text(AppLocalizations.of(context)!.audioDecoder(e.name)),
                         leading: Icon(e == extensionRendererMode ? Icons.done : null),
                       ))
                   .toList(),
               child: ListTile(
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(AppLocalizations.of(context)!.audioDecoderLabel),
-                      Gap.hMD,
-                      Expanded(
-                        child: Text(AppLocalizations.of(context)!.audioDecoder(extensionRendererMode.name),
-                            textAlign: TextAlign.end, overflow: TextOverflow.ellipsis),
-                      ),
-                    ],
-                  ),
-                  trailing: const Icon(Icons.chevron_right))),
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(AppLocalizations.of(context)!.audioDecoderLabel),
+                    Gap.hMD,
+                    Expanded(
+                      child: Text(AppLocalizations.of(context)!.audioDecoder(extensionRendererMode.name),
+                          textAlign: TextAlign.end, overflow: TextOverflow.ellipsis),
+                    ),
+                  ],
+                ),
+              )),
           ListTile(
             title: Text(AppLocalizations.of(context)!.playerEnableDecoderFallback),
             trailing: Switch(
@@ -80,7 +80,7 @@ class SystemSettingsPlayerState extends State<SystemSettingsPlayer> {
               onChanged: (value) => setState(() => userConfig.setPlayerShowThumbnails(value)),
             ),
           ),
-          if (kIsAndroidTV)
+          if (PlatformApi.isAndroidTV())
             ListTile(
               title: Row(
                 children: [

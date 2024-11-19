@@ -1,5 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
+import '../platform_api.dart';
 
 class PopToTop extends StatelessWidget {
   final Widget child;
@@ -17,9 +18,9 @@ class PopToTop extends StatelessWidget {
   Widget build(BuildContext context) {
     return PopScope(
         canPop: false,
-        onPopInvoked: (didPop) {
+        onPopInvokedWithResult: (didPop, _) {
           if (!didPop) {
-            if (kIsAndroidTV && controller.offset > 1000) {
+            if (PlatformApi.isAndroidTV() && controller.offset > 1000) {
               controller.animateTo(
                 0,
                 duration: const Duration(milliseconds: 400),

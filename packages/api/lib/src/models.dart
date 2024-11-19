@@ -100,9 +100,9 @@ class Movie extends Media {
   final List<Studio> studios;
   final List<Keyword> keywords;
   final Duration? lastPlayedPosition;
-  final String uid;
   final bool downloaded;
   final String ext;
+  final Uri url;
   final int fileSize;
   final List<SubtitleData> subtitles;
   final Scrapper scrapper;
@@ -117,9 +117,9 @@ class Movie extends Media {
         keywords = (json['keywords'] as JsonList).toKeywords(),
         genres = (json['genres'] as JsonList).toGenres(),
         studios = (json['studios'] as JsonList).toStudios(),
-        uid = json['uid'],
         downloaded = json['downloaded'] ?? false,
         ext = json['ext'],
+        url = Uri.parse(json['url']),
         fileSize = json['fileSize'],
         subtitles = (json['subtitles'] as JsonList).toSubtitles(),
         scrapper = Scrapper.fromJson(json['scrapper']),
@@ -185,9 +185,9 @@ class TVEpisode extends Media {
   final Duration skipIntro;
   final Duration skipEnding;
   final Duration? lastPlayedPosition;
-  final String uid;
   final bool downloaded;
   final String ext;
+  final Uri url;
   final int fileSize;
   final List<SubtitleData> subtitles;
 
@@ -200,9 +200,9 @@ class TVEpisode extends Media {
         skipIntro = (json['skipIntro'] as int?).toDuration(),
         skipEnding = (json['skipEnding'] as int?).toDuration(),
         lastPlayedPosition = (json['lastPlayedPosition'] as int?).toDuration(),
-        uid = json['uid'],
         downloaded = json['downloaded'] ?? false,
         ext = json['ext'],
+        url = Uri.parse(json['url']),
         fileSize = json['fileSize'],
         subtitles = (json['subtitles'] as JsonList).toSubtitles(),
         super.fromJson();
@@ -391,9 +391,9 @@ class SearchResult {
         airDate = (json['airDate'] as String?)?.toDateTime();
 }
 
-class Session {
+class Session<T> {
   final SessionStatus status;
-  final dynamic data;
+  final T? data;
 
   Session.fromJson(Json json)
       : status = SessionStatus.fromString(json['status']),
@@ -427,20 +427,20 @@ class DriverFile {
   final FileType type;
   final DateTime? createdAt;
   final DateTime? updatedAt;
-  String? category;
-  int? size;
-  String? url;
+  final FileCategory? category;
+  final int? size;
+  final Uri? url;
 
   DriverFile.fromJson(Json json)
       : name = json['name'],
-        category = json['category'],
+        category = json['category'] == null ? null : FileCategory.fromString(json['category']),
         id = json['id'],
         parentId = json['parentId'],
         type = FileType.fromString(json['type']),
         createdAt = (json['createdAt'] as String?)?.toDateTime(),
         updatedAt = (json['updatedAt'] as String?)?.toDateTime(),
         size = json['size'],
-        url = json['url'];
+        url = json['url'] != null ? Uri.tryParse(json['url']) : null;
 }
 
 class PlayerHistory {
@@ -568,6 +568,36 @@ class Version {
   }
 }
 
+enum NetworkDiagnoticsStatus {
+  success,
+  fail;
+
+  static NetworkDiagnoticsStatus fromString(String s) {
+    return NetworkDiagnoticsStatus.values.firstWhere((e) => e.name == s);
+  }
+}
+
+class NetworkDiagnotics {
+  final NetworkDiagnoticsStatus status;
+  final String domain;
+  final String? ip;
+  final String? error;
+  final String? tip;
+
+  NetworkDiagnotics.fromJson(Json json)
+      : status = NetworkDiagnoticsStatus.fromString(json['status']),
+        domain = json['domain'],
+        ip = json['ip'],
+        tip = json['tip'],
+        error = json['error'];
+
+  @override
+  bool operator ==(Object other) => other is NetworkDiagnotics && status == other.status && domain == other.domain;
+
+  @override
+  int get hashCode => Object.hash(status, domain);
+}
+
 enum MediaType {
   movie,
   series,
@@ -627,6 +657,18 @@ enum FileType {
       'folder' => FileType.folder,
       _ => throw UnimplementedError('$s has not been implemented.'),
     };
+  }
+}
+
+enum FileCategory {
+  video,
+  audio,
+  image,
+  doc,
+  other;
+
+  static FileCategory fromString(String s) {
+    return FileCategory.values.firstWhere((e) => e.name == s, orElse: () => FileCategory.other);
   }
 }
 

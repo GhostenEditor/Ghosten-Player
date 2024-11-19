@@ -1,5 +1,4 @@
 import 'package:api/api.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide PopupMenuItem;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:player_view/player.dart';
@@ -13,6 +12,7 @@ import '../../components/no_data.dart';
 import '../../components/pop_to_top.dart';
 import '../../components/popup_menu.dart';
 import '../../models/models.dart';
+import '../../platform_api.dart';
 import '../../theme.dart';
 import '../../utils/notification.dart';
 import '../../utils/player.dart';
@@ -45,14 +45,14 @@ class _LiveListState extends State<LiveList> {
           builder: (context, snapshot) {
             return snapshot.requireData.isEmpty
                 ? NoData(
-                    action: IconButton.filled(onPressed: _addPlaylist, autofocus: kIsAndroidTV, icon: const Icon(Icons.add)),
+                    action: IconButton.filled(onPressed: _addPlaylist, autofocus: PlatformApi.isAndroidTV(), icon: const Icon(Icons.add)),
                   )
                 : ListView.builder(
                     itemCount: snapshot.requireData.length,
                     itemBuilder: (context, index) {
                       final item = snapshot.requireData[index];
                       return ListTile(
-                        autofocus: kIsAndroidTV && index == 0,
+                        autofocus: PlatformApi.isAndroidTV() && index == 0,
                         title: item.title == null ? null : Text(item.title!, overflow: TextOverflow.ellipsis),
                         subtitle: Text(item.url, overflow: TextOverflow.ellipsis),
                         trailing: const Icon(Icons.chevron_right),
@@ -104,11 +104,11 @@ class _ChannelListState extends State<_ChannelList> {
             appBar: AppBar(
               title: _playlist.title == null ? null : Text(_playlist.title!),
               actions: [
-                if (!kIsAndroidTV) IconButton(onPressed: () => cast(context), icon: const Icon(Icons.airplay_rounded)),
+                if (!PlatformApi.isAndroidTV()) IconButton(onPressed: () => cast(context), icon: const Icon(Icons.airplay_rounded)),
                 PopupMenuButton(
                     itemBuilder: (BuildContext context) => [
                           PopupMenuItem(
-                            autofocus: kIsAndroidTV,
+                            autofocus: PlatformApi.isAndroidTV(),
                             title: Text(AppLocalizations.of(context)!.buttonRefresh),
                             leading: const Icon(Icons.refresh),
                             onTap: () async {
@@ -159,7 +159,7 @@ class _ChannelListState extends State<_ChannelList> {
                               itemBuilder: (context, index) {
                                 final item = snapshot.requireData[index];
                                 return FocusCard(
-                                  autofocus: kIsAndroidTV && index == 0,
+                                  autofocus: PlatformApi.isAndroidTV() && index == 0,
                                   child: Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: Stack(

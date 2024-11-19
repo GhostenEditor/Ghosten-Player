@@ -1,10 +1,10 @@
 import 'package:api/api.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../const.dart';
+import '../platform_api.dart';
 import 'gap.dart';
 import 'stream_builder_handler.dart';
 
@@ -22,7 +22,7 @@ class _ConnectButtonState extends State<ConnectButton> {
 
   @override
   Widget build(BuildContext context) {
-    return kIsAndroidTV ? IconButton(onPressed: _showQrCode, icon: const Icon(Icons.switch_left)) : const SizedBox();
+    return PlatformApi.isAndroidTV() ? IconButton(onPressed: _showQrCode, icon: const Icon(Icons.switch_left)) : const SizedBox();
   }
 
   _showQrCode() async {

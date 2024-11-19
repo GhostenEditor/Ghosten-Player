@@ -24,6 +24,9 @@ class MethodChannelApi extends ApiPlatform {
   Future<String?> databasePath() => _methodChannel.invokeMethod<String>('databasePath');
 
   @override
+  Future<String?> logPath() => _methodChannel.invokeMethod<String>('logPath');
+
+  @override
   Future<List<HdrType>?> supportedHdrTypes() async {
     final types = await _methodChannel.invokeMethod<List<int>>('supportedHdrTypes');
     return types?.map((t) => HdrType.fromInt(t)).toList();
@@ -106,11 +109,18 @@ class MethodChannelApi extends ApiPlatform {
     }
   }
 
+  @override
+  Stream<List<NetworkDiagnotics>> networkDiagnotics() async* {
+    final data = await client.post('/network/diagnotics/cb');
+    final eventChannel = EventChannel('$_pluginNamespace/update/${data['id']}');
+    yield* eventChannel.receiveBroadcastStream().map((event) => (jsonDecode(event) as List<dynamic>).map((item) => NetworkDiagnotics.fromJson(item)).toList());
+  }
+
   /// Miscellaneous End
 
   /// Cast Start
   @override
-  Stream<dynamic> dlnaDiscover() async* {
+  Stream<List<dynamic>> dlnaDiscover() async* {
     final data = await client.post('/dlna/discover/cb');
     final eventChannel = EventChannel('$_pluginNamespace/update/${data['id']}');
     yield* eventChannel.receiveBroadcastStream().map((event) => jsonDecode(event));

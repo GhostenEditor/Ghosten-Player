@@ -25,31 +25,33 @@ void main() async {
   await Api.initialized();
   if (kIsWeb) {
     BrowserContextMenu.disableContextMenu();
+    PlatformApi.deviceType = DeviceType.web;
   } else {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.top]);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     HttpOverrides.global = MyHttpOverrides();
-    kIsAndroidTV = await PlatformApi.getAndroidDeviceType() == AndroidDeviceType.tv;
+    await PlatformApi.getDeviceType();
+    kIsAndroidTV = PlatformApi.isAndroidTV();
   }
   final externalUrl = kIsWeb ? null : await PlatformApi.externalUrl;
   if (externalUrl == null) {
     setPreferredOrientations(false);
     final userConfig = await UserConfig.init();
     Provider.debugCheckInvalidValueType = null;
-    if (!kIsWeb && userConfig.autoUpdate) {
+    if (!kIsWeb && userConfig.shouldCheckUpdate()) {
       Api.checkUpdate(
         updateUrl,
         Version.fromString(appVersion),
         needUpdate: (data, url) => showModalBottomSheet(
             context: navigatorKey.currentContext!,
-            constraints: const BoxConstraints(minWidth: double.infinity, maxHeight: 260),
+            constraints: const BoxConstraints(minWidth: double.infinity, maxHeight: 320),
             builder: (context) => UpdateBottomSheet(data, url: url)),
       );
     }
     runApp(ChangeNotifierProvider(create: (_) => userConfig, child: const MainApp()));
     PlatformApi.deeplinkEvent.listen(scanToLogin);
   } else {
-    runApp(PlayerApp(isTV: kIsAndroidTV, url: externalUrl));
+    runApp(PlayerApp(url: externalUrl));
   }
 }
 
@@ -84,9 +86,8 @@ class MainApp extends StatelessWidget {
 
 class PlayerApp extends StatelessWidget {
   final String url;
-  final bool isTV;
 
-  const PlayerApp({super.key, required this.url, required this.isTV});
+  const PlayerApp({super.key, required this.url});
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +101,7 @@ class PlayerApp extends StatelessWidget {
         ...WidgetsApp.defaultShortcuts,
         const SingleActivator(LogicalKeyboardKey.select): const ActivateIntent(),
       },
-      home: QuitConfirm(child: SingletonPlayer(url: url, isTV: isTV)),
+      home: QuitConfirm(child: SingletonPlayer(url: url, isTV: PlatformApi.isAndroidTV())),
       builder: (context, widget) => MediaQuery(
         data: MediaQuery.of(context).copyWith(textScaler: NoScaleTextScaler()),
         child: widget!,
@@ -127,7 +128,7 @@ class _QuitConfirmState extends State<QuitConfirm> {
         ? widget.child
         : PopScope(
             canPop: false,
-            onPopInvoked: (didPop) {
+            onPopInvokedWithResult: (didPop, _) {
               if (didPop) {
                 return;
               }

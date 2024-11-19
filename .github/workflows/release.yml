@@ -16,7 +16,7 @@ jobs:
 
       - uses: subosito/flutter-action@v1
         with:
-          flutter-version: '3.22.2'
+          flutter-version: '3.24.4'
 
       - run: flutter pub get
 

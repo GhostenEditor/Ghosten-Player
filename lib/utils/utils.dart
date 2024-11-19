@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:api/api.dart';
 import 'package:date_format/date_format.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -55,7 +54,7 @@ SystemUiOverlayStyle? getSystemUiOverlayStyle(BuildContext context, [ThemeMode m
 }
 
 void setPreferredOrientations(bool fullscreen) {
-  if (androidDeviceType == AndroidDeviceType.phone) {
+  if (PlatformApi.isAndroidPhone()) {
     if (fullscreen) {
       SystemChrome.setPreferredOrientations([
         DeviceOrientation.portraitUp,
@@ -106,6 +105,22 @@ extension DateTimeExtension on DateTime {
   Duration fromNow() {
     return Duration(milliseconds: DateTime.now().millisecondsSinceEpoch - millisecondsSinceEpoch);
   }
+
+  operator >=(DateTime other) {
+    return microsecondsSinceEpoch >= other.microsecondsSinceEpoch;
+  }
+
+  operator >(DateTime other) {
+    return microsecondsSinceEpoch > other.microsecondsSinceEpoch;
+  }
+
+  operator <=(DateTime other) {
+    return microsecondsSinceEpoch <= other.microsecondsSinceEpoch;
+  }
+
+  operator <(DateTime other) {
+    return microsecondsSinceEpoch < other.microsecondsSinceEpoch;
+  }
 }
 
 extension IntExtension on int {
@@ -114,8 +129,7 @@ extension IntExtension on int {
       < 1 << 10 => '$this B',
       < 1 << 20 => '${double.parse((this / (1 << 10)).toStringAsFixed(2))} KB',
       < 1 << 30 => '${double.parse((this / (1 << 20)).toStringAsFixed(2))} MB',
-      < 1 << 40 => '${double.parse((this / (1 << 30)).toStringAsFixed(2))} GB',
-      _ => '',
+      _ => '${double.parse((this / (1 << 30)).toStringAsFixed(2))} GB',
     };
   }
 
@@ -157,6 +171,20 @@ extension DurationExtension on Duration {
   }
 }
 
+extension UriExtension on Uri {
+  Uri normalize() {
+    if (scheme.toLowerCase() == 'file') {
+      return this;
+    } else {
+      return replace(
+        scheme: scheme.isEmpty ? Api.baseUrl.scheme : null,
+        host: host.isEmpty ? Api.baseUrl.host : null,
+        port: port == 0 ? Api.baseUrl.port : null,
+      );
+    }
+  }
+}
+
 Future<(int, DriverFile)?> showDriverFilePicker(
   BuildContext context,
   String title, {
@@ -191,7 +219,7 @@ Future<(int, DriverFile)?> showDriverFilePicker(
                                       child: Padding(
                                         padding: const EdgeInsets.all(16),
                                         child: IconButton.filledTonal(
-                                          autofocus: kIsAndroidTV && index == 0,
+                                          autofocus: PlatformApi.isAndroidTV() && index == 0,
                                           onPressed: () async {
                                             final flag = await navigateTo<bool>(context, const AccountLoginPage());
                                             if (flag == true) setState(() {});
@@ -205,7 +233,7 @@ Future<(int, DriverFile)?> showDriverFilePicker(
                                       child: Padding(
                                         padding: const EdgeInsets.all(16),
                                         child: IconButton.filledTonal(
-                                          autofocus: kIsAndroidTV && index == 0,
+                                          autofocus: PlatformApi.isAndroidTV() && index == 0,
                                           onPressed: () async {
                                             await Api.requestStoragePermission();
                                             final defaultPath = await FilePicker.externalStoragePath ?? '/';
@@ -229,7 +257,7 @@ Future<(int, DriverFile)?> showDriverFilePicker(
                                     final item = snapshot.requireData[index];
                                     return FocusCard(
                                       width: 160,
-                                      autofocus: kIsAndroidTV && index == 0,
+                                      autofocus: PlatformApi.isAndroidTV() && index == 0,
                                       onTap: () async {
                                         final file = await _showFilePicker(
                                           context,

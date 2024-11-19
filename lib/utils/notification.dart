@@ -1,9 +1,9 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../components/error_message.dart';
 import '../components/gap.dart';
+import '../platform_api.dart';
 
 const _errorIcon = Icon(Icons.error_outline, size: 60, color: Colors.red);
 const _successIcon = Icon(Icons.check_circle_outline, size: 60, color: Colors.green);
@@ -82,7 +82,11 @@ class _NotificationLayout<T> extends StatelessWidget {
   }
 
   _pop(BuildContext context, Duration delay, T? data, Object? error) {
-    Future.delayed(delay).then((value) => Navigator.of(context).pop(NotificationResponse(data: data, error: error)));
+    Future.delayed(delay).then((value) {
+      if (context.mounted) {
+        Navigator.of(context).pop(NotificationResponse(data: data, error: error));
+      }
+    });
   }
 }
 
@@ -102,7 +106,7 @@ Future<NotificationResponse<T?>?> showNotification<T>(
                 future: future,
                 builder: (context, snapshot) => PopScope(
                       canPop: false,
-                      onPopInvoked: (didPop) {
+                      onPopInvokedWithResult: (didPop, _) {
                         if (!didPop && !snapshot.connectionState.isLoading()) {
                           Navigator.of(context).pop(NotificationResponse(data: snapshot.data, error: snapshot.error));
                         }
@@ -130,7 +134,7 @@ Future<bool?> showConfirm(BuildContext context, String confirmText) async {
                 child: Text(AppLocalizations.of(context)!.buttonConfirm),
               ),
               TextButton(
-                autofocus: kIsAndroidTV,
+                autofocus: PlatformApi.isAndroidTV(),
                 onPressed: () => Navigator.of(context).pop(false),
                 child: Text(AppLocalizations.of(context)!.buttonCancel),
               ),

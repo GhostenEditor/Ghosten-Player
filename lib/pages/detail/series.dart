@@ -1,12 +1,12 @@
 import 'package:api/api.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:player_view/player.dart';
 
 import '../../mixins/update.dart';
 import '../../models/models.dart';
+import '../../platform_api.dart';
 import '../../utils/notification.dart';
 import '../../utils/player.dart';
 import '../../utils/utils.dart';
@@ -65,7 +65,7 @@ class _TVDetailState extends State<TVDetail> with DetailPageMixin<TVSeries, TVDe
       buildPlayAction(context, () => play(item)),
       buildWatchedAction(context, item, MediaType.series),
       buildFavoriteAction(context, item, MediaType.series),
-      if (!kIsAndroidTV) buildCastAction(context, (device) => cast(item, device)),
+      if (!PlatformApi.isAndroidTV()) buildCastAction(context, (device) => cast(item, device)),
       ActionDivider(),
       ActionButton(
           text: Text(AppLocalizations.of(context)!.buttonSyncDriver),

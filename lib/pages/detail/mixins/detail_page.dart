@@ -3,7 +3,6 @@ import 'dart:math';
 
 import 'package:api/api.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide PopupMenuItem;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:player_view/player.dart';
@@ -17,6 +16,7 @@ import '../../../components/mobile_builder.dart';
 import '../../../components/pop_to_top.dart';
 import '../../../components/popup_menu.dart';
 import '../../../dialogs/timer_picker.dart';
+import '../../../platform_api.dart';
 import '../../../utils/notification.dart';
 import '../../../utils/utils.dart';
 import '../../player/cast_adaptor.dart';
@@ -76,7 +76,7 @@ mixin DetailPageMixin<T extends MediaBase, S extends StatefulWidget> on State<S>
 
   ActionButton buildPlayAction(BuildContext context, VoidCallback? onPlay) {
     return ActionButton(
-      autofocus: kIsAndroidTV,
+      autofocus: PlatformApi.isAndroidTV(),
       onPressed: onPlay,
       icon: const Icon(Icons.play_arrow_rounded),
     );
@@ -327,7 +327,7 @@ class _SearchResultSelectState extends State<_SearchResultSelect> {
             itemBuilder: (context, index) {
               final item = widget.items[index];
               return InkWell(
-                autofocus: kIsAndroidTV && index == 0,
+                autofocus: PlatformApi.isAndroidTV() && index == 0,
                 onTap: () => Navigator.of(context).pop(index),
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -621,7 +621,7 @@ class _DetailActions extends StatelessWidget {
         } else {
           assert(!entry.collapsed || !entry.autoCollapse, 'collapsed 和 autoCollapse 不能同时为 true');
           popupMenuItems.add(PopupMenuItem(
-            autofocus: kIsAndroidTV && popupMenuItems.isEmpty,
+            autofocus: PlatformApi.isAndroidTV() && popupMenuItems.isEmpty,
             onTap: entry.onPressed,
             enabled: entry.onPressed != null,
             title: entry.text!,

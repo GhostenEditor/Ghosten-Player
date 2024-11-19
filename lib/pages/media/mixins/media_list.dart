@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:api/api.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide PopupMenuItem;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
@@ -9,6 +8,7 @@ import 'package:rxdart/rxdart.dart';
 
 import '../../../components/popup_menu.dart';
 import '../../../components/search_button.dart';
+import '../../../platform_api.dart';
 import '../../../providers/user_config.dart';
 import '../../../utils/utils.dart';
 import '../../library.dart';
@@ -82,7 +82,7 @@ mixin MediaListMixin<T extends StatefulWidget> on State<T> {
         },
         itemBuilder: (BuildContext context) => <PopupMenuEntry<_Category>>[
               PopupMenuItem(
-                autofocus: kIsAndroidTV,
+                autofocus: PlatformApi.isAndroidTV(),
                 onTap: () async {
                   final refresh = await navigateTo<bool>(context, LibraryManage(title: _getMediaTitle(mediaType), type: mediaType));
                   if (refresh == true) {

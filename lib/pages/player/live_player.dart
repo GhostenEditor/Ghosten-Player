@@ -67,11 +67,11 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
               ),
               PopScope(
                 canPop: false,
-                onPopInvoked: (didPop) async {
+                onPopInvokedWithResult: (didPop, _) async {
                   if (didPop) {
                     return;
                   }
-                  if (kIsAndroidTV && _isShowControls.value) {
+                  if (PlatformApi.isAndroidTV() && _isShowControls.value) {
                     _hideControls();
                   } else {
                     await _controller.hide();
@@ -102,7 +102,7 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
                           _showPlaylist(context);
                           return KeyEventResult.handled;
                         case LogicalKeyboardKey.goBack:
-                          if (kIsAndroidTV && _isShowControls.value) {
+                          if (PlatformApi.isAndroidTV() && _isShowControls.value) {
                             _hideControls();
                             return KeyEventResult.handled;
                           }
@@ -151,13 +151,13 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
                         child: SafeArea(
                           child: Center(
                             child: Padding(
-                              padding: EdgeInsets.symmetric(horizontal: kIsAndroidTV ? 72 : 24),
+                              padding: EdgeInsets.symmetric(horizontal: PlatformApi.isAndroidTV() ? 72 : 24),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   PlayerInfoView(_controller),
-                                  PlayerButtons(controller: _controller, isTV: kIsAndroidTV, onActionPlaylist: _showPlaylist),
+                                  PlayerButtons(controller: _controller, isTV: PlatformApi.isAndroidTV(), onActionPlaylist: _showPlaylist),
                                 ],
                               ),
                             ),

@@ -4,6 +4,8 @@ import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '/utils/utils.dart';
+
 enum SystemLanguage {
   zh,
   en,
@@ -11,6 +13,17 @@ enum SystemLanguage {
 
   static SystemLanguage fromString(String? str) {
     return SystemLanguage.values.firstWhere((element) => element.name == str, orElse: () => SystemLanguage.auto);
+  }
+}
+
+enum AutoUpdateFrequency {
+  always,
+  everyday,
+  everyWeek,
+  never;
+
+  static AutoUpdateFrequency fromString(String? str) {
+    return AutoUpdateFrequency.values.firstWhere((element) => element.name == str, orElse: () => AutoUpdateFrequency.everyday);
   }
 }
 
@@ -65,7 +78,8 @@ class UserConfig extends ChangeNotifier {
   SortConfig tvList;
   SortConfig movieList;
   PlayerConfig playerConfig;
-  bool autoUpdate;
+  AutoUpdateFrequency autoUpdateFrequency;
+  DateTime? lastCheckUpdateTime;
   final SharedPreferences prefs;
 
   static Future<UserConfig> init() async {
@@ -81,10 +95,11 @@ class UserConfig extends ChangeNotifier {
         tvList = SortConfig.fromJson(json['tvList']),
         movieList = SortConfig.fromJson(json['movieList']),
         playerConfig = PlayerConfig.fromJson(json['playerConfig']),
-        autoUpdate = json['autoUpdate'] ?? true;
+        autoUpdateFrequency = AutoUpdateFrequency.fromString(json['autoUpdateFrequency']),
+        lastCheckUpdateTime = json['lastCheckUpdateTime'] != null ? DateTime.parse(json['lastCheckUpdateTime']) : null;
 
-  void setAutoUpdate(bool auto) {
-    autoUpdate = auto;
+  void setAutoUpdate(AutoUpdateFrequency f) {
+    autoUpdateFrequency = f;
     save();
   }
 
@@ -149,13 +164,39 @@ class UserConfig extends ChangeNotifier {
     save();
   }
 
+  bool shouldCheckUpdate() {
+    final now = DateTime.now();
+    switch (autoUpdateFrequency) {
+      case AutoUpdateFrequency.always:
+        lastCheckUpdateTime = now;
+        return true;
+      case AutoUpdateFrequency.everyday:
+        if (lastCheckUpdateTime == null || lastCheckUpdateTime!.add(const Duration(days: 1)) <= now) {
+          lastCheckUpdateTime = now;
+          return true;
+        } else {
+          return false;
+        }
+      case AutoUpdateFrequency.everyWeek:
+        if (lastCheckUpdateTime == null || lastCheckUpdateTime!.add(const Duration(days: 7)) <= now) {
+          lastCheckUpdateTime = now;
+          return true;
+        } else {
+          return false;
+        }
+      case AutoUpdateFrequency.never:
+        return false;
+    }
+  }
+
   String toJson() => jsonEncode({
         'language': language.name,
         'themeMode': themeMode.name,
         'tvList': tvList.toMap(),
         'movieList': movieList.toMap(),
         'playerConfig': playerConfig.toMap(),
-        'autoUpdate': autoUpdate,
+        'autoUpdateFrequency': autoUpdateFrequency.name,
+        'lastCheckUpdateTime': lastCheckUpdateTime?.toString()
       });
 
   Locale? get locale {
