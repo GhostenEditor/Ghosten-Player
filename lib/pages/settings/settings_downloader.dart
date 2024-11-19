@@ -1,5 +1,4 @@
 import 'package:api/api.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide PopupMenuItem;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
@@ -11,6 +10,7 @@ import '../../components/gap.dart';
 import '../../components/no_data.dart';
 import '../../components/popup_menu.dart';
 import '../../models/models.dart';
+import '../../platform_api.dart';
 import '../../providers/user_config.dart';
 import '../../utils/notification.dart';
 import '../../utils/player.dart';
@@ -135,14 +135,14 @@ class SystemSettingsDownloader extends StatelessWidget {
                               ),
                               itemBuilder: (context) => [
                                 PopupMenuItem(
-                                  autofocus: kIsAndroidTV,
+                                  autofocus: PlatformApi.isAndroidTV(),
                                   leading: const Icon(Icons.play_arrow_rounded),
                                   title: Text(AppLocalizations.of(context)!.buttonPlay),
                                   onTap: () => play(context, item.mediaType, item.mediaId),
                                 ),
                                 if (item.status == DownloadTaskStatus.idle)
                                   PopupMenuItem(
-                                    autofocus: kIsAndroidTV,
+                                    autofocus: PlatformApi.isAndroidTV(),
                                     leading: const Icon(Icons.downloading_rounded),
                                     title: Text(AppLocalizations.of(context)!.buttonResume),
                                     onTap: () {
@@ -156,7 +156,7 @@ class SystemSettingsDownloader extends StatelessWidget {
                                   ),
                                 if (item.status == DownloadTaskStatus.downloading)
                                   PopupMenuItem(
-                                    autofocus: kIsAndroidTV,
+                                    autofocus: PlatformApi.isAndroidTV(),
                                     leading: const Icon(Icons.pause_rounded),
                                     title: Text(AppLocalizations.of(context)!.buttonPause),
                                     onTap: () => Api.downloadTaskPauseById(item.id),
@@ -229,7 +229,7 @@ class SystemSettingsDownloader extends StatelessWidget {
                               ),
                               itemBuilder: (context) => [
                                 PopupMenuItem(
-                                  autofocus: kIsAndroidTV,
+                                  autofocus: PlatformApi.isAndroidTV(),
                                   leading: const Icon(Icons.play_arrow_rounded),
                                   title: Text(AppLocalizations.of(context)!.buttonPlay),
                                   onTap: () => play(context, item.mediaType, item.mediaId),

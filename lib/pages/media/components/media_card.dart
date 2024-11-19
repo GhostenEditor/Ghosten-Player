@@ -1,5 +1,4 @@
 import 'package:api/api.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -7,6 +6,7 @@ import '../../../components/async_image.dart';
 import '../../../components/focus_card.dart';
 import '../../../components/gap.dart';
 import '../../../components/image_card.dart';
+import '../../../platform_api.dart';
 import '../../../utils/utils.dart';
 
 class MediaCard<T extends Media> extends StatefulWidget {
@@ -43,7 +43,7 @@ class _MediaCardState extends State<MediaCard> {
                     ),
                   )),
         Container(
-          decoration: kIsAndroidTV && focused
+          decoration: PlatformApi.isAndroidTV() && focused
               ? const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [

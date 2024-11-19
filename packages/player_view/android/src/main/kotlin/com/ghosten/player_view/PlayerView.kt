@@ -309,19 +309,19 @@ class PlayerView(
         fun show(bitmap: Bitmap?) {
             var builder = NotificationCompat.Builder(context, context.getString(CHANNEL_ID))
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setSmallIcon(R.drawable.media3_icon_circular_play)
+                .setSmallIcon(androidx.media3.session.R.drawable.media3_icon_circular_play)
                 .addAction(
                     createAction(
                         "Seek to previous item",
-                        R.drawable.media3_notification_seek_to_previous,
+                        androidx.media3.ui.R.drawable.exo_icon_previous,
                         "Seek to previous item"
                     )
                 )
-                .addAction(createAction("pause", R.drawable.media3_notification_pause, "Pause"))
+                .addAction(createAction("pause", androidx.media3.ui.R.drawable.exo_icon_pause, "Pause"))
                 .addAction(
                     createAction(
                         "Seek to next item",
-                        R.drawable.media3_notification_seek_to_next,
+                        androidx.media3.ui.R.drawable.exo_icon_next,
                         "Seek to next item"
                     )
                 )

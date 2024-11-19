@@ -11,7 +11,7 @@ class CastAdaptor extends Cast {
 
   @override
   Stream<List<CastDeviceAdaptor>> discover() {
-    return Api.dlnaDiscover().map(CastDeviceAdaptor.fromJson).scan((acc, curr, i) => acc..add(curr), []);
+    return Api.dlnaDiscover().map((data) => data.map(CastDeviceAdaptor.fromJson).toList());
   }
 }
 

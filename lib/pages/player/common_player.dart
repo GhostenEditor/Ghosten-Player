@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:api/api.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:player_view/player.dart';
@@ -70,7 +69,7 @@ class _CommonPlayerPageState extends State<CommonPlayerPage> {
         willSkipEnding: AppLocalizations.of(context)!.willSkipEnding,
       ),
       controller: controller,
-      isTV: kIsAndroidTV,
+      isTV: PlatformApi.isAndroidTV(),
       showThumbnails: userConfig.playerConfig.showThumbnails,
       seekStep: Duration(seconds: userConfig.playerConfig.speed),
       extensionRendererMode: userConfig.playerConfig.mode,
@@ -125,7 +124,7 @@ class _CommonPlayerPageState extends State<CommonPlayerPage> {
                   showNotification(
                     context,
                     Api.downloadTaskCreate(
-                      item.uid,
+                      item.url.queryParameters['id']!,
                       parallels: playerConfig.enableParallel ? playerConfig.parallels : null,
                       size: playerConfig.enableParallel ? playerConfig.sliceSize : null,
                     ),
@@ -135,7 +134,7 @@ class _CommonPlayerPageState extends State<CommonPlayerPage> {
                   showNotification(
                     context,
                     Api.downloadTaskCreate(
-                      item.uid,
+                      item.url.queryParameters['id']!,
                       parallels: playerConfig.enableParallel ? playerConfig.parallels : null,
                       size: playerConfig.enableParallel ? playerConfig.sliceSize : null,
                     ),

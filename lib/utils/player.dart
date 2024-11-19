@@ -1,10 +1,10 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:player_view/player.dart';
 
 import '../models/models.dart';
 import '../pages/player/common_player.dart';
 import '../pages/player/live_player.dart';
+import '../platform_api.dart';
 import 'utils.dart';
 
 Future<void> toPlayer(BuildContext context, List<ExPlaylistItem> playlist, {int? id, int? theme, required PlayerType playerType}) async {
@@ -14,7 +14,7 @@ Future<void> toPlayer(BuildContext context, List<ExPlaylistItem> playlist, {int?
     index = 0;
   }
   setPreferredOrientations(true);
-  if (kIsAndroidTV && playerType == PlayerType.live) {
+  if (PlatformApi.isAndroidTV() && playerType == PlayerType.live) {
     await navigateTo(context, LivePlayerPage(playlist: playlist, index: index));
   } else {
     await navigateTo(context, CommonPlayerPage(playlist: playlist, index: index, theme: theme, playerType: playerType));

@@ -1,5 +1,4 @@
 import 'package:api/api.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide PopupMenuItem;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
@@ -9,13 +8,16 @@ import '../../components/logo.dart';
 import '../../components/popup_menu.dart';
 import '../../components/scrollbar.dart';
 import '../../const.dart';
+import '../../platform_api.dart';
 import '../../providers/user_config.dart';
 import '../../utils/notification.dart';
 import '../../utils/utils.dart';
 import '../account/account.dart';
 import '../library.dart';
+import 'settings_diagnotics.dart';
 import 'settings_dns.dart';
 import 'settings_downloader.dart';
+import 'settings_log.dart';
 import 'settings_player.dart';
 import 'settings_player_history.dart';
 import 'settings_server.dart';
@@ -79,7 +81,7 @@ class SettingsPage extends StatelessWidget {
               itemBuilder: (BuildContext context) => SystemLanguage.values
                   .map((language) => PopupMenuItem(
                         value: language,
-                        autofocus: kIsAndroidTV && userConfig.language == language,
+                        autofocus: PlatformApi.isAndroidTV() && userConfig.language == language,
                         trailing: Icon(userConfig.language == language ? Icons.done : null),
                         title: Text(AppLocalizations.of(context)!.systemLanguage(language.name)),
                       ))
@@ -92,7 +94,7 @@ class SettingsPage extends StatelessWidget {
               onSelected: userConfig.setTheme,
               itemBuilder: (BuildContext context) => ThemeMode.values
                   .map((theme) => PopupMenuItem(
-                        autofocus: kIsAndroidTV && userConfig.themeMode == theme,
+                        autofocus: PlatformApi.isAndroidTV() && userConfig.themeMode == theme,
                         value: theme,
                         trailing: Icon(userConfig.themeMode == theme ? Icons.done : null),
                         title: Text(AppLocalizations.of(context)!.systemTheme(theme.name).padRight(8, ' ')),
@@ -126,6 +128,16 @@ class SettingsPage extends StatelessWidget {
                   await showNotification(context, Api.resetData(), successText: AppLocalizations.of(context)!.modalNotificationResetSuccessText);
                 }
               },
+            ),
+            _buildItem(
+              AppLocalizations.of(context)!.settingsItemLog,
+              Icons.article_outlined,
+              onTap: () => navigateTo(context, const SettingsLogPage()),
+            ),
+            _buildItem(
+              AppLocalizations.of(context)!.settingsItemNetworkDiagnotics,
+              Icons.rule_rounded,
+              onTap: () => navigateTo(context, const SettingsDiagnotics()),
             ),
             _buildItem(
               AppLocalizations.of(context)!.settingsItemInfo,

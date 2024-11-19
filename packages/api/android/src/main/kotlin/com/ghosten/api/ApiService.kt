@@ -16,7 +16,7 @@ interface ApiMethodHandler {
 
 
 class ApiService : Service() {
-    private external fun apiStart(port: Int, dbPath: String, downloadPath: String, cachePath: String)
+    private external fun apiStart(port: Int, dbPath: String, downloadPath: String, cachePath: String, logPath: String)
     private external fun apiStop()
     external fun apiInitialized(): Boolean
     external fun call(method: String, data: String, params: String): String
@@ -29,6 +29,11 @@ class ApiService : Service() {
     val databasePath: File
         get() {
             return applicationContext.getDatabasePath(DB_NAME)
+        }
+
+    val logPath: String
+        get() {
+            return applicationContext.cacheDir.path + "/logs"
         }
 
     inner class LocalBinder : Binder() {
@@ -108,11 +113,16 @@ class ApiService : Service() {
                 if (!cacheFolder.exists()) {
                     cacheFolder.mkdir()
                 }
+                val file = File(logPath)
+                if (!file.exists()) {
+                    file.mkdir()
+                }
                 apiStart(
                     PORT,
                     databasePath.path,
                     Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES).path,
                     cacheFolder.path,
+                    logPath,
                 )
                 apiStarted = false
             }

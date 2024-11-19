@@ -66,9 +66,33 @@ class ApiWeb extends ApiPlatform {
 
   /// Library End
 
+  /// Miscellaneous Start
+  @override
+  Stream<List<NetworkDiagnotics>> networkDiagnotics() async* {
+    final data = await client.post<Json>('/network/diagnotics/cb');
+    if (data != null) {
+      final sessionId = data['id'];
+      loop:
+      while (true) {
+        await Future.delayed(const Duration(milliseconds: 100));
+        final session = await sessionStatus<List<dynamic>>(sessionId);
+        switch (session.status) {
+          case SessionStatus.progressing:
+            yield session.data!.map((d) => NetworkDiagnotics.fromJson(d)).toList();
+          case SessionStatus.finished:
+          case SessionStatus.failed:
+            break loop;
+          default:
+        }
+      }
+    }
+  }
+
+  /// Miscellaneous End
+
   /// Cast Start
   @override
-  Stream<dynamic> dlnaDiscover() async* {
+  Stream<List<dynamic>> dlnaDiscover() async* {
     final data = await client.post<Json>('/dlna/discover/cb');
     if (data != null) {
       final sessionId = data['id'];

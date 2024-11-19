@@ -1,13 +1,14 @@
 import 'package:api/api.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide PopupMenuItem;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 import '../../components/gap.dart';
 import '../../components/logo.dart';
+import '../../components/popup_menu.dart';
 import '../../components/updater.dart';
 import '../../const.dart';
+import '../../platform_api.dart';
 import '../../providers/user_config.dart';
 
 class SystemSettingsUpdater extends StatefulWidget {
@@ -49,18 +50,36 @@ class SystemSettingsUpdaterState extends State<SystemSettingsUpdater> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  ListTile(
-                    title: Text(AppLocalizations.of(context)!.autoCheckForUpdates),
-                    trailing: Switch(
-                      value: userConfig.autoUpdate,
-                      onChanged: (value) => setState(() => userConfig.setAutoUpdate(value)),
-                    ),
-                  ),
+                  PopupMenuButton(
+                      offset: const Offset(1, 0),
+                      tooltip: '',
+                      onSelected: (value) => setState(() => userConfig.setAutoUpdate(value)),
+                      itemBuilder: (context) => AutoUpdateFrequency.values
+                          .map((e) => PopupMenuItem(
+                                autofocus: PlatformApi.isAndroidTV() && e == userConfig.autoUpdateFrequency,
+                                value: e,
+                                title: Text(AppLocalizations.of(context)!.autoUpdateFrequency(e.name)),
+                                leading: Icon(e == userConfig.autoUpdateFrequency ? Icons.done : null),
+                              ))
+                          .toList(),
+                      child: ListTile(
+                        title: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(AppLocalizations.of(context)!.autoCheckForUpdates),
+                            Gap.hMD,
+                            Expanded(
+                              child: Text(AppLocalizations.of(context)!.autoUpdateFrequency(userConfig.autoUpdateFrequency.name),
+                                  textAlign: TextAlign.end, overflow: TextOverflow.ellipsis),
+                            ),
+                          ],
+                        ),
+                      )),
                 ],
               ),
             ),
             FilledButton(
-              autofocus: kIsAndroidTV,
+              autofocus: PlatformApi.isAndroidTV(),
               onPressed: _loading || _updated
                   ? null
                   : () async {
@@ -70,7 +89,7 @@ class SystemSettingsUpdaterState extends State<SystemSettingsUpdater> {
                         Version.fromString(appVersion),
                         needUpdate: (data, url) => showModalBottomSheet(
                             context: context,
-                            constraints: const BoxConstraints(minWidth: double.infinity, maxHeight: 260),
+                            constraints: const BoxConstraints(minWidth: double.infinity, maxHeight: 320),
                             builder: (context) => UpdateBottomSheet(data, url: url)),
                       );
                       setState(() => _loading = false);

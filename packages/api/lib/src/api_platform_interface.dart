@@ -39,6 +39,10 @@ abstract class ApiPlatform extends PlatformInterface {
     throw UnimplementedError('databasePath() has not been implemented.');
   }
 
+  Future<String?> logPath() {
+    throw UnimplementedError('logPath() has not been implemented.');
+  }
+
   Future<List<HdrType>?> supportedHdrTypes() {
     throw UnimplementedError('supportedHdrTypes() has not been implemented.');
   }
@@ -122,7 +126,7 @@ abstract class ApiPlatform extends PlatformInterface {
   /// DownloadTask End
 
   /// Session Start
-  Future<Session> sessionStatus(String id) async {
+  Future<Session<T>> sessionStatus<T>(String id) async {
     final data = await client.get('/session/status', queryParameters: {'id': id});
     return Session.fromJson(data);
   }
@@ -441,6 +445,10 @@ abstract class ApiPlatform extends PlatformInterface {
     });
   }
 
+  Stream<List<NetworkDiagnotics>> networkDiagnotics() {
+    throw UnimplementedError('networkDiagnotics() has not been implemented.');
+  }
+
   Future<bool> checkUpdate(
     String updateUrl,
     Version currentVersion, {
@@ -452,7 +460,7 @@ abstract class ApiPlatform extends PlatformInterface {
   /// Miscellaneous End
 
   /// Cast Start
-  Stream<dynamic> dlnaDiscover() {
+  Stream<List<dynamic>> dlnaDiscover() {
     throw UnimplementedError('dlnaDiscover() has not been implemented.');
   }
 

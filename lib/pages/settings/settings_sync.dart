@@ -2,13 +2,13 @@ import 'dart:async';
 
 import 'package:api/api.dart';
 import 'package:bluetooth/bluetooth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide PopupMenuItem;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../components/no_data.dart';
 import '../../components/popup_menu.dart';
 import '../../const.dart';
+import '../../platform_api.dart';
 import '../../utils/notification.dart';
 
 class SettingsSyncPage extends StatefulWidget {
@@ -53,28 +53,29 @@ class _SettingsSyncPageState extends State<SettingsSyncPage> {
   }
 
   startServer() {
-    Bluetooth.startServer().listen(
-        (device) async {
-          Bluetooth.connection().listen((resp) async {
-            switch (resp.type) {
-              case BlueToothMessageType.file:
-                await Bluetooth.disconnect();
-                if (mounted) {
-                  final confirmed =
-                      await showConfirm(context, AppLocalizations.of(context)!.dataSyncConfirmSync(device.name ?? AppLocalizations.of(context)!.tagUnknown));
-                  if (confirmed == true) {
-                    Api.syncData(resp.data);
-                  }
-                }
-              case BlueToothMessageType.text:
-                Bluetooth.write(BluetoothMessage.text(appVersion));
+    Bluetooth.startServer().listen((device) async {
+      Bluetooth.connection().listen((resp) async {
+        switch (resp.type) {
+          case BlueToothMessageType.file:
+            await Bluetooth.disconnect();
+            if (mounted) {
+              final confirmed =
+                  await showConfirm(context, AppLocalizations.of(context)!.dataSyncConfirmSync(device.name ?? AppLocalizations.of(context)!.tagUnknown));
+              if (confirmed == true) {
+                Api.syncData(resp.data);
+              }
             }
-          });
-        },
-        onError: (error) => showNotification(context, Future.error(error)),
-        onDone: () {
-          if (needStartServer) startServer();
-        });
+          case BlueToothMessageType.text:
+            Bluetooth.write(BluetoothMessage.text(appVersion));
+        }
+      });
+    }, onError: (error) {
+      if (mounted) {
+        showNotification(context, Future.error(error));
+      }
+    }, onDone: () {
+      if (needStartServer) startServer();
+    });
   }
 
   @override
@@ -87,7 +88,7 @@ class _SettingsSyncPageState extends State<SettingsSyncPage> {
               PopupMenuButton(
                 itemBuilder: (context) => [
                   PopupMenuItem(
-                    autofocus: kIsAndroidTV,
+                    autofocus: PlatformApi.isAndroidTV(),
                     title: Text(AppLocalizations.of(context)!.dataSyncActionRescanBluetoothDevices),
                     leading: const Icon(Icons.sync),
                     onTap: () => startDiscovery(),

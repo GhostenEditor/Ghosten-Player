@@ -45,6 +45,7 @@ class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnec
             "getLocalIpAddress" -> result.success(getLocalIpAddress())
             "requestStoragePermission" -> requestStoragePermission(result)
             "databasePath" -> result.success(apiService?.databasePath?.path)
+            "logPath" -> result.success(apiService?.logPath)
             "initialized" -> {
                 if (serviceConnected) {
                     result.success(apiService?.apiInitialized())

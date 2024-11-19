@@ -1,12 +1,13 @@
 import 'package:api/api.dart';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:install_plugin/install_plugin.dart';
 
 import '../const.dart';
+import '../platform_api.dart';
 import '../utils/utils.dart';
 import 'gap.dart';
 import 'logo.dart';
@@ -31,6 +32,7 @@ class _UpdateBottomSheetState extends State<UpdateBottomSheet> {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Row(
@@ -57,16 +59,11 @@ class _UpdateBottomSheetState extends State<UpdateBottomSheet> {
               ],
             ),
             Gap.vMD,
-            Text(
-              widget.data.comment,
-              maxLines: 4,
-              textAlign: TextAlign.justify,
-              overflow: TextOverflow.ellipsis,
-            ),
+            Expanded(child: Markdown(data: widget.data.comment)),
             Gap.vMD,
             FilledButton(
                 onPressed: downloading.containsKey(widget.url) ? null : download,
-                autofocus: kIsAndroidTV,
+                autofocus: PlatformApi.isAndroidTV(),
                 child: downloading.containsKey(widget.url)
                     ? Row(mainAxisSize: MainAxisSize.min, children: [
                         Text(AppLocalizations.of(context)!.updating),

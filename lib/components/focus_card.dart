@@ -1,5 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
+import '../platform_api.dart';
 
 class FocusCard<T> extends StatefulWidget {
   final Widget child;
@@ -63,7 +64,7 @@ class _FocusCardState<T> extends State<FocusCard<T>> {
         ),
       ),
     );
-    return kIsAndroidTV && widget.scale != null
+    return PlatformApi.isAndroidTV() && widget.scale != null
         ? AnimatedScale(
             scale: _focusNode.hasFocus ? widget.scale! : 1,
             duration: const Duration(milliseconds: 400),

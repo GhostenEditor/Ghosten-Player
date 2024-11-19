@@ -14,22 +14,21 @@ enum ScreenState {
   }
 }
 
-enum AndroidDeviceType {
-  tv,
-  pad,
-  phone;
+enum DeviceType {
+  androidTV,
+  androidPad,
+  androidPhone,
+  web;
 
-  static AndroidDeviceType fromInt(int? i) {
+  static DeviceType fromInt(int? i) {
     return switch (i) {
-      0 => AndroidDeviceType.tv,
-      1 => AndroidDeviceType.pad,
-      2 => AndroidDeviceType.phone,
-      _ => AndroidDeviceType.phone,
+      0 => DeviceType.androidTV,
+      1 => DeviceType.androidPad,
+      2 => DeviceType.androidPhone,
+      _ => DeviceType.androidPhone,
     };
   }
 }
-
-AndroidDeviceType androidDeviceType = AndroidDeviceType.phone;
 
 class PlatformApi {
   static const _channelNamespace = 'com.ghosten.player';
@@ -44,12 +43,19 @@ class PlatformApi {
             ? Stream.value(ScreenState.on)
             : const EventChannel('$_channelNamespace/screen').receiveBroadcastStream().cast<String>().map((event) => ScreenState.fromString(event))))
       .stream;
+  static late DeviceType deviceType;
 
-  static Future<AndroidDeviceType> getAndroidDeviceType() async {
-    final data = await _platform.invokeMethod<int>('androidDeviceType');
-    androidDeviceType = AndroidDeviceType.fromInt(data);
-    return androidDeviceType;
+  static Future<void> getDeviceType() async {
+    deviceType = DeviceType.fromInt(await _platform.invokeMethod<int>('androidDeviceType'));
   }
 
   static Future<String?> get externalUrl => _platform.invokeMethod<String>('externalUrl');
+
+  static bool isAndroidTV() {
+    return deviceType == DeviceType.androidTV;
+  }
+
+  static bool isAndroidPhone() {
+    return deviceType == DeviceType.androidPhone;
+  }
 }
