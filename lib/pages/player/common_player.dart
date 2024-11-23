@@ -36,7 +36,7 @@ class CommonPlayerPage extends StatefulWidget {
 
 class _CommonPlayerPageState extends State<CommonPlayerPage> {
   late final userConfig = context.read<UserConfig>();
-  late final controller = PlayerController<ExPlaylistItem>(widget.playlist, widget.index);
+  late final controller = PlayerController<ExPlaylistItem>(widget.playlist, widget.index, Api.log);
   late final StreamSubscription<bool> _pipSubscription;
   final cast = const CastAdaptor();
 

@@ -39,10 +39,6 @@ abstract class ApiPlatform extends PlatformInterface {
     throw UnimplementedError('databasePath() has not been implemented.');
   }
 
-  Future<String?> logPath() {
-    throw UnimplementedError('logPath() has not been implemented.');
-  }
-
   Future<List<HdrType>?> supportedHdrTypes() {
     throw UnimplementedError('supportedHdrTypes() has not been implemented.');
   }
@@ -59,6 +55,10 @@ abstract class ApiPlatform extends PlatformInterface {
 
   Future<void> resetData() {
     throw UnimplementedError('resetData() has not been implemented.');
+  }
+
+  Future<void> log(int level, String message) {
+    throw UnimplementedError('log() has not been implemented.');
   }
 
   Future<void> requestStoragePermission() async {}
@@ -80,6 +80,10 @@ abstract class ApiPlatform extends PlatformInterface {
 
   Future<void> fileRemove(int driverId, String fileId) {
     return client.delete('/file/remove', data: {'driverId': driverId, 'fileId': fileId});
+  }
+
+  Future<void> fileMkdir(int driverId, String parentFileId, String name) {
+    return client.put('/file/mkdir', data: {'driverId': driverId, 'parentFileId': parentFileId, 'name': name});
   }
 
   /// File End
@@ -447,6 +451,16 @@ abstract class ApiPlatform extends PlatformInterface {
 
   Stream<List<NetworkDiagnotics>> networkDiagnotics() {
     throw UnimplementedError('networkDiagnotics() has not been implemented.');
+  }
+
+  Future<PageData<Log>> logQueryPage(int limit, int offset, [(int, int)? range]) async {
+    final data = await client.get<Json>('/log/query/page', queryParameters: {
+      'limit': limit,
+      'offset': offset,
+      'start': range?.$1,
+      'end': range?.$2,
+    });
+    return PageData.fromJson(data!, (data['data'] as JsonList).map((e) => Log.fromJson(e)));
   }
 
   Future<bool> checkUpdate(

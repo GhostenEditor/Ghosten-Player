@@ -21,19 +21,16 @@ class ApiService : Service() {
     external fun apiInitialized(): Boolean
     external fun call(method: String, data: String, params: String): String
     external fun callWithCallback(method: String, data: String, params: String, callback: ApiMethodHandler)
+    external fun log(level: Int, message: String)
 
     var apiStarted = false
     private var apiThread: ProxyThread? = null
     private val binder = LocalBinder()
     private var loaded = false
+
     val databasePath: File
         get() {
             return applicationContext.getDatabasePath(DB_NAME)
-        }
-
-    val logPath: String
-        get() {
-            return applicationContext.cacheDir.path + "/logs"
         }
 
     inner class LocalBinder : Binder() {
@@ -113,16 +110,12 @@ class ApiService : Service() {
                 if (!cacheFolder.exists()) {
                     cacheFolder.mkdir()
                 }
-                val file = File(logPath)
-                if (!file.exists()) {
-                    file.mkdir()
-                }
                 apiStart(
                     PORT,
                     databasePath.path,
                     Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES).path,
                     cacheFolder.path,
-                    logPath,
+                    applicationContext.cacheDir.path + "/logs",
                 )
                 apiStarted = false
             }

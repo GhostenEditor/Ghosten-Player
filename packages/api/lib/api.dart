@@ -10,16 +10,17 @@ class Api {
   static final Stream<double?> needUpdate$ = ApiPlatform.instance.needUpdate$;
 
   static final databasePath = ApiPlatform.instance.databasePath;
-  static final logPath = ApiPlatform.instance.logPath;
   static final supportedHdrTypes = ApiPlatform.instance.supportedHdrTypes;
   static final syncData = ApiPlatform.instance.syncData;
   static final initialized = ApiPlatform.instance.initialized;
   static final rollbackData = ApiPlatform.instance.rollbackData;
   static final resetData = ApiPlatform.instance.resetData;
+  static final log = ApiPlatform.instance.log;
   static final requestStoragePermission = ApiPlatform.instance.requestStoragePermission;
   static final fileList = ApiPlatform.instance.fileList;
   static final fileRename = ApiPlatform.instance.fileRename;
   static final fileRemove = ApiPlatform.instance.fileRemove;
+  static final fileMkdir = ApiPlatform.instance.fileMkdir;
   static final playerHistory = ApiPlatform.instance.playerHistory;
   static final downloadTaskCreate = ApiPlatform.instance.downloadTaskCreate;
   static final downloadTaskPauseById = ApiPlatform.instance.downloadTaskPauseById;
@@ -85,6 +86,7 @@ class Api {
   static final setSkipTime = ApiPlatform.instance.setSkipTime;
   static final checkUpdate = ApiPlatform.instance.checkUpdate;
   static final networkDiagnotics = ApiPlatform.instance.networkDiagnotics;
+  static final logQueryPage = ApiPlatform.instance.logQueryPage;
   static final dlnaDiscover = ApiPlatform.instance.dlnaDiscover;
   static final dlnaSetUri = ApiPlatform.instance.dlnaSetUri;
   static final dlnaPlay = ApiPlatform.instance.dlnaPlay;

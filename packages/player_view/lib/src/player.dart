@@ -33,7 +33,7 @@ class PlayerController<T extends PlaylistItem> {
 
   T get currentItem => playlist[index.value];
 
-  PlayerController([this.playlist = const [], index = 0]) {
+  PlayerController([this.playlist = const [], index = 0, Function(int, String)? onlog]) {
     assert(playlist.isNotEmpty);
     this.index = ValueNotifier(index);
     isFirst = ValueNotifier(index == 0);
@@ -86,6 +86,10 @@ class PlayerController<T extends PlaylistItem> {
           mediaInfo.value = MediaInfo.fromJson(call.arguments);
         case 'willSkip':
           willSkip.value = UniqueKey();
+        case 'log':
+          if (onlog != null) {
+            onlog(call.arguments['level'], call.arguments['message']);
+          }
         case 'isInitialized':
           PlayerPlatform.instance.setSources(playlist.map((item) => item.toSource()).toList(), this.index.value);
           isInitialized = true;
