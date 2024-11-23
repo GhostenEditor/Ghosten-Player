@@ -1,3 +1,4 @@
+import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:player_view/player.dart';
@@ -18,7 +19,7 @@ class _SingletonPlayerState extends State<SingletonPlayer> {
       url: Uri.parse(widget.url),
       sourceType: PlaylistItemSourceType.local,
     ),
-  ]);
+  ], null, Api.log);
 
   @override
   void dispose() {

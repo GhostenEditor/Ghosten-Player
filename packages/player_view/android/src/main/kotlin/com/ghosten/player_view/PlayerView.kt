@@ -104,7 +104,14 @@ class PlayerView(
                 .build()
         }
         player.addListener(this)
-//        player.addAnalyticsListener(EventLogger())
+        player.addAnalyticsListener(EventLogger(object : EventLoggerHandler {
+            override fun onLog(level: Int, message: String) {
+                mChannel.invokeMethod("log", HashMap<String, Any?>().apply {
+                    this["level"] = level
+                    this["message"] = message
+                })
+            }
+        }))
         mNativeView.findViewById<androidx.media3.ui.PlayerView>(R.id.video_view).player = player
         mChannel.invokeMethod("isInitialized", null)
         mChannel.invokeMethod("volumeChanged", mCurrentVolume.toFloat() / mMaxVolume.toFloat())

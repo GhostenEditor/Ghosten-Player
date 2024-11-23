@@ -24,9 +24,6 @@ class MethodChannelApi extends ApiPlatform {
   Future<String?> databasePath() => _methodChannel.invokeMethod<String>('databasePath');
 
   @override
-  Future<String?> logPath() => _methodChannel.invokeMethod<String>('logPath');
-
-  @override
   Future<List<HdrType>?> supportedHdrTypes() async {
     final types = await _methodChannel.invokeMethod<List<int>>('supportedHdrTypes');
     return types?.map((t) => HdrType.fromInt(t)).toList();
@@ -43,6 +40,9 @@ class MethodChannelApi extends ApiPlatform {
 
   @override
   Future<void> resetData() => _methodChannel.invokeMethod('resetData');
+
+  @override
+  Future<void> log(int level, String message) => _methodChannel.invokeMethod('log', {'level': level, 'message': message});
 
   @override
   Future<void> requestStoragePermission() async {
@@ -161,7 +161,9 @@ class Client extends ApiClient {
               ? method == 'GET'
                   ? Uri(
                       queryParameters: data.entries.fold({}, (acc, cur) {
-                      acc?[cur.key] = cur.value?.toString();
+                      if (cur.value != null) {
+                        acc?[cur.key] = cur.value?.toString();
+                      }
                       return acc;
                     })).toString().substring(1)
                   : jsonEncode(data)

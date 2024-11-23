@@ -45,7 +45,6 @@ class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnec
             "getLocalIpAddress" -> result.success(getLocalIpAddress())
             "requestStoragePermission" -> requestStoragePermission(result)
             "databasePath" -> result.success(apiService?.databasePath?.path)
-            "logPath" -> result.success(apiService?.logPath)
             "initialized" -> {
                 if (serviceConnected) {
                     result.success(apiService?.apiInitialized())
@@ -80,6 +79,9 @@ class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnec
                 }
             }
 
+            "log" -> {
+                apiService?.log(call.argument<Int>("level")!!, call.argument<String>("message")!!)
+            }
 
             else -> {
                 if (apiService == null) {

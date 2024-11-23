@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:animations/animations.dart';
+import 'package:api/api.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -24,7 +25,7 @@ class LivePlayerPage extends StatefulWidget {
 
 class _LivePlayerPageState extends State<LivePlayerPage> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  late final _controller = PlayerController(widget.playlist, widget.index);
+  late final _controller = PlayerController(widget.playlist, widget.index, Api.log);
   final _isShowControls = ValueNotifier(false);
   late final StreamSubscription<bool> _pipSubscription;
 

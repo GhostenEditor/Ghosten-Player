@@ -598,6 +598,49 @@ class NetworkDiagnotics {
   int get hashCode => Object.hash(status, domain);
 }
 
+class PageData<D> {
+  final int offset;
+  final int limit;
+  final int count;
+  final List<D> data;
+
+  PageData.fromJson(Json json, Iterable<D> iter)
+      : offset = json['offset'],
+        limit = json['limit'],
+        count = json['count'],
+        data = iter.toList();
+}
+
+class Log {
+  final LogLevel level;
+  final DateTime time;
+  final String message;
+
+  Log.fromJson(Json json)
+      : level = LogLevel.fromInt(json['level']),
+        time = DateTime.parse(json['time']),
+        message = json['message'];
+}
+
+enum LogLevel {
+  error,
+  warn,
+  info,
+  debug,
+  trace;
+
+  static LogLevel fromInt(int? level) {
+    return switch (level) {
+      1 => LogLevel.error,
+      2 => LogLevel.warn,
+      3 => LogLevel.info,
+      4 => LogLevel.debug,
+      5 => LogLevel.trace,
+      _ => throw Exception('Wrong Log Level of "$level"'),
+    };
+  }
+}
+
 enum MediaType {
   movie,
   series,

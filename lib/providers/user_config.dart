@@ -173,6 +173,7 @@ class UserConfig extends ChangeNotifier {
       case AutoUpdateFrequency.everyday:
         if (lastCheckUpdateTime == null || lastCheckUpdateTime!.add(const Duration(days: 1)) <= now) {
           lastCheckUpdateTime = now;
+          save();
           return true;
         } else {
           return false;
@@ -180,6 +181,7 @@ class UserConfig extends ChangeNotifier {
       case AutoUpdateFrequency.everyWeek:
         if (lastCheckUpdateTime == null || lastCheckUpdateTime!.add(const Duration(days: 7)) <= now) {
           lastCheckUpdateTime = now;
+          save();
           return true;
         } else {
           return false;

@@ -34,6 +34,21 @@ class FileViewer extends StatelessWidget {
       offset: const Offset(1, 0),
       tooltip: '',
       itemBuilder: (context) => [
+        PopupMenuItem(
+          autofocus: PlatformApi.isAndroidTV(),
+          leading: const Icon(Icons.folder_open_rounded),
+          title: Text(AppLocalizations.of(context)!.buttonNewFolder),
+          onTap: () async {
+            final filename =
+                await showDialog<String>(context: context, builder: (context) => _FileNameDialog(dialogTitle: AppLocalizations.of(context)!.buttonNewFolder));
+            if (filename != null && context.mounted) {
+              final resp = await showNotification(context, Api.fileMkdir(driverId, item.parentId, filename));
+              if (resp?.error == null) {
+                onRefresh();
+              }
+            }
+          },
+        ),
         if (item.viewable())
           PopupMenuItem(
             leading: const Icon(Icons.play_arrow_rounded),
@@ -59,11 +74,15 @@ class FileViewer extends StatelessWidget {
             },
           ),
         PopupMenuItem(
-          autofocus: PlatformApi.isAndroidTV(),
           leading: const Icon(Icons.drive_file_rename_outline),
           title: Text(AppLocalizations.of(context)!.buttonRename),
           onTap: () async {
-            final filename = await showDialog<String>(context: context, builder: (context) => _FileRenameDialog(filename: item.name));
+            final filename = await showDialog<String>(
+                context: context,
+                builder: (context) => _FileNameDialog(
+                      dialogTitle: AppLocalizations.of(context)!.buttonRename,
+                      filename: item.name,
+                    ));
             if (filename != null && context.mounted) {
               final resp = await showNotification(context, Api.fileRename(driverId, item.id, filename));
               if (resp?.error == null) {
@@ -119,16 +138,17 @@ class FileViewer extends StatelessWidget {
   }
 }
 
-class _FileRenameDialog extends StatefulWidget {
-  final String filename;
+class _FileNameDialog extends StatefulWidget {
+  final String dialogTitle;
+  final String? filename;
 
-  const _FileRenameDialog({required this.filename});
+  const _FileNameDialog({required this.dialogTitle, this.filename});
 
   @override
-  State<_FileRenameDialog> createState() => _FileRenameDialogState();
+  State<_FileNameDialog> createState() => _FileNameDialogState();
 }
 
-class _FileRenameDialogState extends State<_FileRenameDialog> {
+class _FileNameDialogState extends State<_FileNameDialog> {
   late final _controller = TextEditingController(text: widget.filename);
   final _formKey = GlobalKey<FormState>();
 
@@ -141,7 +161,7 @@ class _FileRenameDialogState extends State<_FileRenameDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(AppLocalizations.of(context)!.buttonRename),
+      title: Text(widget.dialogTitle),
       content: Form(
         key: _formKey,
         child: TextFormField(
