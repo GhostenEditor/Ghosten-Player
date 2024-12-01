@@ -3,7 +3,7 @@ description: "Bluetooth Plugin for Ghosten Player"
 version: 1.2.0
 
 environment:
-  sdk: ^3.5.4
+  sdk: '>=3.4.3 <4.0.0'
   flutter: '>=3.3.0'
 
 dependencies:

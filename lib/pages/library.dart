@@ -36,7 +36,7 @@ class _LibraryManageState extends State<LibraryManage> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvokedWithResult: (didPop, _) {
+      onPopInvoked: (didPop) {
         if (!didPop) Navigator.of(context).pop(refresh);
       },
       child: Scaffold(

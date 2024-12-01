@@ -43,12 +43,12 @@ dependency_overrides:
     git:
       url: https://github.com/GhostenEditor/flutter
       path: packages/flutter
-      ref: release-3.24.4
+      ref: release-3.22.2
   flutter_localizations:
     git:
       url: https://github.com/GhostenEditor/flutter
       path: packages/flutter_localizations
-      ref: release-3.24.4
+      ref: release-3.22.2
 
 flutter:
   uses-material-design: true

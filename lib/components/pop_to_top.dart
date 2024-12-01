@@ -18,7 +18,7 @@ class PopToTop extends StatelessWidget {
   Widget build(BuildContext context) {
     return PopScope(
         canPop: false,
-        onPopInvokedWithResult: (didPop, _) {
+        onPopInvoked: (didPop) {
           if (!didPop) {
             if (PlatformApi.isAndroidTV() && controller.offset > 1000) {
               controller.animateTo(
