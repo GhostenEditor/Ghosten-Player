@@ -128,7 +128,7 @@ class _QuitConfirmState extends State<QuitConfirm> {
         ? widget.child
         : PopScope(
             canPop: false,
-            onPopInvokedWithResult: (didPop, _) {
+            onPopInvoked: (didPop) {
               if (didPop) {
                 return;
               }

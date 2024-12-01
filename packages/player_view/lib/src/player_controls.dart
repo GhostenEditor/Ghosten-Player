@@ -333,7 +333,7 @@ class _PlayerControlsState extends State<PlayerControls> {
           floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
           body: PopScope(
             canPop: false,
-            onPopInvokedWithResult: (didPop, _) async {
+            onPopInvoked: (didPop) async {
               if (didPop) {
                 return;
               } else if (_scaffoldKey.currentState!.isEndDrawerOpen) {

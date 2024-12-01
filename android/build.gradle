@@ -9,23 +9,6 @@ rootProject.buildDir = "../build"
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
 }
-
-// FIX flutter plugin install_plugin for Flutter 3.24
-subprojects {
-    afterEvaluate { project ->
-        if (project.group == "com.example.installplugin") {
-            project.android {
-                compileSdkVersion = 34
-                namespace = project.group
-                compileOptions {
-                    sourceCompatibility = JavaVersion.VERSION_17
-                    targetCompatibility = JavaVersion.VERSION_17
-                }
-            }
-        }
-    }
-}
-
 subprojects {
     project.evaluationDependsOn(":app")
 }

@@ -68,7 +68,7 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
               ),
               PopScope(
                 canPop: false,
-                onPopInvokedWithResult: (didPop, _) async {
+                onPopInvoked: (didPop) async {
                   if (didPop) {
                     return;
                   }
