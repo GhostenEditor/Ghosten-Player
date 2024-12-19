@@ -661,7 +661,6 @@ enum MediaType {
 enum DriverType {
   alipan,
   quark,
-  quarktv,
   webdav,
   local;
 
@@ -669,7 +668,6 @@ enum DriverType {
     return switch (name) {
       'alipan' => DriverType.alipan,
       'quark' => DriverType.quark,
-      'quarktv' => DriverType.quarktv,
       'webdav' => DriverType.webdav,
       'local' => DriverType.local,
       _ => throw Exception('Wrong Driver Type of "$name"'),

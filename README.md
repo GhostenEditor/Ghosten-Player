@@ -143,12 +143,6 @@ _**[Media3文档](https://developer.android.google.cn/media/media3/exoplayer/sup
 
 <img alt="Quark Login Page" src="https://github.com/user-attachments/assets/fc886f5b-8d3d-4ab3-9cb4-2d0d08858fef" width="315"/>
 
-#### 夸克TV
-
-使用夸克App扫描二维码完成登录
-
-<img alt="Quark TV Login Page" src="https://github.com/user-attachments/assets/2e137287-89eb-4e47-b74e-25c894b29e8e" width="315"/>
-
 #### Webdav
 
 填写Webdav对应的IP端口，输出账号密码，提交后完成登录。注：目前仅支持Basic编码登录

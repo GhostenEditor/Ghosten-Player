@@ -95,6 +95,7 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
         ],
       ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -102,7 +103,7 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
               padding: const EdgeInsets.all(8.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
-                children: [DriverType.alipan, DriverType.quark, DriverType.quarktv, DriverType.webdav]
+                children: [DriverType.alipan, DriverType.quark, DriverType.webdav]
                     .map((ty) => [
                           Radio(value: ty, groupValue: driverType, onChanged: (t) => setState(() => driverType = t!)),
                           GestureDetector(
@@ -124,11 +125,6 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
                       ..setJavaScriptMode(JavaScriptMode.unrestricted)
                       ..setUserAgent(ua)
                       ..loadRequest(Uri.parse('https://pan.quark.cn')))),
-          if (driverType == DriverType.quarktv)
-            Expanded(
-                child: Center(
-              child: FilledButton(onPressed: login, child: const Text('登录')),
-            )),
           if (driverType == DriverType.webdav) Expanded(child: FormGroup(controller: _webdav)),
         ],
       ),
@@ -140,14 +136,12 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
       DriverType.alipan => _alipan.validate(),
       DriverType.webdav => _webdav.validate(),
       DriverType.quark => true,
-      DriverType.quarktv => true,
       _ => throw UnimplementedError(),
     }) {
       final data = switch (driverType) {
         DriverType.alipan => _alipan.data,
         DriverType.webdav => _webdav.data,
         DriverType.quark => await _quarkCookie(),
-        DriverType.quarktv => <String, dynamic>{},
         _ => throw UnimplementedError(),
       };
       if (!mounted) return;
@@ -162,11 +156,7 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
   Future<Map<String, dynamic>> _quarkCookie() async {
     final cookieManager = WebviewCookieManager();
     final gotCookies = await cookieManager.getCookies('https://pan.quark.cn');
-    // for (var item in gotCookies) {
-    //   print(item);
-    // }
     final cookies = gotCookies.map((c) => '${c.name}=${c.value}').join('; ');
-    // throw Exception();
     return {'token': cookies};
   }
 
