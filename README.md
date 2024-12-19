@@ -135,19 +135,19 @@ _**[Media3文档](https://developer.android.google.cn/media/media3/exoplayer/sup
 | 3 | 客户端ID     | 仅开发者账号提供                                                                                                                                                                                                                                                                                           |
 | 4 | 客户端密码     | 仅开发者账号提供                                                                                                                                                                                                                                                                                           |
 
-<img alt="Alipan Login Page" src="https://github.com/user-attachments/assets/2344c1cc-59e1-45aa-99c1-11678a2abac0" width="315"/>
+<img alt="Alipan Login Page" src="https://github.com/user-attachments/assets/224c7dbf-a3cc-42d0-afc2-8122ff939c5d" width="315"/>
 
 #### 夸克网盘
 
 通过网页登录夸克后，点击右上角确认按钮后完成登录
 
-<img alt="Quark Login Page" src="https://github.com/user-attachments/assets/fc886f5b-8d3d-4ab3-9cb4-2d0d08858fef" width="315"/>
+<img alt="Quark Login Page" src="https://github.com/user-attachments/assets/7a5671b5-82f6-444a-ae4c-d16f85ce7a5a" width="315"/>
 
 #### Webdav
 
 填写Webdav对应的IP端口，输出账号密码，提交后完成登录。注：目前仅支持Basic编码登录
 
-<img alt="Webdav Login Page 1" src="https://github.com/user-attachments/assets/d8e55dd2-75ea-4c0b-9094-b7c762657471" width="315"/>
+<img alt="Webdav Login Page 1" src="https://github.com/user-attachments/assets/29c72a9e-b61f-41e0-8d77-9f584142e64c" width="315"/>
 
 ### 添加资源
 
