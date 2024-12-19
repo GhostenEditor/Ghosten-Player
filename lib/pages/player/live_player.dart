@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:animations/animations.dart';
 import 'package:api/api.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:player_view/player.dart';
@@ -33,6 +32,7 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
   void initState() {
     _pipSubscription = PlatformApi.pipEvent.listen((flag) {
       _controller.pipMode.value = flag;
+      _isShowControls.value = false;
     });
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     super.initState();
@@ -59,7 +59,7 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
       child: Builder(builder: (context) {
         return Scaffold(
           key: _scaffoldKey,
-          backgroundColor: kIsWeb ? Colors.transparent : Colors.black,
+          backgroundColor: Colors.transparent,
           body: Stack(
             children: [
               PlayerPlatformView(
@@ -75,7 +75,6 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
                   if (PlatformApi.isAndroidTV() && _isShowControls.value) {
                     _hideControls();
                   } else {
-                    await _controller.hide();
                     if (context.mounted) Navigator.pop(context);
                   }
                 },

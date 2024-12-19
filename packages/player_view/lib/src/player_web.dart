@@ -171,9 +171,6 @@ class PlayerWeb extends PlayerPlatform {
   }
 
   @override
-  Future<void> hide() async {}
-
-  @override
   Future<String?> getVideoThumbnail(int position) async {
     return null;
   }
@@ -189,12 +186,12 @@ class PlayerWeb extends PlayerPlatform {
   }
 
   @override
-  void initWeb() {
-    invoke('init');
+  void init(Map<String, dynamic> args) {
+    invoke('init', args);
   }
 
   @override
-  void destroyWeb() {
-    invoke('destroy');
+  void dispose() {
+    invoke('dispose');
   }
 }

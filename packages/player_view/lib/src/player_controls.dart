@@ -5,9 +5,7 @@ import 'package:animations/animations.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -302,7 +300,7 @@ class _PlayerControlsState extends State<PlayerControls> {
       child: Builder(builder: (context) {
         return Scaffold(
           key: _scaffoldKey,
-          backgroundColor: kIsWeb ? Colors.transparent : Colors.black,
+          backgroundColor: Colors.transparent,
           endDrawerEnableOpenDragGesture: false,
           endDrawer: _buildDraw(context),
           resizeToAvoidBottomInset: false,
@@ -333,7 +331,7 @@ class _PlayerControlsState extends State<PlayerControls> {
           floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
           body: PopScope(
             canPop: false,
-            onPopInvoked: (didPop) async {
+            onPopInvoked: (didPop) {
               if (didPop) {
                 return;
               } else if (_scaffoldKey.currentState!.isEndDrawerOpen) {
@@ -352,7 +350,6 @@ class _PlayerControlsState extends State<PlayerControls> {
                 if (widget.onMediaChange != null && _controller.duration.value > Duration.zero) {
                   widget.onMediaChange!(_controller.index.value, _controller.position.value, _controller.duration.value);
                 }
-                await _controller.hide();
                 if (context.mounted) Navigator.pop(context);
               }
             },
@@ -960,69 +957,30 @@ class _PlayerPlaylistViewState extends State<PlayerPlaylistView> {
   }
 }
 
-class PlayerPlatformView extends StatelessWidget {
+class PlayerPlatformView extends StatefulWidget {
   final int? extensionRendererMode;
   final bool? enableDecoderFallback;
 
   const PlayerPlatformView({super.key, this.extensionRendererMode, this.enableDecoderFallback});
 
   @override
-  Widget build(BuildContext context) {
-    return kIsWeb
-        ? const PlatformWebView()
-        : PlatformViewLink(
-            viewType: '<video-player-view>',
-            surfaceFactory: (context, controller) {
-              return AndroidViewSurface(
-                controller: controller as AndroidViewController,
-                gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
-                hitTestBehavior: PlatformViewHitTestBehavior.opaque,
-              );
-            },
-            onCreatePlatformView: (params) {
-              return PlatformViewsService.initSurfaceAndroidView(
-                id: params.id,
-                viewType: '<video-player-view>',
-                layoutDirection: TextDirection.ltr,
-                creationParams: {
-                  'extensionRendererMode': extensionRendererMode,
-                  'enableDecoderFallback': enableDecoderFallback,
-                  'language': Localizations.localeOf(context).languageCode
-                },
-                creationParamsCodec: const StandardMessageCodec(),
-                onFocus: () {
-                  params.onFocusChanged(true);
-                },
-              )
-                ..addOnPlatformViewCreatedListener(params.onPlatformViewCreated)
-                ..create();
-            },
-          );
-  }
+  State<PlayerPlatformView> createState() => _PlayerPlatformViewState();
 }
 
-class PlatformWebView extends StatefulWidget {
-  const PlatformWebView({super.key});
-
-  @override
-  State<PlatformWebView> createState() => _PlatformWebViewState();
-}
-
-class _PlatformWebViewState extends State<PlatformWebView> {
-  @override
-  void initState() {
-    PlayerPlatform.instance.initWeb();
-    super.initState();
-  }
-
+class _PlayerPlatformViewState extends State<PlayerPlatformView> {
   @override
   void dispose() {
-    PlayerPlatform.instance.destroyWeb();
+    PlayerPlatform.instance.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    PlayerPlatform.instance.init({
+      'extensionRendererMode': widget.extensionRendererMode,
+      'enableDecoderFallback': widget.enableDecoderFallback,
+      'language': Localizations.localeOf(context).languageCode
+    });
     return const SizedBox();
   }
 }

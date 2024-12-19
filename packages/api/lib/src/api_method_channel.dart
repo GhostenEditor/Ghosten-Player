@@ -64,6 +64,19 @@ class MethodChannelApi extends ApiPlatform {
 
   /// Session End
 
+  /// Driver Start
+
+  @override
+  Stream<dynamic> driverInsert(Json data) async* {
+    final resp = await client.put('/driver/insert/cb', data: data);
+    final eventChannel = EventChannel('$_pluginNamespace/update/${resp['id']}');
+    yield* eventChannel.receiveBroadcastStream().map((event) => jsonDecode(event)).handleError((error) {
+      throw ApiException.fromPlatformException(error);
+    }, test: (error) => error is PlatformException);
+  }
+
+  /// Driver End
+
   /// Library Start
 
   @override
@@ -71,10 +84,9 @@ class MethodChannelApi extends ApiPlatform {
     final data = await client.post('/library/refresh/id/cb', data: {'id': id});
     final eventChannel = EventChannel('$_pluginNamespace/update/${data['id']}');
 
-    ApiPlatform.streamController.addStream(eventChannel
-        .receiveBroadcastStream()
-        .map((data) => jsonDecode(data)['progress'] as double?)
-        .concatWith([TimerStream<double?>(null, const Duration(seconds: 3))]).distinct());
+    ApiPlatform.streamController.addStream(eventChannel.receiveBroadcastStream().map((data) => jsonDecode(data)['progress'] as double?).handleError((error) {
+      throw ApiException.fromPlatformException(error);
+    }, test: (error) => error is PlatformException).concatWith([TimerStream<double?>(null, const Duration(seconds: 3))]).distinct());
   }
 
   /// Library End
@@ -110,10 +122,15 @@ class MethodChannelApi extends ApiPlatform {
   }
 
   @override
-  Stream<List<NetworkDiagnotics>> networkDiagnotics() async* {
-    final data = await client.post('/network/diagnotics/cb');
+  Stream<List<NetworkDiagnotics>> networkDiagnostics() async* {
+    final data = await client.post('/network/diagnostics/cb');
     final eventChannel = EventChannel('$_pluginNamespace/update/${data['id']}');
-    yield* eventChannel.receiveBroadcastStream().map((event) => (jsonDecode(event) as List<dynamic>).map((item) => NetworkDiagnotics.fromJson(item)).toList());
+    yield* eventChannel
+        .receiveBroadcastStream()
+        .map((event) => (jsonDecode(event) as List<dynamic>).map((item) => NetworkDiagnotics.fromJson(item)).toList())
+        .handleError((error) {
+      throw ApiException.fromPlatformException(error);
+    }, test: (error) => error is PlatformException);
   }
 
   /// Miscellaneous End
@@ -123,7 +140,9 @@ class MethodChannelApi extends ApiPlatform {
   Stream<List<dynamic>> dlnaDiscover() async* {
     final data = await client.post('/dlna/discover/cb');
     final eventChannel = EventChannel('$_pluginNamespace/update/${data['id']}');
-    yield* eventChannel.receiveBroadcastStream().map((event) => jsonDecode(event));
+    yield* eventChannel.receiveBroadcastStream().map((event) => jsonDecode(event) as List<dynamic>).handleError((error) {
+      throw ApiException.fromPlatformException(error);
+    }, test: (error) => error is PlatformException);
   }
 
   ///  Cast End

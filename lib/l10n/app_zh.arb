@@ -68,7 +68,7 @@
   "downloaderDeleteFileConfirmText": "是否同时删除文件？",
   "downloaderLabelDownloaded": "已完成",
   "downloaderLabelDownloading": "下载中",
-  "driverType": "{driverType, select, alipan{阿里云盘} webdav{Webdav} local{本地} other{未知}}",
+  "driverType": "{driverType, select, alipan{阿里云盘} quark{夸克网盘} quarktv{夸克网盘 TV} webdav{Webdav} local{本地} other{未知}}",
   "episodeCount": "{episodes}集",
   "errorLoadData": "数据获取失败",
   "errorTextConnectTimeout": "连接超时",

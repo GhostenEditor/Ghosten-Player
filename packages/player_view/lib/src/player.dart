@@ -29,7 +29,6 @@ class PlayerController<T extends PlaylistItem> {
   final ValueNotifier<bool> pipMode = ValueNotifier(false);
   final ValueNotifier<bool> isCasting = ValueNotifier(false);
   final ValueNotifier<(MediaChange, Duration)?> mediaChange = ValueNotifier(null);
-  bool isInitialized = false;
 
   T get currentItem => playlist[index.value];
 
@@ -92,13 +91,13 @@ class PlayerController<T extends PlaylistItem> {
           }
         case 'isInitialized':
           PlayerPlatform.instance.setSources(playlist.map((item) => item.toSource()).toList(), this.index.value);
-          isInitialized = true;
       }
     });
   }
 
   void dispose() {
     PlayerPlatform.instance.setMethodCallHandler(null);
+    PlayerPlatform.instance.dispose();
     index.dispose();
     isFirst.dispose();
     isLast.dispose();
@@ -165,9 +164,5 @@ class PlayerController<T extends PlaylistItem> {
 
   Future<void> updateSource(T source, int index) {
     return PlayerPlatform.instance.updateSource(source.toSource(), index);
-  }
-
-  Future<void> hide() {
-    return PlayerPlatform.instance.hide();
   }
 }

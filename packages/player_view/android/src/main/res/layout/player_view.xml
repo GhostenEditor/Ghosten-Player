@@ -5,5 +5,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:keepScreenOn="true"
+        android:background="@android:color/background_dark"
         app:use_controller="false"
-        app:surface_type="texture_view"/>
+        app:surface_type="surface_view"/>

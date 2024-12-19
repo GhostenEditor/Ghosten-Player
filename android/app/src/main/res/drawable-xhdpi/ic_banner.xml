@@ -1,0 +1,20 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:width="320px"
+          android:height="180px">
+        <color android:color="#FF1B1B1F"/>
+    </item>
+    <item
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:drawable="@drawable/ic_logo"
+            android:left="40px"
+            android:top="60px"
+            android:width="60px"
+            android:height="60px"/>
+    <item
+            android:width="200px"
+            android:height="80px"
+            android:left="100px"
+            android:top="50px"
+            android:drawable="@drawable/ic_brand"/>
+</layer-list>

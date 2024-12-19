@@ -19,7 +19,7 @@ class _SingletonPlayerState extends State<SingletonPlayer> {
       url: Uri.parse(widget.url),
       sourceType: PlaylistItemSourceType.local,
     ),
-  ], null, Api.log);
+  ], 0, Api.log);
 
   @override
   void dispose() {

@@ -68,7 +68,7 @@
   "downloaderDeleteFileConfirmText": "Whether to delete files at the same time?",
   "downloaderLabelDownloaded": "Downloaded",
   "downloaderLabelDownloading": "Downloading",
-  "driverType": "{driverType, select, alipan{Alipan} webdav{Webdav} local{Local} other{Unknown}}",
+  "driverType": "{driverType, select, alipan{Alipan} quark{Quark} quarktv{Quark TV} webdav{Webdav} local{Local} other{Unknown}}",
   "episodeCount": "Episode {episodes}",
   "errorLoadData": "Load data failed",
   "errorTextConnectTimeout": "Connect Timeout",

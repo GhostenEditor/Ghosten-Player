@@ -1,138 +1,196 @@
 package com.ghosten.player
 
+import android.annotation.TargetApi
 import android.app.UiModeManager
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.res.Configuration
-import io.flutter.embedding.android.FlutterActivity
-import io.flutter.embedding.engine.FlutterEngine
-import io.flutter.plugin.common.EventChannel
-import io.flutter.plugin.common.MethodCall
-import io.flutter.plugin.common.MethodChannel
+import android.os.Build
+import android.os.Bundle
+import android.window.BackEvent
+import android.window.OnBackAnimationCallback
+import android.window.OnBackInvokedCallback
+import android.window.OnBackInvokedDispatcher
+import androidx.annotation.RequiresApi
+import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.FragmentManager
+import io.flutter.Build.API_LEVELS
+import io.flutter.embedding.android.FlutterFragment
 
-class MainActivity : FlutterActivity(), MethodChannel.MethodCallHandler {
-    private var externalUrl: String? = null
-    private var deeplink: String? = null
-    private var channel: MethodChannel? = null
-    private var pipChannel: EventChannel? = null
-    private var pipSink: EventChannel.EventSink? = null
-    private var screenChannel: EventChannel? = null
-    private var screenSink: EventChannel.EventSink? = null
-    private var deeplinkChannel: EventChannel? = null
-    private var deeplinkSink: EventChannel.EventSink? = null
-    private val screenStateReceiver = ScreenStateReceiver()
+class MainActivity : FragmentActivity() {
+    private var mainFragment: MainFragment? = null
+    private var hasRegisteredBackCallback = false
+    override fun onCreate(savedInstanceState: Bundle?) {
+        setTheme(R.style.NormalTheme)
+        setContentView(R.layout.main_layout)
 
-    override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
-        super.configureFlutterEngine(flutterEngine)
-        channel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, PLUGIN_NAMESPACE)
-        channel!!.setMethodCallHandler(this)
-        pipChannel = EventChannel(flutterEngine.dartExecutor.binaryMessenger, "$PLUGIN_NAMESPACE/pip")
-        pipChannel!!.setStreamHandler(object : EventChannel.StreamHandler {
-            override fun onListen(args: Any?, sink: EventChannel.EventSink?) {
-                pipSink = sink
-            }
+        super.onCreate(savedInstanceState)
 
-            override fun onCancel(args: Any?) {
-                pipSink?.endOfStream()
-                pipSink = null
-            }
-        })
-        screenChannel = EventChannel(flutterEngine.dartExecutor.binaryMessenger, "$PLUGIN_NAMESPACE/screen")
-        screenChannel!!.setStreamHandler(object : EventChannel.StreamHandler {
-            override fun onListen(args: Any?, sink: EventChannel.EventSink?) {
-                screenSink = sink
-                screenSink?.success(SCREEN_MODE_PRESENT)
-            }
-
-            override fun onCancel(args: Any?) {
-                screenSink?.endOfStream()
-                screenSink = null
-            }
-        })
-        deeplinkChannel = EventChannel(flutterEngine.dartExecutor.binaryMessenger, "$PLUGIN_NAMESPACE/deeplink")
-        deeplinkChannel!!.setStreamHandler(object : EventChannel.StreamHandler {
-            override fun onListen(args: Any?, sink: EventChannel.EventSink?) {
-                deeplinkSink = sink
-                deeplinkSink?.success(deeplink)
-            }
-
-            override fun onCancel(args: Any?) {
-                deeplinkSink?.endOfStream()
-                deeplinkSink = null
-            }
-        })
+        if (intent.scheme == "content") {
+            mainFragment = ensureFlutterFragmentCreated(
+                PLAYER_FRAGMENT, "player", listOf(androidDeviceType().toString(), intent.data?.toString())
+            )
+        } else {
+            mainFragment = ensureFlutterFragmentCreated(MAIN_FRAGMENT, "main", listOf(androidDeviceType().toString()))
+        }
+        registerOnBackInvokedCallback()
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (intent.scheme == "content") {
-            externalUrl = intent.data?.toString()
+    private fun registerOnBackInvokedCallback() {
+        if (!hasRegisteredBackCallback && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            onBackInvokedDispatcher.registerOnBackInvokedCallback(
+                OnBackInvokedDispatcher.PRIORITY_DEFAULT, createOnBackInvokedCallback()
+            )
+            hasRegisteredBackCallback = true
         }
-        val mScreenStatusFilter = IntentFilter()
-        mScreenStatusFilter.addAction(Intent.ACTION_SCREEN_ON)
-        mScreenStatusFilter.addAction(Intent.ACTION_SCREEN_OFF)
-        mScreenStatusFilter.addAction(Intent.ACTION_USER_PRESENT)
-        context.registerReceiver(screenStateReceiver, mScreenStatusFilter)
+    }
+
+    private fun createOnBackInvokedCallback(): OnBackInvokedCallback {
+        if (Build.VERSION.SDK_INT >= API_LEVELS.API_34) {
+            return object : OnBackAnimationCallback {
+                override fun onBackInvoked() {
+                    commitBackGesture()
+                }
+
+                override fun onBackCancelled() {
+                    cancelBackGesture()
+                }
+
+                override fun onBackProgressed(backEvent: BackEvent) {
+                    updateBackGestureProgress(backEvent)
+                }
+
+                override fun onBackStarted(backEvent: BackEvent) {
+                    startBackGesture(backEvent)
+                }
+            }
+        }
+
+        return OnBackInvokedCallback { mainFragment?.onBackPressed() }
+    }
+
+    @TargetApi(API_LEVELS.API_34)
+    @RequiresApi(API_LEVELS.API_34)
+    fun startBackGesture(backEvent: BackEvent) {
+        if (stillAttachedForEvent("startBackGesture")) {
+            mainFragment?.startBackGesture(backEvent)
+        }
+    }
+
+    @TargetApi(API_LEVELS.API_34)
+    @RequiresApi(API_LEVELS.API_34)
+    fun updateBackGestureProgress(backEvent: BackEvent) {
+        if (stillAttachedForEvent("updateBackGestureProgress")) {
+            mainFragment?.updateBackGestureProgress(backEvent)
+        }
+    }
+
+    @TargetApi(API_LEVELS.API_34)
+    @RequiresApi(API_LEVELS.API_34)
+    fun commitBackGesture() {
+        if (stillAttachedForEvent("commitBackGesture")) {
+            mainFragment?.commitBackGesture()
+        }
+    }
+
+    @TargetApi(API_LEVELS.API_34)
+    @RequiresApi(API_LEVELS.API_34)
+    fun cancelBackGesture() {
+        if (stillAttachedForEvent("cancelBackGesture")) {
+            mainFragment?.cancelBackGesture()
+        }
+    }
+
+    private fun stillAttachedForEvent(event: String): Boolean {
+        if (mainFragment == null) {
+            return false
+        }
+        return true
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        mainFragment?.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+    }
+
+    override fun onPostResume() {
+        super.onPostResume()
+        mainFragment?.onPostResume()
     }
 
     override fun onNewIntent(intent: Intent) {
-        if (intent.scheme == "ghosten") {
-            deeplink = intent.data?.toString()
-            deeplinkSink?.success(deeplink)
-        }
+        mainFragment?.onNewIntent(intent)
         super.onNewIntent(intent)
     }
 
-    override fun onPause() {
-        super.onPause()
-        context.unregisterReceiver(screenStateReceiver)
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        mainFragment?.onBackPressed()
     }
 
-    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration?) {
-        pipSink?.success(isInPictureInPictureMode)
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String?>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        mainFragment?.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
-    override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
-        when (call.method) {
-            "androidDeviceType" -> result.success(androidDeviceType())
-            "externalUrl" -> result.success(externalUrl)
-            else -> result.notImplemented()
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(
+        requestCode: Int, resultCode: Int, data: Intent?
+    ) {
+        super.onActivityResult(requestCode, resultCode, data)
+        mainFragment?.onActivityResult(requestCode, resultCode, data)
+    }
+
+    override fun onUserLeaveHint() {
+        mainFragment?.onUserLeaveHint()
+    }
+
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        mainFragment?.onTrimMemory(level)
+    }
+
+
+    private fun ensureFlutterFragmentCreated(tag: String, entryPoint: String, args: List<String?>): MainFragment {
+        val fragmentManager: FragmentManager = supportFragmentManager
+        var fragment = fragmentManager.findFragmentByTag(tag) as MainFragment?
+
+        val newFragment = FlutterFragment
+            .NewEngineFragmentBuilder(MainFragment::class.java)
+            .shouldDelayFirstAndroidViewDraw(true)
+            .shouldAutomaticallyHandleOnBackPressed(true)
+            .dartEntrypoint(entryPoint)
+            .dartEntrypointArgs(args)
+            .build<MainFragment>()
+        if (fragment == null) {
+            fragmentManager.beginTransaction().add(R.id.fragment_container, newFragment, tag).commit()
+        } else {
+            fragmentManager.beginTransaction().replace(R.id.fragment_container, newFragment, tag).commit()
         }
+        fragment = newFragment
+        return fragment;
     }
 
     private fun androidDeviceType(): Int {
         val uiModeManager = getSystemService(UI_MODE_SERVICE) as UiModeManager
         return if (uiModeManager.currentModeType == Configuration.UI_MODE_TYPE_TELEVISION) {
             DEVICE_TYPE_TV
-        } else if (context.resources.configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK >= Configuration.SCREENLAYOUT_SIZE_LARGE) {
+        } else if (resources.configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK >= Configuration.SCREENLAYOUT_SIZE_LARGE) {
             DEVICE_TYPE_PAD
         } else {
             DEVICE_TYPE_PHONE
         }
     }
 
-    inner class ScreenStateReceiver : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            val action = intent?.action
-            if (Intent.ACTION_SCREEN_ON == action) {
-                screenSink?.success(SCREEN_MODE_ON)
-            } else if (Intent.ACTION_SCREEN_OFF == action) {
-                screenSink?.success(SCREEN_MODE_OFF)
-            } else if (Intent.ACTION_USER_PRESENT == action) {
-                screenSink?.success(SCREEN_MODE_PRESENT)
-            }
-        }
-    }
-
     companion object {
-        const val PLUGIN_NAMESPACE = "com.ghosten.player"
-        const val SCREEN_MODE_ON = "on"
-        const val SCREEN_MODE_OFF = "off"
-        const val SCREEN_MODE_PRESENT = "present"
-        const val DEVICE_TYPE_TV = 0
-        const val DEVICE_TYPE_PAD = 1
-        const val DEVICE_TYPE_PHONE = 2
+        private const val DEVICE_TYPE_TV = 0
+        private const val DEVICE_TYPE_PAD = 1
+        private const val DEVICE_TYPE_PHONE = 2
+        private const val MAIN_FRAGMENT = "main_fragment"
+        private const val PLAYER_FRAGMENT = "player_fragment"
     }
 }

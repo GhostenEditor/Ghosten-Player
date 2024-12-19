@@ -1,4 +1,5 @@
 import 'package:api/api.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart' hide PopupMenuItem;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -96,7 +97,9 @@ class _AccountManageState extends State<AccountManage> {
                           children: [
                             AspectRatio(
                               aspectRatio: 1,
-                              child: item.avatar == null ? const Icon(Icons.account_circle, size: 160) : Image.network(item.avatar!),
+                              child: item.avatar == null
+                                  ? const Icon(Icons.account_circle, size: 160)
+                                  : CachedNetworkImage(imageUrl: item.avatar!, fit: BoxFit.cover),
                             ),
                             Expanded(
                               child: Padding(

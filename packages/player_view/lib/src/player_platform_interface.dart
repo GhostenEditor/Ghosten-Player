@@ -65,10 +65,6 @@ abstract class PlayerPlatform extends PlatformInterface {
     throw UnimplementedError('updateSource() has not been implemented.');
   }
 
-  Future<void> hide() {
-    throw UnimplementedError('hide() has not been implemented.');
-  }
-
   Future<String?> getVideoThumbnail(int position) {
     throw UnimplementedError('getVideoThumbnail() has not been implemented.');
   }
@@ -85,11 +81,11 @@ abstract class PlayerPlatform extends PlatformInterface {
     throw UnimplementedError('setMethodCallHandler() has not been implemented.');
   }
 
-  void initWeb() {
-    throw UnimplementedError('setMethodCallHandler() has not been implemented.');
+  void init(Map<String, dynamic> args) {
+    throw UnimplementedError('init() has not been implemented.');
   }
 
-  void destroyWeb() {
-    throw UnimplementedError('setMethodCallHandler() has not been implemented.');
+  void dispose() {
+    throw UnimplementedError('dispose() has not been implemented.');
   }
 }

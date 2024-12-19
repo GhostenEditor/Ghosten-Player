@@ -20,7 +20,7 @@ class ApiService : Service() {
     private external fun apiStop()
     external fun apiInitialized(): Boolean
     external fun call(method: String, data: String, params: String): String
-    external fun callWithCallback(method: String, data: String, params: String, callback: ApiMethodHandler)
+    external fun callWithCallback(method: String, data: String, params: String, callback: ApiMethodHandler): String
     external fun log(level: Int, message: String)
 
     var apiStarted = false

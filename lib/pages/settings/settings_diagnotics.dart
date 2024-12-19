@@ -14,7 +14,7 @@ class SettingsDiagnotics extends StatelessWidget {
         title: Text(AppLocalizations.of(context)!.settingsItemNetworkDiagnotics),
       ),
       body: StreamBuilderHandler(
-          stream: Api.networkDiagnotics(),
+          stream: Api.networkDiagnostics(),
           builder: (context, snapshot) {
             return ListView.builder(
               itemBuilder: (context, index) {

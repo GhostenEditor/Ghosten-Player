@@ -4,6 +4,7 @@
     <string name="api_response_forbidden">禁止访问</string>
     <string name="api_response_bad_request">错误请求</string>
     <string name="api_response_timeout">请求超时</string>
+    <string name="api_response_conflict">Conflict</string>
     <string name="api_response_internal_error">内部错误</string>
     <string name="api_response_multiple_choices">Multiple Choices</string>
     <string name="api_response_too_many_requests">请求过于频繁，请稍后再尝试</string>

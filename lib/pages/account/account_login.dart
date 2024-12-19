@@ -1,11 +1,16 @@
 import 'package:api/api.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:webview_cookie_manager/webview_cookie_manager.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../components/connect_button.dart';
+import '../../components/error_message.dart';
 import '../../components/form_group.dart';
 import '../../components/gap.dart';
-import '../../utils/notification.dart';
+import '../../const.dart';
 import '../../validators/validators.dart';
 
 class AccountLoginPage extends StatefulWidget {
@@ -18,6 +23,7 @@ class AccountLoginPage extends StatefulWidget {
 class _AccountLoginPageState extends State<AccountLoginPage> {
   late final FormGroupController _alipan;
   late final FormGroupController _webdav;
+
   DriverType driverType = DriverType.alipan;
 
   @override
@@ -90,25 +96,39 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Radio(value: DriverType.alipan, groupValue: driverType, onChanged: (t) => setState(() => driverType = t!)),
-                GestureDetector(
-                  onTap: () => setState(() => driverType = DriverType.alipan),
-                  child: Text(AppLocalizations.of(context)!.driverType(DriverType.alipan.name)),
-                ),
-                Gap.hSM,
-                Radio(value: DriverType.webdav, groupValue: driverType, onChanged: (t) => setState(() => driverType = t!)),
-                GestureDetector(
-                  onTap: () => setState(() => driverType = DriverType.webdav),
-                  child: Text(AppLocalizations.of(context)!.driverType(DriverType.webdav.name)),
-                ),
-              ],
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [DriverType.alipan, DriverType.quark, DriverType.quarktv, DriverType.webdav]
+                    .map((ty) => [
+                          Radio(value: ty, groupValue: driverType, onChanged: (t) => setState(() => driverType = t!)),
+                          GestureDetector(
+                            onTap: () => setState(() => driverType = ty),
+                            child: Text(AppLocalizations.of(context)!.driverType(ty.name)),
+                          ),
+                          Gap.hSM,
+                        ])
+                    .flattened
+                    .toList(),
+              ),
             ),
           ),
           if (driverType == DriverType.alipan) Expanded(child: FormGroup(controller: _alipan)),
+          if (driverType == DriverType.quark)
+            Expanded(
+                child: WebViewWidget(
+                    controller: WebViewController()
+                      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+                      ..setUserAgent(ua)
+                      ..loadRequest(Uri.parse('https://pan.quark.cn')))),
+          if (driverType == DriverType.quarktv)
+            Expanded(
+                child: Center(
+              child: FilledButton(onPressed: login, child: const Text('登录')),
+            )),
           if (driverType == DriverType.webdav) Expanded(child: FormGroup(controller: _webdav)),
         ],
       ),
@@ -119,17 +139,114 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
     if (switch (driverType) {
       DriverType.alipan => _alipan.validate(),
       DriverType.webdav => _webdav.validate(),
+      DriverType.quark => true,
+      DriverType.quarktv => true,
       _ => throw UnimplementedError(),
     }) {
       final data = switch (driverType) {
         DriverType.alipan => _alipan.data,
         DriverType.webdav => _webdav.data,
+        DriverType.quark => await _quarkCookie(),
+        DriverType.quarktv => <String, dynamic>{},
         _ => throw UnimplementedError(),
       };
+      if (!mounted) return;
       data['type'] = driverType.name;
-      final resp = await showNotification(context, Api.driverInsert(data));
-      if (resp!.error == null && mounted) Navigator.of(context).pop(true);
+      final flag = await showDialog<bool>(context: context, builder: (context) => buildLoginLoading(Api.driverInsert(data)));
+      if (flag == true && mounted) {
+        Navigator.of(context).pop(true);
+      }
     }
+  }
+
+  Future<Map<String, dynamic>> _quarkCookie() async {
+    final cookieManager = WebviewCookieManager();
+    final gotCookies = await cookieManager.getCookies('https://pan.quark.cn');
+    // for (var item in gotCookies) {
+    //   print(item);
+    // }
+    final cookies = gotCookies.map((c) => '${c.name}=${c.value}').join('; ');
+    // throw Exception();
+    return {'token': cookies};
+  }
+
+  Widget buildLoginLoading(Stream<dynamic> stream) {
+    return AlertDialog(
+      title: Text(AppLocalizations.of(context)!.modalTitleNotification),
+      content: StreamBuilder(
+          stream: stream,
+          builder: (context, snapshot) => PopScope(
+              canPop: false,
+              onPopInvoked: (didPop) {
+                if (!didPop && (snapshot.connectionState == ConnectionState.done || snapshot.connectionState == ConnectionState.none || snapshot.hasData)) {
+                  Navigator.of(context).pop();
+                }
+              },
+              child: Builder(builder: (context) {
+                switch (snapshot.connectionState) {
+                  case ConnectionState.waiting:
+                  case ConnectionState.active:
+                    if (snapshot.hasData) {
+                      if (snapshot.requireData['type'] == 'qrcode') {
+                        return SizedBox(
+                          width: kQrSize,
+                          height: kQrSize,
+                          child: QrImageView(
+                            backgroundColor: Colors.white,
+                            data: snapshot.requireData['qrcode_data'],
+                            version: QrVersions.auto,
+                            size: kQrSize,
+                          ),
+                        );
+                      } else {
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Padding(
+                              padding: EdgeInsets.all(17),
+                              child: CircularProgressIndicator(),
+                            ),
+                            Text(AppLocalizations.of(context)!.modalNotificationLoadingText),
+                          ],
+                        );
+                      }
+                    } else {
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.all(17),
+                            child: CircularProgressIndicator(),
+                          ),
+                          Text(AppLocalizations.of(context)!.modalNotificationLoadingText),
+                        ],
+                      );
+                    }
+                  case ConnectionState.none:
+                  case ConnectionState.done:
+                    if (snapshot.hasError) {
+                      return ErrorMessage(snapshot: snapshot, leading: const Icon(Icons.error_outline, size: 60, color: Colors.red));
+                    } else {
+                      Future.delayed(const Duration(seconds: 1)).then((value) {
+                        if (context.mounted) {
+                          Navigator.of(context).pop(true);
+                        }
+                      });
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.check_circle_outline, size: 60, color: Colors.green),
+                          Gap.vMD,
+                          Text(AppLocalizations.of(context)!.modalNotificationSuccessText),
+                        ],
+                      );
+                    }
+                }
+              }))),
+    );
   }
 
   onConnectData(String data) {

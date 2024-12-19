@@ -95,10 +95,18 @@ class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnec
                         }
                         val eventChannel = EventChannel(binaryMessenger, "$PLUGIN_NAMESPACE/update/$id")
                         var finished = false
+                        var errorResp: String? = null
                         eventChannel.setStreamHandler(object : EventChannel.StreamHandler {
                             override fun onListen(args: Any?, eventSink: EventChannel.EventSink?) {
                                 if (eventSink != null) {
                                     if (finished) {
+                                        if (errorResp != null) {
+                                            val code = errorResp!!.substring(0, 3)
+                                            val resp = errorResp!!.substring(3)
+                                            activity.runOnUiThread {
+                                                eventSink.error(code, resolveErrorCode(code), resp)
+                                            }
+                                        }
                                         eventSink.endOfStream()
                                     } else {
                                         eventSinkMap[id] = eventSink
@@ -113,7 +121,7 @@ class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnec
                             }
                         })
 
-                        apiService?.callWithCallback(
+                        val data = apiService?.callWithCallback(
                             call.method,
                             call.argument<String>("data")!!,
                             call.argument<String>("params")!!,
@@ -124,8 +132,25 @@ class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnec
                                     }
                                 }
                             })
-                        activity.runOnUiThread {
-                            eventSinkMap.remove(id)?.endOfStream()
+                        if (data == null) {
+                            activity.runOnUiThread {
+                                eventSinkMap.remove(id)?.endOfStream()
+                            }
+                        } else {
+                            val code = data.substring(0, 3)
+                            val resp = data.substring(3)
+                            activity.runOnUiThread {
+                                if (code == "200") {
+                                    eventSinkMap.remove(id)?.endOfStream()
+                                } else {
+                                    if (eventSinkMap[id] != null) {
+                                        eventSinkMap[id]?.error(code, resolveErrorCode(code), resp)
+                                    } else {
+                                        errorResp = data
+                                    }
+                                    eventSinkMap.remove(id)?.endOfStream()
+                                }
+                            }
                         }
                         finished = true
                     } else {
@@ -242,10 +267,11 @@ class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnec
             "404" -> R.string.api_response_not_found
             "405" -> R.string.api_response_method_not_allowed
             "408" -> R.string.api_response_timeout
+            "409" -> R.string.api_response_conflict
             "429" -> R.string.api_response_too_many_requests
             "500" -> R.string.api_response_internal_error
             "501" -> R.string.api_response_not_implemented
-            "504" -> R.string.api_response_not_implemented
+            "504" -> R.string.api_response_gateway_timeout
             else -> null
         }
         return if (message != null) activity.getString(message) else null
