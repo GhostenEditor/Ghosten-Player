@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'player_platform_interface.dart';
 
 class MethodChannelPlayer extends PlayerPlatform {
-  final MethodChannel _channel = const MethodChannel('com.ghosten.player_view');
+  final MethodChannel _channel = const MethodChannel('com.ghosten.player/player');
 
   MethodChannelPlayer();
 
@@ -63,11 +63,6 @@ class MethodChannelPlayer extends PlayerPlatform {
   }
 
   @override
-  Future<void> hide() {
-    return _channel.invokeMethod('hide');
-  }
-
-  @override
   Future<String?> getVideoThumbnail(int position) {
     return _channel.invokeMethod('getVideoThumbnail', {'position': position});
   }
@@ -85,5 +80,15 @@ class MethodChannelPlayer extends PlayerPlatform {
   @override
   void setMethodCallHandler(Future<dynamic> Function(MethodCall call)? handler) {
     _channel.setMethodCallHandler(handler);
+  }
+
+  @override
+  Future<void> init(Map<String, dynamic> args) {
+    return _channel.invokeMethod('init', args);
+  }
+
+  @override
+  Future<void> dispose() {
+    return _channel.invokeMethod('dispose');
   }
 }

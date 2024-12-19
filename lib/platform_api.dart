@@ -20,11 +20,11 @@ enum DeviceType {
   androidPhone,
   web;
 
-  static DeviceType fromInt(int? i) {
-    return switch (i) {
-      0 => DeviceType.androidTV,
-      1 => DeviceType.androidPad,
-      2 => DeviceType.androidPhone,
+  static DeviceType fromString(String? s) {
+    return switch (s) {
+      '0' => DeviceType.androidTV,
+      '1' => DeviceType.androidPad,
+      '2' => DeviceType.androidPhone,
       _ => DeviceType.androidPhone,
     };
   }
@@ -32,7 +32,6 @@ enum DeviceType {
 
 class PlatformApi {
   static const _channelNamespace = 'com.ghosten.player';
-  static const _platform = MethodChannel(_channelNamespace);
   static Stream<bool> pipEvent =
       kIsWeb ? const Stream.empty() : const EventChannel('$_channelNamespace/pip').receiveBroadcastStream().asBroadcastStream().cast();
   static Stream<String> deeplinkEvent = kIsWeb
@@ -44,12 +43,6 @@ class PlatformApi {
             : const EventChannel('$_channelNamespace/screen').receiveBroadcastStream().cast<String>().map((event) => ScreenState.fromString(event))))
       .stream;
   static late DeviceType deviceType;
-
-  static Future<void> getDeviceType() async {
-    deviceType = DeviceType.fromInt(await _platform.invokeMethod<int>('androidDeviceType'));
-  }
-
-  static Future<String?> get externalUrl => _platform.invokeMethod<String>('externalUrl');
 
   static bool isAndroidTV() {
     return deviceType == DeviceType.androidTV;

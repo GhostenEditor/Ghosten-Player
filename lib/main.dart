@@ -20,7 +20,7 @@ import 'theme.dart';
 import 'utils/notification.dart';
 import 'utils/utils.dart';
 
-void main() async {
+void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   await Api.initialized();
   if (kIsWeb) {
@@ -30,29 +30,29 @@ void main() async {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.top]);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     HttpOverrides.global = MyHttpOverrides();
-    await PlatformApi.getDeviceType();
+    PlatformApi.deviceType = DeviceType.fromString(args[0]);
     kIsAndroidTV = PlatformApi.isAndroidTV();
   }
-  final externalUrl = kIsWeb ? null : await PlatformApi.externalUrl;
-  if (externalUrl == null) {
-    setPreferredOrientations(false);
-    final userConfig = await UserConfig.init();
-    Provider.debugCheckInvalidValueType = null;
-    if (!kIsWeb && userConfig.shouldCheckUpdate()) {
-      Api.checkUpdate(
-        updateUrl,
-        Version.fromString(appVersion),
-        needUpdate: (data, url) => showModalBottomSheet(
-            context: navigatorKey.currentContext!,
-            constraints: const BoxConstraints(minWidth: double.infinity, maxHeight: 320),
-            builder: (context) => UpdateBottomSheet(data, url: url)),
-      );
-    }
-    runApp(ChangeNotifierProvider(create: (_) => userConfig, child: const MainApp()));
-    PlatformApi.deeplinkEvent.listen(scanToLogin);
-  } else {
-    runApp(PlayerApp(url: externalUrl));
+  setPreferredOrientations(false);
+  final userConfig = await UserConfig.init();
+  Provider.debugCheckInvalidValueType = null;
+  if (!kIsWeb && userConfig.shouldCheckUpdate()) {
+    Api.checkUpdate(
+      updateUrl,
+      Version.fromString(appVersion),
+      needUpdate: (data, url) => showModalBottomSheet(
+          context: navigatorKey.currentContext!,
+          constraints: const BoxConstraints(minWidth: double.infinity, maxHeight: 320),
+          builder: (context) => UpdateBottomSheet(data, url: url)),
+    );
   }
+  runApp(ChangeNotifierProvider(create: (_) => userConfig, child: const MainApp()));
+  PlatformApi.deeplinkEvent.listen(scanToLogin);
+}
+
+void player(List<String> args) async {
+  PlatformApi.deviceType = DeviceType.fromString(args[0]);
+  runApp(PlayerApp(url: args[1]));
 }
 
 class MainApp extends StatelessWidget {
@@ -170,7 +170,7 @@ Future<void> scanToLogin(String link) async {
   try {
     final url = Uri.parse(link);
     final data = utf8.decode(base64.decode(url.path.split('/').last));
-    if (context.mounted) await showNotification(context, Api.driverInsert(jsonDecode(data)));
+    if (context.mounted) await showNotification(context, Api.driverInsert(jsonDecode(data)).last);
     if (context.mounted) navigateTo(context, const AccountManage());
   } catch (_) {}
 }

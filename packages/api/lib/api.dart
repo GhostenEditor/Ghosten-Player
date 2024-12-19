@@ -85,7 +85,7 @@ class Api {
   static final updatePlayedStatus = ApiPlatform.instance.updatePlayedStatus;
   static final setSkipTime = ApiPlatform.instance.setSkipTime;
   static final checkUpdate = ApiPlatform.instance.checkUpdate;
-  static final networkDiagnotics = ApiPlatform.instance.networkDiagnotics;
+  static final networkDiagnostics = ApiPlatform.instance.networkDiagnostics;
   static final logQueryPage = ApiPlatform.instance.logQueryPage;
   static final dlnaDiscover = ApiPlatform.instance.dlnaDiscover;
   static final dlnaSetUri = ApiPlatform.instance.dlnaSetUri;

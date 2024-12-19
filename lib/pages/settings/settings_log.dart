@@ -7,6 +7,7 @@ import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 import '../../components/error_message.dart';
 import '../../components/no_data.dart';
+import '../../platform_api.dart';
 
 class SettingsLogPage extends StatefulWidget {
   const SettingsLogPage({super.key});
@@ -76,12 +77,14 @@ class _SettingsLogPageState extends State<SettingsLogPage> {
             scrollController: _scrollController,
             builderDelegate: PagedChildBuilderDelegate<Log>(
               itemBuilder: (context, item, index) => ListTile(
+                autofocus: PlatformApi.isAndroidTV() && index == 0,
                 dense: true,
                 visualDensity: VisualDensity.compact,
                 title: Text(item.message),
                 subtitle: Text(formatDate(item.time, [yyyy, '-', mm, '-', dd, ' ', HH, ':', nn, ':', ss, '.', SSS])),
                 leading: Badge(
                   label: SizedBox(width: 40, child: Text(item.level.name.toUpperCase(), textAlign: TextAlign.center)),
+                  textColor: Theme.of(context).colorScheme.surface,
                   backgroundColor: switch (item.level) {
                     LogLevel.error => null,
                     LogLevel.warn => const Color(0xffffab32),

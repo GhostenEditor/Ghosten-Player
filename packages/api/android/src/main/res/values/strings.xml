@@ -4,6 +4,7 @@
     <string name="api_response_forbidden">Forbidden</string>
     <string name="api_response_bad_request">Bad Request</string>
     <string name="api_response_timeout">Timeout</string>
+    <string name="api_response_conflict">Conflict</string>
     <string name="api_response_internal_error">Internal Error</string>
     <string name="api_response_multiple_choices">Multiple Choices</string>
     <string name="api_response_too_many_requests">Too Many Requests</string>

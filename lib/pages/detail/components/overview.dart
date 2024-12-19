@@ -28,7 +28,7 @@ class OverviewSection<T extends MediaBase> extends StatelessWidget {
   }
 
   showFull(BuildContext context) {
-    navigateTo(context, Overview(item: item, description: description));
+    navigateToSlideUp(context, Overview(item: item, description: description));
   }
 }
 
@@ -60,6 +60,7 @@ class Overview<T extends MediaBase> extends StatelessWidget {
             children: [
               if (item.poster != null)
                 BlurredBackground(
+                  defaultColor: item.themeColor != null ? Color(item.themeColor!) : null,
                   background: item.poster!,
                 ),
               if (item.poster != null)

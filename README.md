@@ -7,7 +7,7 @@
 
 [下载](https://github.com/GhostenEditor/Ghosten-Player/releases/latest)
 
-一款同时适配Android TV和Android Phone的视频播放器，同时支持云播放(阿里云盘和Webdav)和本地播放，支持刮削影视的元信息，界面简洁纯净，操作简单
+一款同时适配Android TV和Android Phone的视频播放器，同时支持云播放(阿里云盘、夸克网盘和Webdav)和本地播放，支持刮削影视的元信息，界面简洁纯净，操作简单
 
 [^1]: 开发中
 
@@ -63,7 +63,7 @@
 ## Features
 
 1. 支持 **Android TV** 和 **Android Phone** (桌面端开发中)
-2. [支持阿里云盘、Webdav和本地文件播放](#添加账号)
+2. [支持阿里云盘、夸克网盘、Webdav和本地文件播放](#添加账号)
 3. 纯本地运行，无需后端服务支持 [^3]
 4. [支持跳过片头/片尾](#跳过片头片尾)
 5. 支持视频轨道选择
@@ -135,13 +135,19 @@ _**[Media3文档](https://developer.android.google.cn/media/media3/exoplayer/sup
 | 3 | 客户端ID     | 仅开发者账号提供                                                                                                                                                                                                                                                                                           |
 | 4 | 客户端密码     | 仅开发者账号提供                                                                                                                                                                                                                                                                                           |
 
-<img alt="Alipan Login Page" src="https://github.com/user-attachments/assets/49f6a2d0-c1b4-4fd1-8012-027442fe73ce" width="315"/>
+<img alt="Alipan Login Page" src="https://github.com/user-attachments/assets/224c7dbf-a3cc-42d0-afc2-8122ff939c5d" width="315"/>
+
+#### 夸克网盘
+
+通过网页登录夸克后，点击右上角确认按钮后完成登录
+
+<img alt="Quark Login Page" src="https://github.com/user-attachments/assets/7a5671b5-82f6-444a-ae4c-d16f85ce7a5a" width="315"/>
 
 #### Webdav
 
 填写Webdav对应的IP端口，输出账号密码，提交后完成登录。注：目前仅支持Basic编码登录
 
-<img alt="Webdav Login Page 1" src="https://github.com/user-attachments/assets/68dd1b9f-9627-4cf4-8c65-d919795f42b8" width="315"/>
+<img alt="Webdav Login Page 1" src="https://github.com/user-attachments/assets/29c72a9e-b61f-41e0-8d77-9f584142e64c" width="315"/>
 
 ### 添加资源
 

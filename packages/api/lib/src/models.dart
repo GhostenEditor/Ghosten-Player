@@ -660,12 +660,14 @@ enum MediaType {
 
 enum DriverType {
   alipan,
+  quark,
   webdav,
   local;
 
   static DriverType fromString(String? name) {
     return switch (name) {
       'alipan' => DriverType.alipan,
+      'quark' => DriverType.quark,
       'webdav' => DriverType.webdav,
       'local' => DriverType.local,
       _ => throw Exception('Wrong Driver Type of "$name"'),

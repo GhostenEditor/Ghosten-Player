@@ -223,8 +223,8 @@ abstract class ApiPlatform extends PlatformInterface {
     return data!.map((e) => DriverAccount.fromJson(e)).toList();
   }
 
-  Future<void> driverInsert(dynamic data) {
-    return client.put('/driver/insert', data: data);
+  Stream<dynamic> driverInsert(Json data) async* {
+    throw UnimplementedError('driverInsert() has not been implemented.');
   }
 
   Future<void> driverDeleteById(int id) {
@@ -449,8 +449,8 @@ abstract class ApiPlatform extends PlatformInterface {
     });
   }
 
-  Stream<List<NetworkDiagnotics>> networkDiagnotics() {
-    throw UnimplementedError('networkDiagnotics() has not been implemented.');
+  Stream<List<NetworkDiagnotics>> networkDiagnostics() {
+    throw UnimplementedError('networkDiagnostics() has not been implemented.');
   }
 
   Future<PageData<Log>> logQueryPage(int limit, int offset, [(int, int)? range]) async {

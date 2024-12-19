@@ -1,7 +1,5 @@
 package com.ghosten.player_view
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
 import android.app.*
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -15,6 +13,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -42,7 +41,6 @@ import androidx.media3.ui.DefaultTrackNameProvider
 import androidx.media3.ui.TrackNameProvider
 import com.google.common.util.concurrent.MoreExecutors
 import io.flutter.plugin.common.MethodChannel
-import io.flutter.plugin.platform.PlatformView
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
@@ -57,8 +55,8 @@ class PlayerView(
     extensionRendererMode: Int?,
     enableDecoderFallback: Boolean?,
     language: String?
-) : PlatformView,
-    Player.Listener {
+) : Player.Listener {
+    private val mRootView: FrameLayout = activity.findViewById<FrameLayout>(android.R.id.content)
     private val mNativeView: View = View.inflate(context, R.layout.player_view, null)
     private var httpDataSourceFactory = DefaultHttpDataSource.Factory().setUserAgent(USER_AGENT)
         .setAllowCrossProtocolRedirects(true)
@@ -113,6 +111,8 @@ class PlayerView(
             }
         }))
         mNativeView.findViewById<androidx.media3.ui.PlayerView>(R.id.video_view).player = player
+        mRootView.addView(mNativeView, 0)
+
         mChannel.invokeMethod("isInitialized", null)
         mChannel.invokeMethod("volumeChanged", mCurrentVolume.toFloat() / mMaxVolume.toFloat())
         checkPlaybackPosition(1000)
@@ -246,11 +246,8 @@ class PlayerView(
         )
     }
 
-    override fun getView(): View {
-        return mNativeView
-    }
-
-    override fun dispose() {
+    fun dispose() {
+        mRootView.removeView(mNativeView)
         player.release()
         mediaSession.release()
         cancelNotification()
@@ -842,18 +839,6 @@ class PlayerView(
             (volume * mMaxVolume).roundToInt(),
             AudioManager.FLAG_SHOW_UI
         )
-    }
-
-    fun hide(result: MethodChannel.Result) {
-        mNativeView.animate()
-            .alpha(0f)
-            .setDuration(200)
-            .setListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator) {
-                    mNativeView.visibility = View.GONE
-                    result.success(null)
-                }
-            })
     }
 
     internal class Video(

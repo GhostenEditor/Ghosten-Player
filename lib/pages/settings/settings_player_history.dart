@@ -1,6 +1,7 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:ghosten_player/platform_api.dart';
 
 import '../../components/async_image.dart';
 import '../../components/future_builder_handler.dart';
@@ -33,6 +34,7 @@ class _SystemSettingsPlayerHistoryState extends State<SystemSettingsPlayerHistor
                     itemBuilder: (context, index) {
                       final item = snapshot.requireData[index];
                       return ListTile(
+                        autofocus: PlatformApi.isAndroidTV() && index == 0,
                         leading: item.poster != null
                             ? AspectRatio(
                                 aspectRatio: 1,
