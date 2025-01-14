@@ -1,6 +1,6 @@
 import 'src/api_platform_interface.dart';
 
-export 'src/api_platform_interface.dart' show navigatorKey;
+export 'src/api_platform_interface.dart' show navigatorKey, routeObserver;
 export 'src/errors.dart';
 export 'src/models.dart';
 
@@ -47,6 +47,7 @@ class Api {
   static final driverQueryAll = ApiPlatform.instance.driverQueryAll;
   static final driverInsert = ApiPlatform.instance.driverInsert;
   static final driverDeleteById = ApiPlatform.instance.driverDeleteById;
+  static final movieRecommendation = ApiPlatform.instance.movieRecommendation;
   static final movieQueryAll = ApiPlatform.instance.movieQueryAll;
   static final movieQueryByFilter = ApiPlatform.instance.movieQueryByFilter;
   static final movieQueryById = ApiPlatform.instance.movieQueryById;
@@ -56,6 +57,7 @@ class Api {
   static final movieUpdateById = ApiPlatform.instance.movieUpdateById;
   static final movieRenameById = ApiPlatform.instance.movieRenameById;
   static final movieDeleteById = ApiPlatform.instance.movieDeleteById;
+  static final tvRecommendation = ApiPlatform.instance.tvRecommendation;
   static final tvSeriesQueryAll = ApiPlatform.instance.tvSeriesQueryAll;
   static final tvSeriesQueryByFilter = ApiPlatform.instance.tvSeriesQueryByFilter;
   static final tvSeriesQueryById = ApiPlatform.instance.tvSeriesQueryById;

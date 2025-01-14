@@ -3,7 +3,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../components/error_message.dart';
 import '../components/gap.dart';
-import '../platform_api.dart';
 
 const _errorIcon = Icon(Icons.error_outline, size: 60, color: Colors.red);
 const _successIcon = Icon(Icons.check_circle_outline, size: 60, color: Colors.green);
@@ -134,7 +133,6 @@ Future<bool?> showConfirm(BuildContext context, String confirmText) async {
                 child: Text(AppLocalizations.of(context)!.buttonConfirm),
               ),
               TextButton(
-                autofocus: PlatformApi.isAndroidTV(),
                 onPressed: () => Navigator.of(context).pop(false),
                 child: Text(AppLocalizations.of(context)!.buttonCancel),
               ),

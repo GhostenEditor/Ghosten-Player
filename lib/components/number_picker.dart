@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 typedef TextMapper = String Function(String numberText);
 
@@ -46,7 +45,6 @@ class NumberPicker extends StatefulWidget {
 
 class _NumberPickerState extends State<NumberPicker> {
   late ScrollController _scrollController;
-  late bool _focused = widget.autofocused;
 
   @override
   void initState() {
@@ -96,70 +94,32 @@ class _NumberPickerState extends State<NumberPicker> {
 
   @override
   Widget build(BuildContext context) {
-    return Focus(
-      autofocus: _focused,
-      onFocusChange: (focused) => setState(() {
-        _focused = focused;
-      }),
-      onKeyEvent: (FocusNode node, KeyEvent event) {
-        if (event is KeyDownEvent || event is KeyRepeatEvent) {
-          switch (event.logicalKey) {
-            case LogicalKeyboardKey.arrowUp:
-              _scrollController.animateTo(_scrollController.offset - widget.itemHeight, duration: const Duration(milliseconds: 100), curve: Curves.easeOut);
-              return KeyEventResult.handled;
-            case LogicalKeyboardKey.arrowDown:
-              _scrollController.animateTo(_scrollController.offset + widget.itemHeight, duration: const Duration(milliseconds: 100), curve: Curves.easeOut);
-              return KeyEventResult.handled;
-            case LogicalKeyboardKey.arrowLeft:
-              FocusScope.of(context).previousFocus();
-              return KeyEventResult.handled;
-            case LogicalKeyboardKey.arrowRight:
-            case LogicalKeyboardKey.select:
-              FocusScope.of(context).nextFocus();
-              return KeyEventResult.handled;
+    return SizedBox(
+      width: widget.axis == Axis.vertical ? widget.itemWidth : widget.itemCount * widget.itemWidth,
+      height: widget.axis == Axis.vertical ? widget.itemCount * widget.itemHeight : widget.itemHeight,
+      child: NotificationListener<ScrollEndNotification>(
+        onNotification: (not) {
+          if (not.dragDetails?.primaryVelocity == 0) {
+            Future.microtask(() => _maybeCenterValue());
           }
-        }
-        return KeyEventResult.ignored;
-      },
-      child: SizedBox(
-        width: widget.axis == Axis.vertical ? widget.itemWidth : widget.itemCount * widget.itemWidth,
-        height: widget.axis == Axis.vertical ? widget.itemCount * widget.itemHeight : widget.itemHeight,
-        child: NotificationListener<ScrollEndNotification>(
-          onNotification: (not) {
-            if (not.dragDetails?.primaryVelocity == 0) {
-              Future.microtask(() => _maybeCenterValue());
-            }
-            return true;
-          },
-          child: Stack(
-            children: [
-              ListView.builder(
-                itemCount: listItemsCount,
-                scrollDirection: widget.axis,
-                controller: _scrollController,
-                itemExtent: itemExtent,
-                itemBuilder: _itemBuilder,
-                padding: EdgeInsets.zero,
-              ),
-              _NumberPickerSelectedItemDecoration(
-                axis: widget.axis,
-                itemExtent: itemExtent,
-                decoration: _focused
-                    ? BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary.withAlpha(0x22),
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(
-                          width: 4,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      )
-                    : BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary.withAlpha(0x22),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-              ),
-            ],
-          ),
+          return true;
+        },
+        child: Stack(
+          children: [
+            ListView.builder(
+              itemCount: listItemsCount,
+              scrollDirection: widget.axis,
+              controller: _scrollController,
+              itemExtent: itemExtent,
+              itemBuilder: _itemBuilder,
+              padding: EdgeInsets.zero,
+            ),
+            _NumberPickerSelectedItemDecoration(
+              axis: widget.axis,
+              itemExtent: itemExtent,
+              decoration: widget.decoration,
+            ),
+          ],
         ),
       ),
     );

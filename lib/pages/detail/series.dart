@@ -6,7 +6,6 @@ import 'package:player_view/player.dart';
 
 import '../../mixins/update.dart';
 import '../../models/models.dart';
-import '../../platform_api.dart';
 import '../../utils/notification.dart';
 import '../../utils/player.dart';
 import '../../utils/utils.dart';
@@ -65,7 +64,7 @@ class _TVDetailState extends State<TVDetail> with DetailPageMixin<TVSeries, TVDe
       buildPlayAction(context, () => play(item)),
       buildWatchedAction(context, item, MediaType.series),
       buildFavoriteAction(context, item, MediaType.series),
-      if (!PlatformApi.isAndroidTV()) buildCastAction(context, (device) => cast(item, device)),
+      buildCastAction(context, (device) => cast(item, device)),
       ActionDivider(),
       ActionButton(
           text: Text(AppLocalizations.of(context)!.buttonSyncDriver),

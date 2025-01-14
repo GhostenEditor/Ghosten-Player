@@ -8,7 +8,6 @@ import '../components/focus_card.dart';
 import '../components/future_builder_handler.dart';
 import '../components/gap.dart';
 import '../components/popup_menu.dart';
-import '../platform_api.dart';
 import '../utils/notification.dart';
 import '../utils/utils.dart';
 
@@ -57,7 +56,6 @@ class _LibraryManageState extends State<LibraryManage> {
                 itemBuilder: (context, index) {
                   if (index == snapshot.requireData.length) {
                     return FocusCard(
-                      autofocus: PlatformApi.isAndroidTV() && index == 0,
                       child: const Center(
                         child: IconButton.filledTonal(
                           onPressed: null,
@@ -80,7 +78,6 @@ class _LibraryManageState extends State<LibraryManage> {
                   } else {
                     final item = snapshot.requireData[index];
                     return _LibraryItem(
-                      autofocus: PlatformApi.isAndroidTV() && index == 0,
                       key: ValueKey(item.id),
                       item: item,
                       type: widget.type,
@@ -116,17 +113,14 @@ class _LibraryItem extends StatelessWidget {
   final Library item;
   final VoidCallback needUpdate;
   final LibraryType type;
-  final bool autofocus;
 
-  const _LibraryItem({super.key, required this.item, required this.needUpdate, required this.type, this.autofocus = false});
+  const _LibraryItem({super.key, required this.item, required this.needUpdate, required this.type});
 
   @override
   Widget build(BuildContext context) {
     return FocusCard(
-      autofocus: autofocus,
       itemBuilder: (context) => [
         PopupMenuItem(
-          autofocus: PlatformApi.isAndroidTV() && true,
           onTap: () => showNotification(context, refreshMedia(item.id), showSuccess: false),
           leading: const Icon(Icons.sync),
           title: Text(AppLocalizations.of(context)!.buttonSyncDriver),

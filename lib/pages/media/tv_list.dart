@@ -11,7 +11,6 @@ import '../../components/no_data.dart';
 import '../../components/stream_builder_handler.dart';
 import '../../mixins/update.dart';
 import '../../models/models.dart';
-import '../../platform_api.dart';
 import '../../utils/player.dart';
 import '../../utils/utils.dart';
 import '../detail/series.dart';
@@ -84,7 +83,6 @@ class _TVListPageState extends State<TVListPage> with MediaListMixin, NeedUpdate
                                       final item = items[index];
                                       return RecentMediaCard(
                                           item: item,
-                                          autofocus: PlatformApi.isAndroidTV() && index == 0,
                                           onTap: () async {
                                             final season = await Api.tvSeasonQueryById(item.seasonId);
                                             final playlist = season.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList();

@@ -8,7 +8,6 @@ import 'package:rxdart/rxdart.dart';
 
 import '../../../components/popup_menu.dart';
 import '../../../components/search_button.dart';
-import '../../../platform_api.dart';
 import '../../../providers/user_config.dart';
 import '../../../utils/utils.dart';
 import '../../library.dart';
@@ -82,7 +81,6 @@ mixin MediaListMixin<T extends StatefulWidget> on State<T> {
         },
         itemBuilder: (BuildContext context) => <PopupMenuEntry<_Category>>[
               PopupMenuItem(
-                autofocus: PlatformApi.isAndroidTV(),
                 onTap: () async {
                   final refresh = await navigateTo<bool>(context, LibraryManage(title: _getMediaTitle(mediaType), type: mediaType));
                   if (refresh == true) {

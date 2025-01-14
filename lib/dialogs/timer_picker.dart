@@ -34,6 +34,10 @@ class _TimerPickerDialogState extends State<TimerPickerDialog> {
                   autofocused: true,
                   minValue: 0,
                   maxValue: 60,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary.withAlpha(0x22),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
                   onChanged: (value) => setState(() => _minutes = value),
                 ),
               ),
@@ -46,6 +50,10 @@ class _TimerPickerDialogState extends State<TimerPickerDialog> {
                   value: _seconds,
                   minValue: 0,
                   maxValue: 60,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary.withAlpha(0x22),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
                   onChanged: (value) => setState(() => _seconds = value),
                 ),
               ),

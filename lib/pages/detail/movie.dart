@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 import '../../components/gap.dart';
 import '../../mixins/update.dart';
 import '../../models/models.dart';
-import '../../platform_api.dart';
 import '../../providers/user_config.dart';
 import '../../utils/notification.dart';
 import '../../utils/player.dart';
@@ -71,7 +70,7 @@ class _MovieDetailState extends State<MovieDetail> with DetailPageMixin<Movie, M
       ),
       buildWatchedAction(context, item, MediaType.movie),
       buildFavoriteAction(context, item, MediaType.movie),
-      if (!PlatformApi.isAndroidTV()) buildCastAction(context, (device) => cast(item, device)),
+      buildCastAction(context, (device) => cast(item, device)),
       ActionDivider(),
       ActionButton(
           text: Text(AppLocalizations.of(context)!.buttonSaveMediaInfoToDriver),
@@ -110,7 +109,6 @@ class _MovieDetailState extends State<MovieDetail> with DetailPageMixin<Movie, M
       ActionButton(
         text: Text(AppLocalizations.of(context)!.buttonDownload),
         icon: const Icon(Icons.download_outlined),
-        trailing: const Badge(label: Text('Beta')),
         collapsed: true,
         onPressed: () async {
           if (!context.mounted) return;

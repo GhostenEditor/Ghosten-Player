@@ -1,10 +1,10 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:ghosten_player/components/future_builder_handler.dart';
-import 'package:ghosten_player/utils/notification.dart';
 
+import '../../components/future_builder_handler.dart';
 import '../../components/scrollbar.dart';
+import '../../utils/notification.dart';
 
 class SystemSettingsServer extends StatefulWidget {
   const SystemSettingsServer({super.key});

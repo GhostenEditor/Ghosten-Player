@@ -36,6 +36,7 @@ class _SingletonPlayerState extends State<SingletonPlayer> {
         videoSettingsAudio: AppLocalizations.of(context)!.videoSettingsAudio,
         videoSettingsSubtitle: AppLocalizations.of(context)!.videoSettingsSubtitle,
         videoSettingsSpeeding: AppLocalizations.of(context)!.videoSettingsSpeeding,
+        videoSize: AppLocalizations.of(context)!.videoSize,
         videoSettingsNone: AppLocalizations.of(context)!.none,
         tagUnknown: AppLocalizations.of(context)!.tagUnknown,
         willSkipEnding: AppLocalizations.of(context)!.willSkipEnding,

@@ -23,12 +23,15 @@ class PlayerSpeed {
 }
 
 const playerSpeedList = [
+  PlayerSpeed(text: '0.25x', value: 0.25),
   PlayerSpeed(text: '0.5x', value: 0.5),
   PlayerSpeed(text: '0.75x', value: 0.75),
   PlayerSpeed(text: '1.0x', value: 1),
   PlayerSpeed(text: '1.25x', value: 1.25),
   PlayerSpeed(text: '1.5x', value: 1.5),
   PlayerSpeed(text: '2.0x', value: 2),
+  PlayerSpeed(text: '3.0x', value: 3),
+  PlayerSpeed(text: '5.0x', value: 5),
 ];
 
 enum ControlsStreamStatus { show, showInfinite, hide }
@@ -294,8 +297,10 @@ class _PlayerControlsState extends State<PlayerControls> {
   Widget build(BuildContext context) {
     return Theme(
       data: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: widget.theme != null ? Color(widget.theme!) : Colors.blue, brightness: Brightness.dark),
-        fontFamily: Theme.of(context).textTheme.bodyMedium?.fontFamily,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: widget.theme != null ? Color(widget.theme!) : Colors.blue,
+          brightness: Brightness.dark,
+        ),
       ),
       child: Builder(builder: (context) {
         return Scaffold(
@@ -368,20 +373,23 @@ class _PlayerControlsState extends State<PlayerControls> {
                       }
                     }),
                 ListenableBuilder(
-                    listenable: _isLocked,
+                    listenable: Listenable.merge([_isLocked, _controller.pipMode]),
                     builder: (context, _) {
-                      if (_isLocked.value) {
+                      if (_isLocked.value && !_controller.pipMode.value) {
                         return GestureDetector(
                           behavior: HitTestBehavior.translucent,
                           onTap: _toggleControls,
-                          child: ListenableBuilder(
-                              listenable: Listenable.merge([_isShowControls, _controller.pipMode]),
-                              builder: (context, child) => _isShowControls.value && !_controller.pipMode.value
-                                  ? Align(alignment: Alignment.centerRight, child: child)
-                                  : const SizedBox.expand(),
-                              child: Align(
-                                  alignment: Alignment.centerRight,
-                                  child: IconButton(onPressed: () => _isLocked.value = !_isLocked.value, icon: const Icon(Icons.lock_outline)))),
+                          child: PlayerZoomWrapper(
+                            controller: _controller,
+                            child: ListenableBuilder(
+                                listenable: Listenable.merge([_isShowControls, _controller.pipMode]),
+                                builder: (context, child) => _isShowControls.value && !_controller.pipMode.value
+                                    ? Align(alignment: Alignment.centerRight, child: child)
+                                    : const SizedBox.expand(),
+                                child: Align(
+                                    alignment: Alignment.centerRight,
+                                    child: IconButton(onPressed: () => _isLocked.value = !_isLocked.value, icon: const Icon(Icons.lock_outline)))),
+                          ),
                         );
                       } else {
                         return GestureDetector(
@@ -590,6 +598,56 @@ class _PlayerGestureOverlayState extends State<PlayerGestureOverlay> {
   }
 }
 
+class PlayerZoomWrapper extends StatefulWidget {
+  final PlayerController controller;
+  final Widget child;
+
+  const PlayerZoomWrapper({super.key, required this.controller, required this.child});
+
+  @override
+  State<PlayerZoomWrapper> createState() => _PlayerZoomWrapperState();
+}
+
+class _PlayerZoomWrapperState extends State<PlayerZoomWrapper> {
+  late final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+  final _transformationController = TransformationController();
+
+  @override
+  void dispose() {
+    _transformationController.dispose();
+    widget.controller.setTransform([1, 0, 0, 0, 1, 0, 0, 0, 1]);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        InteractiveViewer(
+          transformationController: _transformationController,
+          boundaryMargin: const EdgeInsets.all(300),
+          onInteractionUpdate: (details) {
+            final matrix = _transformationController.value;
+            widget.controller.setTransform([
+              matrix.storage[0],
+              0,
+              matrix.storage[12] * devicePixelRatio,
+              0,
+              matrix.storage[5],
+              matrix.storage[13] * devicePixelRatio,
+              0,
+              0,
+              1,
+            ]);
+          },
+          child: const SizedBox.expand(),
+        ),
+        widget.child,
+      ],
+    );
+  }
+}
+
 class PlayerButtons extends StatelessWidget {
   final PlayerController controller;
   final bool isTV;
@@ -737,6 +795,7 @@ class PlayerLocalizations {
   final String videoSettingsSubtitle;
   final String videoSettingsSpeeding;
   final String videoSettingsNone;
+  final String videoSize;
   final String tagUnknown;
   final String willSkipEnding;
 
@@ -747,6 +806,7 @@ class PlayerLocalizations {
     required this.videoSettingsSubtitle,
     required this.videoSettingsSpeeding,
     required this.videoSettingsNone,
+    required this.videoSize,
     required this.tagUnknown,
     required this.willSkipEnding,
   });
@@ -793,18 +853,39 @@ class PlayerSettings extends StatelessWidget {
                       onSelected: (id) => controller.setTrack('sub', id)),
                 ListenableBuilder(
                     listenable: controller.playbackSpeed,
+                    builder: (context, _) => PopupMenuButton(
+                          onSelected: (speed) => controller.setPlaybackSpeed(speed),
+                          child: ListTile(
+                              title: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [Text(localizations.videoSettingsSpeeding), Text(' ${controller.playbackSpeed.value}x')],
+                              ),
+                              trailing: const Icon(Icons.chevron_right)),
+                          itemBuilder: (context) => playerSpeedList
+                              .map((playerSpeed) => CheckedPopupMenuItem(
+                                  checked: controller.playbackSpeed.value == playerSpeed.value, value: playerSpeed.value, child: Text(playerSpeed.text)))
+                              .toList(),
+                        )),
+                const Divider(),
+                ListenableBuilder(
+                    listenable: controller.aspectRatio,
                     builder: (context, _) {
                       return PopupMenuButton(
-                        onSelected: (speed) => controller.setPlaybackSpeed(speed),
+                        onSelected: (aspectRatio) {
+                          controller.aspectRatio.value = aspectRatio;
+                          controller.setAspectRatio(aspectRatio.value(context));
+                        },
                         child: ListTile(
-                            title: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [Text(localizations.videoSettingsSpeeding), Text(' ${controller.playbackSpeed.value}x')],
-                            ),
-                            trailing: const Icon(Icons.chevron_right)),
-                        itemBuilder: (BuildContext context) => playerSpeedList
-                            .map((playerSpeed) => CheckedPopupMenuItem(
-                                checked: controller.playbackSpeed.value == playerSpeed.value, value: playerSpeed.value, child: Text(playerSpeed.text)))
+                          leading: const Icon(Icons.aspect_ratio_rounded),
+                          title: Text(localizations.videoSize),
+                          trailing: Text(controller.aspectRatio.value.label(context)),
+                        ),
+                        itemBuilder: (context) => AspectRatioType.values
+                            .map((aspectRatio) => CheckedPopupMenuItem(
+                                  checked: controller.aspectRatio.value == aspectRatio,
+                                  value: aspectRatio,
+                                  child: Text(aspectRatio.label(context)),
+                                ))
                             .toList(),
                       );
                     }),
@@ -913,46 +994,48 @@ class _PlayerPlaylistViewState extends State<PlayerPlaylistView> {
   Widget build(BuildContext context) {
     return Scrollbar(
       controller: _controller,
-      child: ListView.builder(
-          controller: _controller,
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.all(12),
-          itemCount: widget.playlist.length,
-          itemBuilder: (context, index) {
-            if (widget.playlistItemBuilder != null) {
-              return widget.playlistItemBuilder!(context, index, widget.onTap);
-            }
-            final item = widget.playlist[index];
-            return SizedBox(
-              width: 200,
-              child: InkWell(
-                autofocus: index == widget.activeIndex,
-                onTap: () => widget.onTap(index),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: item.poster != null
-                          ? Image.network(item.poster!)
-                          : Container(
-                              color: Theme.of(context).colorScheme.surfaceContainerHighest.withAlpha(0x11),
-                              child: const Icon(Icons.image_not_supported, size: 50)),
+      child: ListView.separated(
+        controller: _controller,
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 48),
+        itemCount: widget.playlist.length,
+        itemBuilder: (context, index) {
+          if (widget.playlistItemBuilder != null) {
+            return widget.playlistItemBuilder!(context, index, widget.onTap);
+          }
+          final item = widget.playlist[index];
+          return SizedBox(
+            width: 200,
+            child: InkWell(
+              autofocus: index == widget.activeIndex,
+              onTap: () => widget.onTap(index),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: item.poster != null
+                        ? Image.network(item.poster!)
+                        : Container(
+                            color: Theme.of(context).colorScheme.surfaceContainerHighest.withAlpha(0x11),
+                            child: const Icon(Icons.image_not_supported, size: 50)),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (item.title != null) Text(item.title!, style: Theme.of(context).textTheme.titleSmall, overflow: TextOverflow.ellipsis),
+                        if (item.description != null) Text(item.description!, style: Theme.of(context).textTheme.bodySmall, overflow: TextOverflow.ellipsis),
+                      ],
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (item.title != null) Text(item.title!, style: Theme.of(context).textTheme.titleSmall, overflow: TextOverflow.ellipsis),
-                          if (item.description != null) Text(item.description!, style: Theme.of(context).textTheme.bodySmall, overflow: TextOverflow.ellipsis),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            );
-          }),
+            ),
+          );
+        },
+        separatorBuilder: (context, index) => const SizedBox(width: 16),
+      ),
     );
   }
 }
@@ -969,6 +1052,16 @@ class PlayerPlatformView extends StatefulWidget {
 
 class _PlayerPlatformViewState extends State<PlayerPlatformView> {
   @override
+  void didChangeDependencies() {
+    PlayerPlatform.instance.init({
+      'extensionRendererMode': widget.extensionRendererMode,
+      'enableDecoderFallback': widget.enableDecoderFallback,
+      'language': Localizations.localeOf(context).languageCode
+    });
+    super.didChangeDependencies();
+  }
+
+  @override
   void dispose() {
     PlayerPlatform.instance.dispose();
     super.dispose();
@@ -976,11 +1069,6 @@ class _PlayerPlatformViewState extends State<PlayerPlatformView> {
 
   @override
   Widget build(BuildContext context) {
-    PlayerPlatform.instance.init({
-      'extensionRendererMode': widget.extensionRendererMode,
-      'enableDecoderFallback': widget.enableDecoderFallback,
-      'language': Localizations.localeOf(context).languageCode
-    });
     return const SizedBox();
   }
 }
@@ -1030,7 +1118,7 @@ class PlayerInfoView extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               if (_controller.title.value != null)
-                                Text(_controller.title.value!, style: Theme.of(context).textTheme.displaySmall, overflow: TextOverflow.ellipsis),
+                                Text(_controller.title.value!, style: Theme.of(context).textTheme.displaySmall, overflow: TextOverflow.ellipsis, maxLines: 2),
                               const SizedBox(height: 10),
                               Text(_controller.subTitle.value, style: Theme.of(context).textTheme.bodyLarge, overflow: TextOverflow.ellipsis),
                               ListenableBuilder(

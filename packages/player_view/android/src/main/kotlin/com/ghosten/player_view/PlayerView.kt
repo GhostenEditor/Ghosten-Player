@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Matrix
 import android.media.AudioManager
 import android.media.MediaMetadataRetriever
 import android.net.TrafficStats
@@ -23,10 +24,7 @@ import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.datasource.FileDataSource
 import androidx.media3.datasource.HttpDataSource
-import androidx.media3.exoplayer.DefaultRenderersFactory
-import androidx.media3.exoplayer.ExoPlaybackException
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.PlayerMessage
+import androidx.media3.exoplayer.*
 import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.mediacodec.MediaCodecDecoderException
 import androidx.media3.exoplayer.mediacodec.MediaCodecRenderer.DecoderInitializationException
@@ -37,6 +35,7 @@ import androidx.media3.exoplayer.source.UnrecognizedInputFormatException
 import androidx.media3.exoplayer.upstream.Loader
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaStyleNotificationHelper
+import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.DefaultTrackNameProvider
 import androidx.media3.ui.TrackNameProvider
 import com.google.common.util.concurrent.MoreExecutors
@@ -44,6 +43,7 @@ import io.flutter.plugin.common.MethodChannel
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
+import java.net.SocketTimeoutException
 import java.util.*
 import java.util.concurrent.ExecutionException
 import kotlin.math.roundToInt
@@ -78,6 +78,7 @@ class PlayerView(
                 DefaultDataSource.Factory(context, httpDataSourceFactory)
             )
         )
+        .setSeekParameters(SeekParameters(3000000, 3000000))
         .build()
     private val mediaSession = MediaSession.Builder(context, player).build()
     private val mAudioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager;
@@ -112,7 +113,6 @@ class PlayerView(
         }))
         mNativeView.findViewById<androidx.media3.ui.PlayerView>(R.id.video_view).player = player
         mRootView.addView(mNativeView, 0)
-
         mChannel.invokeMethod("isInitialized", null)
         mChannel.invokeMethod("volumeChanged", mCurrentVolume.toFloat() / mMaxVolume.toFloat())
         checkPlaybackPosition(1000)
@@ -389,7 +389,9 @@ class PlayerView(
                         .setTrackTypeDisabled(C.TRACK_TYPE_IMAGE, false)
                         .setTrackTypeDisabled(C.TRACK_TYPE_METADATA, false)
                         .build()
-                    player.seekTo(mPlaylist[newPosition.mediaItemIndex].startPosition)
+                    if (mPlaylist[newPosition.mediaItemIndex].startPosition < player.duration * 0.95) {
+                        player.seekTo(mPlaylist[newPosition.mediaItemIndex].startPosition)
+                    }
                 }
                 mChannel.invokeMethod("position", newPosition.positionMs)
             }
@@ -418,6 +420,7 @@ class PlayerView(
                     this["videoCodecs"] = player.videoFormat?.codecs
                     this["videoMime"] = player.videoFormat?.sampleMimeType
                     this["videoFPS"] = player.videoFormat?.frameRate
+                    this["videoBitrate"] = player.videoFormat?.averageBitrate
                     this["videoSize"] = "${player.videoSize.width} * ${player.videoSize.height}"
                     this["audioCodecs"] = player.audioFormat?.codecs
                     this["audioMime"] = player.audioFormat?.sampleMimeType
@@ -466,7 +469,15 @@ class PlayerView(
                     }
 
                     is HttpDataSource.HttpDataSourceException -> {
-                        mChannel.invokeMethod("fatalError", cause.message)
+                        when (val httpCause = cause.cause) {
+                            is SocketTimeoutException -> {
+                                mChannel.invokeMethod("fatalError", "Connection Timeout")
+                            }
+
+                            else -> {
+                                mChannel.invokeMethod("fatalError", httpCause?.message)
+                            }
+                        }
                     }
 
                     is FileDataSource.FileDataSourceException -> {
@@ -511,9 +522,9 @@ class PlayerView(
                             }
 
                             is IllegalArgumentException -> {
-                                mChannel.invokeMethod("error", cause.message)
-                                player.seekTo(player.currentPosition + 1000)
-                                play()
+                                mChannel.invokeMethod("fatalError", cause.message)
+//                                player.seekTo(player.currentPosition + 1000)
+//                                play()
                             }
 
                             is IllegalStateException -> {
@@ -828,6 +839,25 @@ class PlayerView(
         player.replaceMediaItem(index, buildMediaItem(video))
         player.prepare()
     }
+
+    fun setTransform(matrix: ArrayList<Double>) {
+        val videoView = mNativeView.findViewById<androidx.media3.ui.PlayerView>(R.id.video_view)
+        videoView.animationMatrix = Matrix().apply {
+            setValues(matrix.map { it.toFloat() }.toFloatArray())
+        }
+    }
+
+    fun setAspectRatio(aspectRatio: Float?) {
+        val contentFrame = mNativeView.findViewById<AspectRatioFrameLayout>(androidx.media3.ui.R.id.exo_content_frame)
+        contentFrame.setAspectRatio(
+            aspectRatio ?: if (player.videoSize.height == 0) {
+                1.778f
+            } else {
+                player.videoSize.width.toFloat() / player.videoSize.height.toFloat()
+            }
+        )
+    }
+
 
     fun setPlaybackSpeed(speed: Float) {
         player.setPlaybackSpeed(speed)

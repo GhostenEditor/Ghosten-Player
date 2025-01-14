@@ -53,6 +53,16 @@ class MethodChannelPlayer extends PlayerPlatform {
   }
 
   @override
+  Future<void> setTransform(List<double> matrix) {
+    return _channel.invokeMethod('setTransform', {'matrix': matrix});
+  }
+
+  @override
+  Future<void> setAspectRatio(double? aspectRatio) {
+    return _channel.invokeMethod('setAspectRatio', aspectRatio);
+  }
+
+  @override
   Future<void> setSources(List<Map<String, dynamic>> playlist, int index) {
     return _channel.invokeMethod('setSources', {'playlist': playlist, 'index': index});
   }

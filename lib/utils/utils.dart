@@ -219,7 +219,6 @@ Future<(int, DriverFile)?> showDriverFilePicker(
                                       child: Padding(
                                         padding: const EdgeInsets.all(16),
                                         child: IconButton.filledTonal(
-                                          autofocus: PlatformApi.isAndroidTV() && index == 0,
                                           onPressed: () async {
                                             final flag = await navigateTo<bool>(context, const AccountLoginPage());
                                             if (flag == true) setState(() {});
@@ -233,7 +232,6 @@ Future<(int, DriverFile)?> showDriverFilePicker(
                                       child: Padding(
                                         padding: const EdgeInsets.all(16),
                                         child: IconButton.filledTonal(
-                                          autofocus: PlatformApi.isAndroidTV() && index == 0,
                                           onPressed: () async {
                                             await Api.requestStoragePermission();
                                             final defaultPath = await FilePicker.externalStoragePath ?? '/';
@@ -257,7 +255,6 @@ Future<(int, DriverFile)?> showDriverFilePicker(
                                     final item = snapshot.requireData[index];
                                     return FocusCard(
                                       width: 160,
-                                      autofocus: PlatformApi.isAndroidTV() && index == 0,
                                       onTap: () async {
                                         final file = await _showFilePicker(
                                           context,

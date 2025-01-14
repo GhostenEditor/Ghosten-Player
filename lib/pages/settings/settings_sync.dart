@@ -8,7 +8,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../components/no_data.dart';
 import '../../components/popup_menu.dart';
 import '../../const.dart';
-import '../../platform_api.dart';
 import '../../utils/notification.dart';
 
 class SettingsSyncPage extends StatefulWidget {
@@ -88,7 +87,6 @@ class _SettingsSyncPageState extends State<SettingsSyncPage> {
               PopupMenuButton(
                 itemBuilder: (context) => [
                   PopupMenuItem(
-                    autofocus: PlatformApi.isAndroidTV(),
                     title: Text(AppLocalizations.of(context)!.dataSyncActionRescanBluetoothDevices),
                     leading: const Icon(Icons.sync),
                     onTap: () => startDiscovery(),

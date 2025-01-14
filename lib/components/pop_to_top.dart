@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../platform_api.dart';
-
 class PopToTop extends StatelessWidget {
   final Widget child;
   final ScrollController controller;
@@ -20,17 +18,7 @@ class PopToTop extends StatelessWidget {
         canPop: false,
         onPopInvoked: (didPop) {
           if (!didPop) {
-            if (PlatformApi.isAndroidTV() && controller.offset > 1000) {
-              controller.animateTo(
-                0,
-                duration: const Duration(milliseconds: 400),
-                curve: Curves.easeOut,
-              );
-              final node = FocusScope.of(context).traversalChildren.firstOrNull;
-              node?.requestFocus();
-            } else {
-              onPop();
-            }
+            onPop();
           }
         },
         child: child);

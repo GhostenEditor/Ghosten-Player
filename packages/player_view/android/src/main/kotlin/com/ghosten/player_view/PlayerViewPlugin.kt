@@ -52,6 +52,8 @@ class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activit
                     "seekTo" -> mPlayerView?.seekTo((call.arguments as Int).toLong())
                     "updateSource" -> mPlayerView?.updateSource(call.argument("source")!!, call.argument("index")!!)
                     "setSources" -> mPlayerView?.setSources(call.argument("playlist")!!, call.argument("index")!!)
+                    "setTransform" -> mPlayerView?.setTransform(call.argument("matrix")!!)
+                    "setAspectRatio" -> mPlayerView?.setAspectRatio((call.arguments as Double?)?.toFloat())
                     "dispose" -> {
                         mPlayerView?.dispose()
                         mPlayerView = null
