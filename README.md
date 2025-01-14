@@ -18,20 +18,20 @@
 
 <table>
 <tr>
-<td><img src="https://github.com/user-attachments/assets/d08bacb8-d660-4ad6-8fbc-e71681f339d9" alt="TV Screenshot 1" width="700"/></td>
-<td><img src="https://github.com/user-attachments/assets/53e0e529-df2a-4b76-ba7c-31d29c2bb6a4" alt="TV Screenshot 2" width="700"/></td>
+<td><img src="https://github.com/user-attachments/assets/11e2e8c6-ee09-479d-97ce-55b8c328a69d" alt="TV Screenshot 1" width="700"/></td>
+<td><img src="https://github.com/user-attachments/assets/06126725-a87c-468a-8b4e-61fe91f3b5b6" alt="TV Screenshot 2" width="700"/></td>
 </tr>
 <tr>
-<td><img src="https://github.com/user-attachments/assets/9f677129-8183-44aa-b714-42b8a9ef2df8" alt="TV Screenshot 3" width="700"/></td>
-<td><img src="https://github.com/user-attachments/assets/09f6e0e3-11b1-4db5-8c76-cfaf45be1249" alt="TV Screenshot 4" width="700"/></td>
+<td><img src="https://github.com/user-attachments/assets/d39b9e8c-b630-4861-b325-c38c3e8a404c" alt="TV Screenshot 3" width="700"/></td>
+<td><img src="https://github.com/user-attachments/assets/c061c773-1f89-496c-86cf-04caca4a7503" alt="TV Screenshot 4" width="700"/></td>
 </tr>
 <tr>
 <td><img src="https://github.com/user-attachments/assets/967731bc-a13c-485b-a360-b71f53da3f53" alt="TV Screenshot 5" width="700"/></td>
-<td><img src="https://github.com/user-attachments/assets/f7559fa5-2294-4bde-bd73-f112ba841c06" alt="TV Screenshot 6" width="700"/></td>
+<td><img src="https://github.com/user-attachments/assets/45cb240a-a921-46c2-a2ce-c31e5709656a" alt="TV Screenshot 6" width="700"/></td>
 </tr>
 <tr>
-<td><img src="https://github.com/user-attachments/assets/e448ac52-81c6-4c2b-acf0-412b05f3dad6" alt="TV Screenshot 7" width="700"/></td>
-<td><img src="https://github.com/user-attachments/assets/b4e523ff-f4ce-408c-a11f-41df1d54954d" alt="TV Screenshot 8" width="700"/></td>
+<td><img src="https://github.com/user-attachments/assets/9a34cfa9-27b7-457e-b2ab-18b014dd57c9" alt="TV Screenshot 7" width="700"/></td>
+<td><img src="https://github.com/user-attachments/assets/a43ec774-3ad1-4387-bb04-68a040bca288" alt="TV Screenshot 8" width="700"/></td>
 </tr>
 </table>
 
