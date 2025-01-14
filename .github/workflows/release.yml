@@ -21,7 +21,7 @@ jobs:
       - run: flutter pub get
 
       - run: |
-          sed -e '882a\rect = rect.inflate(96);' ${{ env.FLUTTER_ROOT }}/packages/flutter/lib/src/rendering/viewport.dart
+          sed -i '882a\rect = rect.inflate(96);' ${{ env.FLUTTER_ROOT }}/packages/flutter/lib/src/rendering/viewport.dart
 
       - name: Decode Keystore
         run: |
