@@ -92,8 +92,8 @@ mixin ActionMixin<S extends StatefulWidget> on State<S> {
         await future();
         if (!context.mounted) return;
         refresh = true;
-        Navigator.of(context).pop();
-        Navigator.of(context).pop(refresh);
+        Scaffold.of(context).closeEndDrawer();
+        Navigator.of(navigatorKey.currentContext!).pop(refresh);
       },
     );
   }

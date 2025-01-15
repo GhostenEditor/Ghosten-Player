@@ -36,14 +36,13 @@ mixin SearchableMixin {
             case 300:
               if (!context.mounted) return false;
               final data = (e.response?.data! as List<dynamic>).map((e) => SearchResult.fromJson(e)).toList();
-              final res = await showDialog<int>(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (context) => _SearchResultSelect(
-                        items: data,
-                        title: title,
-                        year: year,
-                      ));
+              final res = await navigateTo<int>(
+                  navigatorKey.currentContext!,
+                  _SearchResultSelect(
+                    items: data,
+                    title: title,
+                    year: year,
+                  ));
               if (!context.mounted) return false;
               if (res != null) {
                 return search(context, future, title: title, year: year, index: res);
@@ -71,7 +70,7 @@ mixin SearchableMixin {
           if (!context.mounted) return false;
           final data = (jsonDecode(e.details!) as List<dynamic>).map((e) => SearchResult.fromJson(e)).toList();
           final res = await navigateTo<int>(
-              context,
+              navigatorKey.currentContext!,
               _SearchResultSelect(
                 items: data,
                 title: title,

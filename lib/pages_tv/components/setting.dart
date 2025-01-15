@@ -134,28 +134,37 @@ class _SlidableSettingItemState extends State<SlidableSettingItem> with SingleTi
                 return null;
               }),
             },
-            child: TVListTile(
-              autofocus: widget.autofocus,
-              title: widget.title,
-              subtitle: widget.subtitle,
-              leading: widget.leading,
-              trailing: widget.trailing,
-              selected: widget.selected || focused,
-              onTap: widget.onTap ??
-                  () {
-                    if (_controller.direction.value == 0) {
-                      switch (widget.actionSide) {
-                        case ActionSide.start:
-                          _controller.openStartActionPane(duration: const Duration(milliseconds: 400));
+            child: Stack(
+              alignment: switch (widget.actionSide) {
+                ActionSide.start => Alignment.centerLeft,
+                ActionSide.end => Alignment.centerRight,
+              },
+              children: [
+                TVListTile(
+                  autofocus: widget.autofocus,
+                  title: widget.title,
+                  subtitle: widget.subtitle,
+                  leading: widget.leading,
+                  trailing: widget.trailing,
+                  selected: widget.selected || focused,
+                  onTap: widget.onTap ??
+                      () {
+                        if (_controller.direction.value == 0) {
+                          switch (widget.actionSide) {
+                            case ActionSide.start:
+                              _controller.openStartActionPane(duration: const Duration(milliseconds: 400));
 
-                        case ActionSide.end:
-                          _controller.openEndActionPane(duration: const Duration(milliseconds: 400));
-                      }
-                    } else {
-                      _controller.close(duration: const Duration(milliseconds: 400));
-                    }
-                  },
-              focusNode: _focusNode,
+                            case ActionSide.end:
+                              _controller.openEndActionPane(duration: const Duration(milliseconds: 400));
+                          }
+                        } else {
+                          _controller.close(duration: const Duration(milliseconds: 400));
+                        }
+                      },
+                  focusNode: _focusNode,
+                ),
+                if (focused) Icon(Icons.more_vert_rounded, color: Colors.grey, size: 18),
+              ],
             ),
           ),
         ),

@@ -440,7 +440,7 @@ packages:
       path: "packages/player_view"
       relative: true
     source: path
-    version: "1.2.0"
+    version: "1.4.0"
   plugin_platform_interface:
     dependency: transitive
     description:

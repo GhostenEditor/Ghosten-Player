@@ -152,6 +152,7 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
                     key: ValueKey(item.id),
                     seasonId: item.id,
                     scrapper: scrapper,
+                    needUpdate: () => refresh = true,
                   )),
           (_) => false);
     });
@@ -197,8 +198,9 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
 class _SeasonPage extends StatefulWidget {
   final int seasonId;
   final Scrapper scrapper;
+  final VoidCallback needUpdate;
 
-  const _SeasonPage({super.key, required this.seasonId, required this.scrapper});
+  const _SeasonPage({super.key, required this.seasonId, required this.scrapper, required this.needUpdate});
 
   @override
   State<_SeasonPage> createState() => _SeasonPageState();
@@ -302,17 +304,21 @@ class _SeasonPageState extends State<_SeasonPage> {
                         autofocus: index == 0,
                         episode: item.episodes[index],
                         scrapper: widget.scrapper,
-                        onTap: () => toPlayer(
-                          navigatorKey.currentContext!,
-                          item.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList(),
-                          id: item.episodes[index].id,
-                          theme: item.themeColor,
-                          playerType: PlayerType.tv,
-                        ),
+                        onTap: () async {
+                          await toPlayer(
+                            navigatorKey.currentContext!,
+                            item.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList(),
+                            id: item.episodes[index].id,
+                            theme: item.themeColor,
+                            playerType: PlayerType.tv,
+                          );
+                          widget.needUpdate();
+                        },
                         onTapMore: () async {
                           final resp = await navigateTo(navigatorKey.currentContext!, EpisodeDetail(item.episodes[index], scrapper: widget.scrapper));
                           if (resp == true) {
                             setState(() {});
+                            widget.needUpdate();
                           }
                         },
                       )),
