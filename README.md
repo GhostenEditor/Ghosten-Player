@@ -7,7 +7,8 @@
 
 [下载](https://github.com/GhostenEditor/Ghosten-Player/releases/latest)
 
-一款同时适配Android TV和Android Phone的视频播放器，同时支持云播放(阿里云盘、夸克网盘和Webdav)和本地播放，支持刮削影视的元信息，界面简洁纯净，操作简单
+一款同时适配Android TV和Android Phone的视频播放器，同时支持云播放(阿里云盘、夸克网盘和Webdav)和本地播放，支持刮削影视元信息，管理网盘文件，多线程加速等功能。
+界面简洁纯净，操作简单。
 
 [^1]: 开发中
 
@@ -45,7 +46,7 @@
 <tr>
 <td><img src="https://github.com/user-attachments/assets/2191a341-e9ac-43e4-a79f-17ba6f979d86" alt="Mobile Screenshot 1" width="315"/></td>
 <td><img src="https://github.com/user-attachments/assets/28ee59ee-0846-49f1-8ead-b16bb67be54c" alt="Mobile Screenshot 2" width="315"/></td>
-<td><img src="https://github.com/user-attachments/assets/92828f5b-5a99-40ff-8f72-4fedbad0aacb" alt="Mobile Screenshot 3"  width="315"/></td>
+<td><img src="https://github.com/user-attachments/assets/92828f5b-5a99-40ff-8f72-4fedbad0aacb" alt="Mobile Screenshot 3" width="315"/></td>
 <td><img src="https://github.com/user-attachments/assets/a292ac1c-3e7a-44a9-a0a8-d4426422431f" alt="Mobile Screenshot 4" width="315"/></td>
 </tr>
 <tr>
@@ -118,6 +119,10 @@ _**[Media3文档](https://developer.android.google.cn/media/media3/exoplayer/sup
 
 手机端至 [**Releases页**](https://github.com/GhostenEditor/Ghosten-Player/releases) 自行下载安装，TV端可以使用U盘或当贝市场进行安装
 
+### TV端操作方式
+
+TV端主要通过遥控器进行界面交互(也可外接鼠标)，主要使用到上下左右四个方向键进行焦点切换，选择键选择内容，以及菜单键呼出侧边菜单栏。若你的遥控器缺少某个按键导致功能使用受限，可以提issue。
+
 ### 添加账号
 
 进入设置 → 账号管理，点击加号按钮，进入登录页面。
@@ -139,7 +144,7 @@ _**[Media3文档](https://developer.android.google.cn/media/media3/exoplayer/sup
 
 #### 夸克网盘
 
-通过网页登录夸克后，点击右上角确认按钮后完成登录
+通过网页登录夸克后，点击右上角确认按钮后完成登录(TV端无需点击完成按钮)
 
 <img alt="Quark Login Page" src="https://github.com/user-attachments/assets/7a5671b5-82f6-444a-ae4c-d16f85ce7a5a" width="315"/>
 
@@ -233,12 +238,13 @@ _**[Media3文档](https://developer.android.google.cn/media/media3/exoplayer/sup
 
 ### TV端辅助输入
 
-由于TV端使用遥控器输入链接、账号密码等信息不便，可在TV端点击辅助输入按钮，然后使用手机(需在用以局域网下)
-扫描二维码进入网页，手机端编辑的文本，会推送到TV端聚焦的文本框内
+由于TV端使用遥控器输入链接、账号密码等信息不便。部分页面支持TV端辅助输入，在同一个局域网下，扫描页面上的二维码进入网页，手机端编辑的文本，会推送到TV端聚焦的文本框内
+
+<img src="https://github.com/user-attachments/assets/28ee59ee-0846-49f1-8ead-b16bb67be54c" alt="Mobile Screenshot 2" width="315"/>
 
 ### 文件下载
 
-Todo
+目前仅支持单个文件的下载(后续会添加批量下载功能)，在电影页面，剧集页面以及播放器会有下载按钮。可在设置中的下载管理页面管理下载任务。若播放已下载或正在下载的内容，会优先使用已下载的部分，以节约网络带宽。下载中的文件存放在下载目录，下载成功后文件会按照剧集的结构存放在电影目录下。
 
 ### 多线程播放和下载
 
@@ -323,13 +329,15 @@ Android 6+
 
 ## Todos
 
-- [ ] 音乐播放器
+- [ ] 增加ftp和smb协议的支持
 - [ ] 保存媒体信息至文件(nfo)
 - [ ] 桌面端(Developing)
-- [ ] 应用串联
+- [ ] 使用mpv作为视频解码器以兼容更多的视频格式
 
 ## 声明
 
 本项目仅作为个人学习使用
 
 本项目不提供任何的内容资源，若出现任何内容侵权行为皆与本项目开发人员无关
+
+在使用本程序之前，你应了解并承担相应的风险，包括但不限于账号被ban，下载限速等，与本程序无关
