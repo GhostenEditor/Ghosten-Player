@@ -31,11 +31,12 @@ class SortConfig {
 class MediaSearchQuery {
   final SortConfig sort;
   final String? search;
+  final int? limit;
 
-  const MediaSearchQuery({required this.sort, this.search});
+  const MediaSearchQuery({required this.sort, this.search, this.limit});
 
   Json toMap() {
-    return {...sort.toMap(), 'search': search};
+    return {...sort.toMap(), 'search': search, 'limit': limit};
   }
 }
 
@@ -90,12 +91,53 @@ class Media extends MediaBase {
   }
 }
 
+class MediaRecommendation {
+  final int id;
+  final String? title;
+  final String? originalTitle;
+  final String filename;
+  final DateTime? airDate;
+  final String? poster;
+  final String? logo;
+  final String? backdrop;
+  final String? overview;
+  final int? themeColor;
+  final double? voteAverage;
+  final int voteCount;
+  final MediaStatus status;
+  final List<Genre> genres;
+
+  MediaRecommendation.fromJson(Json json)
+      : id = json['id'],
+        title = json['title'],
+        originalTitle = json['originalTitle'],
+        filename = json['filename'],
+        airDate = (json['airDate'] as String?)?.toDateTime(),
+        poster = json['poster'],
+        themeColor = json['themeColor'],
+        logo = json['logo'],
+        backdrop = json['backdrop'],
+        overview = json['overview'],
+        voteAverage = json['voteAverage'],
+        voteCount = json['voteCount'],
+        status = MediaStatus.fromString(json['status']),
+        genres = (json['genres'] as JsonList).toGenres();
+
+  String displayTitle() {
+    if (title != null && originalTitle != null) {
+      return title == originalTitle ? title! : '$title ($originalTitle)';
+    } else {
+      return title ?? originalTitle ?? filename;
+    }
+  }
+}
+
 class Movie extends Media {
   final double? voteAverage;
   final int voteCount;
   final String? country;
   final String? trailer;
-  final SeriesStatus status;
+  final MediaStatus status;
   final List<Genre> genres;
   final List<Studio> studios;
   final List<Keyword> keywords;
@@ -105,6 +147,7 @@ class Movie extends Media {
   final Uri url;
   final int fileSize;
   final List<SubtitleData> subtitles;
+  final Duration? duration;
   final Scrapper scrapper;
 
   Movie.fromJson(super.json)
@@ -112,7 +155,7 @@ class Movie extends Media {
         voteCount = json['voteCount'],
         country = json['country'],
         trailer = json['trailer'],
-        status = SeriesStatus.fromString(json['status']),
+        status = MediaStatus.fromString(json['status']),
         lastPlayedPosition = (json['lastPlayedPosition'] as int?).toDuration(),
         keywords = (json['keywords'] as JsonList).toKeywords(),
         genres = (json['genres'] as JsonList).toGenres(),
@@ -121,6 +164,7 @@ class Movie extends Media {
         ext = json['ext'],
         url = Uri.parse(json['url']),
         fileSize = json['fileSize'],
+        duration = (json['duration'] as int?)?.toDuration(),
         subtitles = (json['subtitles'] as JsonList).toSubtitles(),
         scrapper = Scrapper.fromJson(json['scrapper']),
         super.fromJson();
@@ -131,7 +175,7 @@ class TVSeries extends Media {
   final int? voteCount;
   final String? country;
   final String? trailer;
-  final SeriesStatus status;
+  final MediaStatus status;
   final Duration skipIntro;
   final Duration skipEnding;
   final List<Genre> genres;
@@ -146,7 +190,7 @@ class TVSeries extends Media {
         voteCount = json['voteCount'],
         country = json['country'],
         trailer = json['trailer'],
-        status = SeriesStatus.fromString(json['status']),
+        status = MediaStatus.fromString(json['status']),
         skipIntro = (json['skipIntro'] as int?).toDuration(),
         skipEnding = (json['skipEnding'] as int?).toDuration(),
         keywords = (json['keywords'] as JsonList).toKeywords(),
@@ -189,6 +233,7 @@ class TVEpisode extends Media {
   final String ext;
   final Uri url;
   final int fileSize;
+  final Duration? duration;
   final List<SubtitleData> subtitles;
 
   TVEpisode.fromJson(super.json)
@@ -199,6 +244,7 @@ class TVEpisode extends Media {
         seriesTitle = json['seriesTitle'],
         skipIntro = (json['skipIntro'] as int?).toDuration(),
         skipEnding = (json['skipEnding'] as int?).toDuration(),
+        duration = (json['duration'] as int?)?.toDuration(),
         lastPlayedPosition = (json['lastPlayedPosition'] as int?).toDuration(),
         downloaded = json['downloaded'] ?? false,
         ext = json['ext'],
@@ -717,19 +763,19 @@ enum FileCategory {
   }
 }
 
-enum SeriesStatus {
+enum MediaStatus {
   returningSeries,
   ended,
   released,
   unknown;
 
-  static SeriesStatus fromString(String? name) {
+  static MediaStatus fromString(String? name) {
     return switch (name) {
-      'Returning Series' => SeriesStatus.returningSeries,
-      'Ended' => SeriesStatus.ended,
-      'Released' => SeriesStatus.released,
-      'Unknown' => SeriesStatus.unknown,
-      _ => SeriesStatus.unknown,
+      'Returning Series' => MediaStatus.returningSeries,
+      'Ended' => MediaStatus.ended,
+      'Released' => MediaStatus.released,
+      'Unknown' => MediaStatus.unknown,
+      _ => MediaStatus.unknown,
     };
   }
 }
@@ -757,6 +803,7 @@ enum SessionStatus {
 enum SortType {
   title,
   airDate,
+  createAt,
   lastPlayedTime;
 
   static SortType fromString(String? str) {

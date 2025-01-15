@@ -7,7 +7,6 @@ import 'package:player_view/player.dart';
 import '../components/gap.dart';
 import '../components/popup_menu.dart';
 import '../models/models.dart';
-import '../platform_api.dart';
 import '../utils/notification.dart';
 import '../utils/player.dart';
 import '../utils/utils.dart';
@@ -35,7 +34,6 @@ class FileViewer extends StatelessWidget {
       tooltip: '',
       itemBuilder: (context) => [
         PopupMenuItem(
-          autofocus: PlatformApi.isAndroidTV(),
           leading: const Icon(Icons.folder_open_rounded),
           title: Text(AppLocalizations.of(context)!.buttonNewFolder),
           onTap: () async {

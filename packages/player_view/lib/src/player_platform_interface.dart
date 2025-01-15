@@ -57,6 +57,14 @@ abstract class PlayerPlatform extends PlatformInterface {
     throw UnimplementedError('setSkipPosition() has not been implemented.');
   }
 
+  Future<void> setTransform(List<double> matrix) {
+    throw UnimplementedError('setTransform() has not been implemented.');
+  }
+
+  Future<void> setAspectRatio(double? aspectRatio) {
+    throw UnimplementedError('setAspectRatio() has not been implemented.');
+  }
+
   Future<void> setSources(List<Map<String, dynamic>> playlist, int index) {
     throw UnimplementedError('setSources() has not been implemented.');
   }

@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 
 import '../../components/gap.dart';
 import '../../components/popup_menu.dart';
-import '../../platform_api.dart';
 import '../../providers/user_config.dart';
 
 class SystemSettingsPlayer extends StatefulWidget {
@@ -41,7 +40,6 @@ class SystemSettingsPlayerState extends State<SystemSettingsPlayer> {
               },
               itemBuilder: (context) => _ExtensionRendererMode.values
                   .map((e) => PopupMenuItem(
-                        autofocus: PlatformApi.isAndroidTV() && e == extensionRendererMode,
                         value: e,
                         title: Text(AppLocalizations.of(context)!.audioDecoder(e.name)),
                         leading: Icon(e == extensionRendererMode ? Icons.done : null),
@@ -80,38 +78,8 @@ class SystemSettingsPlayerState extends State<SystemSettingsPlayer> {
               onChanged: (value) => setState(() => userConfig.setPlayerShowThumbnails(value)),
             ),
           ),
-          if (PlatformApi.isAndroidTV())
-            ListTile(
-              title: Row(
-                children: [
-                  Text(AppLocalizations.of(context)!.playerFastForwardSpeed),
-                  Expanded(
-                    child: MediaQuery(
-                        data: const MediaQueryData(navigationMode: NavigationMode.directional),
-                        child: Slider(
-                          value: userConfig.playerConfig.speed.toDouble(),
-                          min: 5,
-                          max: 100,
-                          divisions: 19,
-                          label: userConfig.playerConfig.speed.toString(),
-                          onChanged: (double value) {
-                            setState(() {
-                              userConfig.setPlayerFastForwardSpeed(value.round());
-                            });
-                          },
-                        )),
-                  ),
-                ],
-              ),
-            ),
           ListTile(
-            title: Row(
-              children: [
-                Text(AppLocalizations.of(context)!.playerOpenFileWithParallelThreads),
-                Gap.hSM,
-                const Badge(label: Text('Beta')),
-              ],
-            ),
+            title: Text(AppLocalizations.of(context)!.playerOpenFileWithParallelThreads),
             trailing: Switch(
               value: userConfig.playerConfig.enableParallel,
               onChanged: (value) => setState(() => userConfig.setPlayerEnableParallel(value)),

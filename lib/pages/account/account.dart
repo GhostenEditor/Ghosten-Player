@@ -10,7 +10,6 @@ import '../../components/focus_card.dart';
 import '../../components/future_builder_handler.dart';
 import '../../components/no_data.dart';
 import '../../components/popup_menu.dart';
-import '../../platform_api.dart';
 import '../../utils/notification.dart';
 import '../../utils/utils.dart';
 import '../../views/file_viewer.dart';
@@ -54,7 +53,6 @@ class _AccountManageState extends State<AccountManage> {
                   itemBuilder: (context, index) {
                     if (index == snapshot.requireData.length) {
                       return FocusCard(
-                        autofocus: PlatformApi.isAndroidTV() && index == 0,
                         onTap: () async {
                           final flag = await navigateTo<bool>(context, const AccountLoginPage());
                           if (flag == true) setState(() {});
@@ -69,10 +67,8 @@ class _AccountManageState extends State<AccountManage> {
                     } else {
                       final item = snapshot.requireData[index];
                       return FocusCard(
-                        autofocus: PlatformApi.isAndroidTV() && index == 0,
                         itemBuilder: (BuildContext context) => [
                           PopupMenuItem(
-                            autofocus: PlatformApi.isAndroidTV(),
                             leading: const Icon(Icons.folder_outlined),
                             title: Text(AppLocalizations.of(context)!.pageTitleFileViewer),
                             onTap: () async {
@@ -80,11 +76,10 @@ class _AccountManageState extends State<AccountManage> {
                             },
                           ),
                           PopupMenuItem(
-                            autofocus: PlatformApi.isAndroidTV(),
                             leading: const Icon(Icons.delete_outline),
                             title: Text(AppLocalizations.of(context)!.buttonDelete),
                             onTap: () async {
-                              final confirmed = await showConfirm(context, AppLocalizations.of(context)!.deleteAccountConfirmText);
+                              final confirmed = await showConfirm(context, AppLocalizations.of(context)!.deleteAccountTip);
                               if (confirmed == true) {
                                 if (!context.mounted) return;
                                 final resp = await showNotification(context, Api.driverDeleteById(item.id));

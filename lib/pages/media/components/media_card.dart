@@ -6,16 +6,13 @@ import '../../../components/async_image.dart';
 import '../../../components/focus_card.dart';
 import '../../../components/gap.dart';
 import '../../../components/image_card.dart';
-import '../../../platform_api.dart';
 import '../../../utils/utils.dart';
 
 class MediaCard<T extends Media> extends StatefulWidget {
-  final ValueChanged<bool>? onFocusChange;
   final T item;
   final GestureTapCallback? onTap;
-  final bool? autofocus;
 
-  const MediaCard({super.key, this.onFocusChange, required this.item, this.onTap, this.autofocus});
+  const MediaCard({super.key, required this.item, this.onTap});
 
   @override
   State<MediaCard> createState() => _MediaCardState();
@@ -23,7 +20,6 @@ class MediaCard<T extends Media> extends StatefulWidget {
 
 class _MediaCardState extends State<MediaCard> {
   late final item = widget.item;
-  late bool focused = widget.autofocus ?? false;
 
   @override
   Widget build(BuildContext context) {
@@ -42,19 +38,7 @@ class _MediaCardState extends State<MediaCard> {
                       color: Theme.of(context).colorScheme.secondaryContainer,
                     ),
                   )),
-        Container(
-          decoration: PlatformApi.isAndroidTV() && focused
-              ? const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.green,
-                      Colors.blueAccent,
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                )
-              : null,
+        Padding(
           padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -90,12 +74,6 @@ class _MediaCardState extends State<MediaCard> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
       child: FocusCard(
-        scale: 1.1,
-        autofocus: focused,
-        onFocusChange: (flag) {
-          setState(() => focused = flag);
-          if (widget.onFocusChange != null) widget.onFocusChange!(focused);
-        },
         onTap: widget.onTap,
         child: item.lastPlayedTime == null
             ? Banner(

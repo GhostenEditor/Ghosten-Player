@@ -14,6 +14,7 @@ class AsyncImage extends StatelessWidget {
   final bool needLoading;
   final double errorIconSize;
   final EdgeInsets padding;
+  final Map<String, String>? httpHeaders;
 
   const AsyncImage(
     this.src, {
@@ -27,6 +28,7 @@ class AsyncImage extends StatelessWidget {
     this.needLoading = true,
     this.errorIconSize = 36,
     this.padding = EdgeInsets.zero,
+    this.httpHeaders = const {headerUserAgent: ua},
   });
 
   @override
@@ -43,7 +45,7 @@ class AsyncImage extends StatelessWidget {
         filterQuality: FilterQuality.medium,
         width: width,
         height: height,
-        httpHeaders: const {headerUserAgent: ua},
+        httpHeaders: httpHeaders,
         errorWidget: (context, url, error) => Center(child: Icon(Icons.broken_image, size: errorIconSize)),
         placeholder: (context, _) => needLoading ? const _AnimatedLoading() : const SizedBox(),
         imageBuilder: ink
@@ -54,12 +56,13 @@ class AsyncImage extends StatelessWidget {
                     width: width,
                     height: height,
                     decoration: BoxDecoration(
+                        borderRadius: radius,
                         image: DecorationImage(
-                      image: imageProvider,
-                      fit: fit,
-                      alignment: alignment,
-                      filterQuality: FilterQuality.medium,
-                    )),
+                          image: imageProvider,
+                          fit: fit,
+                          alignment: alignment,
+                          filterQuality: FilterQuality.medium,
+                        )),
                   ),
                 );
               }

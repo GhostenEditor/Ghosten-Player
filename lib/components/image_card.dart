@@ -6,7 +6,6 @@ import 'focus_card.dart';
 class ImageCard extends StatelessWidget {
   final Widget child;
   final GestureTapCallback? onTap;
-  final ValueChanged<bool>? onFocusChange;
   final double? scale;
   final bool autofocus;
   final String? image;
@@ -18,7 +17,6 @@ class ImageCard extends StatelessWidget {
     super.key,
     required this.child,
     this.onTap,
-    this.onFocusChange,
     this.scale,
     this.autofocus = false,
     required this.image,
@@ -30,7 +28,6 @@ class ImageCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FocusCard(
-      scale: scale,
       autofocus: autofocus,
       onTap: onTap,
       width: width,

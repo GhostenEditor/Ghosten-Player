@@ -2,7 +2,6 @@ import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../components/connect_button.dart';
 import '../../components/form_group.dart';
 import '../../utils/notification.dart';
 import '../../validators/validators.dart';
@@ -47,7 +46,6 @@ class _LiveEditPageState extends State<LiveEditPage> {
       appBar: AppBar(
         title: Text(widget.item == null ? AppLocalizations.of(context)!.pageTitleAdd : AppLocalizations.of(context)!.pageTitleEdit),
         actions: [
-          ConnectButton(onData: onConnectData),
           IconButton(icon: const Icon(Icons.check), onPressed: onSubmit),
         ],
       ),

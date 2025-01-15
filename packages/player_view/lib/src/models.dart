@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
 
 enum PlayerStatus {
   playing,
@@ -68,6 +69,7 @@ class MediaInfo {
   final String? videoCodecs;
   final String? videoMime;
   final double? videoFPS;
+  final int? videoBitrate;
   final String? videoSize;
   final String? audioCodecs;
   final String? audioMime;
@@ -78,9 +80,38 @@ class MediaInfo {
         videoMime = json['videoMime'],
         videoFPS = json['videoFPS'],
         videoSize = json['videoSize'],
+        videoBitrate = json['videoBitrate'],
         audioCodecs = json['audioCodecs'],
         audioMime = json['audioMime'],
         audioBitrate = json['audioBitrate'];
+}
+
+enum AspectRatioType {
+  auto,
+  fill,
+  a16_9,
+  a4_3,
+  a1_1;
+
+  double? value(BuildContext context) {
+    return switch (this) {
+      AspectRatioType.auto => null,
+      AspectRatioType.fill => MediaQuery.of(context).size.aspectRatio,
+      AspectRatioType.a16_9 => 1.778,
+      AspectRatioType.a4_3 => 1.333,
+      AspectRatioType.a1_1 => 1.0,
+    };
+  }
+
+  String label(BuildContext context) {
+    return switch (this) {
+      AspectRatioType.auto => 'Fit',
+      AspectRatioType.fill => 'Fill',
+      AspectRatioType.a16_9 => '16 / 9',
+      AspectRatioType.a4_3 => '4 / 3',
+      AspectRatioType.a1_1 => '1 / 1',
+    };
+  }
 }
 
 enum PlaylistItemSourceType {

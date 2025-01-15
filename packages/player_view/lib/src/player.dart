@@ -16,6 +16,7 @@ class PlayerController<T extends PlaylistItem> {
   late final ValueNotifier<String?> error = ValueNotifier(null);
   late final ValueNotifier<String?> fatalError = ValueNotifier(null);
   final ValueNotifier<double> playbackSpeed = ValueNotifier(1);
+  final ValueNotifier<AspectRatioType> aspectRatio = ValueNotifier(AspectRatioType.auto);
   final ValueNotifier<double> volume = ValueNotifier(1);
   final ValueNotifier<Duration> position = ValueNotifier(Duration.zero);
   final ValueNotifier<Duration> duration = ValueNotifier(Duration.zero);
@@ -104,6 +105,7 @@ class PlayerController<T extends PlaylistItem> {
     title.dispose();
     subTitle.dispose();
     playbackSpeed.dispose();
+    aspectRatio.dispose();
     position.dispose();
     duration.dispose();
     bufferedPosition.dispose();
@@ -139,7 +141,7 @@ class PlayerController<T extends PlaylistItem> {
   }
 
   Future<void> setTrack(String type, dynamic id) {
-    return PlayerPlatform.instance.setTrack(type, id);
+    return PlayerPlatform.instance.setTrack(type, id ?? '');
   }
 
   Future<void> setVolume(double volume) {
@@ -160,6 +162,14 @@ class PlayerController<T extends PlaylistItem> {
 
   Future<String?> getVideoThumbnail(int position) {
     return PlayerPlatform.instance.getVideoThumbnail(position);
+  }
+
+  Future<void> setTransform(List<double> matrix) {
+    return PlayerPlatform.instance.setTransform(matrix);
+  }
+
+  Future<void> setAspectRatio(double? aspectRatio) {
+    return PlayerPlatform.instance.setAspectRatio(aspectRatio);
   }
 
   Future<void> updateSource(T source, int index) {

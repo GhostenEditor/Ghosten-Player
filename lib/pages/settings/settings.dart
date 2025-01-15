@@ -8,7 +8,6 @@ import '../../components/logo.dart';
 import '../../components/popup_menu.dart';
 import '../../components/scrollbar.dart';
 import '../../const.dart';
-import '../../platform_api.dart';
 import '../../providers/user_config.dart';
 import '../../utils/notification.dart';
 import '../../utils/utils.dart';
@@ -69,7 +68,6 @@ class SettingsPage extends StatelessWidget {
             _buildItem(
               AppLocalizations.of(context)!.settingsItemDownload,
               Icons.download_outlined,
-              trailing: const Badge(label: Text('Beta')),
               onTap: () => navigateTo(context, const SystemSettingsDownloader()),
             ),
             const Divider(),
@@ -81,7 +79,6 @@ class SettingsPage extends StatelessWidget {
               itemBuilder: (BuildContext context) => SystemLanguage.values
                   .map((language) => PopupMenuItem(
                         value: language,
-                        autofocus: PlatformApi.isAndroidTV() && userConfig.language == language,
                         trailing: Icon(userConfig.language == language ? Icons.done : null),
                         title: Text(AppLocalizations.of(context)!.systemLanguage(language.name)),
                       ))
@@ -94,7 +91,6 @@ class SettingsPage extends StatelessWidget {
               onSelected: userConfig.setTheme,
               itemBuilder: (BuildContext context) => ThemeMode.values
                   .map((theme) => PopupMenuItem(
-                        autofocus: PlatformApi.isAndroidTV() && userConfig.themeMode == theme,
                         value: theme,
                         trailing: Icon(userConfig.themeMode == theme ? Icons.done : null),
                         title: Text(AppLocalizations.of(context)!.systemTheme(theme.name).padRight(8, ' ')),

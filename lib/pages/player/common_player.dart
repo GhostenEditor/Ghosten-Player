@@ -21,13 +21,15 @@ class CommonPlayerPage extends StatefulWidget {
   final int index;
   final int? theme;
   final PlayerType playerType;
+  final bool isTV;
 
   const CommonPlayerPage({
     super.key,
     required this.playlist,
     required this.index,
-    this.theme,
     required this.playerType,
+    this.theme,
+    this.isTV = false,
   });
 
   @override
@@ -64,12 +66,13 @@ class _CommonPlayerPageState extends State<CommonPlayerPage> {
         videoSettingsAudio: AppLocalizations.of(context)!.videoSettingsAudio,
         videoSettingsSubtitle: AppLocalizations.of(context)!.videoSettingsSubtitle,
         videoSettingsSpeeding: AppLocalizations.of(context)!.videoSettingsSpeeding,
+        videoSize: AppLocalizations.of(context)!.videoSize,
         videoSettingsNone: AppLocalizations.of(context)!.none,
         tagUnknown: AppLocalizations.of(context)!.tagUnknown,
         willSkipEnding: AppLocalizations.of(context)!.willSkipEnding,
       ),
       controller: controller,
-      isTV: PlatformApi.isAndroidTV(),
+      isTV: widget.isTV,
       showThumbnails: userConfig.playerConfig.showThumbnails,
       seekStep: Duration(seconds: userConfig.playerConfig.speed),
       extensionRendererMode: userConfig.playerConfig.mode,
@@ -161,7 +164,6 @@ class _CommonPlayerPageState extends State<CommonPlayerPage> {
         return SizedBox(
           width: 200,
           child: FocusCard(
-            scale: 1.05,
             autofocus: index == controller.index.value,
             onTap: () => onTap(index),
             child: Column(

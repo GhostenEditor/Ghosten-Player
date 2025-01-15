@@ -9,6 +9,7 @@ import 'api_method_channel.dart';
 import 'models.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
+final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
 
 abstract class ApiPlatform extends PlatformInterface {
   ApiPlatform() : super(token: _token);
@@ -234,6 +235,11 @@ abstract class ApiPlatform extends PlatformInterface {
   /// Driver End
 
   /// Movie Start
+  Future<List<MediaRecommendation>> movieRecommendation() async {
+    final data = await client.get<JsonList>('/movie/recommendation');
+    return data!.map((e) => MediaRecommendation.fromJson(e)).toList();
+  }
+
   Future<List<Movie>> movieQueryAll([MediaSearchQuery? query]) async {
     final data = await client.get<JsonList>('/movie/query/all', queryParameters: query?.toMap());
     return data!.map((e) => Movie.fromJson(e)).toList();
@@ -283,6 +289,11 @@ abstract class ApiPlatform extends PlatformInterface {
   /// Movie End
 
   /// TV Start
+  Future<List<MediaRecommendation>> tvRecommendation() async {
+    final data = await client.get<JsonList>('/tv/recommendation');
+    return data!.map((e) => MediaRecommendation.fromJson(e)).toList();
+  }
+
   /// TV Series Start
   Future<List<TVSeries>> tvSeriesQueryAll([MediaSearchQuery? query]) async {
     final data = await client.get<JsonList>('/tv/series/query/all', queryParameters: query?.toMap());

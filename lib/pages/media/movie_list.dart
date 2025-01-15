@@ -11,7 +11,6 @@ import '../../components/no_data.dart';
 import '../../components/stream_builder_handler.dart';
 import '../../mixins/update.dart';
 import '../../models/models.dart';
-import '../../platform_api.dart';
 import '../../utils/player.dart';
 import '../../utils/utils.dart';
 import '../detail/movie.dart';
@@ -84,7 +83,6 @@ class _MovieListState extends State<MovieList> with MediaListMixin, NeedUpdateMi
                                       final item = items[index];
                                       return RecentMediaCard(
                                           item: item,
-                                          autofocus: PlatformApi.isAndroidTV() && index == 0,
                                           width: 180,
                                           onTap: () async {
                                             final movie = await Api.movieQueryById(item.id);

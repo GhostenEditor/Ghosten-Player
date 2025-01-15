@@ -15,14 +15,12 @@ enum ScreenState {
 }
 
 enum DeviceType {
-  androidTV,
   androidPad,
   androidPhone,
   web;
 
   static DeviceType fromString(String? s) {
     return switch (s) {
-      '0' => DeviceType.androidTV,
       '1' => DeviceType.androidPad,
       '2' => DeviceType.androidPhone,
       _ => DeviceType.androidPhone,
@@ -43,10 +41,6 @@ class PlatformApi {
             : const EventChannel('$_channelNamespace/screen').receiveBroadcastStream().cast<String>().map((event) => ScreenState.fromString(event))))
       .stream;
   static late DeviceType deviceType;
-
-  static bool isAndroidTV() {
-    return deviceType == DeviceType.androidTV;
-  }
 
   static bool isAndroidPhone() {
     return deviceType == DeviceType.androidPhone;

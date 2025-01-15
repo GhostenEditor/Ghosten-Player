@@ -6,7 +6,6 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:webview_cookie_manager/webview_cookie_manager.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-import '../../components/connect_button.dart';
 import '../../components/error_message.dart';
 import '../../components/form_group.dart';
 import '../../components/gap.dart';
@@ -90,7 +89,6 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.pageTitleLogin),
         actions: [
-          ConnectButton(onData: onConnectData),
           IconButton(icon: const Icon(Icons.check), onPressed: login),
         ],
       ),

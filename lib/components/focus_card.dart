@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../platform_api.dart';
-
 class FocusCard<T> extends StatefulWidget {
   final Widget child;
 
   final GestureTapCallback? onTap;
-  final ValueChanged<bool>? onFocusChange;
   final PopupMenuItemBuilder<T>? itemBuilder;
   final PopupMenuItemBuilder<T>? itemLongPressBuilder;
-  final double? scale;
   final double? width;
   final double? height;
 
@@ -19,9 +15,7 @@ class FocusCard<T> extends StatefulWidget {
     super.key,
     required this.child,
     this.onTap,
-    this.scale,
     this.autofocus = false,
-    this.onFocusChange,
     this.width,
     this.height,
     this.itemBuilder,
@@ -56,22 +50,11 @@ class _FocusCardState<T> extends State<FocusCard<T>> {
           autofocus: widget.autofocus,
           focusColor: Colors.transparent,
           customBorder: Theme.of(context).cardTheme.shape,
-          onFocusChange: (focused) {
-            setState(() {});
-            if (widget.onFocusChange != null) widget.onFocusChange!(focused);
-          },
           child: widget.child,
         ),
       ),
     );
-    return PlatformApi.isAndroidTV() && widget.scale != null
-        ? AnimatedScale(
-            scale: _focusNode.hasFocus ? widget.scale! : 1,
-            duration: const Duration(milliseconds: 400),
-            curve: Curves.easeOutBack,
-            child: child,
-          )
-        : child;
+    return child;
   }
 
   onTap(BuildContext context, PopupMenuItemBuilder<T> builder) {

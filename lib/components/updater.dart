@@ -7,7 +7,6 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:install_plugin/install_plugin.dart';
 
 import '../const.dart';
-import '../platform_api.dart';
 import '../utils/utils.dart';
 import 'gap.dart';
 import 'logo.dart';
@@ -63,7 +62,6 @@ class _UpdateBottomSheetState extends State<UpdateBottomSheet> {
             Gap.vMD,
             FilledButton(
                 onPressed: downloading.containsKey(widget.url) ? null : download,
-                autofocus: PlatformApi.isAndroidTV(),
                 child: downloading.containsKey(widget.url)
                     ? Row(mainAxisSize: MainAxisSize.min, children: [
                         Text(AppLocalizations.of(context)!.updating),

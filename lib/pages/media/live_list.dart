@@ -12,7 +12,6 @@ import '../../components/no_data.dart';
 import '../../components/pop_to_top.dart';
 import '../../components/popup_menu.dart';
 import '../../models/models.dart';
-import '../../platform_api.dart';
 import '../../theme.dart';
 import '../../utils/notification.dart';
 import '../../utils/player.dart';
@@ -45,14 +44,13 @@ class _LiveListState extends State<LiveList> {
           builder: (context, snapshot) {
             return snapshot.requireData.isEmpty
                 ? NoData(
-                    action: IconButton.filled(onPressed: _addPlaylist, autofocus: PlatformApi.isAndroidTV(), icon: const Icon(Icons.add)),
+                    action: IconButton.filled(onPressed: _addPlaylist, icon: const Icon(Icons.add)),
                   )
                 : ListView.builder(
                     itemCount: snapshot.requireData.length,
                     itemBuilder: (context, index) {
                       final item = snapshot.requireData[index];
                       return ListTile(
-                        autofocus: PlatformApi.isAndroidTV() && index == 0,
                         title: item.title == null ? null : Text(item.title!, overflow: TextOverflow.ellipsis),
                         subtitle: Text(item.url, overflow: TextOverflow.ellipsis),
                         trailing: const Icon(Icons.chevron_right),
@@ -104,11 +102,10 @@ class _ChannelListState extends State<_ChannelList> {
             appBar: AppBar(
               title: _playlist.title == null ? null : Text(_playlist.title!),
               actions: [
-                if (!PlatformApi.isAndroidTV()) IconButton(onPressed: () => cast(context), icon: const Icon(Icons.airplay_rounded)),
+                IconButton(onPressed: () => cast(context), icon: const Icon(Icons.airplay_rounded)),
                 PopupMenuButton(
                     itemBuilder: (BuildContext context) => [
                           PopupMenuItem(
-                            autofocus: PlatformApi.isAndroidTV(),
                             title: Text(AppLocalizations.of(context)!.buttonRefresh),
                             leading: const Icon(Icons.refresh),
                             onTap: () async {
@@ -159,7 +156,6 @@ class _ChannelListState extends State<_ChannelList> {
                               itemBuilder: (context, index) {
                                 final item = snapshot.requireData[index];
                                 return FocusCard(
-                                  autofocus: PlatformApi.isAndroidTV() && index == 0,
                                   child: Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: Stack(
@@ -168,7 +164,7 @@ class _ChannelListState extends State<_ChannelList> {
                                           child: Padding(
                                             padding: const EdgeInsets.all(36),
                                             child: item.image != null
-                                                ? AsyncImage(item.image!, ink: true, fit: BoxFit.contain)
+                                                ? AsyncImage(item.image!, ink: true, fit: BoxFit.contain, httpHeaders: const {})
                                                 : const Icon(Icons.image_not_supported_outlined, size: 48),
                                           ),
                                         ),

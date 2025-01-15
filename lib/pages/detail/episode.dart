@@ -9,7 +9,6 @@ import '../../components/future_builder_handler.dart';
 import '../../components/gap.dart';
 import '../../mixins/update.dart';
 import '../../models/models.dart';
-import '../../platform_api.dart';
 import '../../providers/user_config.dart';
 import '../../utils/notification.dart';
 import '../../utils/player.dart';
@@ -83,7 +82,7 @@ class _EpisodeDetailState extends State<EpisodeDetail> with DetailPageMixin<TVEp
       buildPlayAction(context, () => play(item)),
       buildWatchedAction(context, item, MediaType.episode),
       buildFavoriteAction(context, item, MediaType.episode),
-      if (!PlatformApi.isAndroidTV()) buildCastAction(context, (device) => cast(item, device)),
+      buildCastAction(context, (device) => cast(item, device)),
       ActionDivider(),
       buildSkipFromStartAction(context, item, MediaType.episode, item.skipIntro),
       buildSkipFromEndAction(context, item, MediaType.episode, item.skipEnding),
@@ -111,7 +110,6 @@ class _EpisodeDetailState extends State<EpisodeDetail> with DetailPageMixin<TVEp
       ActionButton(
         text: Text(AppLocalizations.of(context)!.buttonDownload),
         icon: const Icon(Icons.download_outlined),
-        trailing: const Badge(label: Text('Beta')),
         collapsed: true,
         onPressed: item.downloaded
             ? null

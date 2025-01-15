@@ -168,12 +168,8 @@ packages:
     version: "1.1.1"
   flutter:
     dependency: "direct main"
-    description:
-      path: "packages/flutter"
-      ref: "release-3.22.2"
-      resolved-ref: bfac8e2852d55cc875acd3a4b4395ebfaabcc480
-      url: "https://github.com/GhostenEditor/flutter"
-    source: git
+    description: flutter
+    source: sdk
     version: "0.0.0"
   flutter_cache_manager:
     dependency: transitive
@@ -193,12 +189,8 @@ packages:
     version: "4.0.0"
   flutter_localizations:
     dependency: "direct main"
-    description:
-      path: "packages/flutter_localizations"
-      ref: "release-3.22.2"
-      resolved-ref: bfac8e2852d55cc875acd3a4b4395ebfaabcc480
-      url: "https://github.com/GhostenEditor/flutter"
-    source: git
+    description: flutter
+    source: sdk
     version: "0.0.0"
   flutter_markdown:
     dependency: "direct main"
@@ -208,6 +200,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.4+1"
+  flutter_slidable:
+    dependency: "direct main"
+    description:
+      name: flutter_slidable
+      sha256: a857de7ea701f276fd6a6c4c67ae885b60729a3449e42766bb0e655171042801
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.2"
+  flutter_spinkit:
+    dependency: "direct main"
+    description:
+      name: flutter_spinkit
+      sha256: d2696eed13732831414595b98863260e33e8882fc069ee80ec35d4ac9ddb0472
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.2.1"
   flutter_staggered_grid_view:
     dependency: transitive
     description:
@@ -432,7 +440,7 @@ packages:
       path: "packages/player_view"
       relative: true
     source: path
-    version: "1.2.0"
+    version: "1.4.0"
   plugin_platform_interface:
     dependency: transitive
     description:
@@ -473,6 +481,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.28.0"
+  scaled_app:
+    dependency: "direct main"
+    description:
+      name: scaled_app
+      sha256: a2ad9f22cf2200a5ce455b59c5ea7bfb09a84acfc52452d1db54f4958c99d76a
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.0"
   shared_preferences:
     dependency: "direct main"
     description:

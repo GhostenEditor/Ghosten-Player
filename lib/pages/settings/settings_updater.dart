@@ -8,7 +8,6 @@ import '../../components/logo.dart';
 import '../../components/popup_menu.dart';
 import '../../components/updater.dart';
 import '../../const.dart';
-import '../../platform_api.dart';
 import '../../providers/user_config.dart';
 
 class SystemSettingsUpdater extends StatefulWidget {
@@ -56,7 +55,6 @@ class SystemSettingsUpdaterState extends State<SystemSettingsUpdater> {
                       onSelected: (value) => setState(() => userConfig.setAutoUpdate(value)),
                       itemBuilder: (context) => AutoUpdateFrequency.values
                           .map((e) => PopupMenuItem(
-                                autofocus: PlatformApi.isAndroidTV() && e == userConfig.autoUpdateFrequency,
                                 value: e,
                                 title: Text(AppLocalizations.of(context)!.autoUpdateFrequency(e.name)),
                                 leading: Icon(e == userConfig.autoUpdateFrequency ? Icons.done : null),
@@ -79,7 +77,6 @@ class SystemSettingsUpdaterState extends State<SystemSettingsUpdater> {
               ),
             ),
             FilledButton(
-              autofocus: PlatformApi.isAndroidTV(),
               onPressed: _loading || _updated
                   ? null
                   : () async {
