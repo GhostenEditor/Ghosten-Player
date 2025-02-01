@@ -21,7 +21,7 @@ dependencies:
   dio: ^5.7.0
   file_picker:
     path: packages/file_picker
-  flutter_markdown: ^0.7.4
+  flutter_markdown: ^0.7.6
   flutter_slidable: ^3.1.2
   flutter_spinkit: ^5.2.1
   infinite_scroll_pagination: ^4.1.0
