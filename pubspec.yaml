@@ -16,7 +16,7 @@ dependencies:
   bluetooth:
     path: packages/bluetooth
   cached_network_image: ^3.4.1
-  collection: ^1.18.0
+  collection: ^1.19.0
   date_format: ^2.0.9
   dio: ^5.7.0
   file_picker:
