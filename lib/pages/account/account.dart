@@ -166,7 +166,7 @@ class AccountPreference extends StatelessWidget {
             sliceSize = data['sliceSize'];
             return PopScope(
               canPop: false,
-              onPopInvoked: (didPop) {
+              onPopInvokedWithResult: (didPop, _) {
                 if (didPop) return;
                 Api.driverSettingUpdateById(account.id, {
                   if (data.containsKey('proxy')) 'proxy': proxy,

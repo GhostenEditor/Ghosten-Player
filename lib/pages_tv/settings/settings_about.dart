@@ -65,7 +65,7 @@ class _SettingsAutoCheckForUpdatesPageState extends State<SettingsAutoCheckForUp
 
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
         Navigator.of(context).pop(refresh);
       },

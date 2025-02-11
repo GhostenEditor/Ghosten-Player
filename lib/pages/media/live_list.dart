@@ -95,7 +95,7 @@ class _ChannelListState extends State<_ChannelList> {
       child: Builder(builder: (context) {
         return PopScope(
           canPop: false,
-          onPopInvoked: (didPop) {
+          onPopInvokedWithResult: (didPop, _) {
             if (didPop) return;
             Navigator.of(context).pop(_refresh);
           },

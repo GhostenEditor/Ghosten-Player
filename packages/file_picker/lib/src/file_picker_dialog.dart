@@ -57,7 +57,7 @@ class _FilePickerDialogState<T> extends State<FilePickerDialog<T>> {
       ),
       body: PopScope(
         canPop: false,
-        onPopInvoked: (didPop) {
+        onPopInvokedWithResult: (didPop, _) {
           if (!didPop) _pageBack();
         },
         child: RefreshIndicator(

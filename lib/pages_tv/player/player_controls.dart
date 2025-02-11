@@ -141,7 +141,7 @@ class _PlayerControlsState extends State<PlayerControls> {
 
   Widget _buildDraw(BuildContext context) {
     return NavigatorPopHandler(
-      onPop: () {
+      onPopWithResult: (_) {
         _navigatorKey.currentState!.maybePop();
       },
       child: Container(
@@ -285,7 +285,7 @@ class _PlayerControlsState extends State<PlayerControls> {
           resizeToAvoidBottomInset: false,
           body: PopScope(
             canPop: false,
-            onPopInvoked: (didPop) {
+            onPopInvokedWithResult: (didPop, _) {
               if (didPop) {
                 return;
               } else if (_scaffoldKey.currentState!.isEndDrawerOpen) {

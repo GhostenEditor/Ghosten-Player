@@ -139,7 +139,7 @@ class _DriverFilePickerState extends State<DriverFilePicker> {
                 }),
               },
               child: NavigatorPopHandler(
-                onPop: () {
+                onPopWithResult: (_) {
                   _navigatorKey.currentState!.maybePop();
                 },
                 child: Navigator(

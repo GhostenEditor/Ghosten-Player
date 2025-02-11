@@ -5,6 +5,22 @@ allprojects {
     }
 }
 
+// FIX flutter plugin install_plugin for Flutter 3.24
+subprojects {
+    afterEvaluate { project ->
+        if (project.group == "com.example.installplugin" || project.group == "io.flutter.plugins.webview_cookie_manager") {
+            project.android {
+                compileSdkVersion = 35
+                namespace = project.group
+                compileOptions {
+                    sourceCompatibility = JavaVersion.VERSION_17
+                    targetCompatibility = JavaVersion.VERSION_17
+                }
+            }
+        }
+    }
+}
+
 rootProject.buildDir = "../build"
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"

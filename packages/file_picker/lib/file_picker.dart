@@ -1,5 +1,3 @@
-library file_picker;
-
 import 'src/file_picker_platform_interface.dart';
 
 export 'src/models.dart';

@@ -113,7 +113,7 @@ class _HomeState extends State<TVHomePage> {
           ],
         ),
         endDrawer: NavigatorPopHandler(
-          onPop: () => _navigatorKey.currentState!.maybePop(),
+          onPopWithResult: (_) => _navigatorKey.currentState!.maybePop(),
           child: Container(
             width: 360,
             color: Theme.of(context).colorScheme.surfaceContainerLow,
