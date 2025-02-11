@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:animations/animations.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -43,10 +44,8 @@ class PlayerControls extends StatefulWidget {
   final PlayerController controller;
   final List<ListTile> Function(BuildContext)? actions;
   final PlayerLocalizations localizations;
-  final Duration seekStep;
   final bool? showThumbnails;
-  final int? extensionRendererMode;
-  final bool? enableDecoderFallback;
+  final Map<String, dynamic>? options;
   final Cast? cast;
   final Widget Function(BuildContext, int index, void Function(int) onTap)? playlistItemBuilder;
 
@@ -58,9 +57,7 @@ class PlayerControls extends StatefulWidget {
     this.actions,
     this.isTV = false,
     this.theme,
-    this.seekStep = const Duration(seconds: 30),
-    this.extensionRendererMode,
-    this.enableDecoderFallback,
+    this.options,
     this.showThumbnails,
     this.cast,
     this.playlistItemBuilder,
@@ -205,26 +202,13 @@ class _PlayerControlsState extends State<PlayerControls> {
                         onActionMore: _showActionMore,
                         cast: widget.cast,
                       ),
-                      Focus(
-                        autofocus: true,
-                        focusNode: _progressFocusNode,
-                        onKeyEvent: (node, event) => _onProgressKeyEvent(context, node, event),
-                        onFocusChange: (focused) {
-                          if (!focused) {
-                            if (_progressController.seeking) {
-                              _controller.play();
-                            }
-                            _progressController.endSeek(context);
-                          }
+                      PlayerProgressView(
+                        _progressController,
+                        seekStart: () => _controller.pause(),
+                        seekEnd: (position) {
+                          _controller.seekTo(position);
+                          _controller.play();
                         },
-                        child: PlayerProgressView(
-                          _progressController,
-                          seekStart: () => _controller.pause(),
-                          seekEnd: (position) {
-                            _controller.seekTo(position);
-                            _controller.play();
-                          },
-                        ),
                       ),
                     ],
                   ),
@@ -243,54 +227,6 @@ class _PlayerControlsState extends State<PlayerControls> {
         ],
       ),
     );
-  }
-
-  KeyEventResult _onProgressKeyEvent(BuildContext context, FocusNode node, KeyEvent event) {
-    if (_progressFocusNode.hasFocus) {
-      if (event is KeyDownEvent || event is KeyRepeatEvent) {
-        _controlsStream.add(ControlsStreamStatus.show);
-        switch (event.logicalKey) {
-          case LogicalKeyboardKey.arrowLeft:
-            if (!_progressController.seeking) {
-              _controller.pause();
-              _progressController.startSeek(context);
-            }
-            _controlsStream.add(ControlsStreamStatus.showInfinite);
-            _progressController.updateSeek(context, _progressController.cachedPosition - widget.seekStep);
-            return KeyEventResult.handled;
-          case LogicalKeyboardKey.arrowRight:
-            if (!_progressController.seeking) {
-              _controller.pause();
-              _progressController.startSeek(context);
-            }
-            _controlsStream.add(ControlsStreamStatus.showInfinite);
-            _progressController.updateSeek(context, _progressController.cachedPosition + widget.seekStep);
-            return KeyEventResult.handled;
-          case LogicalKeyboardKey.arrowUp:
-            _controlsStream.add(ControlsStreamStatus.showInfinite);
-            return KeyEventResult.ignored;
-          case LogicalKeyboardKey.contextMenu:
-            _showPlaylist(context);
-            return KeyEventResult.handled;
-          case LogicalKeyboardKey.select:
-          case LogicalKeyboardKey.enter:
-            if (_progressController.seeking) {
-              _progressController.endSeek(context);
-              _controller.seekTo(_progressController.cachedPosition);
-              _controller.play();
-            } else {
-              if (_controller.status.value == PlayerStatus.playing) {
-                _controller.pause();
-                return KeyEventResult.handled;
-              } else if (_controller.status.value == PlayerStatus.paused) {
-                _controller.play();
-                return KeyEventResult.handled;
-              }
-            }
-        }
-      }
-    }
-    return KeyEventResult.ignored;
   }
 
   @override
@@ -364,10 +300,7 @@ class _PlayerControlsState extends State<PlayerControls> {
                     listenable: _controller.isCasting,
                     builder: (context, _) {
                       if (!_controller.isCasting.value) {
-                        return PlayerPlatformView(
-                          extensionRendererMode: widget.extensionRendererMode,
-                          enableDecoderFallback: widget.enableDecoderFallback,
-                        );
+                        return PlayerPlatformView(options: widget.options);
                       } else {
                         return const SizedBox();
                       }
@@ -937,7 +870,7 @@ class PlayerSettings extends StatelessWidget {
     required String label,
     required List<MediaTrack> tracks,
     dynamic selected,
-    required Function(dynamic) onSelected,
+    required Function(String?) onSelected,
   }) {
     final selectedTrack = tracks.firstWhereOrNull((v) => v.id == selected);
     return PopupMenuButton(
@@ -945,7 +878,7 @@ class PlayerSettings extends StatelessWidget {
         itemBuilder: (context) => [
               CheckedPopupMenuItem(
                 checked: selected == null,
-                value: '',
+                value: null,
                 child: Text(localizations.videoSettingsNone),
               ),
               ...tracks.map((e) => CheckedPopupMenuItem(
@@ -1041,10 +974,9 @@ class _PlayerPlaylistViewState extends State<PlayerPlaylistView> {
 }
 
 class PlayerPlatformView extends StatefulWidget {
-  final int? extensionRendererMode;
-  final bool? enableDecoderFallback;
+  final Map<String, dynamic>? options;
 
-  const PlayerPlatformView({super.key, this.extensionRendererMode, this.enableDecoderFallback});
+  const PlayerPlatformView({super.key, this.options});
 
   @override
   State<PlayerPlatformView> createState() => _PlayerPlatformViewState();
@@ -1054,9 +986,8 @@ class _PlayerPlatformViewState extends State<PlayerPlatformView> {
   @override
   void didChangeDependencies() {
     PlayerPlatform.instance.init({
-      'extensionRendererMode': widget.extensionRendererMode,
-      'enableDecoderFallback': widget.enableDecoderFallback,
-      'language': Localizations.localeOf(context).languageCode
+      ...?widget.options,
+      'language': Localizations.localeOf(context).languageCode,
     });
     super.didChangeDependencies();
   }
@@ -1481,7 +1412,8 @@ class _PlayerProgressViewState extends State<PlayerProgressView> {
                                 child: Container(color: Theme.of(context).colorScheme.primary))
                           else
                             FractionallySizedBox(
-                                widthFactor: _controller.position / _controller.duration ?? 0, child: Container(color: Theme.of(context).colorScheme.primary))
+                                widthFactor: max(_controller.position / _controller.duration ?? 0, 0),
+                                child: Container(color: Theme.of(context).colorScheme.primary))
                         ],
                       ),
                     ),

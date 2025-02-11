@@ -2,10 +2,11 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
+import '../api.dart';
 import 'api_platform_interface.dart';
-import 'models.dart';
 
 class ApiWeb extends ApiPlatform {
   ApiWeb();
@@ -168,21 +169,37 @@ class Client extends ApiClient {
 
   @override
   Future<T?> delete<T>(String path, {Object? data}) {
-    return _client.delete<T>(path, data: data).then((resp) => resp.data);
+    return _client.delete<T>(path, data: data).then((resp) => resp.data).catchError((error) {
+      throw convert(error);
+    }, test: (error) => error is DioException);
   }
 
   @override
   Future<T?> get<T>(String path, {Json? queryParameters}) {
-    return _client.get<T>(path, queryParameters: queryParameters).then((resp) => resp.data);
+    return _client.get<T>(path, queryParameters: queryParameters).then((resp) => resp.data).catchError((error) {
+      throw convert(error);
+    }, test: (error) => error is DioException);
   }
 
   @override
   Future<T?> post<T>(String path, {Object? data}) {
-    return _client.post<T>(path, data: data).then((resp) => resp.data);
+    return _client.post<T>(path, data: data).then((resp) => resp.data).catchError((error) {
+      throw convert(error);
+    }, test: (error) => error is DioException);
   }
 
   @override
   Future<T?> put<T>(String path, {Object? data}) {
-    return _client.put<T>(path, data: data).then((resp) => resp.data);
+    return _client.put<T>(path, data: data).then((resp) => resp.data).catchError((error) {
+      throw convert(error);
+    }, test: (error) => error is DioException);
+  }
+
+  PlatformException convert(DioException exception) {
+    return PlatformException(
+      code: exception.response?.headers.value('Error-Code') ?? ((exception.response?.statusCode ?? 0) * 100).toString(),
+      message: exception.response?.data.toString() ?? exception.message,
+      stacktrace: exception.stackTrace.toString(),
+    );
   }
 }

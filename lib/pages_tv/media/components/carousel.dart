@@ -149,33 +149,31 @@ class _CarouselPaginationState extends State<CarouselPagination> with RouteAware
         return KeyEventResult.ignored;
       },
       child: Center(
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.black54,
-            borderRadius: BorderRadius.circular(50),
-            border: Border.all(color: focused ? Colors.white : Colors.transparent, width: 4),
-          ),
-          padding: const EdgeInsets.all(8),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: List.generate(widget.len, (index) {
-              return GestureDetector(
-                onTap: () {
-                  widget.onChange(index);
-                },
-                child: AnimatedContainer(
-                  width: index == widget.index ? 30 : 6,
-                  height: 6,
-                  margin: const EdgeInsets.symmetric(horizontal: 2),
-                  decoration: BoxDecoration(
-                    color: index == widget.index ? Colors.white : Colors.white38,
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                  duration: const Duration(milliseconds: 400),
-                  curve: Curves.easeOut,
-                ),
-              );
-            }).toList(),
+        child: Material(
+          color: Colors.black54,
+          shape: StadiumBorder(side: focused ? const BorderSide(color: Colors.white, width: 4) : BorderSide.none),
+          clipBehavior: Clip.antiAlias,
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(
+                  widget.len,
+                  (index) => GestureDetector(
+                        onTap: () => widget.onChange(index),
+                        child: AnimatedContainer(
+                          width: index == widget.index ? 30 : 6,
+                          height: 6,
+                          margin: const EdgeInsets.symmetric(horizontal: 2),
+                          decoration: BoxDecoration(
+                            color: index == widget.index ? Colors.white : Colors.white38,
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                          duration: const Duration(milliseconds: 400),
+                          curve: Curves.easeOut,
+                        ),
+                      )).toList(),
+            ),
           ),
         ),
       ),

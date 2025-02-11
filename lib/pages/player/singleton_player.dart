@@ -1,7 +1,10 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:player_view/player.dart';
+import 'package:provider/provider.dart';
+import 'package:video_player/player.dart';
+
+import '../../providers/user_config.dart';
 
 class SingletonPlayer extends StatefulWidget {
   final String url;
@@ -14,6 +17,7 @@ class SingletonPlayer extends StatefulWidget {
 }
 
 class _SingletonPlayerState extends State<SingletonPlayer> {
+  late final userConfig = context.read<UserConfig>();
   late final PlayerController controller = PlayerController([
     PlaylistItem(
       url: Uri.parse(widget.url),
@@ -41,6 +45,7 @@ class _SingletonPlayerState extends State<SingletonPlayer> {
         tagUnknown: AppLocalizations.of(context)!.tagUnknown,
         willSkipEnding: AppLocalizations.of(context)!.willSkipEnding,
       ),
+      options: userConfig.playerConfig.config,
       showThumbnails: true,
       controller: controller,
       isTV: widget.isTV,

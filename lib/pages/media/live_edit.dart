@@ -4,6 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../components/form_group.dart';
 import '../../utils/notification.dart';
+import '../../utils/utils.dart';
 import '../../validators/validators.dart';
 
 class LiveEditPage extends StatefulWidget {
@@ -16,6 +17,7 @@ class LiveEditPage extends StatefulWidget {
 }
 
 class _LiveEditPageState extends State<LiveEditPage> {
+  late final _controller = TextEditingController(text: widget.item?.url);
   late final _formGroup = FormGroupController([
     FormItem(
       'title',
@@ -29,6 +31,18 @@ class _LiveEditPageState extends State<LiveEditPage> {
       labelText: AppLocalizations.of(context)!.liveCreateFormItemLabelUrl,
       helperText: AppLocalizations.of(context)!.liveCreateFormItemHelperUrl,
       prefixIcon: Icons.link,
+      suffixIcon: IconButton(
+        icon: const Icon(Icons.folder_open_rounded),
+        onPressed: () async {
+          final res = await showDriverFilePicker(context, AppLocalizations.of(context)!.titleEditSubtitle, selectableType: FileType.file);
+          if (res != null) {
+            final file = res.$2;
+            _controller.text = 'driver://${res.$1}/${file.id}';
+            setState(() {});
+          }
+        },
+      ),
+      controller: _controller,
       validator: (value) => urlValidator(context, value, true),
       value: widget.item?.url,
     ),
@@ -46,28 +60,22 @@ class _LiveEditPageState extends State<LiveEditPage> {
       appBar: AppBar(
         title: Text(widget.item == null ? AppLocalizations.of(context)!.pageTitleAdd : AppLocalizations.of(context)!.pageTitleEdit),
         actions: [
-          IconButton(icon: const Icon(Icons.check), onPressed: onSubmit),
+          IconButton(icon: const Icon(Icons.check), onPressed: () => onSubmit(context)),
         ],
       ),
       body: FormGroup(controller: _formGroup),
     );
   }
 
-  onSubmit() async {
+  onSubmit(BuildContext context) async {
     if (_formGroup.validate()) {
       if (widget.item == null) {
-        await showNotification(context, Api.playlistInsert(_formGroup.data));
+        final resp = await showNotification(context, Api.playlistInsert(_formGroup.data));
+        if (resp?.error == null && context.mounted) Navigator.of(context).pop(true);
       } else {
-        await showNotification(context, Api.playlistUpdateById({..._formGroup.data, 'id': widget.item?.id}));
+        final resp = await showNotification(context, Api.playlistUpdateById({..._formGroup.data, 'id': widget.item?.id}));
+        if (resp?.error == null && context.mounted) Navigator.of(context).pop(true);
       }
-      if (mounted) Navigator.of(context).pop(true);
-    }
-  }
-
-  onConnectData(String data) {
-    final focusedItem = _formGroup.focusedItem;
-    if (focusedItem != null) {
-      focusedItem.controller.text += data;
     }
   }
 }

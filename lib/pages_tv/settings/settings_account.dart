@@ -48,6 +48,7 @@ class _SettingsAccountPageState extends State<SettingsAccountPage> {
                     ),
                     actions: [
                       TVIconButton(onPressed: () => showFilePicker(context, FilePickerType.remote, entry.$2.id, '/'), icon: const Icon(Icons.folder_outlined)),
+                      TVIconButton(onPressed: () => navigateToSlideLeft(context, AccountPreference(account: entry.$2)), icon: const Icon(Icons.edit_outlined)),
                       TVIconButton(
                           onPressed: () async {
                             final confirmed = await showConfirm(
@@ -136,5 +137,154 @@ class _FileListPageState extends State<_FileListPage> {
           type: widget.type,
           title: title,
         ));
+  }
+}
+
+class AccountPreference extends StatelessWidget {
+  final DriverAccount account;
+
+  const AccountPreference({super.key, required this.account});
+
+  @override
+  Widget build(BuildContext context) {
+    bool proxy = false;
+    int? concurrency;
+    int? sliceSize;
+    return SettingPage(
+        title: AppLocalizations.of(context)!.pageTitleAccountSetting,
+        child: FutureBuilderHandler(
+          future: Api.driverSettingQueryById(account.id),
+          builder: (context, snapshot) {
+            final data = snapshot.requireData!;
+            proxy = data['proxy'] ?? false;
+            concurrency = data['concurrency'];
+            sliceSize = data['sliceSize'];
+            return PopScope(
+              canPop: false,
+              onPopInvoked: (didPop) {
+                if (didPop) return;
+                Api.driverSettingUpdateById(account.id, {
+                  if (data.containsKey('proxy')) 'proxy': proxy,
+                  if (data.containsKey('concurrency')) 'concurrency': concurrency,
+                  if (data.containsKey('sliceSize')) 'sliceSize': concurrency == null ? null : sliceSize,
+                });
+                Navigator.of(context).pop();
+              },
+              child: StatefulBuilder(builder: (context, setState) {
+                return ListView(
+                  padding: const EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 32),
+                  children: [
+                    if (data.containsKey('proxy'))
+                      SwitchSettingItem(
+                        title: Text(AppLocalizations.of(context)!.accountUseProxy),
+                        value: proxy,
+                        onChanged: (value) => setState(() {
+                          proxy = value;
+                          if (!proxy) {
+                            concurrency = null;
+                            sliceSize = null;
+                          }
+                        }),
+                      ),
+                    if (data.containsKey('concurrency'))
+                      SwitchSettingItem(
+                        title: Text(AppLocalizations.of(context)!.playerOpenFileWithParallelThreads),
+                        value: concurrency != null,
+                        onChanged: (!data.containsKey('proxy') || proxy)
+                            ? (value) => setState(() {
+                                  concurrency = value ? 4 : null;
+                                  sliceSize = value ? 5 : null;
+                                })
+                            : null,
+                      ),
+                    if (data.containsKey('concurrency') && concurrency != null)
+                      StepperSettingItem(
+                        title: Text(AppLocalizations.of(context)!.playerParallelsCount),
+                        min: 2,
+                        max: 8,
+                        value: concurrency ?? 4,
+                        onChanged: (value) => setState(() => concurrency = value),
+                      ),
+                    if (data.containsKey('sliceSize') && concurrency != null)
+                      StepperSettingItem(
+                        title: Text(AppLocalizations.of(context)!.playerSliceSize),
+                        min: 1,
+                        max: 20,
+                        value: sliceSize ?? 5,
+                        onChanged: (value) => setState(() => sliceSize = value),
+                      ),
+                  ],
+                );
+              }),
+            );
+          },
+        ));
+  }
+}
+
+class Stepper extends StatelessWidget {
+  final int value;
+  final int? max;
+  final int? min;
+  final int step;
+  final Function(int) onChange;
+
+  const Stepper({super.key, this.max, this.min, this.step = 1, required this.onChange, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+          border: Border.all(
+            width: 2,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          color: Theme.of(context).colorScheme.primaryContainer,
+          borderRadius: BorderRadius.circular(1000)),
+      padding: const EdgeInsets.all(2),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          InkWell(
+            borderRadius: BorderRadius.circular(100),
+            onTap: min == null || value > min! ? () => onChange(clamp(value - step)) : null,
+            child: Padding(
+              padding: const EdgeInsets.all(6),
+              child: Icon(
+                Icons.remove,
+                size: 16,
+                color: min == null || value > min! ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.primaryContainer,
+              ),
+            ),
+          ),
+          SizedBox(
+            width: 20,
+            child: Text(value.toString(), textAlign: TextAlign.center),
+          ),
+          InkWell(
+            borderRadius: BorderRadius.circular(100),
+            onTap: max == null || value < max! ? () => onChange(clamp(value + step)) : null,
+            child: Padding(
+              padding: const EdgeInsets.all(6),
+              child: Icon(
+                Icons.add,
+                size: 16,
+                color: max == null || value < max! ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.primaryContainer,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  int clamp(int v) {
+    if (max != null) {
+      v = v < max! ? v : max!;
+    }
+    if (min != null) {
+      v = v > min! ? v : min!;
+    }
+    return v;
   }
 }

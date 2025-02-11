@@ -19,8 +19,8 @@ class ApiService : Service() {
     private external fun apiStart(port: Int, dbPath: String, downloadPath: String, cachePath: String, logPath: String)
     private external fun apiStop()
     external fun apiInitialized(): Boolean
-    external fun call(method: String, data: String, params: String): String
-    external fun callWithCallback(method: String, data: String, params: String, callback: ApiMethodHandler): String
+    external fun call(method: String, data: String, params: String): ByteArray
+    external fun callWithCallback(method: String, data: String, params: String, callback: ApiMethodHandler): ByteArray
     external fun log(level: Int, message: String)
 
     var apiStarted = false

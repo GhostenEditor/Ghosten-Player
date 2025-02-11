@@ -1,5 +1,3 @@
-library player;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -140,8 +138,8 @@ class PlayerController<T extends PlaylistItem> {
     return PlayerPlatform.instance.setPlaybackSpeed(speed);
   }
 
-  Future<void> setTrack(String type, dynamic id) {
-    return PlayerPlatform.instance.setTrack(type, id ?? '');
+  Future<void> setTrack(String type, String? id) {
+    return PlayerPlatform.instance.setTrack(type, id);
   }
 
   Future<void> setVolume(double volume) {

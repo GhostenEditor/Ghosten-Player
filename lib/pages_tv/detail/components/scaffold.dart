@@ -64,11 +64,13 @@ class _DetailScaffoldState<T extends MediaBase> extends State<DetailScaffold<T>>
               key: widget.scaffoldKey,
               backgroundColor: Colors.transparent,
               endDrawer: widget.endDrawer != null
-                  ? Container(
-                      width: 360,
-                      color: Theme.of(context).drawerTheme.backgroundColor,
-                      child: Navigator(key: widget.drawerNavigatorKey, onGenerateRoute: (settings) => FadeInPageRoute(builder: (context) => widget.endDrawer!)),
-                    )
+                  ? Builder(
+                      builder: (context) => Container(
+                            width: 360,
+                            color: Theme.of(context).colorScheme.surfaceContainerLow,
+                            child: Navigator(
+                                key: widget.drawerNavigatorKey, onGenerateRoute: (settings) => FadeInPageRoute(builder: (context) => widget.endDrawer!)),
+                          ))
                   : null,
               body: Row(
                 children: [

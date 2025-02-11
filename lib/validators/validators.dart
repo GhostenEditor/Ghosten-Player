@@ -24,6 +24,8 @@ String? urlValidator(BuildContext context, String? value, [bool required = false
   } else {
     if (RegExp(r'^https?://[a-zA-Z0-9\-.]+\.[a-zA-Z0-9\-.]{2,}(:[0-9]{1,5})?(/\S*)?$').hasMatch(value!)) {
       return null;
+    } else if (RegExp(r'^driver?://(\d{1,3})(/\S*)?$').hasMatch(value)) {
+      return null;
     } else {
       return AppLocalizations.of(context)!.formValidatorUrl;
     }

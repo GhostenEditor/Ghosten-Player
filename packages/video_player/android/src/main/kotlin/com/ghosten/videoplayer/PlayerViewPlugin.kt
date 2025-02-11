@@ -1,10 +1,9 @@
-package com.ghosten.player_view
+package com.ghosten.videoplayer
 
 import android.app.Activity
 import android.app.PictureInPictureParams
 import android.content.pm.PackageManager
 import android.os.Build
-import androidx.media3.common.C
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -17,7 +16,7 @@ import java.util.*
 class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware {
     private lateinit var mChannel: MethodChannel
     private lateinit var activity: Activity
-    private var mPlayerView: PlayerView? = null
+    private var mPlayerView: BasePlayerView? = null
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         mChannel = MethodChannel(binding.binaryMessenger, "com.ghosten.player/player")
         mChannel.setMethodCallHandler(this)
@@ -35,7 +34,7 @@ class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activit
             else -> {
                 when (call.method) {
                     "init" -> {
-                        if (mPlayerView == null) mPlayerView = PlayerView(
+                        mPlayerView = Media3PlayerView(
                             activity.applicationContext,
                             activity,
                             mChannel,
@@ -48,7 +47,6 @@ class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activit
                     "play" -> mPlayerView?.play()
                     "pause" -> mPlayerView?.pause()
                     "next" -> mPlayerView?.next(call.arguments as Int)
-                    "previous" -> mPlayerView?.previous()
                     "seekTo" -> mPlayerView?.seekTo((call.arguments as Int).toLong())
                     "updateSource" -> mPlayerView?.updateSource(call.argument("source")!!, call.argument("index")!!)
                     "setSources" -> mPlayerView?.setSources(call.argument("playlist")!!, call.argument("index")!!)
@@ -60,21 +58,8 @@ class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activit
                     }
 
                     "setVolume" -> mPlayerView?.setVolume((call.arguments as Double).toFloat())
-                    "setTrack" -> mPlayerView?.setTrack(
-                        when (call.argument<String>("type")) {
-                            "video" -> C.TRACK_TYPE_VIDEO
-                            "audio" -> C.TRACK_TYPE_AUDIO
-                            "sub" -> C.TRACK_TYPE_TEXT
-                            else -> return result.notImplemented()
-                        }, call.argument("id")
-                    )
-
-                    "setSkipPosition" ->
-                        mPlayerView?.setSkipPosition(
-                            call.argument("type")!!,
-                            call.argument("list")!!
-                        )
-
+                    "setTrack" -> mPlayerView?.setTrack(call.argument<String>("type"), call.argument<String?>("id"))
+                    "setSkipPosition" -> mPlayerView?.setSkipPosition(call.argument("type")!!, call.argument("list")!!)
                     "getVideoThumbnail" -> return mPlayerView!!.getVideoThumbnail(
                         result,
                         call.argument<Long>("position")!!
@@ -102,9 +87,7 @@ class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activit
     override fun onDetachedFromActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             activity.setPictureInPictureParams(
-                PictureInPictureParams.Builder()
-                    .setAutoEnterEnabled(true)
-                    .build()
+                PictureInPictureParams.Builder().setAutoEnterEnabled(true).build()
             )
         }
     }

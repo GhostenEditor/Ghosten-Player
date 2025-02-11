@@ -168,6 +168,21 @@ class _TVDetailState extends State<TVDetail> with ActionMixin, SearchableMixin {
                     autofocus: true,
                     leading: const Icon(Icons.play_arrow_rounded),
                     title: Text(AppLocalizations.of(context)!.buttonWatchNow),
+                    subtitle: item.nextToPlay != null
+                        ? Text('S${item.nextToPlay!.season} E${item.nextToPlay!.episode} - ${item.nextToPlay!.displayTitle()}', overflow: TextOverflow.ellipsis)
+                        : const Text(''),
+                    trailing: (item.nextToPlay?.duration != null && item.nextToPlay?.lastPlayedTime != null && item.nextToPlay!.duration!.inSeconds > 0)
+                        ? SizedBox.square(
+                            dimension: 16,
+                            child: Builder(builder: (context) {
+                              return CircularProgressIndicator(
+                                value: item.nextToPlay!.lastPlayedPosition!.inSeconds / item.nextToPlay!.duration!.inSeconds,
+                                backgroundColor: Colors.white,
+                                strokeAlign: BorderSide.strokeAlignInside,
+                              );
+                            }),
+                          )
+                        : null,
                     onTap: () => play(context, item),
                   ),
                   ButtonSettingItem(

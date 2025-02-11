@@ -1,7 +1,7 @@
 import 'package:api/api.dart';
-import 'package:flutter/material.dart' hide PopupMenuItem;
+import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:player_view/player.dart';
+import 'package:video_player/player.dart';
 
 import '../../components/appbar_progress.dart';
 import '../../components/async_image.dart';
@@ -9,8 +9,6 @@ import '../../components/focus_card.dart';
 import '../../components/future_builder_handler.dart';
 import '../../components/logo.dart';
 import '../../components/no_data.dart';
-import '../../components/pop_to_top.dart';
-import '../../components/popup_menu.dart';
 import '../../models/models.dart';
 import '../../theme.dart';
 import '../../utils/notification.dart';
@@ -95,9 +93,12 @@ class _ChannelListState extends State<_ChannelList> {
     return Theme(
       data: darkTheme,
       child: Builder(builder: (context) {
-        return PopToTop(
-          controller: _scrollController,
-          onPop: () => Navigator.of(context).pop(_refresh),
+        return PopScope(
+          canPop: false,
+          onPopInvoked: (didPop) {
+            if (didPop) return;
+            Navigator.of(context).pop(_refresh);
+          },
           child: Scaffold(
             appBar: AppBar(
               title: _playlist.title == null ? null : Text(_playlist.title!),
@@ -106,16 +107,19 @@ class _ChannelListState extends State<_ChannelList> {
                 PopupMenuButton(
                     itemBuilder: (BuildContext context) => [
                           PopupMenuItem(
-                            title: Text(AppLocalizations.of(context)!.buttonRefresh),
-                            leading: const Icon(Icons.refresh),
+                            padding: EdgeInsets.zero,
                             onTap: () async {
                               final resp = await showNotification(context, Api.playlistRefreshById(_playlist.id));
                               if (resp?.error == null) setState(() {});
                             },
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                              title: Text(AppLocalizations.of(context)!.buttonRefresh),
+                              leading: const Icon(Icons.refresh),
+                            ),
                           ),
                           PopupMenuItem(
-                            title: Text(AppLocalizations.of(context)!.buttonEdit),
-                            leading: const Icon(Icons.edit),
+                            padding: EdgeInsets.zero,
                             onTap: () async {
                               final flag = await navigateTo(context, LiveEditPage(item: _playlist));
                               if (flag == true) {
@@ -123,10 +127,14 @@ class _ChannelListState extends State<_ChannelList> {
                                 setState(() => _refresh = true);
                               }
                             },
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                              title: Text(AppLocalizations.of(context)!.buttonEdit),
+                              leading: const Icon(Icons.edit),
+                            ),
                           ),
                           PopupMenuItem(
-                            leading: const Icon(Icons.delete),
-                            title: Text(AppLocalizations.of(context)!.buttonDelete),
+                            padding: EdgeInsets.zero,
                             onTap: () async {
                               final confirm = await showConfirm(context, AppLocalizations.of(context)!.deleteConfirmText);
                               if (confirm != true) return;
@@ -136,6 +144,11 @@ class _ChannelListState extends State<_ChannelList> {
                               if (!context.mounted) return;
                               Navigator.of(context).pop(true);
                             },
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                              leading: const Icon(Icons.delete),
+                              title: Text(AppLocalizations.of(context)!.buttonDelete),
+                            ),
                           ),
                         ]),
               ],

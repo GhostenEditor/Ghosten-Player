@@ -209,7 +209,9 @@ class _FileListPageState extends State<_FileListPage> {
                           autofocus: index == 0,
                           leading: Radio(
                               value: item,
-                              onChanged: (widget.selectableType == null || item.type == widget.selectableType) ? (file) {} : null,
+                              onChanged: (widget.selectableType == null || item.type == widget.selectableType)
+                                  ? (file) => Navigator.of(navigatorKey.currentContext!).pop((widget.driverId, item))
+                                  : null,
                               groupValue: _selectedFile),
                           title: Text(item.name),
                           subtitle: Row(children: [
@@ -223,11 +225,9 @@ class _FileListPageState extends State<_FileListPage> {
                                   onPressed: () => onPage(item.id),
                                 )
                               : null,
-                          onTap: item.type == FileType.folder
-                              ? () {
-                                  Navigator.of(navigatorKey.currentContext!).pop((widget.driverId, item));
-                                }
-                              : null,
+                          onTap: (widget.selectableType == null || item.type == widget.selectableType)
+                              ? () => Navigator.of(navigatorKey.currentContext!).pop((widget.driverId, item))
+                              : () {},
                         ),
                       );
                     })

@@ -1,12 +1,11 @@
 import 'dart:async';
 
 import 'package:api/api.dart';
-import 'package:flutter/material.dart' hide PopupMenuItem;
+import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../../../components/popup_menu.dart';
 import '../../../components/search_button.dart';
 import '../../../providers/user_config.dart';
 import '../../../utils/utils.dart';
@@ -81,66 +80,94 @@ mixin MediaListMixin<T extends StatefulWidget> on State<T> {
         },
         itemBuilder: (BuildContext context) => <PopupMenuEntry<_Category>>[
               PopupMenuItem(
+                padding: EdgeInsets.zero,
                 onTap: () async {
                   final refresh = await navigateTo<bool>(context, LibraryManage(title: _getMediaTitle(mediaType), type: mediaType));
                   if (refresh == true) {
                     setState(() {});
                   }
                 },
-                leading: const Icon(Icons.folder_open_rounded),
-                title: Text(_getMediaTitle(mediaType).padRight(8, ' ')),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                  leading: const Icon(Icons.folder_open_rounded),
+                  title: Text(_getMediaTitle(mediaType), softWrap: true),
+                ),
               ),
               const PopupMenuDivider(),
               PopupMenuItem(
+                padding: EdgeInsets.zero,
                 value: _sort.type == SortType.title && _sort.direction == SortDirection.asc ? _Category.nameDesc : _Category.nameAsc,
-                leading: const Icon(Icons.abc),
-                title: Text(AppLocalizations.of(context)!.buttonName),
-                trailing: Icon(_sort.type == SortType.title && _sort.direction == SortDirection.asc
-                    ? Icons.arrow_upward_rounded
-                    : _sort.type == SortType.title && _sort.direction == SortDirection.desc
-                        ? Icons.arrow_downward_rounded
-                        : null),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                  leading: const Icon(Icons.abc),
+                  title: Text(AppLocalizations.of(context)!.buttonName),
+                  trailing: Icon(_sort.type == SortType.title && _sort.direction == SortDirection.asc
+                      ? Icons.arrow_upward_rounded
+                      : _sort.type == SortType.title && _sort.direction == SortDirection.desc
+                          ? Icons.arrow_downward_rounded
+                          : null),
+                ),
               ),
               PopupMenuItem(
+                padding: EdgeInsets.zero,
                 value: _sort.type == SortType.airDate && _sort.direction == SortDirection.desc ? _Category.airDateAsc : _Category.airDateDesc,
-                leading: const Icon(Icons.access_time_rounded),
-                title: Text(AppLocalizations.of(context)!.buttonAirDate),
-                trailing: Icon(_sort.type == SortType.airDate && _sort.direction == SortDirection.asc
-                    ? Icons.arrow_upward
-                    : _sort.type == SortType.airDate && _sort.direction == SortDirection.desc
-                        ? Icons.arrow_downward
-                        : null),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                  leading: const Icon(Icons.access_time_rounded),
+                  title: Text(AppLocalizations.of(context)!.buttonAirDate, softWrap: false),
+                  trailing: Icon(_sort.type == SortType.airDate && _sort.direction == SortDirection.asc
+                      ? Icons.arrow_upward
+                      : _sort.type == SortType.airDate && _sort.direction == SortDirection.desc
+                          ? Icons.arrow_downward
+                          : null),
+                ),
               ),
               PopupMenuItem(
+                padding: EdgeInsets.zero,
                 value: _sort.type == SortType.lastPlayedTime && _sort.direction == SortDirection.desc ? _Category.lastPlayTimeAsc : _Category.lastPlayTimeDesc,
-                leading: const Icon(Icons.remove_red_eye_outlined),
-                title: Text(AppLocalizations.of(context)!.buttonLastWatchedTime),
-                trailing: Icon(_sort.type == SortType.lastPlayedTime && _sort.direction == SortDirection.asc
-                    ? Icons.arrow_upward
-                    : _sort.type == SortType.lastPlayedTime && _sort.direction == SortDirection.desc
-                        ? Icons.arrow_downward
-                        : null),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                  leading: const Icon(Icons.remove_red_eye_outlined),
+                  title: Text(AppLocalizations.of(context)!.buttonLastWatchedTime, softWrap: false),
+                  trailing: Icon(_sort.type == SortType.lastPlayedTime && _sort.direction == SortDirection.asc
+                      ? Icons.arrow_upward
+                      : _sort.type == SortType.lastPlayedTime && _sort.direction == SortDirection.desc
+                          ? Icons.arrow_downward
+                          : null),
+                ),
               ),
               const PopupMenuDivider(),
               PopupMenuItem(
-                leading: const Icon(Icons.format_list_bulleted_rounded),
-                title: Text(AppLocalizations.of(context)!.buttonAll),
-                trailing: Icon(_sort.filter == FilterType.all ? Icons.done : null),
+                padding: EdgeInsets.zero,
                 value: _Category.all,
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                  leading: const Icon(Icons.format_list_bulleted_rounded),
+                  title: Text(AppLocalizations.of(context)!.buttonAll),
+                  trailing: Icon(_sort.filter == FilterType.all ? Icons.done : null),
+                ),
               ),
               PopupMenuItem(
-                leading: Icon(_sort.filter == FilterType.watched ? Icons.check_circle : Icons.check_circle_outline),
-                title: Text(_sort.filter == FilterType.watched ? AppLocalizations.of(context)!.buttonWatched : AppLocalizations.of(context)!.buttonUnwatched),
-                trailing: Icon(_sort.filter == FilterType.watched || _sort.filter == FilterType.unwatched ? Icons.check_rounded : null),
+                padding: EdgeInsets.zero,
                 value: _sort.filter == FilterType.unwatched ? _Category.watched : _Category.unwatched,
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                  leading: Icon(_sort.filter == FilterType.watched ? Icons.check_circle : Icons.check_circle_outline),
+                  title: Text(_sort.filter == FilterType.watched ? AppLocalizations.of(context)!.buttonWatched : AppLocalizations.of(context)!.buttonUnwatched),
+                  trailing: Icon(_sort.filter == FilterType.watched || _sort.filter == FilterType.unwatched ? Icons.check_rounded : null),
+                ),
               ),
               PopupMenuItem(
-                leading: Icon(_sort.filter == FilterType.exceptFavorite ? Icons.favorite_outline_rounded : Icons.favorite_rounded),
-                title: Text(_sort.filter == FilterType.exceptFavorite
-                    ? AppLocalizations.of(context)!.buttonExpectFavorite
-                    : AppLocalizations.of(context)!.buttonFavorite),
-                trailing: Icon(_sort.filter == FilterType.favorite || _sort.filter == FilterType.exceptFavorite ? Icons.check_rounded : null),
+                padding: EdgeInsets.zero,
                 value: _sort.filter == FilterType.favorite ? _Category.exceptFavorite : _Category.favorite,
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                  leading: Icon(_sort.filter == FilterType.exceptFavorite ? Icons.favorite_outline_rounded : Icons.favorite_rounded),
+                  title: Text(_sort.filter == FilterType.exceptFavorite
+                      ? AppLocalizations.of(context)!.buttonExpectFavorite
+                      : AppLocalizations.of(context)!.buttonFavorite),
+                  trailing: Icon(_sort.filter == FilterType.favorite || _sort.filter == FilterType.exceptFavorite ? Icons.check_rounded : null),
+                ),
               ),
             ]);
   }

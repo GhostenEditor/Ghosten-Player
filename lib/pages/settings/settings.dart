@@ -1,11 +1,11 @@
 import 'package:api/api.dart';
-import 'package:flutter/material.dart' hide PopupMenuItem;
+import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../components/appbar_progress.dart';
 import '../../components/logo.dart';
-import '../../components/popup_menu.dart';
 import '../../components/scrollbar.dart';
 import '../../const.dart';
 import '../../providers/user_config.dart';
@@ -77,10 +77,10 @@ class SettingsPage extends StatelessWidget {
               trailing: AppLocalizations.of(context)!.systemLanguage(userConfig.language.name),
               onSelected: userConfig.setLanguage,
               itemBuilder: (BuildContext context) => SystemLanguage.values
-                  .map((language) => PopupMenuItem(
+                  .map((language) => CheckedPopupMenuItem(
                         value: language,
-                        trailing: Icon(userConfig.language == language ? Icons.done : null),
-                        title: Text(AppLocalizations.of(context)!.systemLanguage(language.name)),
+                        checked: userConfig.language == language,
+                        child: Text(AppLocalizations.of(context)!.systemLanguage(language.name)),
                       ))
                   .toList(),
             ),
@@ -90,10 +90,10 @@ class SettingsPage extends StatelessWidget {
               trailing: AppLocalizations.of(context)!.systemTheme(userConfig.themeMode.name),
               onSelected: userConfig.setTheme,
               itemBuilder: (BuildContext context) => ThemeMode.values
-                  .map((theme) => PopupMenuItem(
+                  .map((theme) => CheckedPopupMenuItem(
                         value: theme,
-                        trailing: Icon(userConfig.themeMode == theme ? Icons.done : null),
-                        title: Text(AppLocalizations.of(context)!.systemTheme(theme.name).padRight(8, ' ')),
+                        checked: userConfig.themeMode == theme,
+                        child: Text(AppLocalizations.of(context)!.systemTheme(theme.name).padRight(8, ' ')),
                       ))
                   .toList(),
             ),
@@ -139,6 +139,13 @@ class SettingsPage extends StatelessWidget {
               AppLocalizations.of(context)!.settingsItemInfo,
               Icons.info_outline,
               onTap: () => navigateTo(context, const SystemSettingsUpdater()),
+            ),
+            _buildItem(
+              AppLocalizations.of(context)!.settingsItemFeedback,
+              Icons.feedback_outlined,
+              onTap: () {
+                launchUrlString('https://github.com/$repoAuthor/$repoName/issues', browserConfiguration: BrowserConfiguration(showTitle: true));
+              },
             ),
           ],
         ));

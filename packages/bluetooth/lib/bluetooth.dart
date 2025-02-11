@@ -2,6 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 
+const bluetoothConnectTimeoutException = '60003';
+const bluetoothNonAdaptorException = '60004';
+
 class Bluetooth {
   static const String namespace = 'com.ghosten.bluetooth';
   static const MethodChannel methodChannel = MethodChannel('$namespace/methods');
@@ -10,7 +13,7 @@ class Bluetooth {
   static const EventChannel _connectedChannel = EventChannel('$namespace/connected');
 
   static Future<bool> requestEnable() async {
-    return await methodChannel.invokeMethod('requestEnable').catchError((error) => throw BluetoothException.nonAdaptor(error)) ?? false;
+    return await methodChannel.invokeMethod('requestEnable').catchError((error) => throw PlatformException(code: bluetoothNonAdaptorException)) ?? false;
   }
 
   static Stream<BluetoothDevice> startServer() async* {
@@ -30,7 +33,7 @@ class Bluetooth {
   }
 
   static Future<bool> connect(String address) async {
-    return await methodChannel.invokeMethod('connect', address).catchError((error) => throw BluetoothException.connectTimeout(error)) ?? false;
+    return await methodChannel.invokeMethod('connect', address).catchError((error) => throw PlatformException(code: bluetoothConnectTimeoutException)) ?? false;
   }
 
   static Future<int> requestDiscoverable(Duration duration) async {
@@ -43,7 +46,7 @@ class Bluetooth {
   }
 
   static Future<bool> requestPermission() async {
-    return await methodChannel.invokeMethod('requestPermission').catchError((error) => throw BluetoothException.nonAdaptor(error)) ?? false;
+    return await methodChannel.invokeMethod('requestPermission').catchError((error) => throw PlatformException(code: bluetoothNonAdaptorException)) ?? false;
   }
 
   static Stream<BluetoothDevice> startDiscovery() async* {
@@ -196,19 +199,4 @@ class BluetoothMessage {
   BluetoothMessage.file(String filePath)
       : type = BlueToothMessageType.file,
         data = filePath;
-}
-
-enum BluetoothExceptionType { connectTimeout, nonAdaptor }
-
-class BluetoothException implements Exception {
-  final BluetoothExceptionType type;
-  final String? message;
-
-  BluetoothException.connectTimeout(PlatformException error)
-      : type = BluetoothExceptionType.connectTimeout,
-        message = error.message;
-
-  BluetoothException.nonAdaptor(PlatformException error)
-      : type = BluetoothExceptionType.nonAdaptor,
-        message = error.message;
 }

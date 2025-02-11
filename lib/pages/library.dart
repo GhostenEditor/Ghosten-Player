@@ -1,5 +1,5 @@
 import 'package:api/api.dart';
-import 'package:flutter/material.dart' hide PopupMenuItem;
+import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../components/appbar_progress.dart';
@@ -7,7 +7,6 @@ import '../components/async_image.dart';
 import '../components/focus_card.dart';
 import '../components/future_builder_handler.dart';
 import '../components/gap.dart';
-import '../components/popup_menu.dart';
 import '../utils/notification.dart';
 import '../utils/utils.dart';
 
@@ -121,11 +120,16 @@ class _LibraryItem extends StatelessWidget {
     return FocusCard(
       itemBuilder: (context) => [
         PopupMenuItem(
+          padding: EdgeInsets.zero,
           onTap: () => showNotification(context, refreshMedia(item.id), showSuccess: false),
-          leading: const Icon(Icons.sync),
-          title: Text(AppLocalizations.of(context)!.buttonSyncDriver),
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+            leading: const Icon(Icons.sync),
+            title: Text(AppLocalizations.of(context)!.buttonSyncDriver),
+          ),
         ),
         PopupMenuItem(
+          padding: EdgeInsets.zero,
           onTap: () async {
             final confirmed = await showConfirm(context, AppLocalizations.of(context)!.deleteMediaGroupConfirmText);
             if (confirmed == true) {
@@ -134,8 +138,11 @@ class _LibraryItem extends StatelessWidget {
               if (resp?.error == null) needUpdate();
             }
           },
-          leading: const Icon(Icons.delete_outline),
-          title: Text(AppLocalizations.of(context)!.buttonDelete),
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+            leading: const Icon(Icons.delete_outline),
+            title: Text(AppLocalizations.of(context)!.buttonDelete),
+          ),
         )
       ],
       child: Column(

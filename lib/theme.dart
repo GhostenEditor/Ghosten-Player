@@ -36,7 +36,6 @@ final tvTheme = ThemeData(
   drawerTheme: const DrawerThemeData(
     shape: RoundedRectangleBorder(),
     endShape: RoundedRectangleBorder(),
-    backgroundColor: Color(0xff202124),
   ),
   colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF98C2FF), brightness: Brightness.dark),
   dividerTheme: const DividerThemeData(color: Colors.white12),

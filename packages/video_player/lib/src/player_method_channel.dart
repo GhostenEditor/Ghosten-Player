@@ -33,8 +33,8 @@ class MethodChannelPlayer extends PlayerPlatform {
   }
 
   @override
-  setTrack(String type, dynamic id) {
-    return _channel.invokeMethod('setTrack', {'type': type, if (id.isNotEmpty) 'id': id});
+  setTrack(String type, String? id) {
+    return _channel.invokeMethod('setTrack', {'type': type, 'id': id});
   }
 
   @override

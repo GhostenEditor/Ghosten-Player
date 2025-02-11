@@ -28,7 +28,7 @@ class TVListPage extends StatefulWidget {
 }
 
 class _TVListPageState extends State<TVListPage> with NeedUpdateMixin, ChannelMixin {
-  final backdrop = ValueNotifier<String?>(null);
+  final _backdrop = ValueNotifier<String?>(null);
   final _carouselIndex = ValueNotifier<int?>(null);
   final _showBlur = ValueNotifier(false);
   final _controller = ScrollController();
@@ -44,7 +44,7 @@ class _TVListPageState extends State<TVListPage> with NeedUpdateMixin, ChannelMi
 
   @override
   void dispose() {
-    backdrop.dispose();
+    _backdrop.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -56,7 +56,7 @@ class _TVListPageState extends State<TVListPage> with NeedUpdateMixin, ChannelMi
       children: [
         AspectRatio(
           aspectRatio: 2,
-          child: ListenableBuilder(listenable: backdrop, builder: (context, _) => CarouselBackground(src: backdrop.value)),
+          child: ListenableBuilder(listenable: _backdrop, builder: (context, _) => CarouselBackground(src: _backdrop.value)),
         ),
         AspectRatio(
           aspectRatio: 2,
@@ -81,9 +81,9 @@ class _TVListPageState extends State<TVListPage> with NeedUpdateMixin, ChannelMi
               builder: (context, snapshot) {
                 Future.microtask(() {
                   if (snapshot.requireData.isNotEmpty) {
-                    backdrop.value = snapshot.requireData[0].backdrop;
+                    _backdrop.value = snapshot.requireData[0].backdrop;
                   } else {
-                    backdrop.value = null;
+                    _backdrop.value = null;
                   }
                 });
                 return SliverToBoxAdapter(
@@ -104,7 +104,7 @@ class _TVListPageState extends State<TVListPage> with NeedUpdateMixin, ChannelMi
                                   }
                                 },
                                 onChange: (index) {
-                                  backdrop.value = snapshot.requireData[index].backdrop;
+                                  _backdrop.value = snapshot.requireData[index].backdrop;
                                   _carouselIndex.value = index;
                                 },
                                 child: CarouselItem(

@@ -2,9 +2,11 @@ import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../utils/utils.dart';
 import '../../validators/validators.dart';
 import '../components/input_assistance.dart';
 import '../components/stepper_form.dart';
+import '../utils/driver_file_picker.dart';
 import '../utils/notification.dart';
 
 class LiveEdit extends StatefulWidget {
@@ -17,6 +19,7 @@ class LiveEdit extends StatefulWidget {
 }
 
 class _LiveEditState extends State<LiveEdit> {
+  late final _controller = TextEditingController(text: widget.item?.url);
   late final items = [
     FormItem(
       'title',
@@ -30,6 +33,17 @@ class _LiveEditState extends State<LiveEdit> {
       labelText: AppLocalizations.of(context)!.liveCreateFormItemLabelUrl,
       helperText: AppLocalizations.of(context)!.liveCreateFormItemHelperUrl,
       prefixIcon: const Icon(Icons.link),
+      suffixIcon: IconButton(
+        icon: const Icon(Icons.folder_open_rounded),
+        onPressed: () async {
+          final resp = await navigateTo(navigatorKey.currentContext!, const DriverFilePicker(selectableType: FileType.file));
+          if (resp is (int, DriverFile)) {
+            final file = resp.$2;
+            _controller.text = 'driver://${resp.$1}/${file.id}';
+          }
+        },
+      ),
+      controller: _controller,
       validator: (value) => urlValidator(context, value, true),
       value: widget.item?.url,
     ),
@@ -66,11 +80,12 @@ class _LiveEditState extends State<LiveEdit> {
                     items: items,
                     onComplete: (data) async {
                       if (widget.item == null) {
-                        await showNotification(context, Api.playlistInsert(data));
+                        final resp = await showNotification(context, Api.playlistInsert(data));
+                        if (resp?.error == null && context.mounted) Navigator.of(context).pop(true);
                       } else {
-                        await showNotification(context, Api.playlistUpdateById({...data, 'id': widget.item?.id}));
+                        final resp = await showNotification(context, Api.playlistUpdateById({...data, 'id': widget.item?.id}));
+                        if (resp?.error == null && context.mounted) Navigator.of(context).pop(true);
                       }
-                      if (context.mounted) Navigator.of(context).pop(true);
                     },
                   ),
                 ],

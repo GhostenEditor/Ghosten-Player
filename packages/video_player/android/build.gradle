@@ -1,4 +1,4 @@
-group = "com.ghosten.player_view"
+group = "com.ghosten.videoplayer"
 version = "1.0-SNAPSHOT"
 
 buildscript {
@@ -25,19 +25,17 @@ apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
 
 android {
-    if (project.android.hasProperty("namespace")) {
-        namespace = "com.ghosten.player_view"
-    }
+    namespace = "com.ghosten.videoplayer"
 
-    compileSdk = 34
+    compileSdk = 35
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = JavaVersion.VERSION_11
     }
 
     sourceSets {
@@ -67,7 +65,7 @@ android {
     }
 }
 
-def media3_version = "1.4.1"
+def media3_version = "1.5.1"
 dependencies {
     implementation "androidx.media3:media3-ui:${media3_version}"
     implementation "androidx.media3:media3-datasource:${media3_version}"

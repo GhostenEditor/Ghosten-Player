@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:player_view/player.dart';
+import 'package:video_player/player.dart';
 
 import '../models/models.dart';
 import '../pages/player/common_player.dart';

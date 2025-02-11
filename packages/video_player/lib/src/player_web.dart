@@ -141,7 +141,7 @@ class PlayerWeb extends PlayerPlatform {
   }
 
   @override
-  Future<void> setTrack(String type, dynamic id) async {
+  Future<void> setTrack(String type, String? id) async {
     invoke('track', {'id': id, 'type': type});
   }
 

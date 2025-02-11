@@ -1,9 +1,7 @@
 import 'package:api/api.dart';
 import 'package:flutter/widgets.dart';
-import 'package:player_view/player.dart';
-import 'package:provider/provider.dart';
+import 'package:video_player/player.dart';
 
-import '../providers/user_config.dart';
 import '../utils/utils.dart';
 
 extension FromMedia on ExPlaylistItem {
@@ -13,7 +11,7 @@ extension FromMedia on ExPlaylistItem {
       sourceType: episode.downloaded ? PlaylistItemSourceType.local : PlaylistItemSourceType.other,
       title: episode.displayTitle(),
       description: '${episode.seriesTitle} S${episode.season} E${episode.episode}${episode.airDate == null ? '' : ' - ${episode.airDate?.format()}'}',
-      url: mediaUrl(episode.url),
+      url: episode.url.normalize(),
       poster: episode.poster,
       subtitles: episode.subtitles
           .map((e) => Subtitle(
@@ -36,7 +34,7 @@ extension FromMedia on ExPlaylistItem {
       sourceType: movie.downloaded ? PlaylistItemSourceType.local : PlaylistItemSourceType.other,
       title: movie.title ?? movie.filename,
       description: '${movie.originalTitle} - ${movie.airDate?.format()}',
-      url: mediaUrl(movie.url),
+      url: movie.url.normalize(),
       poster: movie.poster,
       subtitles: movie.subtitles
           .map((e) => Subtitle(
@@ -60,19 +58,6 @@ extension FromMedia on ExPlaylistItem {
         poster: channel.image,
         posterPadding: const EdgeInsets.only(top: 28, left: 24, right: 24, bottom: 12));
   }
-}
-
-Uri mediaUrl(Uri url) {
-  if (url.scheme.toLowerCase() == 'file') {
-    return url;
-  }
-  final userConfig = Provider.of<UserConfig>(navigatorKey.currentContext!, listen: false);
-  final playerConfig = userConfig.playerConfig;
-  return url.normalize().replace(queryParameters: {
-    ...url.queryParameters,
-    if (playerConfig.enableParallel) 'parallels': playerConfig.parallels.toString(),
-    if (playerConfig.enableParallel) 'size': (playerConfig.sliceSize * 1000000).toString(),
-  });
 }
 
 class ExPlaylistItem extends PlaylistItem {

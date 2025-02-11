@@ -1,9 +1,8 @@
-import 'package:flutter/material.dart' hide PopupMenuItem;
+import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 import '../../components/gap.dart';
-import '../../components/popup_menu.dart';
 import '../../providers/user_config.dart';
 
 class SystemSettingsPlayer extends StatefulWidget {
@@ -39,10 +38,10 @@ class SystemSettingsPlayerState extends State<SystemSettingsPlayer> {
                 });
               },
               itemBuilder: (context) => _ExtensionRendererMode.values
-                  .map((e) => PopupMenuItem(
+                  .map((e) => CheckedPopupMenuItem(
                         value: e,
-                        title: Text(AppLocalizations.of(context)!.audioDecoder(e.name)),
-                        leading: Icon(e == extensionRendererMode ? Icons.done : null),
+                        checked: e == extensionRendererMode,
+                        child: Text(AppLocalizations.of(context)!.audioDecoder(e.name)),
                       ))
                   .toList(),
               child: ListTile(
@@ -78,37 +77,6 @@ class SystemSettingsPlayerState extends State<SystemSettingsPlayer> {
               onChanged: (value) => setState(() => userConfig.setPlayerShowThumbnails(value)),
             ),
           ),
-          ListTile(
-            title: Text(AppLocalizations.of(context)!.playerOpenFileWithParallelThreads),
-            trailing: Switch(
-              value: userConfig.playerConfig.enableParallel,
-              onChanged: (value) => setState(() => userConfig.setPlayerEnableParallel(value)),
-            ),
-          ),
-          if (userConfig.playerConfig.enableParallel)
-            ListTile(
-              title: Text(AppLocalizations.of(context)!.playerParallelsCount),
-              trailing: Stepper(
-                min: 2,
-                max: 8,
-                value: userConfig.playerConfig.parallels,
-                onChange: (value) {
-                  setState(() => userConfig.setPlayerParallels(value));
-                },
-              ),
-            ),
-          if (userConfig.playerConfig.enableParallel)
-            ListTile(
-              title: Text(AppLocalizations.of(context)!.playerSliceSize),
-              trailing: Stepper(
-                min: 1,
-                max: 20,
-                value: userConfig.playerConfig.sliceSize,
-                onChange: (value) {
-                  setState(() => userConfig.setPlayerSliceSize(value));
-                },
-              ),
-            ),
         ],
       ),
     );

@@ -46,50 +46,6 @@ class SystemSettingsPlayerState extends State<SystemSettingsPlayer> {
           value: userConfig.playerConfig.showThumbnails ?? false,
           onChanged: (value) => setState(() => userConfig.setPlayerShowThumbnails(value)),
         ),
-        ButtonSettingItem(
-          title: Text(AppLocalizations.of(context)!.playerFastForwardSpeed),
-          trailing: Text('${userConfig.playerConfig.speed} ${AppLocalizations.of(context)!.second}'),
-          subtitle: MediaQuery(
-              data: const MediaQueryData(navigationMode: NavigationMode.directional),
-              child: Slider(
-                autofocus: true,
-                value: userConfig.playerConfig.speed.toDouble(),
-                min: 5,
-                max: 100,
-                divisions: 19,
-                label: userConfig.playerConfig.speed.toString(),
-                onChanged: (double value) {
-                  setState(() {
-                    userConfig.setPlayerFastForwardSpeed(value.round());
-                  });
-                },
-              )),
-        ),
-        SwitchSettingItem(
-          title: Text(AppLocalizations.of(context)!.playerOpenFileWithParallelThreads),
-          value: userConfig.playerConfig.enableParallel,
-          onChanged: (value) => setState(() => userConfig.setPlayerEnableParallel(value)),
-        ),
-        if (userConfig.playerConfig.enableParallel)
-          StepperSettingItem(
-            title: Text(AppLocalizations.of(context)!.playerParallelsCount),
-            min: 2,
-            max: 8,
-            value: userConfig.playerConfig.parallels,
-            onChanged: (value) {
-              setState(() => userConfig.setPlayerParallels(value));
-            },
-          ),
-        if (userConfig.playerConfig.enableParallel)
-          StepperSettingItem(
-            title: Text(AppLocalizations.of(context)!.playerSliceSize),
-            min: 1,
-            max: 20,
-            value: userConfig.playerConfig.sliceSize,
-            onChanged: (value) {
-              setState(() => userConfig.setPlayerSliceSize(value));
-            },
-          ),
       ]),
     );
   }

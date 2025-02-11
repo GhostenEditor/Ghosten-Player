@@ -4,8 +4,8 @@ import 'dart:math';
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:player_view/player.dart';
 import 'package:provider/provider.dart';
+import 'package:video_player/player.dart';
 
 import '../../components/async_image.dart';
 import '../../components/focus_card.dart';
@@ -74,9 +74,7 @@ class _CommonPlayerPageState extends State<CommonPlayerPage> {
       controller: controller,
       isTV: widget.isTV,
       showThumbnails: userConfig.playerConfig.showThumbnails,
-      seekStep: Duration(seconds: userConfig.playerConfig.speed),
-      extensionRendererMode: userConfig.playerConfig.mode,
-      enableDecoderFallback: userConfig.playerConfig.enableDecoderFallback,
+      options: userConfig.playerConfig.config,
       theme: widget.theme,
       cast: cast,
       actions: (context) => [
@@ -120,27 +118,17 @@ class _CommonPlayerPageState extends State<CommonPlayerPage> {
             title: Text(AppLocalizations.of(context)!.buttonDownload),
             onTap: () async {
               final item = controller.currentItem;
-              if (!context.mounted) return;
-              final playerConfig = Provider.of<UserConfig>(navigatorKey.currentContext!, listen: false).playerConfig;
               switch (widget.playerType) {
                 case PlayerType.tv:
                   showNotification(
                     context,
-                    Api.downloadTaskCreate(
-                      item.url.queryParameters['id']!,
-                      parallels: playerConfig.enableParallel ? playerConfig.parallels : null,
-                      size: playerConfig.enableParallel ? playerConfig.sliceSize : null,
-                    ),
+                    Api.downloadTaskCreate(item.url.queryParameters['id']!),
                     successText: AppLocalizations.of(context)!.tipsForDownload,
                   );
                 case PlayerType.movie:
                   showNotification(
                     context,
-                    Api.downloadTaskCreate(
-                      item.url.queryParameters['id']!,
-                      parallels: playerConfig.enableParallel ? playerConfig.parallels : null,
-                      size: playerConfig.enableParallel ? playerConfig.sliceSize : null,
-                    ),
+                    Api.downloadTaskCreate(item.url.queryParameters['id']!),
                     successText: AppLocalizations.of(context)!.tipsForDownload,
                   );
                 case PlayerType.live:

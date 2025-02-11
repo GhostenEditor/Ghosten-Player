@@ -236,16 +236,4 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
               }))),
     );
   }
-
-  onConnectData(String data) {
-    final formGroup = switch (driverType) {
-      DriverType.alipan => _alipan,
-      DriverType.webdav => _webdav,
-      _ => throw UnimplementedError(),
-    };
-    final focusedItem = formGroup.focusedItem;
-    if (focusedItem != null) {
-      focusedItem.controller.text += data;
-    }
-  }
 }

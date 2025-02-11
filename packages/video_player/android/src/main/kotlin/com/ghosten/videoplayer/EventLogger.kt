@@ -1,4 +1,4 @@
-package com.ghosten.player_view
+package com.ghosten.videoplayer
 
 import android.os.SystemClock
 import android.util.Log
