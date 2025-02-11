@@ -64,9 +64,9 @@ class ErrorMessage<T> extends StatelessWidget {
   CommonException _toCommonException(BuildContext context, Object error) {
     return switch (snapshot.error) {
       _ when error is PlatformException => CommonException(
-          code: AppLocalizations.of(context)!.errorCode(error.code, error.message as Object),
+          code: AppLocalizations.of(context)!.errorCode(error.code, error.message as Object? ?? ''),
           message: error.message,
-          details: AppLocalizations.of(context)!.errorDetails(error.code, error.message as Object),
+          details: AppLocalizations.of(context)!.errorDetails(error.code, error.message as Object? ?? ''),
           stackTrace: error.stacktrace == null ? null : StackTrace.fromString(error.stacktrace!),
         ),
       _ => CommonException(code: '0', message: error.toString())
