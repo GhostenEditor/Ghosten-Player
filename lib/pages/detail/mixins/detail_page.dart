@@ -226,7 +226,7 @@ mixin DetailPageMixin<T extends MediaBase, S extends StatefulWidget> on State<S>
       await future(title: title, year: year, index: index);
     } on PlatformException catch (e) {
       switch (e.code) {
-        case '40400':
+        case '40401':
           if (!mounted) return false;
           final res =
               await showDialog<(String, int?)>(context: context, barrierDismissible: false, builder: (context) => PromptFilename(text: title, year: year));

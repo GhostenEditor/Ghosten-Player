@@ -58,7 +58,7 @@ mixin SearchableMixin {
       }
     } on PlatformException catch (e) {
       switch (e.code) {
-        case '40400':
+        case '40401':
           if (!context.mounted) return false;
           final res = await navigateTo<(String, int?)>(navigatorKey.currentContext!, SearchNoResult(text: title, year: year));
           if (res != null) {
