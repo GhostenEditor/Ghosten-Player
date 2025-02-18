@@ -4,8 +4,8 @@ import 'dart:math';
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:player_view/player.dart' hide PlayerControls;
 import 'package:provider/provider.dart';
+import 'package:video_player/player.dart' hide PlayerControls;
 
 import '../../models/models.dart';
 import '../../platform_api.dart';
@@ -72,12 +72,28 @@ class _CommonPlayerPageState extends State<CommonPlayerPage> {
         willSkipEnding: AppLocalizations.of(context)!.willSkipEnding,
       ),
       controller: controller,
-      showThumbnails: userConfig.playerConfig.showThumbnails,
+      options: userConfig.playerConfig.config,
       seekStep: Duration(seconds: userConfig.playerConfig.speed),
-      extensionRendererMode: userConfig.playerConfig.mode,
-      enableDecoderFallback: userConfig.playerConfig.enableDecoderFallback,
       theme: widget.theme,
       actions: (context) => [
+        ButtonSettingItem(
+          title: Text(AppLocalizations.of(context)!.playerFastForwardSpeed),
+          trailing: Text('${userConfig.playerConfig.speed} ${AppLocalizations.of(context)!.second}'),
+          subtitle: MediaQuery(
+              data: const MediaQueryData(navigationMode: NavigationMode.directional),
+              child: Slider(
+                value: userConfig.playerConfig.speed.toDouble(),
+                min: 5,
+                max: 100,
+                divisions: 19,
+                label: userConfig.playerConfig.speed.toString(),
+                onChanged: (double value) {
+                  setState(() {
+                    userConfig.setPlayerFastForwardSpeed(value.round());
+                  });
+                },
+              )),
+        ),
         if (controller.currentItem.canSkipIntro)
           ButtonSettingItem(
             leading: const Icon(Icons.access_time),
@@ -126,26 +142,17 @@ class _CommonPlayerPageState extends State<CommonPlayerPage> {
             onTap: () async {
               final item = controller.currentItem;
               if (!context.mounted) return;
-              final playerConfig = Provider.of<UserConfig>(navigatorKey.currentContext!, listen: false).playerConfig;
               switch (widget.playerType) {
                 case PlayerType.tv:
                   showNotification(
                     context,
-                    Api.downloadTaskCreate(
-                      item.url.queryParameters['id']!,
-                      parallels: playerConfig.enableParallel ? playerConfig.parallels : null,
-                      size: playerConfig.enableParallel ? playerConfig.sliceSize : null,
-                    ),
+                    Api.downloadTaskCreate(item.url.queryParameters['id']!),
                     successText: AppLocalizations.of(context)!.tipsForDownload,
                   );
                 case PlayerType.movie:
                   showNotification(
                     context,
-                    Api.downloadTaskCreate(
-                      item.url.queryParameters['id']!,
-                      parallels: playerConfig.enableParallel ? playerConfig.parallels : null,
-                      size: playerConfig.enableParallel ? playerConfig.sliceSize : null,
-                    ),
+                    Api.downloadTaskCreate(item.url.queryParameters['id']!),
                     successText: AppLocalizations.of(context)!.tipsForDownload,
                   );
                 case PlayerType.live:

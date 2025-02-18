@@ -163,7 +163,7 @@ class _SlidableSettingItemState extends State<SlidableSettingItem> with SingleTi
                       },
                   focusNode: _focusNode,
                 ),
-                if (focused) Icon(Icons.more_vert_rounded, color: Colors.grey, size: 18),
+                if (focused) const Icon(Icons.more_vert_rounded, color: Colors.grey, size: 18),
               ],
             ),
           ),
@@ -382,7 +382,7 @@ class SettingPage extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.only(left: 24, right: 24, top: 32, bottom: 18),
-            color: Theme.of(context).colorScheme.surfaceContainerLow,
+            color: Theme.of(context).colorScheme.surfaceContainerHigh,
             child: Text(
               title,
               style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.w500),

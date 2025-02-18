@@ -165,7 +165,7 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
           stream: stream,
           builder: (context, snapshot) => PopScope(
               canPop: false,
-              onPopInvoked: (didPop) {
+              onPopInvokedWithResult: (didPop, _) {
                 if (!didPop && (snapshot.connectionState == ConnectionState.done || snapshot.connectionState == ConnectionState.none || snapshot.hasData)) {
                   Navigator.of(context).pop();
                 }
@@ -235,17 +235,5 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
                 }
               }))),
     );
-  }
-
-  onConnectData(String data) {
-    final formGroup = switch (driverType) {
-      DriverType.alipan => _alipan,
-      DriverType.webdav => _webdav,
-      _ => throw UnimplementedError(),
-    };
-    final focusedItem = formGroup.focusedItem;
-    if (focusedItem != null) {
-      focusedItem.controller.text += data;
-    }
   }
 }

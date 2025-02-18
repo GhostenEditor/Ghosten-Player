@@ -37,7 +37,7 @@ abstract class PlayerPlatform extends PlatformInterface {
     throw UnimplementedError('seekTo() has not been implemented.');
   }
 
-  Future<void> setTrack(String type, dynamic id) {
+  Future<void> setTrack(String type, String? id) {
     throw UnimplementedError('setTrack() has not been implemented.');
   }
 

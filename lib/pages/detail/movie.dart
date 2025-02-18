@@ -1,13 +1,11 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:player_view/player.dart';
-import 'package:provider/provider.dart';
+import 'package:video_player/player.dart';
 
 import '../../components/gap.dart';
 import '../../mixins/update.dart';
 import '../../models/models.dart';
-import '../../providers/user_config.dart';
 import '../../utils/notification.dart';
 import '../../utils/player.dart';
 import '../../utils/utils.dart';
@@ -111,15 +109,7 @@ class _MovieDetailState extends State<MovieDetail> with DetailPageMixin<Movie, M
         icon: const Icon(Icons.download_outlined),
         collapsed: true,
         onPressed: () async {
-          if (!context.mounted) return;
-          final playerConfig = Provider.of<UserConfig>(navigatorKey.currentContext!, listen: false).playerConfig;
-          final resp = await showNotification(
-              context,
-              Api.downloadTaskCreate(
-                item.url.queryParameters['id']!,
-                parallels: playerConfig.enableParallel ? playerConfig.parallels : null,
-                size: playerConfig.enableParallel ? playerConfig.sliceSize : null,
-              ),
+          final resp = await showNotification(context, Api.downloadTaskCreate(item.url.queryParameters['id']!),
               successText: AppLocalizations.of(context)!.tipsForDownload);
           if (resp?.error == null) setState(() => refresh = true);
         },

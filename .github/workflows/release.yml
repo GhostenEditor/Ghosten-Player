@@ -16,12 +16,12 @@ jobs:
 
       - uses: subosito/flutter-action@v1
         with:
-          flutter-version: '3.22.2'
+          flutter-version: '3.27.4'
 
       - run: flutter pub get
 
       - run: |
-          sed -i '882a\rect = rect.inflate(96);' ${{ env.FLUTTER_ROOT }}/packages/flutter/lib/src/rendering/viewport.dart
+          sed -i '890a\rect = rect.inflate(96);' ${{ env.FLUTTER_ROOT }}/packages/flutter/lib/src/rendering/viewport.dart
 
       - name: Decode Keystore
         run: |

@@ -40,10 +40,6 @@ abstract class ApiPlatform extends PlatformInterface {
     throw UnimplementedError('databasePath() has not been implemented.');
   }
 
-  Future<List<HdrType>?> supportedHdrTypes() {
-    throw UnimplementedError('supportedHdrTypes() has not been implemented.');
-  }
-
   Future<bool?> initialized() async => true;
 
   Future<void> syncData(String filePath) {
@@ -98,25 +94,17 @@ abstract class ApiPlatform extends PlatformInterface {
   /// Player End
 
   /// DownloadTask Start
-  Future<void> downloadTaskCreate(String id, {int? parallels, int? size}) async {
+  Future<void> downloadTaskCreate(String id) async {
     await requestStoragePermission();
-    return client.put('/download/task/create', data: {
-      'id': id,
-      'parallels': parallels,
-      'size': size,
-    });
+    return client.put('/download/task/create', data: {'id': id});
   }
 
   Future<void> downloadTaskPauseById(int id) {
     return client.post('/download/task/pause/id', data: {'id': id});
   }
 
-  Future<void> downloadTaskResumeById(int id, {int? parallels, int? size}) {
-    return client.post('/download/task/resume/id', data: {
-      'id': id,
-      'parallels': parallels,
-      'size': size,
-    });
+  Future<void> downloadTaskResumeById(int id) {
+    return client.post('/download/task/resume/id', data: {'id': id});
   }
 
   Future<void> downloadTaskDeleteById(int id, {bool deleteFile = false}) {
@@ -226,6 +214,14 @@ abstract class ApiPlatform extends PlatformInterface {
 
   Stream<dynamic> driverInsert(Json data) async* {
     throw UnimplementedError('driverInsert() has not been implemented.');
+  }
+
+  Future<Map<String, dynamic>?> driverSettingQueryById(int id) {
+    return client.get<Json>('/driver/setting/query/id', queryParameters: {'id': id});
+  }
+
+  Future<void> driverSettingUpdateById(int id, Map<String, dynamic> settings) {
+    return client.post('/driver/setting/update/id', data: {'id': id, 'settings': settings});
   }
 
   Future<void> driverDeleteById(int id) {

@@ -24,19 +24,13 @@ class MethodChannelApi extends ApiPlatform {
   Future<String?> databasePath() => _methodChannel.invokeMethod<String>('databasePath');
 
   @override
-  Future<List<HdrType>?> supportedHdrTypes() async {
-    final types = await _methodChannel.invokeMethod<List<int>>('supportedHdrTypes');
-    return types?.map((t) => HdrType.fromInt(t)).toList();
-  }
-
-  @override
   Future<bool?> initialized() => _methodChannel.invokeMethod('initialized');
 
   @override
   Future<void> syncData(String filePath) => _methodChannel.invokeMethod('syncData', filePath);
 
   @override
-  Future<void> rollbackData() => _methodChannel.invokeMethod('rollbackData').catchError((_) => throw RollbackDataException());
+  Future<void> rollbackData() => _methodChannel.invokeMethod('rollbackData').catchError((_) => throw PlatformException(code: rollbackDataExceptionCode));
 
   @override
   Future<void> resetData() => _methodChannel.invokeMethod('resetData');
@@ -48,7 +42,7 @@ class MethodChannelApi extends ApiPlatform {
   Future<void> requestStoragePermission() async {
     final permit = await _methodChannel.invokeMethod('requestStoragePermission');
     if (permit != true) {
-      throw StoragePermissionException();
+      throw PlatformException(code: storagePermissionExceptionCode);
     }
   }
 
@@ -70,9 +64,7 @@ class MethodChannelApi extends ApiPlatform {
   Stream<dynamic> driverInsert(Json data) async* {
     final resp = await client.put('/driver/insert/cb', data: data);
     final eventChannel = EventChannel('$_pluginNamespace/update/${resp['id']}');
-    yield* eventChannel.receiveBroadcastStream().map((event) => jsonDecode(event)).handleError((error) {
-      throw ApiException.fromPlatformException(error);
-    }, test: (error) => error is PlatformException);
+    yield* eventChannel.receiveBroadcastStream().map((event) => jsonDecode(event));
   }
 
   /// Driver End
@@ -84,9 +76,10 @@ class MethodChannelApi extends ApiPlatform {
     final data = await client.post('/library/refresh/id/cb', data: {'id': id});
     final eventChannel = EventChannel('$_pluginNamespace/update/${data['id']}');
 
-    ApiPlatform.streamController.addStream(eventChannel.receiveBroadcastStream().map((data) => jsonDecode(data)['progress'] as double?).handleError((error) {
-      throw ApiException.fromPlatformException(error);
-    }, test: (error) => error is PlatformException).concatWith([TimerStream<double?>(null, const Duration(seconds: 3))]).distinct());
+    ApiPlatform.streamController.addStream(eventChannel
+        .receiveBroadcastStream()
+        .map((data) => jsonDecode(data)['progress'] as double?)
+        .concatWith([TimerStream<double?>(null, const Duration(seconds: 3))]).distinct());
   }
 
   /// Library End
@@ -125,12 +118,7 @@ class MethodChannelApi extends ApiPlatform {
   Stream<List<NetworkDiagnotics>> networkDiagnostics() async* {
     final data = await client.post('/network/diagnostics/cb');
     final eventChannel = EventChannel('$_pluginNamespace/update/${data['id']}');
-    yield* eventChannel
-        .receiveBroadcastStream()
-        .map((event) => (jsonDecode(event) as List<dynamic>).map((item) => NetworkDiagnotics.fromJson(item)).toList())
-        .handleError((error) {
-      throw ApiException.fromPlatformException(error);
-    }, test: (error) => error is PlatformException);
+    yield* eventChannel.receiveBroadcastStream().map((event) => (jsonDecode(event) as List<dynamic>).map((item) => NetworkDiagnotics.fromJson(item)).toList());
   }
 
   /// Miscellaneous End
@@ -140,9 +128,7 @@ class MethodChannelApi extends ApiPlatform {
   Stream<List<dynamic>> dlnaDiscover() async* {
     final data = await client.post('/dlna/discover/cb');
     final eventChannel = EventChannel('$_pluginNamespace/update/${data['id']}');
-    yield* eventChannel.receiveBroadcastStream().map((event) => jsonDecode(event) as List<dynamic>).handleError((error) {
-      throw ApiException.fromPlatformException(error);
-    }, test: (error) => error is PlatformException);
+    yield* eventChannel.receiveBroadcastStream().map((event) => jsonDecode(event) as List<dynamic>);
   }
 
   ///  Cast End
@@ -204,12 +190,7 @@ class Client extends ApiClient {
           }
         })
         .catchError((error) {
-          throw ApiException.fromPlatformException(error);
-        }, test: (error) {
-          return error is PlatformException;
-        })
-        .catchError((error) {
-          throw ApiException.fromTimeoutException(error);
+          throw PlatformException(code: '40800', message: (error as TimeoutException).message);
         }, test: (error) {
           return error is TimeoutException;
         });

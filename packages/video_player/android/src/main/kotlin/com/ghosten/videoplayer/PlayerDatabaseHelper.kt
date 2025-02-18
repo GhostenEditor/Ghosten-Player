@@ -1,4 +1,4 @@
-package com.ghosten.player_view
+package com.ghosten.videoplayer
 
 import android.content.ContentValues
 import android.content.Context
@@ -39,7 +39,7 @@ class PlayerDatabaseHelper(context: Context) : SQLiteOpenHelper(context, "player
 
     fun queryPath(url: String, timeUs: Long): String? {
         val cursor = readableDatabase.rawQuery(
-            "SELECT relativePath FROM ${TABLE_NAME} WHERE $FIELD_NAME_URL  = ? AND $FIELD_NAME_POSITION  = ?",
+            "SELECT relativePath FROM $TABLE_NAME WHERE $FIELD_NAME_URL  = ? AND $FIELD_NAME_POSITION  = ?",
             arrayOf(url, timeUs.toString())
         )
         var path: String? = null

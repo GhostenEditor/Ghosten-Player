@@ -18,7 +18,6 @@ class _StepperFormState extends State<StepperForm> {
 
   late final dirties = List.generate(widget.items.length, (_) => false);
   late final focusNodes = List.generate(widget.items.length + 1, (_) => FocusNode());
-  late final controllers = List.generate(widget.items.length, (index) => TextEditingController(text: widget.items[index].value));
 
   int currentStep = 0;
 
@@ -27,8 +26,8 @@ class _StepperFormState extends State<StepperForm> {
     for (final focusNode in focusNodes) {
       focusNode.dispose();
     }
-    for (final controller in controllers) {
-      controller.dispose();
+    for (final item in widget.items) {
+      item.controller.dispose();
     }
     super.dispose();
   }
@@ -37,7 +36,7 @@ class _StepperFormState extends State<StepperForm> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, _) {
         if (didPop) {
           return;
         }
@@ -57,14 +56,15 @@ class _StepperFormState extends State<StepperForm> {
               isActive: currentStep == entry.$1,
               state: stepState(entry.$2, entry.$1),
               content: TextField(
-                controller: controllers[entry.$1],
+                controller: widget.items[entry.$1].controller,
                 focusNode: focusNodes[entry.$1],
                 decoration: InputDecoration(
                   isDense: true,
                   prefixIcon: entry.$2.prefixIcon,
+                  suffixIcon: entry.$2.suffixIcon,
                   helperText: entry.$2.helperText,
                   border: const OutlineInputBorder(),
-                  errorText: dirties[entry.$1] && entry.$2.validator != null ? entry.$2.validator!(controllers[entry.$1].text) : null,
+                  errorText: dirties[entry.$1] && entry.$2.validator != null ? entry.$2.validator!(widget.items[entry.$1].controller.text) : null,
                 ),
                 obscureText: entry.$2.obscureText,
                 onEditingComplete: () {
@@ -86,11 +86,17 @@ class _StepperFormState extends State<StepperForm> {
                   focusNode: focusNodes.last,
                   child: Text(AppLocalizations.of(context)!.buttonSubmit),
                   onPressed: () {
-                    if (!widget.items.indexed.any((entry) => entry.$2.validator != null ? entry.$2.validator!(controllers[entry.$1].text) != null : false)) {
+                    if (!widget.items.indexed
+                        .any((entry) => entry.$2.validator != null ? entry.$2.validator!(widget.items[entry.$1].controller.text) != null : false)) {
                       widget.onComplete(widget.items.indexed.fold({}, (acc, entry) {
-                        acc[entry.$2.name] = controllers[entry.$1].text;
+                        acc[entry.$2.name] = widget.items[entry.$1].controller.text;
                         return acc;
                       }));
+                    } else {
+                      for (int i = 0; i < dirties.length; i++) {
+                        dirties[i] = true;
+                      }
+                      setState(() {});
                     }
                   },
                 ),
@@ -110,7 +116,7 @@ class _StepperFormState extends State<StepperForm> {
 
   StepState stepState(FormItem item, int index) {
     if (dirties[index]) {
-      if (item.validator != null && item.validator!(controllers[index].text) != null) {
+      if (item.validator != null && item.validator!(widget.items[index].controller.text) != null) {
         return StepState.error;
       } else {
         if (index == currentStep) {
@@ -136,17 +142,21 @@ class FormItem {
   final String? hintText;
   final String name;
   final Widget? prefixIcon;
+  final Widget? suffixIcon;
   final FormFieldValidator<String?>? validator;
   final bool obscureText;
+  final TextEditingController controller;
 
-  const FormItem(
+  FormItem(
     this.name, {
     required this.labelText,
     this.value,
     this.helperText,
     this.hintText,
     this.prefixIcon,
+    this.suffixIcon,
     this.validator,
     this.obscureText = false,
-  });
+    TextEditingController? controller,
+  }) : controller = controller ?? TextEditingController(text: value);
 }

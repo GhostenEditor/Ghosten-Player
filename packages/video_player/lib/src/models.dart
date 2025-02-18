@@ -16,7 +16,7 @@ enum PlayerStatus {
 
 class MediaTrack {
   String? label;
-  dynamic id;
+  String? id;
   String type;
   bool selected;
 

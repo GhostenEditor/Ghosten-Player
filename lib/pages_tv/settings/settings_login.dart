@@ -173,7 +173,7 @@ class _SettingsLoginPageState extends State<SettingsLoginPage> {
         stream: stream,
         builder: (context, snapshot) => PopScope(
             canPop: false,
-            onPopInvoked: (didPop) {
+            onPopInvokedWithResult: (didPop, _) {
               if (!didPop && (snapshot.connectionState == ConnectionState.done || snapshot.connectionState == ConnectionState.none || snapshot.hasData)) {
                 Navigator.of(context).pop();
               }

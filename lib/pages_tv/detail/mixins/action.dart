@@ -1,10 +1,8 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../providers/user_config.dart';
 import '../../components/setting.dart';
 import '../../components/time_picker.dart';
 import '../../utils/notification.dart';
@@ -67,16 +65,8 @@ mixin ActionMixin<S extends StatefulWidget> on State<S> {
       title: Text(AppLocalizations.of(context)!.buttonDownload),
       leading: const Icon(Icons.download_outlined),
       onTap: () async {
-        if (!context.mounted) return;
-        final playerConfig = Provider.of<UserConfig>(navigatorKey.currentContext!, listen: false).playerConfig;
-        final resp = await showNotification(
-            context,
-            Api.downloadTaskCreate(
-              url.queryParameters['id']!,
-              parallels: playerConfig.enableParallel ? playerConfig.parallels : null,
-              size: playerConfig.enableParallel ? playerConfig.sliceSize : null,
-            ),
-            successText: AppLocalizations.of(context)!.tipsForDownload);
+        final resp =
+            await showNotification(context, Api.downloadTaskCreate(url.queryParameters['id']!), successText: AppLocalizations.of(context)!.tipsForDownload);
         if (resp?.error == null) setState(() => refresh = true);
       },
     );

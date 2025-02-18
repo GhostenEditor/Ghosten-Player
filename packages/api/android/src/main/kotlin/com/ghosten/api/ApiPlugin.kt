@@ -9,7 +9,6 @@ import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.IBinder
-import android.view.WindowManager
 import androidx.annotation.RequiresApi
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -41,7 +40,6 @@ class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnec
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
             "arch" -> result.success(arch())
-            "supportedHdrTypes" -> result.success(getSupportedHdrTypes())
             "getLocalIpAddress" -> result.success(getLocalIpAddress())
             "requestStoragePermission" -> requestStoragePermission(result)
             "databasePath" -> result.success(apiService?.databasePath?.path)
@@ -85,7 +83,7 @@ class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnec
 
             else -> {
                 if (apiService == null) {
-                    return result.error("500", resolveErrorCode("500"), "Service Start Failed");
+                    return result.error("50000", "Service Start Failed", null);
                 }
                 Thread {
                     if (call.method.endsWith("/cb")) {
@@ -95,16 +93,22 @@ class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnec
                         }
                         val eventChannel = EventChannel(binaryMessenger, "$PLUGIN_NAMESPACE/update/$id")
                         var finished = false
-                        var errorResp: String? = null
+                        var errorResp: ApiData? = null
                         eventChannel.setStreamHandler(object : EventChannel.StreamHandler {
                             override fun onListen(args: Any?, eventSink: EventChannel.EventSink?) {
                                 if (eventSink != null) {
                                     if (finished) {
                                         if (errorResp != null) {
-                                            val code = errorResp!!.substring(0, 3)
-                                            val resp = errorResp!!.substring(3)
                                             activity.runOnUiThread {
-                                                eventSink.error(code, resolveErrorCode(code), resp)
+                                                if (errorResp!!.isOk()) {
+                                                    result.success(errorResp!!.msg)
+                                                } else {
+                                                    result.error(
+                                                        errorResp!!.code.toString(),
+                                                        errorResp!!.msg,
+                                                        null
+                                                    )
+                                                }
                                             }
                                         }
                                         eventSink.endOfStream()
@@ -137,16 +141,15 @@ class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnec
                                 eventSinkMap.remove(id)?.endOfStream()
                             }
                         } else {
-                            val code = data.substring(0, 3)
-                            val resp = data.substring(3)
+                            val apiData = ApiData(data)
                             activity.runOnUiThread {
-                                if (code == "200") {
+                                if (apiData.isOk()) {
                                     eventSinkMap.remove(id)?.endOfStream()
                                 } else {
                                     if (eventSinkMap[id] != null) {
-                                        eventSinkMap[id]?.error(code, resolveErrorCode(code), resp)
+                                        eventSinkMap[id]?.error(apiData.code.toString(), apiData.msg, null)
                                     } else {
-                                        errorResp = data
+                                        errorResp = apiData
                                     }
                                     eventSinkMap.remove(id)?.endOfStream()
                                 }
@@ -164,18 +167,41 @@ class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnec
                                 result.success(null)
                             }
                         } else {
-                            val code = data.substring(0, 3)
-                            val resp = data.substring(3)
+                            val apiData = ApiData(data)
                             activity.runOnUiThread {
-                                if (code == "200") {
-                                    result.success(resp)
+                                if (apiData.isOk()) {
+                                    result.success(apiData.msg)
                                 } else {
-                                    result.error(code, resolveErrorCode(code), resp)
+                                    result.error(apiData.code.toString(), apiData.msg, null)
                                 }
                             }
                         }
                     }
                 }.start()
+            }
+        }
+    }
+
+    inner class ApiData(val data: ByteArray) {
+        val code: Int
+        val msg: String
+
+        init {
+            code = parse_u8(data.get(0)) shl 8 or parse_u8(data.get(1))
+            msg = data.copyOfRange(2, data.size).toString(Charsets.UTF_8)
+        }
+
+        fun isOk(): Boolean {
+            return code / 10000 == 2
+        }
+
+        fun parse_u8(b: Byte): Int {
+            return b.let {
+                if (it < 0) {
+                    it.toInt() + 256
+                } else {
+                    it.toInt()
+                }
             }
         }
     }
@@ -252,35 +278,11 @@ class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnec
         return null
     }
 
-    private fun getSupportedHdrTypes(): IntArray {
-        val wm = activity.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-        val display = wm.defaultDisplay
-        return display.hdrCapabilities.supportedHdrTypes
-    }
-
-    private fun resolveErrorCode(code: String): String? {
-        val message = when (code) {
-            "300" -> R.string.api_response_multiple_choices
-            "400" -> R.string.api_response_bad_request
-            "401" -> R.string.api_response_unauthorized
-            "403" -> R.string.api_response_forbidden
-            "404" -> R.string.api_response_not_found
-            "405" -> R.string.api_response_method_not_allowed
-            "408" -> R.string.api_response_timeout
-            "409" -> R.string.api_response_conflict
-            "429" -> R.string.api_response_too_many_requests
-            "500" -> R.string.api_response_internal_error
-            "501" -> R.string.api_response_not_implemented
-            "504" -> R.string.api_response_gateway_timeout
-            else -> null
-        }
-        return if (message != null) activity.getString(message) else null
-    }
-
     fun requestStoragePermission(result: Result) {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (activity.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
-                activity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+            if (activity.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED || activity.checkSelfPermission(
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ) != PackageManager.PERMISSION_GRANTED
             ) {
                 val permissions = arrayOf(
                     Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -291,8 +293,7 @@ class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnec
             }
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (activity.checkSelfPermission(Manifest.permission.READ_MEDIA_VIDEO) != PackageManager.PERMISSION_GRANTED
-            ) {
+            if (activity.checkSelfPermission(Manifest.permission.READ_MEDIA_VIDEO) != PackageManager.PERMISSION_GRANTED) {
                 val permissions = arrayOf(
                     Manifest.permission.READ_MEDIA_VIDEO,
                 )

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../components/gap.dart';
-import '../../utils/utils.dart';
 import '../../validators/validators.dart';
 import '../components/filled_button.dart';
 import '../components/future_builder_handler.dart';
@@ -35,7 +34,7 @@ class SystemSettingsDNSState extends State<SystemSettingsDNS> {
                     actions: [
                       TVIconButton(
                           onPressed: () async {
-                            final flag = await navigateTo<bool>(context, _SystemSettingsDNSEdit(item: entry.$2));
+                            final flag = await navigateToSlideLeft<bool>(context, _SystemSettingsDNSEdit(item: entry.$2));
                             if (flag == true) setState(() {});
                           },
                           icon: const Icon(Icons.edit_outlined)),

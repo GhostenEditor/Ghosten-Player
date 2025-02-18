@@ -1,4 +1,4 @@
-package com.ghosten.player_view
+package com.ghosten.videoplayer
 
 import android.app.*
 import android.content.BroadcastReceiver
@@ -24,7 +24,10 @@ import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.datasource.FileDataSource
 import androidx.media3.datasource.HttpDataSource
-import androidx.media3.exoplayer.*
+import androidx.media3.exoplayer.DefaultRenderersFactory
+import androidx.media3.exoplayer.ExoPlaybackException
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.SeekParameters
 import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.mediacodec.MediaCodecDecoderException
 import androidx.media3.exoplayer.mediacodec.MediaCodecRenderer.DecoderInitializationException
@@ -48,14 +51,14 @@ import java.util.*
 import java.util.concurrent.ExecutionException
 import kotlin.math.roundToInt
 
-class PlayerView(
+class Media3PlayerView(
     private val context: Context,
     private val activity: Activity,
     private val mChannel: MethodChannel,
     extensionRendererMode: Int?,
     enableDecoderFallback: Boolean?,
     language: String?
-) : Player.Listener {
+) : Player.Listener, BasePlayerView {
     private val mRootView: FrameLayout = activity.findViewById<FrameLayout>(android.R.id.content)
     private val mNativeView: View = View.inflate(context, R.layout.player_view, null)
     private var httpDataSourceFactory = DefaultHttpDataSource.Factory().setUserAgent(USER_AGENT)
@@ -118,21 +121,6 @@ class PlayerView(
         checkPlaybackPosition(1000)
         thumbnailThread.start()
         createNotificationChannel()
-    }
-
-    fun getVideoThumbnail(result: MethodChannel.Result, timeMs: Long) {
-        val url = mPlaylist[player.currentMediaItemIndex].url
-        var path: String? = playerDB.queryPath(url, timeMs)
-        if (path != null) {
-            if (File(context.cacheDir, path).exists()) {
-                result.success(context.cacheDir.toString() + "/" + path)
-            } else {
-                playerDB.delete(url, timeMs)
-                thumbnailThread.add(result, timeMs)
-            }
-        } else {
-            thumbnailThread.add(result, timeMs)
-        }
     }
 
     inner class ThumbnailThread : Thread() {
@@ -244,17 +232,6 @@ class PlayerView(
             },
             delayMs
         )
-    }
-
-    fun dispose() {
-        mRootView.removeView(mNativeView)
-        player.release()
-        mediaSession.release()
-        cancelNotification()
-        setPictureInPictureParams()
-        handler.removeCallbacksAndMessages(null)
-        playerDB.close()
-        thumbnailThread.cancel()
     }
 
     override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -465,7 +442,10 @@ class PlayerView(
             is ExoPlaybackException -> {
                 when (val cause = error.cause) {
                     is HttpDataSource.InvalidResponseCodeException -> {
-                        mChannel.invokeMethod("fatalError", cause.responseBody.decodeToString())
+                        mChannel.invokeMethod(
+                            "fatalError",
+                            "${cause.responseCode} ${cause.responseBody.decodeToString()}"
+                        )
                     }
 
                     is HttpDataSource.HttpDataSourceException -> {
@@ -579,7 +559,7 @@ class PlayerView(
                                 null
                             }
                         } ?: ""
-                        this["id"] = trackFormat.id
+                        this["id"] = trackFormat.id?.toString()
                     }
                     if (track["type"] != null) {
                         tracksList.add(track)
@@ -681,7 +661,7 @@ class PlayerView(
         if (params != null) activity.setPictureInPictureParams(params)
     }
 
-    fun getPictureInPictureParams(): PictureInPictureParams? {
+    override fun getPictureInPictureParams(): PictureInPictureParams? {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 PictureInPictureParams.Builder()
@@ -695,16 +675,48 @@ class PlayerView(
         return null
     }
 
-    fun canEnterPictureInPicture(): Boolean {
+    override fun canEnterPictureInPicture(): Boolean {
         return when (player.playbackState) {
             Player.STATE_BUFFERING, Player.STATE_READY -> true
             else -> false
         }
     }
 
-    fun setTrack(trackType: Int, trackId: String?) {
+    override fun getVideoThumbnail(result: MethodChannel.Result, timeMs: Long) {
+        val url = mPlaylist[player.currentMediaItemIndex].url
+        var path: String? = playerDB.queryPath(url, timeMs)
+        if (path != null) {
+            if (File(context.cacheDir, path).exists()) {
+                result.success(context.cacheDir.toString() + "/" + path)
+            } else {
+                playerDB.delete(url, timeMs)
+                thumbnailThread.add(result, timeMs)
+            }
+        } else {
+            thumbnailThread.add(result, timeMs)
+        }
+    }
+
+    override fun dispose() {
+        mRootView.removeView(mNativeView)
+        player.release()
+        mediaSession.release()
+        cancelNotification()
+        setPictureInPictureParams()
+        handler.removeCallbacksAndMessages(null)
+        playerDB.close()
+        thumbnailThread.cancel()
+    }
+
+    override fun setTrack(trackType: String?, trackId: String?) {
+        val type = when (trackType) {
+            "video" -> C.TRACK_TYPE_VIDEO
+            "audio" -> C.TRACK_TYPE_AUDIO
+            "sub" -> C.TRACK_TYPE_TEXT
+            else -> return
+        }
         for (trackGroup in player.currentTracks.groups) {
-            if (trackGroup.type == trackType) {
+            if (trackGroup.type == type) {
                 if (trackId == null) {
                     player.trackSelectionParameters = player.trackSelectionParameters.buildUpon()
                         .setTrackTypeDisabled(trackGroup.type, true)
@@ -727,7 +739,7 @@ class PlayerView(
         }
     }
 
-    fun setSkipPosition(skipType: String, list: List<Int>) {
+    override fun setSkipPosition(skipType: String, list: List<Int>) {
         for (i in list.indices) {
             when (skipType) {
                 "start" -> {
@@ -741,7 +753,7 @@ class PlayerView(
         }
     }
 
-    fun play() {
+    override fun play() {
         when (player.playbackState) {
             Player.STATE_BUFFERING -> {
                 player.play()
@@ -762,11 +774,11 @@ class PlayerView(
         }
     }
 
-    fun pause() {
+    override fun pause() {
         player.pause()
     }
 
-    fun next(index: Int) {
+    override fun next(index: Int) {
         if (index >= player.mediaItemCount) {
             player.seekTo(player.duration)
             return
@@ -775,17 +787,17 @@ class PlayerView(
             return
         }
         player.seekTo(index, mPlaylist[index].startPosition)
+        if (player.playbackState == Player.STATE_IDLE) {
+            player.prepare()
+            player.play()
+        }
     }
 
-    fun previous() {
-        player.seekToPreviousMediaItem()
-    }
-
-    fun seekTo(position: Long) {
+    override fun seekTo(position: Long) {
         player.seekTo(position)
     }
 
-    fun setSources(data: List<HashMap<String, Any>>, index: Int) {
+    override fun setSources(data: List<HashMap<String, Any>>, index: Int) {
         val playlist = data.map { item ->
             Video(
                 when (item[TYPE]) {
@@ -816,7 +828,7 @@ class PlayerView(
         player.prepare()
     }
 
-    fun updateSource(data: HashMap<String, Any>, index: Int) {
+    override fun updateSource(data: HashMap<String, Any>, index: Int) {
         val video = Video(
             when (data[TYPE]) {
                 "hls" -> C.CONTENT_TYPE_HLS
@@ -840,14 +852,29 @@ class PlayerView(
         player.prepare()
     }
 
-    fun setTransform(matrix: ArrayList<Double>) {
+    override fun setTransform(matrix: ArrayList<Double>) {
         val videoView = mNativeView.findViewById<androidx.media3.ui.PlayerView>(R.id.video_view)
         videoView.animationMatrix = Matrix().apply {
             setValues(matrix.map { it.toFloat() }.toFloatArray())
         }
+//        val m = MatrixTransformation {
+//            val matrix = Matrix()
+//            matrix.setScale(-1f, 1f)
+//            matrix
+//        }
+
+//        player.setVideoEffects(listOf(
+//            MatrixTransformation {
+//                val matrix = Matrix()
+//                matrix.setScale(-1f, 1f)
+//                matrix
+//            }
+//        ))
+//        player.prepare()
+//        player.play()
     }
 
-    fun setAspectRatio(aspectRatio: Float?) {
+    override fun setAspectRatio(aspectRatio: Float?) {
         val contentFrame = mNativeView.findViewById<AspectRatioFrameLayout>(androidx.media3.ui.R.id.exo_content_frame)
         contentFrame.setAspectRatio(
             aspectRatio ?: if (player.videoSize.height == 0) {
@@ -859,37 +886,17 @@ class PlayerView(
     }
 
 
-    fun setPlaybackSpeed(speed: Float) {
+    override fun setPlaybackSpeed(speed: Float) {
         player.setPlaybackSpeed(speed)
     }
 
-    fun setVolume(volume: Float) {
+    override fun setVolume(volume: Float) {
         mAudioManager.setStreamVolume(
             AudioManager.STREAM_MUSIC,
             (volume * mMaxVolume).roundToInt(),
             AudioManager.FLAG_SHOW_UI
         )
     }
-
-    internal class Video(
-        val type: Int,
-        val url: String,
-        val title: String?,
-        val description: String?,
-        val poster: String?,
-        val subtitle: List<Subtitle>?,
-        var startPosition: Long,
-        var endPosition: Long,
-    ) {
-        var skipEnd: PlayerMessage? = null
-        var skipEndTip: PlayerMessage? = null
-    }
-
-    internal class Subtitle(
-        val url: String,
-        val mimeType: String,
-        val language: String?,
-    )
 
     companion object {
         const val TYPE: String = "type"

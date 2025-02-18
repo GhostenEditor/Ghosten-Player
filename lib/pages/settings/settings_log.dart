@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:readmore/readmore.dart';
 
 import '../../components/error_message.dart';
 import '../../components/no_data.dart';
@@ -78,7 +79,7 @@ class _SettingsLogPageState extends State<SettingsLogPage> {
               itemBuilder: (context, item, index) => ListTile(
                 dense: true,
                 visualDensity: VisualDensity.compact,
-                title: Text(item.message),
+                title: ReadMoreText(item.message, trimLines: 8, colorClickableText: Theme.of(context).colorScheme.primary),
                 subtitle: Text(formatDate(item.time, [yyyy, '-', mm, '-', dd, ' ', HH, ':', nn, ':', ss, '.', SSS])),
                 leading: Badge(
                   label: SizedBox(width: 40, child: Text(item.level.name.toUpperCase(), textAlign: TextAlign.center)),

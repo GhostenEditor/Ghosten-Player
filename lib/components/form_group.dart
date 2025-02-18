@@ -1,15 +1,14 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 class FormItem {
   late final TextEditingController controller;
 
-  final focusNode = FocusNode();
   final String? labelText;
   final String? helperText;
   final String? hintText;
   final String name;
   final IconData? prefixIcon;
+  final Widget? suffixIcon;
   final FormFieldValidator<String?>? validator;
   final bool obscureText;
 
@@ -20,19 +19,17 @@ class FormItem {
     this.helperText,
     this.hintText,
     this.prefixIcon,
+    this.suffixIcon,
     this.validator,
     this.obscureText = false,
-  }) {
-    controller = TextEditingController(text: value);
-  }
+    TextEditingController? controller,
+  }) : controller = controller ?? TextEditingController(text: value);
 
   String? get value => controller.text.isEmpty ? null : controller.text;
 
-  bool get focused => focusNode.hasFocus;
 
   void dispose() {
     controller.dispose();
-    focusNode.dispose();
   }
 }
 
@@ -53,8 +50,6 @@ class FormGroupController {
   bool validate() {
     return formKey.currentState!.validate();
   }
-
-  FormItem? get focusedItem => items.firstWhereOrNull((item) => item.focused);
 }
 
 class FormGroup extends StatefulWidget {
@@ -77,13 +72,13 @@ class _FormGroupState extends State<FormGroup> {
           final item = widget.controller.items[index];
           return TextFormField(
             controller: item.controller,
-            focusNode: item.focusNode,
             decoration: InputDecoration(
               isDense: true,
               labelText: item.labelText,
               helperText: item.helperText,
               hintText: item.hintText,
               prefixIcon: Icon(item.prefixIcon),
+              suffixIcon: item.suffixIcon,
             ),
             obscureText: item.obscureText,
             validator: item.validator,

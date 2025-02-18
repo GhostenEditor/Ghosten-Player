@@ -2,11 +2,10 @@ import 'dart:async';
 
 import 'package:api/api.dart';
 import 'package:bluetooth/bluetooth.dart';
-import 'package:flutter/material.dart' hide PopupMenuItem;
+import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../components/no_data.dart';
-import '../../components/popup_menu.dart';
 import '../../const.dart';
 import '../../utils/notification.dart';
 
@@ -87,24 +86,36 @@ class _SettingsSyncPageState extends State<SettingsSyncPage> {
               PopupMenuButton(
                 itemBuilder: (context) => [
                   PopupMenuItem(
-                    title: Text(AppLocalizations.of(context)!.dataSyncActionRescanBluetoothDevices),
-                    leading: const Icon(Icons.sync),
+                    padding: EdgeInsets.zero,
                     onTap: () => startDiscovery(),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                      title: Text(AppLocalizations.of(context)!.dataSyncActionRescanBluetoothDevices),
+                      leading: const Icon(Icons.sync),
+                    ),
                   ),
                   PopupMenuItem(
-                    title: Text(AppLocalizations.of(context)!.dataSyncActionSetDiscoverable),
-                    leading: const Icon(Icons.remove_red_eye_outlined),
+                    padding: EdgeInsets.zero,
                     onTap: () => Bluetooth.requestDiscoverable(const Duration(seconds: 60)),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                      title: Text(AppLocalizations.of(context)!.dataSyncActionSetDiscoverable),
+                      leading: const Icon(Icons.remove_red_eye_outlined),
+                    ),
                   ),
                   PopupMenuItem(
-                    title: Text(AppLocalizations.of(context)!.dataSyncActionRollback),
-                    leading: const Icon(Icons.settings_backup_restore),
+                    padding: EdgeInsets.zero,
                     onTap: () async {
                       final confirmed = await showConfirm(context, AppLocalizations.of(context)!.dataSyncConfirmRollback);
                       if (confirmed == true && context.mounted) {
                         showNotification(context, Api.rollbackData());
                       }
                     },
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                      title: Text(AppLocalizations.of(context)!.dataSyncActionRollback),
+                      leading: const Icon(Icons.settings_backup_restore),
+                    ),
                   ),
                 ],
               ),

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:api/api.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../components/gap.dart';
@@ -55,9 +56,9 @@ mixin SearchableMixin {
         default:
           rethrow;
       }
-    } on ApiException catch (e) {
-      switch (e.type) {
-        case ApiExceptionType.notFound:
+    } on PlatformException catch (e) {
+      switch (e.code) {
+        case '40401':
           if (!context.mounted) return false;
           final res = await navigateTo<(String, int?)>(navigatorKey.currentContext!, SearchNoResult(text: title, year: year));
           if (res != null) {
@@ -66,9 +67,9 @@ mixin SearchableMixin {
           } else {
             rethrow;
           }
-        case ApiExceptionType.multiChoices:
+        case '30001':
           if (!context.mounted) return false;
-          final data = (jsonDecode(e.details!) as List<dynamic>).map((e) => SearchResult.fromJson(e)).toList();
+          final data = (jsonDecode(e.message!) as List<dynamic>).map((e) => SearchResult.fromJson(e)).toList();
           final res = await navigateTo<int>(
               navigatorKey.currentContext!,
               _SearchResultSelect(

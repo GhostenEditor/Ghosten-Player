@@ -16,6 +16,7 @@ import 'pages/account/account.dart';
 import 'pages/home.dart';
 import 'pages/player/singleton_player.dart';
 import 'pages_tv/home.dart';
+import 'pages_tv/settings/settings_update.dart';
 import 'platform_api.dart';
 import 'providers/user_config.dart';
 import 'theme.dart';
@@ -58,14 +59,11 @@ void tv() async {
   HttpOverrides.global = MyHttpOverrides();
   final userConfig = await UserConfig.init();
   Provider.debugCheckInvalidValueType = null;
-  if (!kIsWeb && userConfig.shouldCheckUpdate()) {
+  if (userConfig.shouldCheckUpdate()) {
     Api.checkUpdate(
       updateUrl,
       Version.fromString(appVersion),
-      needUpdate: (data, url) => showModalBottomSheet(
-          context: navigatorKey.currentContext!,
-          constraints: const BoxConstraints(minWidth: double.infinity, maxHeight: 320),
-          builder: (context) => UpdateBottomSheet(data, url: url)),
+      needUpdate: (data, url) => navigateTo(navigatorKey.currentContext!, const SettingsUpdate()),
     );
   }
   runApp(ChangeNotifierProvider(create: (_) => userConfig, child: const TVApp()));
@@ -199,7 +197,7 @@ class _QuitConfirmState extends State<QuitConfirm> {
         ? widget.child
         : PopScope(
             canPop: false,
-            onPopInvoked: (didPop) {
+            onPopInvokedWithResult: (didPop, _) {
               if (didPop) {
                 return;
               }

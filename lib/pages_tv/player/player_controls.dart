@@ -6,8 +6,8 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:player_view/player.dart' hide PlayerControls, DurationDivision;
 import 'package:rxdart/rxdart.dart';
+import 'package:video_player/player.dart';
 
 import '../../const.dart';
 import '../components/icon_button.dart';
@@ -23,8 +23,8 @@ class PlayerControls extends StatefulWidget {
   final PlayerLocalizations localizations;
   final Duration seekStep;
   final bool? showThumbnails;
-  final int? extensionRendererMode;
-  final bool? enableDecoderFallback;
+  final Map<String, dynamic>? options;
+
   final Widget Function(BuildContext, int index, void Function(int) onTap)? playlistItemBuilder;
 
   const PlayerControls({
@@ -35,8 +35,7 @@ class PlayerControls extends StatefulWidget {
     this.actions,
     this.theme,
     this.seekStep = const Duration(seconds: 30),
-    this.extensionRendererMode,
-    this.enableDecoderFallback,
+    this.options,
     this.showThumbnails,
     this.playlistItemBuilder,
   });
@@ -142,7 +141,7 @@ class _PlayerControlsState extends State<PlayerControls> {
 
   Widget _buildDraw(BuildContext context) {
     return NavigatorPopHandler(
-      onPop: () {
+      onPopWithResult: (_) {
         _navigatorKey.currentState!.maybePop();
       },
       child: Container(
@@ -286,7 +285,7 @@ class _PlayerControlsState extends State<PlayerControls> {
           resizeToAvoidBottomInset: false,
           body: PopScope(
             canPop: false,
-            onPopInvoked: (didPop) {
+            onPopInvokedWithResult: (didPop, _) {
               if (didPop) {
                 return;
               } else if (_scaffoldKey.currentState!.isEndDrawerOpen) {
@@ -311,10 +310,7 @@ class _PlayerControlsState extends State<PlayerControls> {
                     listenable: _controller.isCasting,
                     builder: (context, _) {
                       if (!_controller.isCasting.value) {
-                        return PlayerPlatformView(
-                          extensionRendererMode: widget.extensionRendererMode,
-                          enableDecoderFallback: widget.enableDecoderFallback,
-                        );
+                        return PlayerPlatformView(options: widget.options);
                       } else {
                         return const SizedBox();
                       }
@@ -908,16 +904,6 @@ class PlayerInfoView extends StatelessWidget {
               }),
           listenable: Listenable.merge([_controller.title, _controller.fatalError])),
     );
-  }
-}
-
-extension DurationDivision on Duration {
-  double? operator /(Duration other) {
-    if (other == Duration.zero) {
-      return null;
-    } else {
-      return inMilliseconds / other.inMilliseconds;
-    }
   }
 }
 

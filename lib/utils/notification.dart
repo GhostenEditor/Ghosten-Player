@@ -105,7 +105,7 @@ Future<NotificationResponse<T?>?> showNotification<T>(
                 future: future,
                 builder: (context, snapshot) => PopScope(
                       canPop: false,
-                      onPopInvoked: (didPop) {
+                      onPopInvokedWithResult: (didPop, _) {
                         if (!didPop && !snapshot.connectionState.isLoading()) {
                           Navigator.of(context).pop(NotificationResponse(data: snapshot.data, error: snapshot.error));
                         }

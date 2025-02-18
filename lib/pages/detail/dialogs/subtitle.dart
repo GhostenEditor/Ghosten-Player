@@ -1,7 +1,7 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:player_view/player.dart';
+import 'package:video_player/player.dart';
 
 import '../../../components/gap.dart';
 import '../../../providers/user_config.dart';

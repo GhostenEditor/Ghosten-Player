@@ -45,7 +45,7 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin, SearchableM
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, _) {
         if (!didPop) {
           if (_drawerNavigatorKey.currentState?.canPop() == true) {
             _drawerNavigatorKey.currentState!.pop();

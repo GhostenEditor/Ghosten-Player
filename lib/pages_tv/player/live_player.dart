@@ -2,13 +2,13 @@ import 'dart:async';
 
 import 'package:animations/animations.dart';
 import 'package:api/api.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:player_view/player.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:video_player/player.dart';
 
+import '../../components/async_image.dart';
 import '../../providers/user_config.dart';
 import '../components/focusable_image.dart';
 import '../components/loading.dart';
@@ -102,12 +102,11 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
         fit: StackFit.expand,
         children: [
           PlayerPlatformView(
-            extensionRendererMode: playerConfig.mode,
-            enableDecoderFallback: playerConfig.enableDecoderFallback,
+            options: playerConfig.config,
           ),
           PopScope(
             canPop: false,
-            onPopInvoked: (didPop) async {
+            onPopInvokedWithResult: (didPop, _) {
               if (didPop) {
                 return;
               }
@@ -233,12 +232,15 @@ class _PlayerInfo extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                CachedNetworkImage(
-                  imageUrl: controller.currentItem.poster!,
-                  height: 160,
-                  width: 160,
-                  fit: BoxFit.contain,
-                ),
+                if (controller.currentItem.poster != null)
+                  AsyncImage(
+                    controller.currentItem.poster!,
+                    height: 160,
+                    width: 160,
+                    needLoading: false,
+                    errorIconSize: 56,
+                    fit: BoxFit.contain,
+                  ),
                 const SizedBox(width: 36),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

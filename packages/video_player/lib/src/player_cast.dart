@@ -748,7 +748,7 @@ class _BlurredBackgroundState extends State<BlurredBackground> with SingleTicker
     } while (isDirty && retryCounter >= 0);
     try {
       buildOwner.finalizeTree();
-    } catch (e) {}
+    } catch (_) {}
 
     return image;
   }

@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Configuration
+import android.provider.Settings
 import android.window.BackEvent
 import androidx.annotation.RequiresApi
 import io.flutter.Build.API_LEVELS
@@ -62,6 +63,18 @@ class MainFragment : FlutterFragment() {
                 deeplinkSink = null
             }
         })
+    }
+
+    override fun onFlutterUiDisplayed() {
+        if (Settings.Global.getFloat(
+                context.contentResolver,
+                Settings.Global.TRANSITION_ANIMATION_SCALE,
+                1.0f
+            ) == 0.0f
+        ) {
+            flutterEngine?.accessibilityChannel?.setAccessibilityFeatures(0)
+        }
+        super.onFlutterUiDisplayed()
     }
 
     override fun onResume() {

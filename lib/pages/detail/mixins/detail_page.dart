@@ -2,19 +2,17 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:api/api.dart';
-import 'package:dio/dio.dart';
-import 'package:flutter/material.dart' hide PopupMenuItem;
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:player_view/player.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:video_player/player.dart';
 
 import '../../../components/appbar_progress.dart';
 import '../../../components/async_image.dart';
 import '../../../components/future_builder_handler.dart';
 import '../../../components/gap.dart';
 import '../../../components/mobile_builder.dart';
-import '../../../components/pop_to_top.dart';
-import '../../../components/popup_menu.dart';
 import '../../../dialogs/timer_picker.dart';
 import '../../../utils/notification.dart';
 import '../../../utils/utils.dart';
@@ -38,9 +36,12 @@ mixin DetailPageMixin<T extends MediaBase, S extends StatefulWidget> on State<S>
 
   @override
   Widget build(BuildContext context) {
-    return PopToTop(
-      onPop: () => Navigator.of(context).pop(refresh),
-      controller: _controller,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        Navigator.of(context).pop(refresh);
+      },
       child: Scaffold(
         body: FutureBuilderHandler(
           future: future(),
@@ -223,37 +224,9 @@ mixin DetailPageMixin<T extends MediaBase, S extends StatefulWidget> on State<S>
   Future<bool> search(Future<void> Function({required String title, int? year, int? index}) future, {required String title, int? year, int? index}) async {
     try {
       await future(title: title, year: year, index: index);
-    } on DioException catch (e) {
-      switch (e.type) {
-        case DioExceptionType.badResponse:
-          switch (e.response?.statusCode) {
-            case 404:
-              if (!mounted) return false;
-              final res =
-                  await showDialog<(String, int?)>(context: context, barrierDismissible: false, builder: (context) => PromptFilename(text: title, year: year));
-              if (res != null) {
-                return search(future, title: res.$1, year: res.$2);
-              } else {
-                rethrow;
-              }
-            case 300:
-              if (!mounted) return false;
-              final data = (e.response?.data! as List<dynamic>).map((e) => SearchResult.fromJson(e)).toList();
-              final res = await showDialog<int>(context: context, barrierDismissible: false, builder: (context) => _SearchResultSelect(data));
-              if (res != null) {
-                return search(future, title: title, year: year, index: res);
-              } else {
-                rethrow;
-              }
-            default:
-              rethrow;
-          }
-        default:
-          rethrow;
-      }
-    } on ApiException catch (e) {
-      switch (e.type) {
-        case ApiExceptionType.notFound:
+    } on PlatformException catch (e) {
+      switch (e.code) {
+        case '40401':
           if (!mounted) return false;
           final res =
               await showDialog<(String, int?)>(context: context, barrierDismissible: false, builder: (context) => PromptFilename(text: title, year: year));
@@ -262,9 +235,9 @@ mixin DetailPageMixin<T extends MediaBase, S extends StatefulWidget> on State<S>
           } else {
             rethrow;
           }
-        case ApiExceptionType.multiChoices:
+        case '30001':
           if (!mounted) return false;
-          final data = (jsonDecode(e.details!) as List<dynamic>).map((e) => SearchResult.fromJson(e)).toList();
+          final data = (jsonDecode(e.message!) as List<dynamic>).map((e) => SearchResult.fromJson(e)).toList();
           final res = await showDialog<int>(context: context, barrierDismissible: false, builder: (context) => _SearchResultSelect(data));
           if (res != null) {
             return search(future, title: title, year: year, index: res);
@@ -618,11 +591,15 @@ class _DetailActions extends StatelessWidget {
         } else {
           assert(!entry.collapsed || !entry.autoCollapse, 'collapsed 和 autoCollapse 不能同时为 true');
           popupMenuItems.add(PopupMenuItem(
+            padding: EdgeInsets.zero,
             onTap: entry.onPressed,
-            enabled: entry.onPressed != null,
-            title: entry.text!,
-            leading: entry.icon!,
-            trailing: entry.trailing,
+            child: ListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              enabled: entry.onPressed != null,
+              title: entry.text!,
+              leading: entry.icon!,
+              trailing: entry.trailing,
+            ),
           ));
         }
       } else {

@@ -1,11 +1,10 @@
 import 'package:api/api.dart';
-import 'package:flutter/material.dart' hide PopupMenuItem;
+import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 import '../../components/gap.dart';
 import '../../components/logo.dart';
-import '../../components/popup_menu.dart';
 import '../../components/updater.dart';
 import '../../const.dart';
 import '../../providers/user_config.dart';
@@ -54,10 +53,10 @@ class SystemSettingsUpdaterState extends State<SystemSettingsUpdater> {
                       tooltip: '',
                       onSelected: (value) => setState(() => userConfig.setAutoUpdate(value)),
                       itemBuilder: (context) => AutoUpdateFrequency.values
-                          .map((e) => PopupMenuItem(
+                          .map((e) => CheckedPopupMenuItem(
                                 value: e,
-                                title: Text(AppLocalizations.of(context)!.autoUpdateFrequency(e.name)),
-                                leading: Icon(e == userConfig.autoUpdateFrequency ? Icons.done : null),
+                                checked: e == userConfig.autoUpdateFrequency,
+                                child: Text(AppLocalizations.of(context)!.autoUpdateFrequency(e.name)),
                               ))
                           .toList(),
                       child: ListTile(

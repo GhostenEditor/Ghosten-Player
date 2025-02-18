@@ -1,11 +1,10 @@
 import 'package:api/api.dart';
-import 'package:flutter/material.dart' hide PopupMenuItem;
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:player_view/player.dart';
+import 'package:video_player/player.dart';
 
 import '../components/gap.dart';
-import '../components/popup_menu.dart';
 import '../models/models.dart';
 import '../utils/notification.dart';
 import '../utils/player.dart';
@@ -34,8 +33,7 @@ class FileViewer extends StatelessWidget {
       tooltip: '',
       itemBuilder: (context) => [
         PopupMenuItem(
-          leading: const Icon(Icons.folder_open_rounded),
-          title: Text(AppLocalizations.of(context)!.buttonNewFolder),
+          padding: EdgeInsets.zero,
           onTap: () async {
             final filename =
                 await showDialog<String>(context: context, builder: (context) => _FileNameDialog(dialogTitle: AppLocalizations.of(context)!.buttonNewFolder));
@@ -46,11 +44,15 @@ class FileViewer extends StatelessWidget {
               }
             }
           },
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+            leading: const Icon(Icons.folder_open_rounded),
+            title: Text(AppLocalizations.of(context)!.buttonNewFolder),
+          ),
         ),
         if (item.viewable())
           PopupMenuItem(
-            leading: const Icon(Icons.play_arrow_rounded),
-            title: Text(AppLocalizations.of(context)!.buttonView),
+            padding: EdgeInsets.zero,
             onTap: () async {
               switch (item.category) {
                 case FileCategory.image:
@@ -70,10 +72,14 @@ class FileViewer extends StatelessWidget {
                 default:
               }
             },
+            child: ListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              leading: const Icon(Icons.play_arrow_rounded),
+              title: Text(AppLocalizations.of(context)!.buttonView),
+            ),
           ),
         PopupMenuItem(
-          leading: const Icon(Icons.drive_file_rename_outline),
-          title: Text(AppLocalizations.of(context)!.buttonRename),
+          padding: EdgeInsets.zero,
           onTap: () async {
             final filename = await showDialog<String>(
                 context: context,
@@ -88,10 +94,14 @@ class FileViewer extends StatelessWidget {
               }
             }
           },
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+            leading: const Icon(Icons.drive_file_rename_outline),
+            title: Text(AppLocalizations.of(context)!.buttonRename),
+          ),
         ),
         PopupMenuItem(
-          leading: const Icon(Icons.delete_outline),
-          title: Text(AppLocalizations.of(context)!.buttonDelete),
+          padding: EdgeInsets.zero,
           onTap: () async {
             final confirmed = await showConfirm(context, AppLocalizations.of(context)!.deleteConfirmText);
             if (confirmed == true && context.mounted) {
@@ -101,13 +111,22 @@ class FileViewer extends StatelessWidget {
               }
             }
           },
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+            leading: const Icon(Icons.delete_outline),
+            title: Text(AppLocalizations.of(context)!.buttonDelete),
+          ),
         ),
         PopupMenuItem(
-          leading: const Icon(Icons.info_outline_rounded),
-          title: Text(AppLocalizations.of(context)!.buttonProperty),
+          padding: EdgeInsets.zero,
           onTap: () async {
             showModalBottomSheet(context: context, builder: (context) => FilePropertyBottomSheet(item: item));
           },
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+            leading: const Icon(Icons.info_outline_rounded),
+            title: Text(AppLocalizations.of(context)!.buttonProperty),
+          ),
         ),
       ],
       child: Focus(

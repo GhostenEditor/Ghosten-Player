@@ -10,7 +10,6 @@ class Api {
   static final Stream<double?> needUpdate$ = ApiPlatform.instance.needUpdate$;
 
   static final databasePath = ApiPlatform.instance.databasePath;
-  static final supportedHdrTypes = ApiPlatform.instance.supportedHdrTypes;
   static final syncData = ApiPlatform.instance.syncData;
   static final initialized = ApiPlatform.instance.initialized;
   static final rollbackData = ApiPlatform.instance.rollbackData;
@@ -46,6 +45,8 @@ class Api {
   static final playlistChannelsQueryById = ApiPlatform.instance.playlistChannelsQueryById;
   static final driverQueryAll = ApiPlatform.instance.driverQueryAll;
   static final driverInsert = ApiPlatform.instance.driverInsert;
+  static final driverSettingQueryById = ApiPlatform.instance.driverSettingQueryById;
+  static final driverSettingUpdateById = ApiPlatform.instance.driverSettingUpdateById;
   static final driverDeleteById = ApiPlatform.instance.driverDeleteById;
   static final movieRecommendation = ApiPlatform.instance.movieRecommendation;
   static final movieQueryAll = ApiPlatform.instance.movieQueryAll;

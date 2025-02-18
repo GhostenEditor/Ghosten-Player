@@ -1,8 +1,6 @@
-import 'package:api/api.dart';
-import 'package:bluetooth/bluetooth.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'gap.dart';
@@ -35,9 +33,11 @@ class ErrorMessage<T> extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(exception.message, style: Theme.of(context).textTheme.titleMedium),
-                if (kDebugMode && exception.detail?.isNotEmpty == true) ...[Gap.vLG, Text(exception.detail!)],
-                if (kDebugMode && exception.error?.toString().isNotEmpty == true) ...[Gap.vLG, if (exception.error != null) Text(exception.error.toString())],
+                Text(exception.code, style: Theme.of(context).textTheme.titleMedium),
+                if (kDebugMode && exception.details?.toString().isNotEmpty == true) ...[
+                  Gap.vLG,
+                  if (exception.details != null) Text(exception.details.toString())
+                ],
               ],
             ),
           ),
@@ -63,57 +63,27 @@ class ErrorMessage<T> extends StatelessWidget {
 
   CommonException _toCommonException(BuildContext context, Object error) {
     return switch (snapshot.error) {
-      _ when error is DioException => switch (error.type) {
-          DioExceptionType.connectionTimeout || DioExceptionType.sendTimeout || DioExceptionType.receiveTimeout => CommonException(
-              message: 'HTTP Request Timeout',
-              detail: 'URL: ${error.requestOptions.path}',
-            ),
-          DioExceptionType.badCertificate => CommonException(
-              message: 'HTTP Bad Certificate',
-              detail: 'URL: ${error.requestOptions.path}',
-            ),
-          DioExceptionType.cancel => CommonException(
-              message: 'HTTP Has Been Canceled',
-              detail: 'URL: ${error.requestOptions.path}',
-            ),
-          DioExceptionType.connectionError => CommonException(
-              message: 'HTTP Connection Error',
-              detail: 'URL: ${error.requestOptions.path}',
-            ),
-          DioExceptionType.badResponse || DioExceptionType.unknown => CommonException(
-              message: 'HTTP ${error.response?.statusCode}',
-              detail: 'URL: ${error.requestOptions.path}',
-              error: error.response?.data,
-            ),
-        },
-      _ when error is ApiException => CommonException(
-          message: error.message ?? '',
-          detail: error.details,
+      _ when error is PlatformException => CommonException(
+          code: AppLocalizations.of(context)!.errorCode(error.code, error.message as Object? ?? ''),
+          message: error.message,
+          details: AppLocalizations.of(context)!.errorDetails(error.code, error.message as Object? ?? ''),
+          stackTrace: error.stacktrace == null ? null : StackTrace.fromString(error.stacktrace!),
         ),
-      _ when error is BluetoothException => switch (error.type) {
-          BluetoothExceptionType.connectTimeout => CommonException(
-              message: AppLocalizations.of(context)!.errorTextConnectTimeout,
-              detail: AppLocalizations.of(context)!.errorTextConnectTimeoutHelper,
-            ),
-          BluetoothExceptionType.nonAdaptor => CommonException(
-              message: AppLocalizations.of(context)!.errorTextNoBluetoothAdaptor,
-            ),
-        },
-      _ when error is RollbackDataException => CommonException(
-          message: AppLocalizations.of(context)!.errorTextNoDataToRollback,
-        ),
-      _ when error is StoragePermissionException => CommonException(
-          message: AppLocalizations.of(context)!.errorTextNoStoragePermission,
-        ),
-      _ => CommonException(message: error.toString(), error: snapshot.stackTrace.toString())
+      _ => CommonException(code: '0', message: error.toString())
     };
   }
 }
 
 class CommonException implements Exception {
-  final String message;
-  final String? detail;
-  final dynamic error;
+  final String code;
+  final String? message;
+  final dynamic details;
+  final StackTrace? stackTrace;
 
-  const CommonException({required this.message, this.detail, this.error});
+  const CommonException({
+    required this.code,
+    this.message,
+    this.details,
+    this.stackTrace,
+  });
 }

@@ -1,7 +1,7 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
-import 'package:player_view/player.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:video_player/player.dart';
 
 import '../../components/error_message.dart';
 import '../../platform_api.dart';
