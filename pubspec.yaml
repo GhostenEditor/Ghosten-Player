@@ -32,7 +32,7 @@ dependencies:
   readmore: ^3.0.0
   rxdart: ^0.28.0
   scaled_app: ^2.3.0
-  shared_preferences: ^2.5.0
+  shared_preferences: ^2.5.2
   url_launcher: ^6.3.0
   video_player:
     path: packages/video_player
