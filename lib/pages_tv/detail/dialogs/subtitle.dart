@@ -53,7 +53,7 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.folder_open_rounded),
                     onPressed: () async {
-                      final resp = await navigateTo(navigatorKey.currentContext!, const DriverFilePicker(selectableType: FileType.folder));
+                      final resp = await navigateTo(navigatorKey.currentContext!, const DriverFilePicker(selectableType: FileType.file));
                       if (resp is (int, DriverFile)) {
                         final file = resp.$2;
                         final ext = file.name.split('.').lastOrNull;
