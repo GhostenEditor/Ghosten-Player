@@ -106,10 +106,11 @@ jobs:
           echo "VERSION=$new_version" >> $GITHUB_ENV
 
       - name: Push APK to Releases
-        uses: ncipollo/release-action@v1
+        uses: softprops/action-gh-release@v2
         with:
-          artifacts: "build/app/outputs/flutter-apk/app-arm*-release.apk"
-          generateReleaseNotes: true
+          token: ${{ secrets.TOKEN }}
+          tag_name: v${{ env.VERSION }}
+          release_name: v${{ env.VERSION }}
           draft: true
-          tag: v${{ env.VERSION }}
-          token: ${{ github.token }}
+          files: |
+            build/app/outputs/flutter-apk/app-arm*-release.apk
