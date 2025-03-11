@@ -4,8 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:video_player/player.dart';
 
-import '../../components/gap.dart';
-import '../../models/models.dart';
 import '../../utils/utils.dart';
 import '../../validators/validators.dart';
 import '../../views/image_viewer.dart';
@@ -17,12 +15,6 @@ import '../utils/player.dart';
 import '../utils/utils.dart';
 
 class FileViewer extends StatelessWidget {
-  final bool autofocus;
-  final int driverId;
-  final DriverFile item;
-  final VoidCallback onPage;
-  final VoidCallback onRefresh;
-
   const FileViewer({
     super.key,
     required this.item,
@@ -31,6 +23,12 @@ class FileViewer extends StatelessWidget {
     required this.onRefresh,
     this.autofocus = false,
   });
+
+  final bool autofocus;
+  final int driverId;
+  final DriverFile item;
+  final VoidCallback onPage;
+  final VoidCallback onRefresh;
 
   @override
   Widget build(BuildContext context) {
@@ -70,16 +68,17 @@ class FileViewer extends StatelessWidget {
                                   navigateTo(navigatorKey.currentContext!, ImageViewer(url: item.url!.normalize(), title: item.name));
                                 case FileCategory.video:
                                   toPlayer(
-                                      navigatorKey.currentContext!,
-                                      [
-                                        ExPlaylistItem(
-                                            id: 0,
-                                            url: item.url!.normalize(),
-                                            sourceType: PlaylistItemSourceType.other,
-                                            title: item.name,
-                                            description: item.updatedAt?.format())
-                                      ],
-                                      playerType: PlayerType.movie);
+                                    navigatorKey.currentContext!,
+                                    [
+                                      PlaylistItem(
+                                        url: item.url!.normalize(),
+                                        sourceType: PlaylistItemSourceType.other,
+                                        title: item.name,
+                                        description: item.updatedAt?.format(),
+                                        source: null,
+                                      )
+                                    ],
+                                  );
                                 default:
                               }
                             },
@@ -106,8 +105,8 @@ class FileViewer extends StatelessWidget {
                           leading: const Icon(Icons.delete_outline),
                           title: Text(AppLocalizations.of(context)!.buttonDelete),
                           onTap: () async {
-                            final confirmed = await showConfirm(context, AppLocalizations.of(context)!.deleteConfirmText);
-                            if (confirmed == true && context.mounted) {
+                            final flag = await showConfirm(context, AppLocalizations.of(context)!.deleteConfirmText);
+                            if ((flag ?? false) && context.mounted) {
                               final resp = await showNotification(context, Api.fileRemove(driverId, item.id));
                               if (resp?.error == null) {
                                 onRefresh();
@@ -136,9 +135,8 @@ class FileViewer extends StatelessWidget {
         autofocus: autofocus,
         leading: Icon(item.icon()),
         title: Text(item.name, overflow: TextOverflow.ellipsis),
-        subtitle: Row(children: [
+        subtitle: Row(spacing: 12, children: [
           if (item.updatedAt != null) Text(item.updatedAt!.formatFull()),
-          if (item.type == FileType.file && item.updatedAt != null) Gap.hMD,
           if (item.type == FileType.file && item.size != null) Text(item.size!.toSizeDisplay()),
         ]),
         trailing: item.type == FileType.folder ? const Icon(Icons.chevron_right) : null,
@@ -149,10 +147,10 @@ class FileViewer extends StatelessWidget {
 }
 
 class _FileNameDialog extends StatefulWidget {
+  const _FileNameDialog({required this.dialogTitle, this.filename});
+
   final String dialogTitle;
   final String? filename;
-
-  const _FileNameDialog({required this.dialogTitle, this.filename});
 
   @override
   State<_FileNameDialog> createState() => _FileNameDialogState();
@@ -195,7 +193,7 @@ class _FileNameDialogState extends State<_FileNameDialog> {
               child: Text(AppLocalizations.of(context)!.buttonConfirm),
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
-                  Navigator.of(context).pop((_controller.text));
+                  Navigator.of(context).pop(_controller.text);
                 }
               },
             ),
@@ -207,9 +205,9 @@ class _FileNameDialogState extends State<_FileNameDialog> {
 }
 
 class FilePropertyBottomSheet extends StatelessWidget {
-  final DriverFile item;
-
   const FilePropertyBottomSheet({super.key, required this.item});
+
+  final DriverFile item;
 
   @override
   Widget build(BuildContext context) {
@@ -220,10 +218,10 @@ class FilePropertyBottomSheet extends StatelessWidget {
           children: [
             Icon(item.icon(), size: 128),
             ListTile(title: Text(item.name, style: Theme.of(context).textTheme.headlineMedium)),
-            buildListTile(context, AppLocalizations.of(context)!.filePropertyCategory, getCategory(context)),
-            if (item.type == FileType.file) buildListTile(context, AppLocalizations.of(context)!.filePropertySize, item.size?.toSizeDisplay() ?? ''),
-            buildListTile(context, AppLocalizations.of(context)!.filePropertyUpdateAt, item.updatedAt?.formatFullWithoutSec() ?? ''),
-            buildListTile(context, AppLocalizations.of(context)!.filePropertyCreateAt, item.createdAt?.formatFullWithoutSec() ?? ''),
+            _buildListTile(context, AppLocalizations.of(context)!.filePropertyCategory, _getCategory(context)),
+            if (item.type == FileType.file) _buildListTile(context, AppLocalizations.of(context)!.filePropertySize, item.size?.toSizeDisplay() ?? ''),
+            _buildListTile(context, AppLocalizations.of(context)!.filePropertyUpdateAt, item.updatedAt?.formatFullWithoutSec() ?? ''),
+            _buildListTile(context, AppLocalizations.of(context)!.filePropertyCreateAt, item.createdAt?.formatFullWithoutSec() ?? ''),
             const SafeArea(child: SizedBox()),
           ],
         ),
@@ -231,7 +229,7 @@ class FilePropertyBottomSheet extends StatelessWidget {
     );
   }
 
-  Widget buildListTile(BuildContext context, String leading, String title) {
+  Widget _buildListTile(BuildContext context, String leading, String title) {
     return ListTile(
       minLeadingWidth: 100,
       dense: true,
@@ -242,7 +240,7 @@ class FilePropertyBottomSheet extends StatelessWidget {
     );
   }
 
-  String getCategory(BuildContext context) {
+  String _getCategory(BuildContext context) {
     if (item.type == FileType.folder) {
       return AppLocalizations.of(context)!.fileCategory('folder');
     } else {

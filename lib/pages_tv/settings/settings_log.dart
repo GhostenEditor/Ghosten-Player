@@ -21,7 +21,7 @@ class _SettingsLogPageState extends State<SettingsLogPage> {
 
   final _scrollController = ScrollController();
 
-  Future<void> query(int index) async {
+  Future<void> _query(int index) async {
     try {
       final data = await Api.logQueryPage(
         30,
@@ -42,7 +42,7 @@ class _SettingsLogPageState extends State<SettingsLogPage> {
   @override
   void initState() {
     super.initState();
-    _controller.addPageRequestListener(query);
+    _controller.addPageRequestListener(_query);
   }
 
   @override
@@ -81,8 +81,8 @@ class _SettingsLogPageState extends State<SettingsLogPage> {
                   ),
                   onTap: () {},
                 ),
-                firstPageErrorIndicatorBuilder: (_) => ErrorMessage(snapshot: AsyncSnapshot.withError(ConnectionState.done, _controller.error)),
-                newPageErrorIndicatorBuilder: (_) => ErrorMessage(snapshot: AsyncSnapshot.withError(ConnectionState.done, _controller.error)),
+                firstPageErrorIndicatorBuilder: (_) => ErrorMessage(error: _controller.error),
+                newPageErrorIndicatorBuilder: (_) => ErrorMessage(error: _controller.error),
                 noItemsFoundIndicatorBuilder: (_) => const NoData(),
                 noMoreItemsIndicatorBuilder: (_) => Padding(
                   padding: const EdgeInsets.all(8.0),

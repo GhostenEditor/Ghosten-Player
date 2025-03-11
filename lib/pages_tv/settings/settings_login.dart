@@ -23,7 +23,7 @@ class SettingsLoginPage extends StatefulWidget {
 }
 
 class _SettingsLoginPageState extends State<SettingsLoginPage> {
-  DriverType driverType = DriverType.alipan;
+  DriverType _driverType = DriverType.alipan;
   late final List<FormItem> _alipan;
   late final List<FormItem> _webdav;
 
@@ -88,13 +88,13 @@ class _SettingsLoginPageState extends State<SettingsLoginPage> {
               fit: FlexFit.tight,
               child: DecoratedBox(
                 decoration: const BoxDecoration(
-                  image: DecorationImage(image: AssetImage('assets/images/bg-wheat.webp'), repeat: ImageRepeat.repeat),
+                  image: DecorationImage(image: AssetImage('assets/tv/images/bg-wheat.webp'), repeat: ImageRepeat.repeat),
                 ),
                 child: Container(
                   clipBehavior: Clip.antiAlias,
                   decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
                   child: InputAssistance(
-                    disabled: switch (driverType) {
+                    disabled: switch (_driverType) {
                       DriverType.webdav || DriverType.alipan => false,
                       DriverType.quark => true,
                       DriverType.local => throw UnimplementedError(),
@@ -118,26 +118,26 @@ class _SettingsLoginPageState extends State<SettingsLoginPage> {
                     children: [DriverType.alipan, DriverType.quark, DriverType.webdav]
                         .map((ty) => Padding(
                               padding: const EdgeInsets.all(4),
-                              child: driverType == ty
+                              child: _driverType == ty
                                   ? TVFilledButton(
-                                      onPressed: () => setState(() => driverType = ty),
+                                      onPressed: () => setState(() => _driverType = ty),
                                       child: Text(AppLocalizations.of(context)!.driverType(ty.name)),
                                     )
                                   : TVTextButton(
-                                      onPressed: () => setState(() => driverType = ty), child: Text(AppLocalizations.of(context)!.driverType(ty.name))),
+                                      onPressed: () => setState(() => _driverType = ty), child: Text(AppLocalizations.of(context)!.driverType(ty.name))),
                             ))
                         .toList(),
                   ),
                   Expanded(
-                    child: switch (driverType) {
+                    child: switch (_driverType) {
                       DriverType.alipan => Center(
                           child: StepperForm(
                               key: ValueKey(_alipan),
                               items: _alipan,
                               onComplete: (data) async {
                                 data['type'] = DriverType.alipan.name;
-                                final flag = await showDialog<bool>(context: context, builder: (context) => buildLoginLoading(Api.driverInsert(data)));
-                                if (flag == true && context.mounted) {
+                                final flag = await showDialog<bool>(context: context, builder: (context) => _buildLoginLoading(Api.driverInsert(data)));
+                                if ((flag ?? false) && context.mounted) {
                                   Navigator.of(context).pop(true);
                                 }
                               })),
@@ -147,14 +147,14 @@ class _SettingsLoginPageState extends State<SettingsLoginPage> {
                               items: _webdav,
                               onComplete: (data) async {
                                 data['type'] = DriverType.webdav.name;
-                                final flag = await showDialog<bool>(context: context, builder: (context) => buildLoginLoading(Api.driverInsert(data)));
-                                if (flag == true && context.mounted) {
+                                final flag = await showDialog<bool>(context: context, builder: (context) => _buildLoginLoading(Api.driverInsert(data)));
+                                if ((flag ?? false) && context.mounted) {
                                   Navigator.of(context).pop(true);
                                 }
                               })),
                       DriverType.quark => _QuarkLogin(onComplete: (data) async {
-                          final flag = await showDialog<bool>(context: context, builder: (context) => buildLoginLoading(Api.driverInsert(data)));
-                          if (flag == true && context.mounted) {
+                          final flag = await showDialog<bool>(context: context, builder: (context) => _buildLoginLoading(Api.driverInsert(data)));
+                          if ((flag ?? false) && context.mounted) {
                             Navigator.of(context).pop(true);
                           }
                         }),
@@ -168,7 +168,7 @@ class _SettingsLoginPageState extends State<SettingsLoginPage> {
     );
   }
 
-  Widget buildLoginLoading(Stream<dynamic> stream) {
+  Widget _buildLoginLoading(Stream<dynamic> stream) {
     return StreamBuilder(
         stream: stream,
         builder: (context, snapshot) => PopScope(
@@ -188,7 +188,7 @@ class _SettingsLoginPageState extends State<SettingsLoginPage> {
                   if (snapshot.hasError) {
                     return AlertDialog(
                       title: Text(AppLocalizations.of(context)!.modalTitleNotification),
-                      content: ErrorMessage(snapshot: snapshot, leading: const Icon(Icons.error_outline, size: 60, color: Colors.red)),
+                      content: ErrorMessage(error: snapshot.error, leading: const Icon(Icons.error_outline, size: 60, color: Colors.red)),
                     );
                   } else {
                     Navigator.of(context).pop(true);
@@ -200,9 +200,9 @@ class _SettingsLoginPageState extends State<SettingsLoginPage> {
 }
 
 class _QuarkLogin extends StatefulWidget {
-  final ValueChanged<dynamic> onComplete;
-
   const _QuarkLogin({required this.onComplete});
+
+  final ValueChanged<dynamic> onComplete;
 
   @override
   State<_QuarkLogin> createState() => _QuarkLoginState();

@@ -20,10 +20,10 @@ import 'dialogs/subtitle.dart';
 import 'mixins/action.dart';
 
 class EpisodeDetail extends StatefulWidget {
+  const EpisodeDetail(this.initialData, {super.key, required this.scrapper});
+
   final TVEpisode initialData;
   final Scrapper scrapper;
-
-  const EpisodeDetail(this.initialData, {super.key, required this.scrapper});
 
   @override
   State<EpisodeDetail> createState() => _EpisodeDetailState();
@@ -47,7 +47,7 @@ class _EpisodeDetailState extends State<EpisodeDetail> with ActionMixin {
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) {
-          if (_drawerNavigatorKey.currentState?.canPop() == true) {
+          if (_drawerNavigatorKey.currentState?.canPop() ?? false) {
             _drawerNavigatorKey.currentState!.pop();
           } else {
             Navigator.of(context).pop(refresh);
@@ -65,7 +65,7 @@ class _EpisodeDetailState extends State<EpisodeDetail> with ActionMixin {
                 navigatorKey: _navigatorKey,
                 drawerNavigatorKey: _drawerNavigatorKey,
                 showSide: _showSide,
-                endDrawer: buildEndDrawer(context, item),
+                endDrawer: _buildEndDrawer(context, item),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -155,7 +155,7 @@ class _EpisodeDetailState extends State<EpisodeDetail> with ActionMixin {
                       leading: const Icon(Icons.play_arrow_rounded),
                       title: Text(AppLocalizations.of(context)!.buttonWatchNow),
                       onTap: () {
-                        play(item);
+                        _play(item);
                       },
                     ),
                     ButtonSettingItem(
@@ -188,7 +188,7 @@ class _EpisodeDetailState extends State<EpisodeDetail> with ActionMixin {
     );
   }
 
-  Widget buildEndDrawer(BuildContext context, TVEpisode item) {
+  Widget _buildEndDrawer(BuildContext context, TVEpisode item) {
     return SettingPage(
       title: AppLocalizations.of(context)!.buttonMore,
       child: Builder(builder: (context) {
@@ -228,14 +228,13 @@ class _EpisodeDetailState extends State<EpisodeDetail> with ActionMixin {
     );
   }
 
-  play(TVEpisode item) async {
+  Future<void> _play(TVEpisode item) async {
     final season = await Api.tvSeasonQueryById(item.seasonId);
     if (!mounted) return;
     await toPlayer(
       context,
       season.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList(),
-      playerType: PlayerType.tv,
-      id: item.id,
+      index: season.episodes.indexWhere((episode) => episode.id == item.id),
       theme: item.themeColor,
     );
     setState(() => refresh = true);

@@ -72,8 +72,12 @@ class MethodChannelApi extends ApiPlatform {
   /// Library Start
 
   @override
-  Future<void> libraryRefreshById(int id) async {
-    final data = await client.post('/library/refresh/id/cb', data: {'id': id});
+  Future<void> libraryRefreshById(int id, bool incremental, String behavior) async {
+    final data = await client.post('/library/refresh/id/cb', data: {
+      'id': id,
+      'incremental': incremental,
+      'behavior': behavior,
+    });
     final eventChannel = EventChannel('$_pluginNamespace/update/${data['id']}');
 
     ApiPlatform.streamController.addStream(eventChannel
@@ -125,10 +129,10 @@ class MethodChannelApi extends ApiPlatform {
 
   /// Cast Start
   @override
-  Stream<List<dynamic>> dlnaDiscover() async* {
+  Stream<List<Json>> dlnaDiscover() async* {
     final data = await client.post('/dlna/discover/cb');
     final eventChannel = EventChannel('$_pluginNamespace/update/${data['id']}');
-    yield* eventChannel.receiveBroadcastStream().map((event) => jsonDecode(event) as List<dynamic>);
+    yield* eventChannel.receiveBroadcastStream().map((event) => jsonDecode(event) as List<Json>);
   }
 
   ///  Cast End

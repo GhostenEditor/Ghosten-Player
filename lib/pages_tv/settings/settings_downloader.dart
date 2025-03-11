@@ -26,15 +26,15 @@ class _SystemSettingsDownloaderState extends State<SystemSettingsDownloader> {
   final _stream =
       ConcatStream([Stream.value(null), Stream.periodic(const Duration(seconds: 1))]).switchMap((_) => Stream.fromFuture(Api.downloadTaskQueryByAll()));
   StreamSubscription<List<DownloadTask>>? _subscription;
-  List<DownloadTask> completeList = [];
-  List<DownloadTask> notCompleteList = [];
+  List<DownloadTask> _completeList = [];
+  List<DownloadTask> _notCompleteList = [];
 
   @override
   void initState() {
     super.initState();
     _subscription = _stream.listen((data) {
-      completeList = (data).where((item) => item.status == DownloadTaskStatus.complete).toList();
-      notCompleteList = (data).where((item) => item.status != DownloadTaskStatus.complete).toList();
+      _completeList = data.where((item) => item.status == DownloadTaskStatus.complete).toList();
+      _notCompleteList = data.where((item) => item.status != DownloadTaskStatus.complete).toList();
       setState(() {});
     });
   }
@@ -54,173 +54,174 @@ class _SystemSettingsDownloaderState extends State<SystemSettingsDownloader> {
             SliverToBoxAdapter(
                 child: ListTile(
                     title: Text(AppLocalizations.of(context)!.downloaderLabelDownloading, style: Theme.of(context).textTheme.labelMedium), dense: true)),
-            notCompleteList.isEmpty
-                ? const SliverToBoxAdapter(child: NoData())
-                : SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    sliver: SliverList.builder(
-                      itemCount: notCompleteList.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        final item = notCompleteList[index];
-                        return SlidableSettingItem(
-                          key: ValueKey(item.id),
-                          leading: AspectRatio(
-                            aspectRatio: 1,
-                            child: item.poster == null
-                                ? Container(
-                                    decoration: const BoxDecoration(
-                                      color: Colors.black12,
-                                      borderRadius: BorderRadius.all(Radius.circular(4)),
-                                    ),
-                                    child: const Icon(
-                                      Icons.image_not_supported_outlined,
-                                      size: 24,
-                                    ),
-                                  )
-                                : AsyncImage(
-                                    item.poster!,
-                                    radius: BorderRadius.circular(6),
-                                    ink: true,
-                                  ),
-                          ),
-                          trailing: SizedBox.square(
-                            dimension: 28,
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                CircularProgressIndicator(
-                                  value: item.status == DownloadTaskStatus.downloading ? item.progress : (item.progress ?? 0),
-                                  color: switch (item.status) {
-                                    DownloadTaskStatus.idle => Theme.of(context).colorScheme.secondary,
-                                    DownloadTaskStatus.downloading => Theme.of(context).colorScheme.primary,
-                                    DownloadTaskStatus.complete => throw UnimplementedError(),
-                                    DownloadTaskStatus.failed => Theme.of(context).colorScheme.error,
-                                  },
-                                  backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+            if (_notCompleteList.isEmpty)
+              const SliverToBoxAdapter(child: NoData())
+            else
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                sliver: SliverList.builder(
+                  itemCount: _notCompleteList.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final item = _notCompleteList[index];
+                    return SlidableSettingItem(
+                      key: ValueKey(item.id),
+                      leading: AspectRatio(
+                        aspectRatio: 1,
+                        child: item.poster == null
+                            ? Container(
+                                decoration: const BoxDecoration(
+                                  color: Colors.black12,
+                                  borderRadius: BorderRadius.all(Radius.circular(4)),
                                 ),
-                                Builder(
-                                    builder: (context) => IconTheme(
-                                        data: IconTheme.of(context).copyWith(size: 16),
-                                        child: switch (item.status) {
-                                          DownloadTaskStatus.idle => const Icon(Icons.pause),
-                                          DownloadTaskStatus.downloading => const Icon(Icons.download_rounded),
-                                          DownloadTaskStatus.complete => throw UnimplementedError(),
-                                          DownloadTaskStatus.failed => const Icon(Icons.close),
-                                        }))
-                              ],
-                            ),
-                          ),
-                          title: Text(item.title),
-                          subtitle: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(item.createdAt.formatFullWithoutSec()),
-                                  Text(item.size.toSizeDisplay()),
-                                ],
+                                child: const Icon(
+                                  Icons.image_not_supported_outlined,
+                                  size: 24,
+                                ),
+                              )
+                            : AsyncImage(
+                                item.poster!,
+                                radius: BorderRadius.circular(6),
+                                ink: true,
                               ),
-                              Row(children: [
-                                if (item.speed != null) Text(item.speed!.toNetworkSpeed()),
-                                if (item.speed != null) Gap.hSM,
-                                Text(item.elapsed.toDisplay()),
-                                if (item.speed != null) const Text('/'),
-                                if (item.speed != null) Text(Duration(seconds: (item.size / item.speed! * (1 - (item.progress ?? 0))).toInt()).toDisplay()),
-                              ]),
+                      ),
+                      trailing: SizedBox.square(
+                        dimension: 28,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            CircularProgressIndicator(
+                              value: item.status == DownloadTaskStatus.downloading ? item.progress : (item.progress ?? 0),
+                              color: switch (item.status) {
+                                DownloadTaskStatus.idle => Theme.of(context).colorScheme.secondary,
+                                DownloadTaskStatus.downloading => Theme.of(context).colorScheme.primary,
+                                DownloadTaskStatus.complete => throw UnimplementedError(),
+                                DownloadTaskStatus.failed => Theme.of(context).colorScheme.error,
+                              },
+                              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                            ),
+                            Builder(
+                                builder: (context) => IconTheme(
+                                    data: IconTheme.of(context).copyWith(size: 16),
+                                    child: switch (item.status) {
+                                      DownloadTaskStatus.idle => const Icon(Icons.pause),
+                                      DownloadTaskStatus.downloading => const Icon(Icons.download_rounded),
+                                      DownloadTaskStatus.complete => throw UnimplementedError(),
+                                      DownloadTaskStatus.failed => const Icon(Icons.close),
+                                    }))
+                          ],
+                        ),
+                      ),
+                      title: Text(item.title),
+                      subtitle: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(item.createdAt.formatFullWithoutSec()),
+                              Text(item.size.toSizeDisplay()),
                             ],
                           ),
-                          actions: [
-                            TVIconButton(icon: const Icon(Icons.play_arrow_rounded), onPressed: () => play(context, item.mediaType, item.mediaId)),
-                            if (item.status == DownloadTaskStatus.idle)
-                              TVIconButton(icon: const Icon(Icons.downloading_rounded), onPressed: () => Api.downloadTaskResumeById(item.id)),
-                            if (item.status == DownloadTaskStatus.downloading)
-                              TVIconButton(icon: const Icon(Icons.pause_rounded), onPressed: () => Api.downloadTaskPauseById(item.id)),
-                            TVIconButton(
-                                icon: const Icon(Icons.delete_outline_outlined),
-                                onPressed: () => showNotification(context, Api.downloadTaskDeleteById(item.id))),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
+                          Row(children: [
+                            if (item.speed != null) Text(item.speed!.toNetworkSpeed()),
+                            if (item.speed != null) Gap.hSM,
+                            Text(item.elapsed.toDisplay()),
+                            if (item.speed != null) const Text('/'),
+                            if (item.speed != null) Text(Duration(seconds: (item.size / item.speed! * (1 - (item.progress ?? 0))).toInt()).toDisplay()),
+                          ]),
+                        ],
+                      ),
+                      actions: [
+                        TVIconButton(icon: const Icon(Icons.play_arrow_rounded), onPressed: () => _play(context, item.mediaType, item.mediaId)),
+                        if (item.status == DownloadTaskStatus.idle)
+                          TVIconButton(icon: const Icon(Icons.downloading_rounded), onPressed: () => Api.downloadTaskResumeById(item.id)),
+                        if (item.status == DownloadTaskStatus.downloading)
+                          TVIconButton(icon: const Icon(Icons.pause_rounded), onPressed: () => Api.downloadTaskPauseById(item.id)),
+                        TVIconButton(
+                            icon: const Icon(Icons.delete_outline_outlined), onPressed: () => showNotification(context, Api.downloadTaskDeleteById(item.id))),
+                      ],
+                    );
+                  },
+                ),
+              ),
             SliverToBoxAdapter(
                 child: ListTile(
                     title: Text(AppLocalizations.of(context)!.downloaderLabelDownloaded, style: Theme.of(context).textTheme.labelMedium), dense: true)),
-            completeList.isEmpty
-                ? const SliverToBoxAdapter(child: NoData())
-                : SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    sliver: SliverList.builder(
-                      itemCount: completeList.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        final item = completeList[index];
-                        return SlidableSettingItem(
-                          leading: AspectRatio(
-                            aspectRatio: 1,
-                            child: item.poster == null
-                                ? Container(
-                                    decoration: const BoxDecoration(
-                                      color: Colors.black12,
-                                      borderRadius: BorderRadius.all(Radius.circular(4)),
-                                    ),
-                                    child: const Icon(
-                                      Icons.image_not_supported_outlined,
-                                      size: 24,
-                                    ),
-                                  )
-                                : AsyncImage(
-                                    item.poster!,
-                                    radius: BorderRadius.circular(6),
-                                    ink: true,
-                                  ),
-                          ),
-                          title: Text(item.title),
-                          subtitle: Column(
-                            mainAxisSize: MainAxisSize.min,
+            if (_completeList.isEmpty)
+              const SliverToBoxAdapter(child: NoData())
+            else
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                sliver: SliverList.builder(
+                  itemCount: _completeList.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final item = _completeList[index];
+                    return SlidableSettingItem(
+                      leading: AspectRatio(
+                        aspectRatio: 1,
+                        child: item.poster == null
+                            ? Container(
+                                decoration: const BoxDecoration(
+                                  color: Colors.black12,
+                                  borderRadius: BorderRadius.all(Radius.circular(4)),
+                                ),
+                                child: const Icon(
+                                  Icons.image_not_supported_outlined,
+                                  size: 24,
+                                ),
+                              )
+                            : AsyncImage(
+                                item.poster!,
+                                radius: BorderRadius.circular(6),
+                                ink: true,
+                              ),
+                      ),
+                      title: Text(item.title),
+                      subtitle: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(item.createdAt.formatFullWithoutSec()),
-                                  Text(item.size.toSizeDisplay()),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  if (item.elapsed != Duration.zero) Text((item.size ~/ item.elapsed.inSeconds).toNetworkSpeed()),
-                                  Text(item.elapsed.toDisplay()),
-                                ],
-                              ),
+                              Text(item.createdAt.formatFullWithoutSec()),
+                              Text(item.size.toSizeDisplay()),
                             ],
                           ),
-                          actions: [
-                            TVIconButton(
-                              icon: const Icon(Icons.play_arrow_rounded),
-                              onPressed: () => play(context, item.mediaType, item.mediaId),
-                            ),
-                            TVIconButton(
-                              icon: const Icon(Icons.delete_outline_outlined),
-                              onPressed: () async {
-                                final confirmed = await showConfirm(context, AppLocalizations.of(context)!.downloaderDeleteFileConfirmText);
-                                if (confirmed != null && context.mounted) {
-                                  await showNotification(context, Api.downloadTaskDeleteById(item.id, deleteFile: confirmed));
-                                }
-                              },
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              if (item.elapsed != Duration.zero) Text((item.size ~/ item.elapsed.inSeconds).toNetworkSpeed()),
+                              Text(item.elapsed.toDisplay()),
+                            ],
+                          ),
+                        ],
+                      ),
+                      actions: [
+                        TVIconButton(
+                          icon: const Icon(Icons.play_arrow_rounded),
+                          onPressed: () => _play(context, item.mediaType, item.mediaId),
+                        ),
+                        TVIconButton(
+                          icon: const Icon(Icons.delete_outline_outlined),
+                          onPressed: () async {
+                            final confirmed = await showConfirm(context, AppLocalizations.of(context)!.downloaderDeleteFileConfirmText);
+                            if (confirmed != null && context.mounted) {
+                              await showNotification(context, Api.downloadTaskDeleteById(item.id, deleteFile: confirmed));
+                            }
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
             const SliverPadding(padding: EdgeInsets.only(bottom: 12)),
           ],
         ));
   }
 
-  play(BuildContext context, MediaType mediaType, int id) async {
+  Future<void> _play(BuildContext context, MediaType mediaType, int id) async {
     switch (mediaType) {
       case MediaType.movie:
         final movie = await Api.movieQueryById(id);
@@ -230,7 +231,6 @@ class _SystemSettingsDownloaderState extends State<SystemSettingsDownloader> {
           navigatorKey.currentContext!,
           [FromMedia.fromMovie(movie)],
           theme: movie.themeColor,
-          playerType: PlayerType.movie,
         );
         _subscription?.resume();
       case MediaType.episode:
@@ -241,8 +241,7 @@ class _SystemSettingsDownloaderState extends State<SystemSettingsDownloader> {
         await toPlayer(
           navigatorKey.currentContext!,
           season.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList(),
-          playerType: PlayerType.tv,
-          id: episode.id,
+          index: season.episodes.indexWhere((e) => episode.id == e.id),
           theme: season.themeColor,
         );
         _subscription?.resume();

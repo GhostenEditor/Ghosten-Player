@@ -3,17 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../components/async_image.dart';
+import '../../../pages/components/theme_builder.dart';
 import '../../utils/utils.dart';
 
 class DetailScaffold<T extends MediaBase> extends StatefulWidget {
-  final T item;
-  final Key? navigatorKey;
-  final Key? scaffoldKey;
-  final Key? drawerNavigatorKey;
-  final Widget child;
-  final Widget? endDrawer;
-  final ValueNotifier<bool>? showSide;
-
   const DetailScaffold({
     super.key,
     required this.item,
@@ -25,6 +18,14 @@ class DetailScaffold<T extends MediaBase> extends StatefulWidget {
     this.drawerNavigatorKey,
   });
 
+  final T item;
+  final Key? navigatorKey;
+  final Key? scaffoldKey;
+  final Key? drawerNavigatorKey;
+  final Widget child;
+  final Widget? endDrawer;
+  final ValueNotifier<bool>? showSide;
+
   @override
   State<DetailScaffold<T>> createState() => _DetailScaffoldState();
 }
@@ -34,23 +35,19 @@ class _DetailScaffoldState<T extends MediaBase> extends State<DetailScaffold<T>>
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        widget.showSide != null
-            ? ListenableBuilder(listenable: widget.showSide!, builder: (context, _) => _buildBackground(context, widget.item, widget.showSide!.value))
-            : _buildBackground(context, widget.item, true),
-        Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: widget.item.themeColor == null
-                ? null
-                : ColorScheme.fromSeed(seedColor: Color(widget.item.themeColor!), brightness: Theme.of(context).brightness),
-          ),
-          child: Focus(
+        if (widget.showSide != null)
+          ListenableBuilder(listenable: widget.showSide!, builder: (context, _) => _buildBackground(context, widget.item, widget.showSide!.value))
+        else
+          _buildBackground(context, widget.item, true),
+        ThemeBuilder(widget.item.themeColor, builder: (context) {
+          return Focus(
             skipTraversal: true,
             onKeyEvent: (FocusNode node, KeyEvent event) {
               if (event is KeyDownEvent || event is KeyRepeatEvent) {
                 switch (event.logicalKey) {
                   case LogicalKeyboardKey.contextMenu:
                     if (widget.scaffoldKey is GlobalKey<ScaffoldState>) {
-                      final k = widget.scaffoldKey as GlobalKey<ScaffoldState>;
+                      final k = widget.scaffoldKey! as GlobalKey<ScaffoldState>;
                       if (k.currentState?.isEndDrawerOpen == false) {
                         k.currentState?.openEndDrawer();
                         return KeyEventResult.handled;
@@ -89,7 +86,7 @@ class _DetailScaffoldState<T extends MediaBase> extends State<DetailScaffold<T>>
                             if (currentNode != null) {
                               final nearestScope = currentNode.nearestScope!;
                               final focusedChild = nearestScope.focusedChild;
-                              if (focusedChild == null || focusedChild.focusInDirection(indent.direction) != true) {
+                              if (focusedChild == null || !focusedChild.focusInDirection(indent.direction)) {
                                 switch (indent.direction) {
                                   case TraversalDirection.left:
                                     nearestScope.parent?.focusInDirection(indent.direction);
@@ -109,13 +106,13 @@ class _DetailScaffoldState<T extends MediaBase> extends State<DetailScaffold<T>>
                 ],
               ),
             ),
-          ),
-        )
+          );
+        })
       ],
     );
   }
 
-  Widget _buildBackground<T extends MediaBase>(BuildContext context, T item, bool overlay) {
+  Widget _buildBackground(BuildContext context, T item, bool overlay) {
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -123,7 +120,7 @@ class _DetailScaffoldState<T extends MediaBase> extends State<DetailScaffold<T>>
           AsyncImage(item.backdrop!)
         else
           Image.asset(
-            'assets/images/bg-pixel.webp',
+            'assets/tv/images/bg-pixel.webp',
             repeat: ImageRepeat.repeat,
           ),
         if (item.logo != null)
@@ -138,21 +135,19 @@ class _DetailScaffoldState<T extends MediaBase> extends State<DetailScaffold<T>>
               alignment: Alignment.topRight,
             ),
           ),
-        overlay
-            ? item.backdrop != null
-                ? const DecoratedBox(decoration: BoxDecoration(color: Colors.black87))
-                : const DecoratedBox(decoration: BoxDecoration(color: Color(0xAA000000)))
-            : DecoratedBox(
-                decoration: BoxDecoration(
+        DecoratedBox(
+          decoration: overlay
+              ? BoxDecoration(color: Theme.of(context).scaffoldBackgroundColor.withAlpha(item.backdrop != null ? 0xDD : 0xAA))
+              : BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      item.backdrop != null ? const Color(0xEE000000) : const Color(0xAA000000),
+                      Theme.of(context).scaffoldBackgroundColor.withAlpha(item.backdrop != null ? 0xEE : 0xAA),
                       const Color(0x66000000),
                     ],
-                    stops: const [0.3, 0.7],
+                    stops: const [0.3, 0.8],
                   ),
                 ),
-              ),
+        ),
       ],
     );
   }

@@ -38,11 +38,6 @@ class MethodChannelPlayer extends PlayerPlatform {
   }
 
   @override
-  setVolume(double volume) {
-    return _channel.invokeMethod('setVolume', volume);
-  }
-
-  @override
   Future<bool?> requestPip() {
     return _channel.invokeMethod<bool>('requestPip', {});
   }
@@ -85,6 +80,21 @@ class MethodChannelPlayer extends PlayerPlatform {
   @override
   Future<bool?> canPip() {
     return _channel.invokeMethod('canPip');
+  }
+
+  @override
+  Future<void> enterFullscreen() {
+    return _channel.invokeMethod('fullscreen', true);
+  }
+
+  @override
+  Future<void> exitFullscreen() {
+    return _channel.invokeMethod('fullscreen', false);
+  }
+
+  @override
+  Future<void> setPlayerOption(String optionName, dynamic optionValue) {
+    return _channel.invokeMethod('setPlayerOption', {'name': optionName, 'value': optionValue});
   }
 
   @override

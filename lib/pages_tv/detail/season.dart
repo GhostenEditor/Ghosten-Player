@@ -2,7 +2,6 @@ import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../components/gap.dart';
 import '../../models/models.dart';
 import '../../pages/detail/utils/tmdb_uri.dart';
 import '../../utils/utils.dart';
@@ -18,9 +17,9 @@ import 'episode.dart';
 import 'mixins/action.dart';
 
 class SeasonDetail extends StatefulWidget {
-  final TVSeries initialData;
-
   const SeasonDetail({super.key, required this.initialData});
+
+  final TVSeries initialData;
 
   @override
   State<SeasonDetail> createState() => _SeasonDetailState();
@@ -44,7 +43,7 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) {
-          if (_drawerNavigatorKey.currentState?.canPop() == true) {
+          if (_drawerNavigatorKey.currentState?.canPop() ?? false) {
             _drawerNavigatorKey.currentState!.pop();
           } else {
             Navigator.of(context).pop(refresh);
@@ -57,14 +56,14 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
           builder: (context, snapshot) {
             final item = snapshot.requireData;
             if (item.seasons.isNotEmpty) {
-              switchSeason(item.seasons.firstWhere((it) => currentSeason.value != null ? it.id == currentSeason.value?.id : true), widget.initialData.scrapper);
+              _switchSeason(item.seasons.firstWhere((it) => currentSeason.value == null || it.id == currentSeason.value?.id), widget.initialData.scrapper);
             }
             return DetailScaffold(
                 item: item,
                 navigatorKey: _navigatorKey,
                 scaffoldKey: _scaffoldKey,
                 drawerNavigatorKey: _drawerNavigatorKey,
-                endDrawer: buildEndDrawer(context),
+                endDrawer: _buildEndDrawer(context),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -113,7 +112,7 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
                                               if (item.favorite) const Icon(Icons.favorite_outline_rounded),
                                             ],
                                           ),
-                                          onTap: () => switchSeason(item, snapshot.requireData.scrapper),
+                                          onTap: () => _switchSeason(item, snapshot.requireData.scrapper),
                                         ),
                                       ),
                                     );
@@ -142,7 +141,7 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
     );
   }
 
-  switchSeason(TVSeason item, Scrapper scrapper) {
+  void _switchSeason(TVSeason item, Scrapper scrapper) {
     if (currentSeason.value == item) return;
     currentSeason.value = item;
     Future.microtask(() {
@@ -158,7 +157,7 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
     });
   }
 
-  Widget buildEndDrawer(BuildContext context) {
+  Widget _buildEndDrawer(BuildContext context) {
     return SettingPage(
       title: AppLocalizations.of(context)!.buttonMore,
       child: ListenableBuilder(
@@ -196,11 +195,11 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
 }
 
 class _SeasonPage extends StatefulWidget {
+  const _SeasonPage({super.key, required this.seasonId, required this.scrapper, required this.needUpdate});
+
   final int seasonId;
   final Scrapper scrapper;
   final VoidCallback needUpdate;
-
-  const _SeasonPage({super.key, required this.seasonId, required this.scrapper, required this.needUpdate});
 
   @override
   State<_SeasonPage> createState() => _SeasonPageState();
@@ -220,6 +219,7 @@ class _SeasonPageState extends State<_SeasonPage> {
                 padding: const EdgeInsets.only(bottom: 16),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 16,
                   children: [
                     FocusableImage(
                       poster: item.poster,
@@ -227,7 +227,6 @@ class _SeasonPageState extends State<_SeasonPage> {
                       height: 180,
                       onTap: () {},
                     ),
-                    Gap.hLG,
                     Expanded(
                         child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -241,48 +240,50 @@ class _SeasonPageState extends State<_SeasonPage> {
                             const SizedBox(width: 16),
                             if (item.airDate != null) Text(item.airDate!.format(), style: Theme.of(context).textTheme.labelSmall),
                             const Spacer(),
-                            item.watched
-                                ? TVIconButton.filledTonal(
-                                    icon: const Icon(Icons.check_rounded, size: 16),
-                                    visualDensity: VisualDensity.compact,
-                                    padding: EdgeInsets.zero,
-                                    minimumSize: const Size.square(32),
-                                    onPressed: () async {
-                                      await Api.markWatched(MediaType.season, item.id, !item.watched);
-                                      if (context.mounted) setState(() {});
-                                    },
-                                  )
-                                : TVIconButton(
-                                    icon: const Icon(Icons.check_rounded, size: 16),
-                                    visualDensity: VisualDensity.compact,
-                                    padding: EdgeInsets.zero,
-                                    minimumSize: const Size.square(32),
-                                    onPressed: () async {
-                                      await Api.markWatched(MediaType.season, item.id, !item.watched);
-                                      if (context.mounted) setState(() {});
-                                    },
-                                  ),
-                            item.favorite
-                                ? TVIconButton.filledTonal(
-                                    icon: const Icon(Icons.favorite_outline, size: 16),
-                                    visualDensity: VisualDensity.compact,
-                                    padding: EdgeInsets.zero,
-                                    minimumSize: const Size.square(32),
-                                    onPressed: () async {
-                                      await Api.markFavorite(MediaType.season, item.id, !item.favorite);
-                                      if (context.mounted) setState(() {});
-                                    },
-                                  )
-                                : TVIconButton(
-                                    icon: const Icon(Icons.favorite_outline, size: 16),
-                                    visualDensity: VisualDensity.compact,
-                                    padding: EdgeInsets.zero,
-                                    minimumSize: const Size.square(32),
-                                    onPressed: () async {
-                                      await Api.markFavorite(MediaType.season, item.id, !item.favorite);
-                                      if (context.mounted) setState(() {});
-                                    },
-                                  ),
+                            if (item.watched)
+                              TVIconButton.filledTonal(
+                                icon: const Icon(Icons.check_rounded, size: 16),
+                                visualDensity: VisualDensity.compact,
+                                padding: EdgeInsets.zero,
+                                minimumSize: const Size.square(32),
+                                onPressed: () async {
+                                  await Api.markWatched(MediaType.season, item.id, !item.watched);
+                                  if (context.mounted) setState(() {});
+                                },
+                              )
+                            else
+                              TVIconButton(
+                                icon: const Icon(Icons.check_rounded, size: 16),
+                                visualDensity: VisualDensity.compact,
+                                padding: EdgeInsets.zero,
+                                minimumSize: const Size.square(32),
+                                onPressed: () async {
+                                  await Api.markWatched(MediaType.season, item.id, !item.watched);
+                                  if (context.mounted) setState(() {});
+                                },
+                              ),
+                            if (item.favorite)
+                              TVIconButton.filledTonal(
+                                icon: const Icon(Icons.favorite_outline, size: 16),
+                                visualDensity: VisualDensity.compact,
+                                padding: EdgeInsets.zero,
+                                minimumSize: const Size.square(32),
+                                onPressed: () async {
+                                  await Api.markFavorite(MediaType.season, item.id, !item.favorite);
+                                  if (context.mounted) setState(() {});
+                                },
+                              )
+                            else
+                              TVIconButton(
+                                icon: const Icon(Icons.favorite_outline, size: 16),
+                                visualDensity: VisualDensity.compact,
+                                padding: EdgeInsets.zero,
+                                minimumSize: const Size.square(32),
+                                onPressed: () async {
+                                  await Api.markFavorite(MediaType.season, item.id, !item.favorite);
+                                  if (context.mounted) setState(() {});
+                                },
+                              ),
                           ],
                         ),
                         Text(
@@ -308,9 +309,8 @@ class _SeasonPageState extends State<_SeasonPage> {
                           await toPlayer(
                             navigatorKey.currentContext!,
                             item.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList(),
-                            id: item.episodes[index].id,
+                            index: index,
                             theme: item.themeColor,
-                            playerType: PlayerType.tv,
                           );
                           widget.needUpdate();
                         },
@@ -329,12 +329,6 @@ class _SeasonPageState extends State<_SeasonPage> {
 }
 
 class _EpisodeListTile extends StatelessWidget {
-  final TVEpisode episode;
-  final Scrapper scrapper;
-  final bool? autofocus;
-  final GestureTapCallback? onTap;
-  final GestureTapCallback? onTapMore;
-
   const _EpisodeListTile({
     super.key,
     required this.episode,
@@ -343,6 +337,12 @@ class _EpisodeListTile extends StatelessWidget {
     this.autofocus,
     this.onTapMore,
   });
+
+  final TVEpisode episode;
+  final Scrapper scrapper;
+  final bool? autofocus;
+  final GestureTapCallback? onTap;
+  final GestureTapCallback? onTapMore;
 
   @override
   Widget build(BuildContext context) {
@@ -397,7 +397,7 @@ class _EpisodeListTile extends StatelessWidget {
                 children: [
                   RichText(
                     text: TextSpan(
-                      style: Theme.of(context).textTheme.labelSmall!,
+                      style: Theme.of(context).textTheme.labelSmall,
                       children: [
                         TextSpan(text: episode.seriesTitle),
                         const WidgetSpan(child: SizedBox(width: 6)),

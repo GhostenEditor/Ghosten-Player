@@ -9,9 +9,9 @@ import '../../components/setting.dart';
 import '../../components/text_button.dart';
 
 class MovieMetadata extends StatefulWidget {
-  final Movie movie;
-
   const MovieMetadata({super.key, required this.movie});
+
+  final Movie movie;
 
   @override
   State<MovieMetadata> createState() => _MovieMetadataState();

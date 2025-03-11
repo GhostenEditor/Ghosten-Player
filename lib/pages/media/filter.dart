@@ -3,55 +3,53 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../components/appbar_progress.dart';
 import '../../components/async_image.dart';
 import '../../components/future_builder_handler.dart';
-import '../../components/gap.dart';
 import '../../components/no_data.dart';
-import '../../mixins/update.dart';
 import '../../utils/utils.dart';
+import '../components/appbar_progress.dart';
+import '../components/image_card.dart';
 import '../detail/movie.dart';
 import '../detail/series.dart';
-import 'components/media_card.dart';
 
 class FilterPage extends StatefulWidget {
+  const FilterPage({super.key, this.queryType = QueryType.genre, this.id});
+
   final QueryType queryType;
   final int? id;
-
-  const FilterPage({super.key, this.queryType = QueryType.genre, this.id});
 
   @override
   State<FilterPage> createState() => _FilterPageState();
 }
 
-class _FilterPageState extends State<FilterPage> with NeedUpdateMixin {
-  late QueryType queryType = widget.queryType;
+class _FilterPageState extends State<FilterPage> {
+  late QueryType _queryType = widget.queryType;
 
-  late Future<List<Genre>> genres = Api.genreQueryAll();
-  late Future<List<Studio>> studios = Api.studioQueryAll();
-  late Future<List<Keyword>> keywords = Api.keywordQueryAll();
-  late Future<List<Actor>> actors = Api.actorQueryAll();
-  int? selectedGenre;
-  int? selectedStudio;
-  int? selectedKeyword;
-  int? selectedActor;
-  List<TVSeries> tvSeries = [];
-  List<Movie> movies = [];
+  late final Future<List<Genre>> _genres = Api.genreQueryAll();
+  late final Future<List<Studio>> _studios = Api.studioQueryAll();
+  late final Future<List<Keyword>> _keywords = Api.keywordQueryAll();
+  late final Future<List<Actor>> _actors = Api.actorQueryAll();
+  int? _selectedGenre;
+  int? _selectedStudio;
+  int? _selectedKeyword;
+  int? _selectedActor;
+  List<TVSeries> _tvSeries = [];
+  List<Movie> _movies = [];
 
   @override
   void initState() {
     if (widget.id != null) {
-      switch (queryType) {
+      switch (_queryType) {
         case QueryType.genre:
-          selectedGenre = widget.id;
+          _selectedGenre = widget.id;
         case QueryType.studio:
-          selectedStudio = widget.id;
+          _selectedStudio = widget.id;
         case QueryType.keyword:
-          selectedKeyword = widget.id;
+          _selectedKeyword = widget.id;
         case QueryType.actor:
-          selectedActor = widget.id;
+          _selectedActor = widget.id;
       }
-      search();
+      _search();
     }
     super.initState();
   }
@@ -77,53 +75,53 @@ class _FilterPageState extends State<FilterPage> with NeedUpdateMixin {
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: PopupMenuButton(
                           onSelected: (value) => setState(() {
-                                queryType = value;
+                                _queryType = value;
                               }),
                           itemBuilder: (context) => QueryType.values
                               .map((e) => CheckedPopupMenuItem(
-                                    checked: e == queryType,
+                                    checked: e == _queryType,
                                     value: e,
                                     child: Text(AppLocalizations.of(context)!.queryType(e.name)),
                                   ))
                               .toList(),
-                          child: _FilterButton(text: AppLocalizations.of(context)!.queryType(queryType.name))),
+                          child: _FilterButton(text: AppLocalizations.of(context)!.queryType(_queryType.name))),
                     ),
-                    if (queryType == QueryType.genre)
+                    if (_queryType == QueryType.genre)
                       FutureBuilderHandler(
                           initialData: const <Genre>[],
-                          future: genres,
+                          future: _genres,
                           builder: (context, snapshot) {
-                            final selected = snapshot.requireData.firstWhereOrNull((e) => e.id == selectedGenre);
+                            final selected = snapshot.requireData.firstWhereOrNull((e) => e.id == _selectedGenre);
                             return PopupMenuButton(
                                 onSelected: (value) {
-                                  selectedGenre = value;
-                                  search();
+                                  _selectedGenre = value;
+                                  _search();
                                   setState(() {});
                                 },
                                 itemBuilder: (context) => snapshot.requireData
                                     .map((e) => CheckedPopupMenuItem(
-                                          checked: e.id == selectedGenre,
+                                          checked: e.id == _selectedGenre,
                                           value: e.id,
                                           child: Text(e.name),
                                         ))
                                     .toList(),
                                 child: _FilterButton(text: selected?.name ?? AppLocalizations.of(context)!.unselect));
                           }),
-                    if (queryType == QueryType.studio)
+                    if (_queryType == QueryType.studio)
                       FutureBuilderHandler(
                           initialData: const <Studio>[],
-                          future: studios,
+                          future: _studios,
                           builder: (context, snapshot) {
-                            final selected = snapshot.requireData.firstWhereOrNull((e) => e.id == selectedStudio);
+                            final selected = snapshot.requireData.firstWhereOrNull((e) => e.id == _selectedStudio);
                             return PopupMenuButton(
                                 onSelected: (value) {
-                                  selectedStudio = value;
-                                  search();
+                                  _selectedStudio = value;
+                                  _search();
                                   setState(() {});
                                 },
                                 itemBuilder: (context) => snapshot.requireData
                                     .map((e) => CheckedPopupMenuItem(
-                                          checked: e.id == selectedStudio,
+                                          checked: e.id == _selectedStudio,
                                           value: e.id,
                                           child: Row(
                                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -143,40 +141,40 @@ class _FilterPageState extends State<FilterPage> with NeedUpdateMixin {
                                   imagePadding: const EdgeInsets.only(right: 4),
                                 ));
                           }),
-                    if (queryType == QueryType.keyword)
+                    if (_queryType == QueryType.keyword)
                       FutureBuilderHandler(
                           initialData: const <Keyword>[],
-                          future: keywords,
+                          future: _keywords,
                           builder: (context, snapshot) {
-                            final selected = snapshot.requireData.firstWhereOrNull((e) => e.id == selectedKeyword);
+                            final selected = snapshot.requireData.firstWhereOrNull((e) => e.id == _selectedKeyword);
                             return PopupMenuButton(
                                 onSelected: (value) {
-                                  selectedKeyword = value;
-                                  search();
+                                  _selectedKeyword = value;
+                                  _search();
                                 },
                                 itemBuilder: (context) => snapshot.requireData
                                     .map((e) => CheckedPopupMenuItem(
-                                          checked: e.id == selectedKeyword,
+                                          checked: e.id == _selectedKeyword,
                                           value: e.id,
                                           child: Text(e.name),
                                         ))
                                     .toList(),
                                 child: _FilterButton(text: selected?.name ?? AppLocalizations.of(context)!.unselect));
                           }),
-                    if (queryType == QueryType.actor)
+                    if (_queryType == QueryType.actor)
                       FutureBuilderHandler(
                           initialData: const <Actor>[],
-                          future: actors,
+                          future: _actors,
                           builder: (context, snapshot) {
-                            final selected = snapshot.requireData.firstWhereOrNull((e) => e.id == selectedActor);
+                            final selected = snapshot.requireData.firstWhereOrNull((e) => e.id == _selectedActor);
                             return PopupMenuButton(
                                 onSelected: (value) {
-                                  selectedActor = value;
-                                  search();
+                                  _selectedActor = value;
+                                  _search();
                                 },
                                 itemBuilder: (context) => snapshot.requireData
                                     .map((e) => CheckedPopupMenuItem(
-                                          checked: e.id == selectedActor,
+                                          checked: e.id == _selectedActor,
                                           value: e.id,
                                           child: Row(
                                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -191,8 +189,6 @@ class _FilterPageState extends State<FilterPage> with NeedUpdateMixin {
                                   text: selected?.name ?? AppLocalizations.of(context)!.unselect,
                                   image: selected?.profile,
                                   width: 200,
-                                  imageWidth: 40,
-                                  imageHeight: 60,
                                 ));
                           }),
                   ],
@@ -206,22 +202,29 @@ class _FilterPageState extends State<FilterPage> with NeedUpdateMixin {
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
             child: Text(AppLocalizations.of(context)!.homeTabTV, style: Theme.of(context).textTheme.titleLarge),
           )),
-          if (tvSeries.isEmpty)
+          if (_tvSeries.isEmpty)
             const SliverSafeArea(sliver: SliverToBoxAdapter(child: Padding(padding: EdgeInsets.symmetric(vertical: 32), child: NoData())))
           else
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               sliver: SliverGrid.builder(
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 200, childAspectRatio: 0.56),
-                  itemCount: tvSeries.length,
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 120,
+                    childAspectRatio: 0.5,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                  ),
+                  itemCount: _tvSeries.length,
                   itemBuilder: (context, index) {
-                    final item = tvSeries[index];
-                    return MediaCard(
+                    final item = _tvSeries[index];
+                    return ImageCard(
                       key: ValueKey(item.id),
-                      item: item,
+                      item.poster,
+                      title: Text(item.displayRecentTitle()),
+                      subtitle: Text(item.airDate?.format() ?? ''),
                       onTap: () async {
-                        final flag = await navigateTo<bool>(context, TVDetail(tvSeriesId: item.id, initialData: item));
-                        if (flag == true) setState(() {});
+                        final flag = await navigateTo<bool>(context, TVDetail(item.id, initialData: item));
+                        if (flag ?? false) setState(() {});
                       },
                     );
                   }),
@@ -231,23 +234,29 @@ class _FilterPageState extends State<FilterPage> with NeedUpdateMixin {
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
             child: Text(AppLocalizations.of(context)!.homeTabMovie, style: Theme.of(context).textTheme.titleLarge),
           )),
-          if (movies.isEmpty)
+          if (_movies.isEmpty)
             const SliverSafeArea(sliver: SliverToBoxAdapter(child: Padding(padding: EdgeInsets.symmetric(vertical: 32), child: NoData())))
           else
             SliverSafeArea(
                 sliver: SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               sliver: SliverGrid.builder(
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 200, childAspectRatio: 0.56),
-                  itemCount: movies.length,
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 120,
+                    childAspectRatio: 0.5,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                  ),
+                  itemCount: _movies.length,
                   itemBuilder: (context, index) {
-                    final item = movies[index];
-                    return MediaCard(
-                      key: ValueKey(item.id),
-                      item: item,
+                    final item = _movies[index];
+                    return ImageCard(
+                      item.poster,
+                      title: Text(item.displayRecentTitle()),
+                      subtitle: Text(item.airDate?.format() ?? ''),
                       onTap: () async {
                         final flag = await navigateTo<bool>(context, MovieDetail(item.id, initialData: item));
-                        if (flag == true) setState(() {});
+                        if (flag ?? false) setState(() {});
                       },
                     );
                   }),
@@ -258,27 +267,27 @@ class _FilterPageState extends State<FilterPage> with NeedUpdateMixin {
     );
   }
 
-  search() async {
-    switch (queryType) {
+  Future<void> _search() async {
+    switch (_queryType) {
       case QueryType.genre:
-        if (selectedGenre != null) {
-          tvSeries = await Api.tvSeriesQueryByFilter(queryType, selectedGenre!);
-          movies = await Api.movieQueryByFilter(queryType, selectedGenre!);
+        if (_selectedGenre != null) {
+          _tvSeries = await Api.tvSeriesQueryByFilter(_queryType, _selectedGenre!);
+          _movies = await Api.movieQueryByFilter(_queryType, _selectedGenre!);
         }
       case QueryType.studio:
-        if (selectedStudio != null) {
-          tvSeries = await Api.tvSeriesQueryByFilter(queryType, selectedStudio!);
-          movies = await Api.movieQueryByFilter(queryType, selectedStudio!);
+        if (_selectedStudio != null) {
+          _tvSeries = await Api.tvSeriesQueryByFilter(_queryType, _selectedStudio!);
+          _movies = await Api.movieQueryByFilter(_queryType, _selectedStudio!);
         }
       case QueryType.keyword:
-        if (selectedKeyword != null) {
-          tvSeries = await Api.tvSeriesQueryByFilter(queryType, selectedKeyword!);
-          movies = await Api.movieQueryByFilter(queryType, selectedKeyword!);
+        if (_selectedKeyword != null) {
+          _tvSeries = await Api.tvSeriesQueryByFilter(_queryType, _selectedKeyword!);
+          _movies = await Api.movieQueryByFilter(_queryType, _selectedKeyword!);
         }
       case QueryType.actor:
-        if (selectedActor != null) {
-          tvSeries = await Api.tvSeriesQueryByFilter(queryType, selectedActor!);
-          movies = await Api.movieQueryByFilter(queryType, selectedActor!);
+        if (_selectedActor != null) {
+          _tvSeries = await Api.tvSeriesQueryByFilter(_queryType, _selectedActor!);
+          _movies = await Api.movieQueryByFilter(_queryType, _selectedActor!);
         }
     }
     setState(() {});
@@ -286,13 +295,6 @@ class _FilterPageState extends State<FilterPage> with NeedUpdateMixin {
 }
 
 class _FilterButton extends StatelessWidget {
-  final String text;
-  final double? width;
-  final double imageWidth;
-  final double imageHeight;
-  final EdgeInsets imagePadding;
-  final String? image;
-
   const _FilterButton({
     this.width,
     required this.text,
@@ -301,6 +303,13 @@ class _FilterButton extends StatelessWidget {
     this.imageHeight = 60,
     this.imagePadding = EdgeInsets.zero,
   });
+
+  final String text;
+  final double? width;
+  final double imageWidth;
+  final double imageHeight;
+  final EdgeInsets imagePadding;
+  final String? image;
 
   @override
   Widget build(BuildContext context) {
@@ -319,9 +328,9 @@ class _FilterButton extends StatelessWidget {
               padding: image != null ? const EdgeInsets.only(left: 16) : const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                spacing: 12,
                 children: [
-                  width == null ? Text(text) : Expanded(child: Text(text, overflow: TextOverflow.ellipsis)),
-                  if (image != null) Gap.hMD,
+                  if (width == null) Text(text) else Expanded(child: Text(text, overflow: TextOverflow.ellipsis)),
                   if (image != null)
                     AsyncImage(
                       image!,

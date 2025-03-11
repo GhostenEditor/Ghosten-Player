@@ -38,15 +38,16 @@ class SettingsDiagnotics extends StatelessWidget {
                     },
                     onTap: () {},
                   )),
-              snapshot.connectionState == ConnectionState.done
-                  ? snapshot.requireData.every((item) => item.status == NetworkDiagnoticsStatus.success)
-                      ? ButtonSettingItem(
-                          title: Text(AppLocalizations.of(context)!.networkStatus(NetworkDiagnoticsStatus.success.name)),
-                        )
-                      : ButtonSettingItem(
-                          title: Text(AppLocalizations.of(context)!.networkStatus(NetworkDiagnoticsStatus.fail.name)),
-                        )
-                  : const Loading()
+              if (snapshot.connectionState == ConnectionState.done)
+                snapshot.requireData.every((item) => item.status == NetworkDiagnoticsStatus.success)
+                    ? ButtonSettingItem(
+                        title: Text(AppLocalizations.of(context)!.networkStatus(NetworkDiagnoticsStatus.success.name)),
+                      )
+                    : ButtonSettingItem(
+                        title: Text(AppLocalizations.of(context)!.networkStatus(NetworkDiagnoticsStatus.fail.name)),
+                      )
+              else
+                const Loading()
             ]);
           }),
     );

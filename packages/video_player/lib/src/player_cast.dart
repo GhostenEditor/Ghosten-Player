@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui;
-import 'dart:ui';
 
 import 'package:animations/animations.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -9,17 +8,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
-import 'cast.dart';
-import 'models.dart';
-import 'player_controls.dart';
+import '../player.dart';
 import 'player_platform_interface.dart';
 
-class PlayerCast<T extends PlaylistItem> extends StatefulWidget {
+class PlayerCast<T> extends StatefulWidget {
   final bool isTV;
   final CastDevice device;
   final int index;
   final int? theme;
-  final List<T> playlist;
+  final List<PlaylistItem<T>> playlist;
 
   const PlayerCast({
     super.key,
@@ -31,35 +28,29 @@ class PlayerCast<T extends PlaylistItem> extends StatefulWidget {
   });
 
   @override
-  State<PlayerCast> createState() => _PlayerCastState<T>();
+  State<PlayerCast<T>> createState() => _PlayerCastState<T>();
 }
 
-class _PlayerCastState<T extends PlaylistItem> extends State<PlayerCast<T>> {
+class _PlayerCastState<T> extends State<PlayerCast<T>> {
   final isPlaying = ValueNotifier(true);
   final showPlaylist = ValueNotifier(false);
   late final device = widget.device;
   late final index = ValueNotifier<int>(widget.index);
-  final _controller = PlayerProgressController();
-  StreamSubscription<PositionInfo>? _subscription;
-  Duration lastPlayedPosition = Duration.zero;
+  late final _controller = PlayerProgressController(device);
   final _scrollController = ScrollController();
 
   bool get isFirst => index.value == 0;
 
   bool get isLast => index.value == widget.playlist.length - 1;
 
-  T get currentItem => widget.playlist.elementAt(index.value);
+  PlaylistItem<T> get currentItem => widget.playlist.elementAt(index.value);
 
   @override
   void initState() {
     // todo: bug when SDK < 29
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.top]);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge, overlays: [SystemUiOverlay.top]);
-    _subscription = device.position().listen((data) {
-      _controller.setPosition(data.position);
-      _controller.setDuration(data.duration);
-      lastPlayedPosition = data.position;
-    });
+    device.start();
     next(index.value, true);
     super.initState();
   }
@@ -70,7 +61,6 @@ class _PlayerCastState<T extends PlaylistItem> extends State<PlayerCast<T>> {
     showPlaylist.dispose();
     device.stop();
     _controller.dispose();
-    _subscription?.cancel();
     _scrollController.dispose();
     super.dispose();
   }
@@ -107,7 +97,7 @@ class _PlayerCastState<T extends PlaylistItem> extends State<PlayerCast<T>> {
                   leading: IconButton(
                     icon: const BackButtonIcon(),
                     onPressed: () {
-                      Navigator.of(context).pop((index.value, lastPlayedPosition));
+                      Navigator.of(context).pop((index.value, _controller.position));
                     },
                   ),
                   scrolledUnderElevation: 0,
@@ -381,7 +371,7 @@ class _PlayerCastState<T extends PlaylistItem> extends State<PlayerCast<T>> {
   }
 }
 
-class _PlayerArtwork<T extends PlaylistItem> extends StatelessWidget {
+class _PlayerArtwork<T extends PlaylistItem<dynamic>> extends StatelessWidget {
   final T item;
   final ValueNotifier<bool> isPlaying;
 
@@ -519,8 +509,9 @@ class _PlayerVolumeState extends State<PlayerVolume> {
 class PlayerCastSearcher extends StatelessWidget {
   final Cast cast;
   final String? noResultText;
+  final Widget Function(BuildContext, Object?) errorWidget;
 
-  const PlayerCastSearcher(this.cast, {super.key, this.noResultText});
+  const PlayerCastSearcher(this.cast, {super.key, this.noResultText, required this.errorWidget});
 
   @override
   Widget build(BuildContext context) {
@@ -547,7 +538,7 @@ class PlayerCastSearcher extends StatelessWidget {
               ),
             );
           } else if (snapshot.hasError) {
-            return Center(child: Text(snapshot.error.toString()));
+            return errorWidget(context, snapshot.error);
           } else if (snapshot.connectionState != ConnectionState.done) {
             return const Column(
               mainAxisSize: MainAxisSize.min,
@@ -655,8 +646,8 @@ class _BlurredBackgroundState extends State<BlurredBackground> with SingleTicker
       vector = Offset(vector.dx, -vector.dy);
     }
     offset = Offset(
-      clampDouble(offset.dx, -offsetLimitation.width, offsetLimitation.width),
-      clampDouble(offset.dy, -offsetLimitation.height, offsetLimitation.height),
+      offset.dx.clamp(-offsetLimitation.width, offsetLimitation.width),
+      offset.dy.clamp(-offsetLimitation.height, offsetLimitation.height),
     );
     final matrix = Matrix4.translationValues(-size.width / 2, -size.height / 2, 0).scaled(scaleSize.toDouble(), scaleSize.toDouble(), 1.0);
     matrix.translate((offset.dx + size.width / 2) / scaleSize, (offset.dy + size.height / 2) / scaleSize, 0);

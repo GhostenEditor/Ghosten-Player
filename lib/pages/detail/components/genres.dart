@@ -6,9 +6,9 @@ import '../../../utils/utils.dart';
 import '../../media/filter.dart';
 
 class GenresSection extends StatelessWidget {
-  final List<Genre> genres;
-
   const GenresSection({super.key, required this.genres});
+
+  final List<Genre> genres;
 
   @override
   Widget build(BuildContext context) {
@@ -16,17 +16,21 @@ class GenresSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Text(AppLocalizations.of(context)!.titleType, style: Theme.of(context).textTheme.titleLarge),
+          padding: const EdgeInsets.all(16),
+          child: Text(AppLocalizations.of(context)!.titleType, style: Theme.of(context).textTheme.titleMedium),
         ),
         SizedBox(
           height: 30,
           child: ListView.separated(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               scrollDirection: Axis.horizontal,
               separatorBuilder: (BuildContext context, int index) => const SizedBox(width: 10),
               itemCount: genres.length,
               itemBuilder: (BuildContext context, int index) => FilledButton.tonal(
-                  onPressed: () => navigateTo(context, FilterPage(queryType: QueryType.genre, id: genres[index].id)), child: Text(genres[index].name))),
+                  style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 12), minimumSize: Size.zero, textStyle: Theme.of(context).textTheme.labelMedium),
+                  onPressed: () => navigateTo(context, FilterPage(id: genres[index].id)),
+                  child: Text(genres[index].name))),
         ),
       ],
     );

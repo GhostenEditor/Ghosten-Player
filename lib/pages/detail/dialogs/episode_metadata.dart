@@ -2,12 +2,12 @@ import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../../components/gap.dart';
+import '../../../validators/validators.dart';
 
 class EpisodeMetadata extends StatefulWidget {
-  final TVEpisode episode;
-
   const EpisodeMetadata({super.key, required this.episode});
+
+  final TVEpisode episode;
 
   @override
   State<EpisodeMetadata> createState() => _EpisodeMetadataState();
@@ -27,6 +27,7 @@ class _EpisodeMetadataState extends State<EpisodeMetadata> {
         key: _formKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          spacing: 12,
           children: [
             TextFormField(
               autofocus: true,
@@ -38,9 +39,9 @@ class _EpisodeMetadataState extends State<EpisodeMetadata> {
                 labelText: AppLocalizations.of(context)!.formLabelTitle,
                 isDense: true,
               ),
+              validator: (value) => requiredValidator(context, value),
               onEditingComplete: () => FocusScope.of(context).nextFocus(),
             ),
-            Gap.vMD,
             TextFormField(
               autofocus: true,
               controller: _controller2,

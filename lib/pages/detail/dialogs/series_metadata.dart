@@ -2,13 +2,12 @@ import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../../components/gap.dart';
 import '../../../validators/validators.dart';
 
 class SeriesMetadata extends StatefulWidget {
-  final TVSeries series;
-
   const SeriesMetadata({super.key, required this.series});
+
+  final TVSeries series;
 
   @override
   State<SeriesMetadata> createState() => _SeriesMetadataState();
@@ -35,6 +34,7 @@ class _SeriesMetadataState extends State<SeriesMetadata> {
         key: _formKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          spacing: 12,
           children: [
             TextFormField(
               autofocus: true,
@@ -49,7 +49,6 @@ class _SeriesMetadataState extends State<SeriesMetadata> {
               validator: (value) => requiredValidator(context, value),
               onEditingComplete: () => FocusScope.of(context).nextFocus(),
             ),
-            Gap.vMD,
             TextFormField(
               autofocus: true,
               controller: _controller2,

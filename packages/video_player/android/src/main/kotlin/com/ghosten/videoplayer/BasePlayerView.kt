@@ -13,14 +13,15 @@ interface BasePlayerView {
     fun setSources(data: List<HashMap<String, Any>>, index: Int)
     fun setTransform(matrix: ArrayList<Double>)
     fun setAspectRatio(aspectRatio: Float?)
+    fun fullscreen(flag: Boolean)
     fun dispose()
-    fun setVolume(volume: Float)
     fun setTrack(trackType: String?, trackId: String?)
     fun setSkipPosition(skipType: String, list: List<Int>)
     fun getVideoThumbnail(result: MethodChannel.Result, timeMs: Long)
     fun setPlaybackSpeed(speed: Float)
     fun getPictureInPictureParams(): PictureInPictureParams?
     fun canEnterPictureInPicture(): Boolean
+    fun setPlayerOption(name: String, value: Any)
 }
 
 internal class Video(

@@ -399,7 +399,7 @@ abstract class ApiPlatform extends PlatformInterface {
     }).then((value) => value['id'] as int);
   }
 
-  Future<void> libraryRefreshById(int id) {
+  Future<void> libraryRefreshById(int id, bool incremental, String behavior) {
     throw UnimplementedError('libraryRefreshById() has not been implemented.');
   }
 
@@ -481,7 +481,7 @@ abstract class ApiPlatform extends PlatformInterface {
   /// Miscellaneous End
 
   /// Cast Start
-  Stream<List<dynamic>> dlnaDiscover() {
+  Stream<List<Json>> dlnaDiscover() {
     throw UnimplementedError('dlnaDiscover() has not been implemented.');
   }
 

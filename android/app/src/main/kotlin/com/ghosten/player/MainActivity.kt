@@ -30,7 +30,7 @@ class MainActivity : FragmentActivity() {
                 PLAYER_FRAGMENT, "player", listOf(androidDeviceType().toString(), intent.data?.toString())
             )
         } else if (androidDeviceType() == DEVICE_TYPE_TV) {
-            mainFragment = ensureFlutterFragmentCreated(PLAYER_FRAGMENT, "tv", listOf())
+            mainFragment = ensureFlutterFragmentCreated(MAIN_FRAGMENT, "main", listOf(androidDeviceType().toString()))
         } else {
             mainFragment = ensureFlutterFragmentCreated(MAIN_FRAGMENT, "main", listOf(androidDeviceType().toString()))
         }

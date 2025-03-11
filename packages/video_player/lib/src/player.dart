@@ -4,23 +4,36 @@ import 'package:flutter/material.dart';
 import 'models.dart';
 import 'player_platform_interface.dart';
 
-class PlayerController<T extends PlaylistItem> {
-  final List<T> playlist;
-  late final ValueNotifier<int> index;
-  late final ValueNotifier<bool> isFirst;
-  late final ValueNotifier<bool> isLast;
-  late final ValueNotifier<String?> title;
-  late final ValueNotifier<String> subTitle;
-  late final ValueNotifier<String?> error = ValueNotifier(null);
-  late final ValueNotifier<String?> fatalError = ValueNotifier(null);
+abstract class PlayerBaseController {
+  abstract final ValueNotifier<Duration> position;
+  abstract final ValueNotifier<Duration> bufferedPosition;
+  abstract final ValueNotifier<Duration> duration;
+  abstract final ValueNotifier<PlayerStatus> status;
+
+  Future<String?> getVideoThumbnail(int position);
+}
+
+class PlayerController<T> implements PlayerBaseController {
+  final ValueNotifier<List<PlaylistItem<T>>> playlist = ValueNotifier([]);
+  final ValueNotifier<int?> index = ValueNotifier(null);
+  final ValueNotifier<bool> isFirst = ValueNotifier(true);
+  final ValueNotifier<bool> isLast = ValueNotifier(true);
+  final ValueNotifier<String?> title = ValueNotifier(null);
+  final ValueNotifier<String> subTitle = ValueNotifier('');
+  final ValueNotifier<String?> error = ValueNotifier(null);
+  final ValueNotifier<String?> fatalError = ValueNotifier(null);
   final ValueNotifier<double> playbackSpeed = ValueNotifier(1);
   final ValueNotifier<AspectRatioType> aspectRatio = ValueNotifier(AspectRatioType.auto);
   final ValueNotifier<double> volume = ValueNotifier(1);
+  @override
   final ValueNotifier<Duration> position = ValueNotifier(Duration.zero);
+  @override
   final ValueNotifier<Duration> duration = ValueNotifier(Duration.zero);
   final ValueNotifier<int> networkSpeed = ValueNotifier(0);
+  @override
   final ValueNotifier<Duration> bufferedPosition = ValueNotifier(Duration.zero);
-  final ValueNotifier<PlayerStatus> status = ValueNotifier(PlayerStatus.buffering);
+  @override
+  final ValueNotifier<PlayerStatus> status = ValueNotifier(PlayerStatus.idle);
   final ValueNotifier<MediaTrackGroup> trackGroup = ValueNotifier(MediaTrackGroup.empty());
   final ValueNotifier<MediaInfo?> mediaInfo = ValueNotifier(null);
   final ValueNotifier<dynamic> willSkip = ValueNotifier(null);
@@ -29,20 +42,14 @@ class PlayerController<T extends PlaylistItem> {
   final ValueNotifier<bool> isCasting = ValueNotifier(false);
   final ValueNotifier<(MediaChange, Duration)?> mediaChange = ValueNotifier(null);
 
-  T get currentItem => playlist[index.value];
+  PlaylistItem<T>? get currentItem => index.value == null ? null : playlist.value.elementAtOrNull(index.value!);
 
-  PlayerController([this.playlist = const [], index = 0, Function(int, String)? onlog]) {
-    assert(playlist.isNotEmpty);
-    this.index = ValueNotifier(index);
-    isFirst = ValueNotifier(index == 0);
-    isLast = ValueNotifier(index == playlist.length - 1);
-    title = ValueNotifier(playlist[index].title);
-    subTitle = ValueNotifier(playlist[index].description ?? '');
+  PlayerController([Function(int, String)? onLog]) {
     this.index.addListener(() {
-      title.value = currentItem.title;
-      subTitle.value = currentItem.description ?? '';
+      title.value = currentItem?.title;
+      subTitle.value = currentItem?.description ?? '';
       isFirst.value = this.index.value == 0;
-      isLast.value = this.index.value == playlist.length - 1;
+      isLast.value = this.index.value == playlist.value.length - 1;
     });
     PlayerPlatform.instance.canPip().then((value) => canPip.value = value ?? false);
     PlayerPlatform.instance.setMethodCallHandler((call) async {
@@ -85,18 +92,15 @@ class PlayerController<T extends PlaylistItem> {
         case 'willSkip':
           willSkip.value = UniqueKey();
         case 'log':
-          if (onlog != null) {
-            onlog(call.arguments['level'], call.arguments['message']);
+          if (onLog != null) {
+            onLog(call.arguments['level'], call.arguments['message']);
           }
-        case 'isInitialized':
-          PlayerPlatform.instance.setSources(playlist.map((item) => item.toSource()).toList(), this.index.value);
       }
     });
   }
 
-  void dispose() {
+  void dispose() async {
     PlayerPlatform.instance.setMethodCallHandler(null);
-    PlayerPlatform.instance.dispose();
     index.dispose();
     isFirst.dispose();
     isLast.dispose();
@@ -123,8 +127,13 @@ class PlayerController<T extends PlaylistItem> {
   }
 
   Future<void> next(int index) async {
-    if (index < 0 || index >= playlist.length) return;
-    return PlayerPlatform.instance.next(index);
+    if (index < 0 || index >= playlist.value.length) return;
+    if (index != this.index.value) {
+      PlayerPlatform.instance.next(index);
+    }
+    if (status.value == PlayerStatus.paused || status.value == PlayerStatus.idle) {
+      play();
+    }
   }
 
   Future<void> seekTo(Duration position) async {
@@ -139,25 +148,19 @@ class PlayerController<T extends PlaylistItem> {
   }
 
   Future<void> setTrack(String type, String? id) {
+    if (id == 'null') id = null;
     return PlayerPlatform.instance.setTrack(type, id);
-  }
-
-  Future<void> setVolume(double volume) {
-    return PlayerPlatform.instance.setVolume(volume);
   }
 
   Future<bool?> requestPip() {
     return PlayerPlatform.instance.requestPip();
   }
 
-  Future<void> requestFullscreen() {
-    return PlayerPlatform.instance.requestFullscreen();
-  }
-
   Future<void> setSkipPosition(String type, List<int> list) {
     return PlayerPlatform.instance.setSkipPosition(type, list);
   }
 
+  @override
   Future<String?> getVideoThumbnail(int position) {
     return PlayerPlatform.instance.getVideoThumbnail(position);
   }
@@ -170,7 +173,28 @@ class PlayerController<T extends PlaylistItem> {
     return PlayerPlatform.instance.setAspectRatio(aspectRatio);
   }
 
-  Future<void> updateSource(T source, int index) {
+  Future<void> updateSource(PlaylistItem<T> source, int index) {
     return PlayerPlatform.instance.updateSource(source.toSource(), index);
+  }
+
+  Future<void> setSources(List<PlaylistItem<T>> playlist, int index) async {
+    if (playlist.length == this.playlist.value.length &&
+        List.generate(playlist.length, (i) => i).every((index) => playlist[index] == this.playlist.value[index])) {
+      return;
+    }
+    this.playlist.value = playlist;
+    return PlayerPlatform.instance.setSources(playlist.map((item) => item.toSource()).toList(), index);
+  }
+
+  Future<void> enterFullscreen() {
+    return PlayerPlatform.instance.enterFullscreen();
+  }
+
+  Future<void> exitFullscreen() {
+    return PlayerPlatform.instance.exitFullscreen();
+  }
+
+  static Future<void> setPlayerOption(String optionName, dynamic optionValue) {
+    return PlayerPlatform.instance.setPlayerOption(optionName, optionValue);
   }
 }

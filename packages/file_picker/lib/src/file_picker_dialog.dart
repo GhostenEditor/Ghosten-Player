@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 
 class FilePickerDialog<T> extends StatefulWidget {
   final String? title;
@@ -85,7 +86,7 @@ class _FilePickerDialogState<T> extends State<FilePickerDialog<T>> {
                         ? widget.errorBuilder != null
                             ? widget.errorBuilder!(snapshot)
                             : const SizedBox()
-                        : const Center(child: CircularProgressIndicator()),
+                        : const _Loading(),
                     ConnectionState.none || ConnectionState.active || ConnectionState.done => snapshot.hasError
                         ? widget.errorBuilder != null
                             ? widget.errorBuilder!(snapshot)
@@ -190,6 +191,47 @@ class _ListViewWithScrollbarState extends State<_ListViewWithScrollbar> {
           itemBuilder: widget.itemBuilder,
           separatorBuilder: widget.separatorBuilder,
           itemCount: widget.itemCount,
+        ),
+      ),
+    );
+  }
+}
+
+class _Loading extends StatelessWidget {
+  const _Loading();
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: Theme.of(context).colorScheme.surfaceContainerLowest,
+      highlightColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+      child: IgnorePointer(
+        child: ListView.builder(
+          itemCount: 20,
+          itemBuilder: (context, _) => ListTile(
+            leading: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              width: 60,
+            ),
+            title: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              height: 24,
+            ),
+            subtitle: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              margin: EdgeInsets.only(right: 40),
+              height: 16,
+            ),
+          ),
         ),
       ),
     );

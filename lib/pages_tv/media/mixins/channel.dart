@@ -25,7 +25,7 @@ mixin ChannelMixin {
                             switch (indent.direction) {
                               case TraversalDirection.up:
                               case TraversalDirection.down:
-                                if (focusedChild == null || focusedChild.focusInDirection(indent.direction) != true) {
+                                if (focusedChild == null || !focusedChild.focusInDirection(indent.direction)) {
                                   FocusTraversalGroup.of(context).inDirection(nearestScope.parent!, indent.direction);
                                 }
                               case TraversalDirection.right:

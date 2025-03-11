@@ -8,9 +8,9 @@ import '../../components/setting.dart';
 import '../../components/text_button.dart';
 
 class EpisodeMetadata extends StatefulWidget {
-  final TVEpisode episode;
-
   const EpisodeMetadata({super.key, required this.episode});
+
+  final TVEpisode episode;
 
   @override
   State<EpisodeMetadata> createState() => _EpisodeMetadataState();

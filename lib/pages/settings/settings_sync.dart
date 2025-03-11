@@ -3,11 +3,12 @@ import 'dart:async';
 import 'package:api/api.dart';
 import 'package:bluetooth/bluetooth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../components/no_data.dart';
 import '../../const.dart';
-import '../../utils/notification.dart';
+import '../utils/notification.dart';
 
 class SettingsSyncPage extends StatefulWidget {
   const SettingsSyncPage({super.key});
@@ -19,38 +20,38 @@ class SettingsSyncPage extends StatefulWidget {
 enum BluetoothState { withPermission, withoutPermission, discovering, nonAdaptor }
 
 class _SettingsSyncPageState extends State<SettingsSyncPage> {
-  final devices = <BluetoothDevice>[];
-  StreamSubscription<BluetoothDevice>? subscription;
-  BluetoothState bluetoothState = BluetoothState.withoutPermission;
-  bool needStartServer = true;
+  final _devices = <BluetoothDevice>[];
+  StreamSubscription<BluetoothDevice>? _subscription;
+  BluetoothState _bluetoothState = BluetoothState.withoutPermission;
+  bool _needStartServer = true;
 
   @override
   void initState() {
-    init();
+    _init();
     super.initState();
   }
 
   @override
   void dispose() {
-    needStartServer = false;
+    _needStartServer = false;
     Bluetooth.close().catchError((_) {});
-    subscription?.cancel();
+    _subscription?.cancel();
     super.dispose();
   }
 
-  init() async {
+  Future<void> _init() async {
     try {
       if (await Bluetooth.requestPermission() && await Bluetooth.requestEnable()) {
-        setState(() => bluetoothState = BluetoothState.withPermission);
-        startServer();
-        startDiscovery();
+        setState(() => _bluetoothState = BluetoothState.withPermission);
+        _startServer();
+        _startDiscovery();
       }
     } catch (e) {
-      setState(() => bluetoothState = BluetoothState.nonAdaptor);
+      setState(() => _bluetoothState = BluetoothState.nonAdaptor);
     }
   }
 
-  startServer() {
+  void _startServer() {
     Bluetooth.startServer().listen((device) async {
       Bluetooth.connection().listen((resp) async {
         switch (resp.type) {
@@ -59,7 +60,7 @@ class _SettingsSyncPageState extends State<SettingsSyncPage> {
             if (mounted) {
               final confirmed =
                   await showConfirm(context, AppLocalizations.of(context)!.dataSyncConfirmSync(device.name ?? AppLocalizations.of(context)!.tagUnknown));
-              if (confirmed == true) {
+              if (confirmed ?? false) {
                 Api.syncData(resp.data);
               }
             }
@@ -72,7 +73,7 @@ class _SettingsSyncPageState extends State<SettingsSyncPage> {
         showNotification(context, Future.error(error));
       }
     }, onDone: () {
-      if (needStartServer) startServer();
+      if (_needStartServer) _startServer();
     });
   }
 
@@ -82,12 +83,12 @@ class _SettingsSyncPageState extends State<SettingsSyncPage> {
         appBar: AppBar(
           title: Text(AppLocalizations.of(context)!.settingsItemDataSync),
           actions: [
-            if (bluetoothState == BluetoothState.withPermission || bluetoothState == BluetoothState.discovering)
+            if (_bluetoothState == BluetoothState.withPermission || _bluetoothState == BluetoothState.discovering)
               PopupMenuButton(
                 itemBuilder: (context) => [
                   PopupMenuItem(
                     padding: EdgeInsets.zero,
-                    onTap: () => startDiscovery(),
+                    onTap: () => _startDiscovery(),
                     child: ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                       title: Text(AppLocalizations.of(context)!.dataSyncActionRescanBluetoothDevices),
@@ -106,8 +107,8 @@ class _SettingsSyncPageState extends State<SettingsSyncPage> {
                   PopupMenuItem(
                     padding: EdgeInsets.zero,
                     onTap: () async {
-                      final confirmed = await showConfirm(context, AppLocalizations.of(context)!.dataSyncConfirmRollback);
-                      if (confirmed == true && context.mounted) {
+                      final flag = await showConfirm(context, AppLocalizations.of(context)!.dataSyncConfirmRollback);
+                      if ((flag ?? false) && context.mounted) {
                         showNotification(context, Api.rollbackData());
                       }
                     },
@@ -121,19 +122,19 @@ class _SettingsSyncPageState extends State<SettingsSyncPage> {
               ),
           ],
         ),
-        body: switch (bluetoothState) {
+        body: switch (_bluetoothState) {
           BluetoothState.withPermission || BluetoothState.discovering => Column(
               children: [
-                bluetoothState == BluetoothState.discovering ? const LinearProgressIndicator() : const SizedBox(height: 4),
+                if (_bluetoothState == BluetoothState.discovering) const LinearProgressIndicator() else const SizedBox(height: 4),
                 Expanded(
-                  child: (bluetoothState != BluetoothState.discovering && devices.isEmpty)
+                  child: (_bluetoothState != BluetoothState.discovering && _devices.isEmpty)
                       ? const NoData()
                       : ListView(
                           children: [
-                            ...devices.map((device) => ListTile(
+                            ..._devices.map((device) => ListTile(
                                   title: Text(device.name ?? AppLocalizations.of(context)!.tagUnknown),
                                   subtitle: Text(device.address),
-                                  onTap: () => showNotification(context, startConnection(device)),
+                                  onTap: () => showNotification(context, _startConnection(device)),
                                   trailing: Icon(device.isConnected
                                       ? Icons.import_export
                                       : device.bonded
@@ -147,7 +148,6 @@ class _SettingsSyncPageState extends State<SettingsSyncPage> {
             ),
           BluetoothState.withoutPermission => Center(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Padding(
@@ -162,32 +162,32 @@ class _SettingsSyncPageState extends State<SettingsSyncPage> {
         });
   }
 
-  startDiscovery() {
+  void _startDiscovery() {
     setState(() {
-      devices.clear();
-      bluetoothState = BluetoothState.discovering;
+      _devices.clear();
+      _bluetoothState = BluetoothState.discovering;
     });
-    if (subscription != null) {
-      subscription!.cancel();
+    if (_subscription != null) {
+      _subscription!.cancel();
     }
-    Bluetooth.getBondedDevices().then((value) => setState(() => devices.addAll(value)));
-    subscription = Bluetooth.startDiscovery().listen(
+    Bluetooth.getBondedDevices().then((value) => setState(() => _devices.addAll(value)));
+    _subscription = Bluetooth.startDiscovery().listen(
         (device) {
-          final index = devices.indexWhere((element) => element.address == device.address);
+          final index = _devices.indexWhere((element) => element.address == device.address);
           if (index >= 0) {
-            devices[index] = device;
+            _devices[index] = device;
           } else {
-            devices.add(device);
+            _devices.add(device);
           }
           setState(() {});
         },
         onError: (error) {},
         onDone: () {
-          setState(() => bluetoothState = BluetoothState.withPermission);
+          setState(() => _bluetoothState = BluetoothState.withPermission);
         });
   }
 
-  Future<void> startConnection(BluetoothDevice device) async {
+  Future<void> _startConnection(BluetoothDevice device) async {
     await Bluetooth.connect(device.address);
     await Bluetooth.write(BluetoothMessage.text(appVersion));
     final resp = await Bluetooth.connection().first;
@@ -197,12 +197,12 @@ class _SettingsSyncPageState extends State<SettingsSyncPage> {
         final localVersion = Version.fromString(appVersion);
         if (localVersion > remoteVersion) {
           await Bluetooth.disconnect();
-          if (mounted) throw Exception(AppLocalizations.of(context)!.dataSyncTipOutOfDate(device.name ?? ''));
+          if (mounted) throw PlatformException(message: AppLocalizations.of(context)!.dataSyncTipOutOfDate(device.name ?? ''), code: '');
         } else {
           await Bluetooth.write(BluetoothMessage.file((await Api.databasePath())!));
         }
       case BlueToothMessageType.file:
-        if (mounted) throw Exception(AppLocalizations.of(context)!.dataSyncTipSyncError);
+        if (mounted) throw PlatformException(message: AppLocalizations.of(context)!.dataSyncTipSyncError, code: '');
     }
   }
 }

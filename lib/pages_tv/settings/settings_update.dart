@@ -24,13 +24,12 @@ class _SettingsUpdateState extends State<SettingsUpdate> {
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 60),
         child: FutureBuilder(
-            future: checkUpdate(),
+            future: _checkUpdate(),
             builder: (context, snapshot) {
               switch (snapshot.connectionState) {
                 case ConnectionState.waiting:
                 case ConnectionState.active:
                   return Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Flexible(
                         child: Align(
@@ -72,7 +71,6 @@ class _SettingsUpdateState extends State<SettingsUpdate> {
                     );
                   } else if (snapshot.hasError) {
                     return Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Flexible(
                           child: Align(
@@ -95,7 +93,7 @@ class _SettingsUpdateState extends State<SettingsUpdate> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              ErrorMessage(snapshot: snapshot),
+                              ErrorMessage(error: snapshot.error),
                               ElevatedButton(
                                 autofocus: true,
                                 onPressed: () => setState(() {}),
@@ -113,7 +111,6 @@ class _SettingsUpdateState extends State<SettingsUpdate> {
                     );
                   } else {
                     return Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Flexible(
                           child: Align(
@@ -155,7 +152,7 @@ class _SettingsUpdateState extends State<SettingsUpdate> {
     );
   }
 
-  Future<UpdateResp?> checkUpdate() async {
+  Future<UpdateResp?> _checkUpdate() async {
     final res = await Dio(BaseOptions(connectTimeout: const Duration(seconds: 30))).get(updateUrl);
     final data = UpdateResp.fromJson(res.data);
     if (Version.fromString(appVersion) < data.tagName) {
@@ -167,23 +164,22 @@ class _SettingsUpdateState extends State<SettingsUpdate> {
 }
 
 class _SettingsUpdating extends StatefulWidget {
+  const _SettingsUpdating({required this.data, required this.url});
+
   final UpdateResp data;
   final String url;
-
-  const _SettingsUpdating({required this.data, required this.url});
 
   @override
   State<_SettingsUpdating> createState() => _SettingsUpdatingState();
 }
 
 class _SettingsUpdatingState extends State<_SettingsUpdating> {
-  static Map<String, _DownloadTask> downloading = {};
-  bool failed = false;
+  static final Map<String, _DownloadTask> _downloading = {};
+  bool _failed = false;
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Flexible(
           child: Align(
@@ -201,10 +197,10 @@ class _SettingsUpdatingState extends State<_SettingsUpdating> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                if (downloading.containsKey(widget.url))
+                if (_downloading.containsKey(widget.url))
                   ListenableBuilder(
-                      listenable: downloading[widget.url]!.progress,
-                      builder: (context, _) => LinearProgressIndicator(value: downloading[widget.url]!.progress.value))
+                      listenable: _downloading[widget.url]!.progress,
+                      builder: (context, _) => LinearProgressIndicator(value: _downloading[widget.url]!.progress.value))
                 else
                   const LinearProgressIndicator(value: 1, color: Colors.greenAccent),
                 const SizedBox(height: 12),
@@ -221,13 +217,13 @@ class _SettingsUpdatingState extends State<_SettingsUpdating> {
               Expanded(child: Markdown(data: widget.data.comment)),
               ElevatedButton(
                 autofocus: true,
-                onPressed: downloading.containsKey(widget.url) ? null : download,
+                onPressed: _downloading.containsKey(widget.url) ? null : _download,
                 style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 64),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                     backgroundColor: Colors.white,
                     foregroundColor: Colors.black),
-                child: Text(downloading.containsKey(widget.url) ? AppLocalizations.of(context)!.updating : AppLocalizations.of(context)!.updateNow),
+                child: Text(_downloading.containsKey(widget.url) ? AppLocalizations.of(context)!.updating : AppLocalizations.of(context)!.updateNow),
               )
             ],
           ),
@@ -236,13 +232,13 @@ class _SettingsUpdatingState extends State<_SettingsUpdating> {
     );
   }
 
-  download() async {
+  Future<void> _download() async {
     await Api.requestStoragePermission();
     final url = widget.url;
     final task = _DownloadTask(url);
     setState(() {
-      downloading[url] = task;
-      failed = false;
+      _downloading[url] = task;
+      _failed = false;
     });
     final cachePath = '${(await FilePicker.cachePath)!}/$appName-${DateTime.now().millisecondsSinceEpoch}.apk';
     await Dio().download(
@@ -255,16 +251,16 @@ class _SettingsUpdatingState extends State<_SettingsUpdating> {
     ).catchError((error) {
       if (mounted) {
         setState(() {
-          downloading.remove(url);
+          _downloading.remove(url);
           task.dispose();
-          failed = true;
+          _failed = true;
         });
       }
       throw error;
     }, test: (e) => true);
     if (mounted) {
       setState(() {
-        downloading.remove(url);
+        _downloading.remove(url);
         task.dispose();
       });
     }
@@ -273,12 +269,12 @@ class _SettingsUpdatingState extends State<_SettingsUpdating> {
 }
 
 class _DownloadTask {
+  _DownloadTask(this.url);
+
   final String url;
   final ValueNotifier<double?> progress = ValueNotifier(null);
 
-  _DownloadTask(this.url);
-
-  dispose() {
+  void dispose() {
     progress.dispose();
   }
 }

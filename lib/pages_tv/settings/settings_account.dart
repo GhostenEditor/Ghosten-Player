@@ -47,13 +47,13 @@ class _SettingsAccountPageState extends State<SettingsAccountPage> {
                             ),
                     ),
                     actions: [
-                      TVIconButton(onPressed: () => showFilePicker(context, FilePickerType.remote, entry.$2.id, '/'), icon: const Icon(Icons.folder_outlined)),
+                      TVIconButton(onPressed: () => _showFilePicker(context, FilePickerType.remote, entry.$2.id, '/'), icon: const Icon(Icons.folder_outlined)),
                       TVIconButton(onPressed: () => navigateToSlideLeft(context, AccountPreference(account: entry.$2)), icon: const Icon(Icons.edit_outlined)),
                       TVIconButton(
                           onPressed: () async {
-                            final confirmed = await showConfirm(
+                            final flag = await showConfirm(
                                 context, AppLocalizations.of(context)!.deleteAccountConfirmText, AppLocalizations.of(context)!.deleteAccountTip);
-                            if (confirmed == true && context.mounted) {
+                            if ((flag ?? false) && context.mounted) {
                               final resp = await showNotification(context, Api.driverDeleteById(entry.$2.id));
                               if (resp?.error == null) {
                                 setState(() {});
@@ -71,7 +71,7 @@ class _SettingsAccountPageState extends State<SettingsAccountPage> {
                 icon: const Icon(Icons.add),
                 onPressed: () async {
                   final flag = await navigateTo<bool>(navigatorKey.currentContext!, const SettingsLoginPage());
-                  if (flag == true) setState(() {});
+                  if (flag ?? false) setState(() {});
                 },
               ),
             ]);
@@ -79,23 +79,23 @@ class _SettingsAccountPageState extends State<SettingsAccountPage> {
     );
   }
 
-  Future<void> showFilePicker(BuildContext context, FilePickerType type, int driverId, String defaultPath) {
+  Future<void> _showFilePicker(BuildContext context, FilePickerType type, int driverId, String defaultPath) {
     return navigateToSlideLeft(context, _FileListPage(driverId: driverId, parentFileId: defaultPath));
   }
 }
 
 class _FileListPage extends StatefulWidget {
-  final int driverId;
-  final String parentFileId;
-  final String? title;
-  final FileType? type;
-
   const _FileListPage({
     required this.driverId,
     required this.parentFileId,
     this.type,
     this.title,
   });
+
+  final int driverId;
+  final String parentFileId;
+  final String? title;
+  final FileType? type;
 
   @override
   State<_FileListPage> createState() => _FileListPageState();
@@ -120,7 +120,7 @@ class _FileListPageState extends State<_FileListPage> {
                         item: item,
                         driverId: widget.driverId,
                         onRefresh: () => setState(() {}),
-                        onPage: () => onPage(item.id, item.name),
+                        onPage: () => _onPage(item.id, item.name),
                       );
                     })
                 : const NoData();
@@ -128,7 +128,7 @@ class _FileListPageState extends State<_FileListPage> {
     );
   }
 
-  onPage(String parentFileId, [String? title]) {
+  void _onPage(String parentFileId, [String? title]) {
     navigateToSlideLeft(
         context,
         _FileListPage(
@@ -141,9 +141,9 @@ class _FileListPageState extends State<_FileListPage> {
 }
 
 class AccountPreference extends StatelessWidget {
-  final DriverAccount account;
-
   const AccountPreference({super.key, required this.account});
+
+  final DriverAccount account;
 
   @override
   Widget build(BuildContext context) {
@@ -223,13 +223,13 @@ class AccountPreference extends StatelessWidget {
 }
 
 class Stepper extends StatelessWidget {
+  const Stepper({super.key, this.max, this.min, this.step = 1, required this.onChange, required this.value});
+
   final int value;
   final int? max;
   final int? min;
   final int step;
   final Function(int) onChange;
-
-  const Stepper({super.key, this.max, this.min, this.step = 1, required this.onChange, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -247,7 +247,7 @@ class Stepper extends StatelessWidget {
         children: [
           InkWell(
             borderRadius: BorderRadius.circular(100),
-            onTap: min == null || value > min! ? () => onChange(clamp(value - step)) : null,
+            onTap: min == null || value > min! ? () => onChange(_clamp(value - step)) : null,
             child: Padding(
               padding: const EdgeInsets.all(6),
               child: Icon(
@@ -263,7 +263,7 @@ class Stepper extends StatelessWidget {
           ),
           InkWell(
             borderRadius: BorderRadius.circular(100),
-            onTap: max == null || value < max! ? () => onChange(clamp(value + step)) : null,
+            onTap: max == null || value < max! ? () => onChange(_clamp(value + step)) : null,
             child: Padding(
               padding: const EdgeInsets.all(6),
               child: Icon(
@@ -278,7 +278,7 @@ class Stepper extends StatelessWidget {
     );
   }
 
-  int clamp(int v) {
+  int _clamp(int v) {
     if (max != null) {
       v = v < max! ? v : max!;
     }

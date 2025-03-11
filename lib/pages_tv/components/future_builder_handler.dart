@@ -4,11 +4,11 @@ import '../../components/error_message.dart';
 import '../components/loading.dart';
 
 class FutureBuilderHandler<T> extends StatelessWidget {
+  const FutureBuilderHandler({super.key, required this.builder, this.future, this.initialData});
+
   final AsyncWidgetBuilder<T> builder;
   final Future<T>? future;
   final T? initialData;
-
-  const FutureBuilderHandler({super.key, required this.builder, this.future, this.initialData});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +17,7 @@ class FutureBuilderHandler<T> extends StatelessWidget {
       future: future,
       builder: (BuildContext context, AsyncSnapshot<T> snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          return snapshot.hasError ? Center(child: ErrorMessage(snapshot: snapshot)) : builder(context, snapshot);
+          return snapshot.hasError ? Center(child: ErrorMessage(error: snapshot.error)) : builder(context, snapshot);
         } else {
           return snapshot.hasData ? builder(context, snapshot) : const Loading();
         }
@@ -27,11 +27,11 @@ class FutureBuilderHandler<T> extends StatelessWidget {
 }
 
 class FutureBuilderSliverHandler<T> extends StatelessWidget {
+  const FutureBuilderSliverHandler({super.key, required this.builder, this.future, this.initialData});
+
   final AsyncWidgetBuilder<T> builder;
   final Future<T>? future;
   final T? initialData;
-
-  const FutureBuilderSliverHandler({super.key, required this.builder, this.future, this.initialData});
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +41,7 @@ class FutureBuilderSliverHandler<T> extends StatelessWidget {
       builder: (BuildContext context, AsyncSnapshot<T> snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           return snapshot.hasError
-              ? SliverFillRemaining(hasScrollBody: false, child: Center(child: ErrorMessage(snapshot: snapshot)))
+              ? SliverFillRemaining(hasScrollBody: false, child: Center(child: ErrorMessage(error: snapshot.error)))
               : builder(context, snapshot);
         } else {
           return snapshot.hasData ? builder(context, snapshot) : const SliverFillRemaining(hasScrollBody: false, child: Loading());

@@ -41,16 +41,8 @@ abstract class PlayerPlatform extends PlatformInterface {
     throw UnimplementedError('setTrack() has not been implemented.');
   }
 
-  Future<void> setVolume(double volume) {
-    throw UnimplementedError('setVolume() has not been implemented.');
-  }
-
   Future<bool?> requestPip() {
     throw UnimplementedError('requestPip() has not been implemented.');
-  }
-
-  Future<void> requestFullscreen() {
-    throw UnimplementedError('requestFullscreen() has not been implemented.');
   }
 
   Future<void> setSkipPosition(String type, List<int> list) {
@@ -85,15 +77,27 @@ abstract class PlayerPlatform extends PlatformInterface {
     throw UnimplementedError('canPip() has not been implemented.');
   }
 
+  Future<void> enterFullscreen() {
+    throw UnimplementedError('enterFullscreen() has not been implemented.');
+  }
+
+  Future<void> exitFullscreen() {
+    throw UnimplementedError('enterFullscreen() has not been implemented.');
+  }
+
+  Future<void> setPlayerOption(String optionName, dynamic optionValue) {
+    throw UnimplementedError('setPlayerOption() has not been implemented.');
+  }
+
   void setMethodCallHandler(Future<dynamic> Function(MethodCall call)? handler) {
     throw UnimplementedError('setMethodCallHandler() has not been implemented.');
   }
 
-  void init(Map<String, dynamic> args) {
+  Future<void> init(Map<String, dynamic> args) {
     throw UnimplementedError('init() has not been implemented.');
   }
 
-  void dispose() {
+  Future<void> dispose() {
     throw UnimplementedError('dispose() has not been implemented.');
   }
 }

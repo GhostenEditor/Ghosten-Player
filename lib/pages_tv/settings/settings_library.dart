@@ -1,9 +1,10 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 
 import '../../components/async_image.dart';
-import '../../components/gap.dart';
+import '../../providers/user_config.dart';
 import '../../utils/utils.dart';
 import '../components/future_builder_handler.dart';
 import '../components/icon_button.dart';
@@ -13,17 +14,16 @@ import '../utils/driver_file_picker.dart';
 import '../utils/notification.dart';
 
 class LibraryManage extends StatefulWidget {
+  const LibraryManage({super.key, required this.title, required this.type});
+
   final String title;
   final LibraryType type;
-
-  const LibraryManage({super.key, required this.title, required this.type});
 
   @override
   State<LibraryManage> createState() => _LibraryManageState();
 }
 
 class _LibraryManageState extends State<LibraryManage> {
-  bool refresh = false;
   final _controller = ScrollController();
 
   @override
@@ -66,23 +66,25 @@ class _LibraryManageState extends State<LibraryManage> {
                     subtitle: Row(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 8,
                       children: [
                         Text(AppLocalizations.of(context)!.driverType(entry.$2.driverType.name)),
-                        Gap.hSM,
                         Text(entry.$2.driverName, overflow: TextOverflow.ellipsis),
                       ],
                     ),
                     actions: [
                       TVIconButton(
                         icon: const Icon(Icons.sync),
-                        onPressed: () => showNotification(context, Api.libraryRefreshById(entry.$2.id), showSuccess: false),
+                        onPressed: () => showNotification(
+                            context, Api.libraryRefreshById(entry.$2.id, false, Provider.of<UserConfig>(context, listen: false).scraperBehavior),
+                            showSuccess: false),
                       ),
                       TVIconButton(
                         icon: const Icon(Icons.delete_outline),
                         onPressed: () async {
                           final confirmed = await showConfirm(
                               context, AppLocalizations.of(context)!.deleteConfirmText, AppLocalizations.of(context)!.deleteMediaGroupConfirmText);
-                          if (confirmed == true) {
+                          if (confirmed ?? false) {
                             if (!context.mounted) return;
                             final resp = await showNotification(context, Api.libraryDeleteById(entry.$2.id));
                             if (resp?.error == null && context.mounted) {
@@ -101,8 +103,8 @@ class _LibraryManageState extends State<LibraryManage> {
                   autofocus: snapshot.requireData.isEmpty,
                   onPressed: () async {
                     final resp = await navigateTo(navigatorKey.currentContext!, const DriverFilePicker(selectableType: FileType.folder));
-                    if (resp is (int, DriverFile)) {
-                      addLibrary(resp.$1, resp.$2);
+                    if (context.mounted && resp is (int, DriverFile)) {
+                      _addLibrary(context, resp.$1, resp.$2);
                     }
                   }),
             ]);
@@ -110,7 +112,8 @@ class _LibraryManageState extends State<LibraryManage> {
     );
   }
 
-  Future<void> addLibrary(int driverId, DriverFile file) async {
+  Future<void> _addLibrary(BuildContext context, int driverId, DriverFile file) async {
+    final scraperBehavior = Provider.of<UserConfig>(context, listen: false).scraperBehavior;
     final resp = await showNotification<bool>(context, Future(() async {
       final id = await Api.libraryInsert(
         type: widget.type,
@@ -119,11 +122,11 @@ class _LibraryManageState extends State<LibraryManage> {
         parentId: file.parentId,
         filename: file.name,
       );
-      await Api.libraryRefreshById(id);
+      await Api.libraryRefreshById(id, false, scraperBehavior);
       return true;
     }));
-    if (resp?.data == true) {
-      setState(() => refresh = true);
+    if (resp?.data ?? false) {
+      setState(() {});
     }
   }
 }

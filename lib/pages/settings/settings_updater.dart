@@ -5,9 +5,9 @@ import 'package:provider/provider.dart';
 
 import '../../components/gap.dart';
 import '../../components/logo.dart';
-import '../../components/updater.dart';
 import '../../const.dart';
 import '../../providers/user_config.dart';
+import '../components/updater.dart';
 
 class SystemSettingsUpdater extends StatefulWidget {
   const SystemSettingsUpdater({super.key});
@@ -17,7 +17,7 @@ class SystemSettingsUpdater extends StatefulWidget {
 }
 
 class SystemSettingsUpdaterState extends State<SystemSettingsUpdater> {
-  late final userConfig = Provider.of<UserConfig>(context, listen: true);
+  late final _userConfig = Provider.of<UserConfig>(context);
   bool _loading = false;
   bool _updated = false;
 
@@ -27,7 +27,6 @@ class SystemSettingsUpdaterState extends State<SystemSettingsUpdater> {
       appBar: AppBar(),
       body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Expanded(
               child: Column(
@@ -51,11 +50,11 @@ class SystemSettingsUpdaterState extends State<SystemSettingsUpdater> {
                   PopupMenuButton(
                       offset: const Offset(1, 0),
                       tooltip: '',
-                      onSelected: (value) => setState(() => userConfig.setAutoUpdate(value)),
+                      onSelected: (value) => setState(() => _userConfig.setAutoUpdate(value)),
                       itemBuilder: (context) => AutoUpdateFrequency.values
                           .map((e) => CheckedPopupMenuItem(
                                 value: e,
-                                checked: e == userConfig.autoUpdateFrequency,
+                                checked: e == _userConfig.autoUpdateFrequency,
                                 child: Text(AppLocalizations.of(context)!.autoUpdateFrequency(e.name)),
                               ))
                           .toList(),
@@ -66,7 +65,7 @@ class SystemSettingsUpdaterState extends State<SystemSettingsUpdater> {
                             Text(AppLocalizations.of(context)!.autoCheckForUpdates),
                             Gap.hMD,
                             Expanded(
-                              child: Text(AppLocalizations.of(context)!.autoUpdateFrequency(userConfig.autoUpdateFrequency.name),
+                              child: Text(AppLocalizations.of(context)!.autoUpdateFrequency(_userConfig.autoUpdateFrequency.name),
                                   textAlign: TextAlign.end, overflow: TextOverflow.ellipsis),
                             ),
                           ],
@@ -91,9 +90,8 @@ class SystemSettingsUpdaterState extends State<SystemSettingsUpdater> {
                       setState(() => _loading = false);
                     },
               child: _loading
-                  ? Row(mainAxisSize: MainAxisSize.min, children: [
+                  ? Row(mainAxisSize: MainAxisSize.min, spacing: 12, children: [
                       Text(AppLocalizations.of(context)!.checkForUpdates),
-                      Gap.hMD,
                       const SizedBox(width: 10, height: 10, child: CircularProgressIndicator(strokeWidth: 2)),
                     ])
                   : _updated

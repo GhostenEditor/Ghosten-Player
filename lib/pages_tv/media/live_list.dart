@@ -1,8 +1,11 @@
 import 'package:api/api.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../components/async_image.dart';
 import '../../components/no_data.dart';
+import '../../const.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
 import '../components/focusable_image.dart';
@@ -36,14 +39,14 @@ class _LiveListPageState extends State<LiveListPage> with WidgetsBindingObserver
   @override
   Widget build(BuildContext context) {
     return FutureBuilderHandler<List<Playlist>>(
-        future: Api.playlistQueryAll(),
+        future: _getPlaylists(),
         builder: (context, snapshot) {
           _selectedPlaylistId.value = snapshot.requireData.firstOrNull?.id;
           return Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Flexible(
-                flex: 2,
+                flex: 1,
                 child: snapshot.requireData.isEmpty
                     ? NoData(
                         action: TVIconButton.filledTonal(onPressed: _addPlaylist, autofocus: true, icon: const Icon(Icons.add)),
@@ -63,8 +66,12 @@ class _LiveListPageState extends State<LiveListPage> with WidgetsBindingObserver
                                     return SlidableSettingItem(
                                       selected: _selectedPlaylistId.value == item.id,
                                       autofocus: index == 0,
-                                      title: item.title == null ? null : Text(item.title!, overflow: TextOverflow.ellipsis),
-                                      subtitle: Text(item.url, overflow: TextOverflow.ellipsis),
+                                      title: item.url != defaultIPTVUrl
+                                          ? item.title == null
+                                              ? null
+                                              : Text(item.title!, overflow: TextOverflow.ellipsis)
+                                          : Text(AppLocalizations.of(context)!.iptvDefaultSource, overflow: TextOverflow.ellipsis),
+                                      subtitle: item.url != defaultIPTVUrl ? Text(item.url, overflow: TextOverflow.ellipsis) : null,
                                       onTap: () async {
                                         if (_selectedPlaylistId.value == item.id) return;
                                         _selectedPlaylistId.value = item.id;
@@ -76,22 +83,24 @@ class _LiveListPageState extends State<LiveListPage> with WidgetsBindingObserver
                                       },
                                       actionSide: ActionSide.start,
                                       actions: [
-                                        TVIconButton(
-                                            icon: const Icon(Icons.delete_outline_rounded),
-                                            onPressed: () async {
-                                              final confirm = await showConfirm(
-                                                  context, AppLocalizations.of(context)!.deleteConfirmText, AppLocalizations.of(context)!.deletePlaylistTip);
-                                              if (confirm != true) return;
-                                              if (!context.mounted) return;
-                                              await showNotification(context, Api.playlistDeleteById(item.id));
-                                              if (context.mounted) setState(() {});
-                                            }),
-                                        TVIconButton(
-                                            icon: const Icon(Icons.edit),
-                                            onPressed: () async {
-                                              final resp = await navigateTo<bool>(context, LiveEdit(item: item));
-                                              if (resp == true && context.mounted) setState(() {});
-                                            }),
+                                        if (item.url != defaultIPTVUrl)
+                                          TVIconButton(
+                                              icon: const Icon(Icons.delete_outline_rounded),
+                                              onPressed: () async {
+                                                final confirm = await showConfirm(
+                                                    context, AppLocalizations.of(context)!.deleteConfirmText, AppLocalizations.of(context)!.deletePlaylistTip);
+                                                if (confirm != true) return;
+                                                if (!context.mounted) return;
+                                                await showNotification(context, Api.playlistDeleteById(item.id));
+                                                if (context.mounted) setState(() {});
+                                              }),
+                                        if (item.url != defaultIPTVUrl)
+                                          TVIconButton(
+                                              icon: const Icon(Icons.edit),
+                                              onPressed: () async {
+                                                final flag = await navigateTo<bool>(context, LiveEdit(item: item));
+                                                if ((flag ?? false) && context.mounted) setState(() {});
+                                              }),
                                         TVIconButton(
                                             icon: const Icon(Icons.sync),
                                             onPressed: () async {
@@ -116,7 +125,7 @@ class _LiveListPageState extends State<LiveListPage> with WidgetsBindingObserver
               ),
               if (snapshot.requireData.isNotEmpty)
                 Flexible(
-                    flex: 3,
+                    flex: 2,
                     child: Actions(
                       actions: {
                         DirectionalFocusIntent: CallbackAction<DirectionalFocusIntent>(onInvoke: (indent) {
@@ -124,7 +133,7 @@ class _LiveListPageState extends State<LiveListPage> with WidgetsBindingObserver
                           if (currentNode != null) {
                             final nearestScope = currentNode.nearestScope!;
                             final focusedChild = nearestScope.focusedChild;
-                            if (focusedChild == null || focusedChild.focusInDirection(indent.direction) != true) {
+                            if (focusedChild == null || !focusedChild.focusInDirection(indent.direction)) {
                               switch (indent.direction) {
                                 case TraversalDirection.left:
                                   nearestScope.parent?.focusInDirection(indent.direction);
@@ -147,22 +156,44 @@ class _LiveListPageState extends State<LiveListPage> with WidgetsBindingObserver
         });
   }
 
-  _addPlaylist() async {
-    final resp = await navigateTo<bool>(context, const LiveEdit());
-    if (resp == true && context.mounted) setState(() {});
-  }
-
   @override
   Future<bool> didPopRoute() async {
     _navigatorKey.currentState!.pop();
     return true;
   }
+
+  Future<void> _addPlaylist() async {
+    final resp = await navigateTo<bool>(context, const LiveEdit());
+    if ((resp ?? false) && context.mounted) setState(() {});
+  }
+
+  Future<List<Playlist>> _getPlaylists() async {
+    List<Playlist> playlists = [];
+    playlists = await Api.playlistQueryAll();
+    final defaultId = playlists.firstWhereOrNull((playlist) => playlist.url == defaultIPTVUrl)?.id;
+    if (defaultId == null) {
+      try {
+        await Api.playlistInsert({
+          'title': 'DEFAULT',
+          'url': defaultIPTVUrl,
+        });
+        playlists = await Api.playlistQueryAll();
+      } catch (e) {
+        ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(SnackBar(
+          backgroundColor: Colors.black87,
+          content: Text(AppLocalizations.of(navigatorKey.currentContext!)!.iptvSourceFetchFailed),
+          behavior: SnackBarBehavior.floating,
+        ));
+      }
+    }
+    return playlists;
+  }
 }
 
 class _ChannelList extends StatefulWidget {
-  final int playlistId;
-
   const _ChannelList({required this.playlistId});
+
+  final int playlistId;
 
   @override
   State<_ChannelList> createState() => _ChannelListState();
@@ -192,7 +223,6 @@ class _ChannelListState extends State<_ChannelList> {
                       itemCount: playlist.length,
                       gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                         maxCrossAxisExtent: 198,
-                        childAspectRatio: 1,
                         mainAxisSpacing: 16,
                         crossAxisSpacing: 16,
                       ),
@@ -200,7 +230,7 @@ class _ChannelListState extends State<_ChannelList> {
                       itemBuilder: (context, index) {
                         final item = playlist[index];
                         return _ChannelGridItem(
-                            key: ValueKey(item.url),
+                            key: ValueKey(item.hashCode),
                             item: item,
                             onTap: () => navigateTo(
                                 navigatorKey.currentContext!,
@@ -215,10 +245,10 @@ class _ChannelListState extends State<_ChannelList> {
 }
 
 class _ChannelGridItem extends StatelessWidget {
+  const _ChannelGridItem({super.key, required this.item, this.onTap});
+
   final Channel item;
   final GestureTapCallback? onTap;
-
-  const _ChannelGridItem({super.key, required this.item, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -245,5 +275,90 @@ class _ChannelGridItem extends StatelessWidget {
         )
       ],
     );
+  }
+}
+
+class _ChannelListGrouped extends StatefulWidget {
+  const _ChannelListGrouped({required this.playlistId});
+
+  final int playlistId;
+
+  @override
+  State<_ChannelListGrouped> createState() => _ChannelListGroupedState();
+}
+
+class _ChannelListGroupedState extends State<_ChannelListGrouped> {
+  final _groupName = ValueNotifier<String?>(null);
+  final _playlist = ValueNotifier<List<Channel>>([]);
+
+  @override
+  void dispose() {
+    _groupName.dispose();
+    _playlist.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilderHandler(
+        future: Api.playlistChannelsQueryById(widget.playlistId),
+        builder: (context, snapshot) {
+          final playlist = snapshot.requireData;
+          final groupedPlaylist = playlist.groupListsBy((channel) => channel.category);
+          return playlist.isEmpty
+              ? const NoData()
+              : Row(
+                  children: [
+                    Flexible(
+                      flex: 2,
+                      child: ListenableBuilder(
+                          listenable: _groupName,
+                          builder: (context, _) {
+                            return ListView.builder(
+                              padding: const EdgeInsets.only(left: 8, right: 8, top: 60, bottom: 60),
+                              itemCount: groupedPlaylist.keys.length,
+                              itemBuilder: (context, index) {
+                                final name = groupedPlaylist.keys.elementAt(index) ?? AppLocalizations.of(context)!.tagUnknown;
+                                return ButtonSettingItem(
+                                  selected: _groupName.value == name,
+                                  title: Text(name),
+                                  onTap: () {
+                                    _groupName.value = name;
+                                    _playlist.value = groupedPlaylist[name]!;
+                                  },
+                                );
+                              },
+                            );
+                          }),
+                    ),
+                    const VerticalDivider(),
+                    Flexible(
+                        flex: 3,
+                        child: ListenableBuilder(
+                            listenable: _playlist,
+                            builder: (context, _) {
+                              return _playlist.value.isNotEmpty
+                                  ? ListView.builder(
+                                      padding: const EdgeInsets.only(left: 8, right: 48, top: 60, bottom: 60),
+                                      itemCount: _playlist.value.length,
+                                      itemBuilder: (context, index) {
+                                        final item = _playlist.value.elementAt(index);
+                                        return ButtonSettingItem(
+                                          leading: item.image != null ? AsyncImage(item.image!, width: 40, showErrorWidget: false) : null,
+                                          title: Text(item.title ?? ''),
+                                          onTap: () => navigateTo(
+                                              navigatorKey.currentContext!,
+                                              LivePlayerPage(
+                                                playlist: playlist.map(FromMedia.fromChannel).toList(),
+                                                index: playlist.indexOf(item),
+                                              )),
+                                        );
+                                      },
+                                    )
+                                  : const NoData();
+                            })),
+                  ],
+                );
+        });
   }
 }

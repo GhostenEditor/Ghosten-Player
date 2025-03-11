@@ -2,14 +2,13 @@ import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../../components/image_card.dart';
-import '../../../components/scrollbar.dart';
+import '../../components/image_card.dart';
 
 class SeasonsSection extends StatelessWidget {
+  const SeasonsSection({super.key, required this.seasons, required this.onTap});
+
   final List<TVSeason> seasons;
   final void Function(TVSeason) onTap;
-
-  const SeasonsSection({super.key, required this.seasons, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -17,23 +16,24 @@ class SeasonsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Text(AppLocalizations.of(context)!.titleSeasons, style: Theme.of(context).textTheme.titleLarge),
+          padding: const EdgeInsets.all(16),
+          child: Text(AppLocalizations.of(context)!.titleSeasons, style: Theme.of(context).textTheme.titleMedium),
         ),
         SizedBox(
-          height: 300,
-          child: ScrollbarListView.builder(
-            padding: const EdgeInsets.only(top: 4, bottom: 12),
+          height: 230,
+          child: ListView.separated(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            separatorBuilder: (context, index) => const SizedBox(width: 12),
             itemCount: seasons.length,
             scrollDirection: Axis.horizontal,
             itemBuilder: (BuildContext context, int index) {
               final item = seasons[index];
               return ImageCard(
-                scale: 1.05,
-                width: 170,
-                image: item.poster,
+                item.poster,
+                width: 120,
+                height: 180,
                 onTap: () => onTap(item),
-                child: RichText(
+                title: RichText(
                   text: TextSpan(children: [
                     TextSpan(text: item.title ?? AppLocalizations.of(context)!.seasonNumber(item.season), style: Theme.of(context).textTheme.titleSmall),
                     if (item.episodeCount != null)

@@ -1,27 +1,27 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 
-import '../components/appbar_progress.dart';
 import '../components/async_image.dart';
 import '../components/focus_card.dart';
 import '../components/future_builder_handler.dart';
-import '../components/gap.dart';
-import '../utils/notification.dart';
-import '../utils/utils.dart';
+import '../providers/user_config.dart';
+import 'components/appbar_progress.dart';
+import 'utils/notification.dart';
+import 'utils/utils.dart';
 
 class LibraryManage extends StatefulWidget {
-  final String title;
-  final LibraryType type;
+  const LibraryManage({super.key, required this.type});
 
-  const LibraryManage({super.key, required this.title, required this.type});
+  final LibraryType type;
 
   @override
   State<LibraryManage> createState() => _LibraryManageState();
 }
 
 class _LibraryManageState extends State<LibraryManage> {
-  bool refresh = false;
+  bool _refresh = false;
   final _controller = ScrollController();
 
   @override
@@ -35,11 +35,14 @@ class _LibraryManageState extends State<LibraryManage> {
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) Navigator.of(context).pop(refresh);
+        if (!didPop) Navigator.of(context).pop(_refresh);
       },
       child: Scaffold(
           appBar: AppBar(
-            title: Text(widget.title),
+            title: Text(switch (widget.type) {
+              LibraryType.tv => AppLocalizations.of(context)!.settingsItemTV,
+              LibraryType.movie => AppLocalizations.of(context)!.settingsItemMovie,
+            }),
             bottom: const AppbarProgressIndicator(),
           ),
           body: FutureBuilderHandler<List<Library>>(
@@ -69,8 +72,8 @@ class _LibraryManageState extends State<LibraryManage> {
                               LibraryType.movie => AppLocalizations.of(context)!.pageTitleCreateMovieLibrary,
                             },
                             selectableType: FileType.folder);
-                        if (res != null) {
-                          addLibrary(res.$1, res.$2);
+                        if (res != null && context.mounted) {
+                          addLibrary(context, res.$1, res.$2);
                         }
                       },
                     );
@@ -80,7 +83,7 @@ class _LibraryManageState extends State<LibraryManage> {
                       key: ValueKey(item.id),
                       item: item,
                       type: widget.type,
-                      needUpdate: () => setState(() => refresh = true),
+                      needUpdate: () => setState(() => _refresh = true),
                     );
                   }
                 },
@@ -90,7 +93,8 @@ class _LibraryManageState extends State<LibraryManage> {
     );
   }
 
-  Future<void> addLibrary(int driverId, DriverFile file) async {
+  Future<void> addLibrary(BuildContext context, int driverId, DriverFile file) async {
+    final scraperBehavior = Provider.of<UserConfig>(context, listen: false).scraperBehavior;
     final resp = await showNotification<bool>(context, Future(() async {
       final id = await Api.libraryInsert(
         type: widget.type,
@@ -99,21 +103,21 @@ class _LibraryManageState extends State<LibraryManage> {
         parentId: file.parentId,
         filename: file.name,
       );
-      await Api.libraryRefreshById(id);
+      await Api.libraryRefreshById(id, false, scraperBehavior);
       return true;
     }));
-    if (resp?.data == true) {
-      setState(() => refresh = true);
+    if (resp?.data ?? false) {
+      setState(() => _refresh = true);
     }
   }
 }
 
 class _LibraryItem extends StatelessWidget {
+  const _LibraryItem({super.key, required this.item, required this.needUpdate, required this.type});
+
   final Library item;
   final VoidCallback needUpdate;
   final LibraryType type;
-
-  const _LibraryItem({super.key, required this.item, required this.needUpdate, required this.type});
 
   @override
   Widget build(BuildContext context) {
@@ -121,18 +125,27 @@ class _LibraryItem extends StatelessWidget {
       itemBuilder: (context) => [
         PopupMenuItem(
           padding: EdgeInsets.zero,
-          onTap: () => showNotification(context, refreshMedia(item.id), showSuccess: false),
+          onTap: () => showNotification(context, refreshMedia(context, item.id, incremental: false), showSuccess: false),
           child: ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
             leading: const Icon(Icons.sync),
-            title: Text(AppLocalizations.of(context)!.buttonSyncDriver),
+            title: Text(AppLocalizations.of(context)!.buttonSyncLibrary),
+          ),
+        ),
+        PopupMenuItem(
+          padding: EdgeInsets.zero,
+          onTap: () => showNotification(context, refreshMedia(context, item.id, incremental: true), showSuccess: false),
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+            leading: const Icon(Icons.sync),
+            title: Text(AppLocalizations.of(context)!.buttonIncrementalSyncLibrary),
           ),
         ),
         PopupMenuItem(
           padding: EdgeInsets.zero,
           onTap: () async {
             final confirmed = await showConfirm(context, AppLocalizations.of(context)!.deleteMediaGroupConfirmText);
-            if (confirmed == true) {
+            if (confirmed ?? false) {
               if (!context.mounted) return;
               final resp = await showNotification(context, Api.libraryDeleteById(item.id));
               if (resp?.error == null) needUpdate();
@@ -153,12 +166,12 @@ class _LibraryItem extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
+                spacing: 12,
                 children: [
                   switch (type) {
                     LibraryType.tv => const Icon(Icons.tv, size: 36),
                     LibraryType.movie => const Icon(Icons.movie_creation_outlined, size: 36),
                   },
-                  Gap.hMD,
                   Text(
                     item.filename,
                     style: Theme.of(context).textTheme.titleLarge,
@@ -171,7 +184,6 @@ class _LibraryItem extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Padding(
                   padding: const EdgeInsets.only(right: 8.0),
@@ -198,8 +210,12 @@ class _LibraryItem extends StatelessWidget {
     );
   }
 
-  Future<void> refreshMedia(int id) async {
-    await Api.libraryRefreshById(id);
+  Future<void> refreshMedia(BuildContext context, int id, {required bool incremental}) async {
+    await Api.libraryRefreshById(
+      id,
+      incremental,
+      Provider.of<UserConfig>(context, listen: false).scraperBehavior,
+    );
     needUpdate();
   }
 }

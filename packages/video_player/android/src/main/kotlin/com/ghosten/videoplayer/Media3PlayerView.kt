@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Matrix
-import android.media.AudioManager
 import android.media.MediaMetadataRetriever
 import android.net.TrafficStats
 import android.net.Uri
@@ -49,15 +48,18 @@ import java.io.FileOutputStream
 import java.net.SocketTimeoutException
 import java.util.*
 import java.util.concurrent.ExecutionException
-import kotlin.math.roundToInt
 
 class Media3PlayerView(
     private val context: Context,
     private val activity: Activity,
     private val mChannel: MethodChannel,
-    extensionRendererMode: Int?,
-    enableDecoderFallback: Boolean?,
-    language: String?
+    private var extensionRendererMode: Int?,
+    private var enableDecoderFallback: Boolean?,
+    private var language: String?,
+    private val width: Int?,
+    private val height: Int?,
+    private val top: Int?,
+    private val left: Int?,
 ) : Player.Listener, BasePlayerView {
     private val mRootView: FrameLayout = activity.findViewById<FrameLayout>(android.R.id.content)
     private val mNativeView: View = View.inflate(context, R.layout.player_view, null)
@@ -66,61 +68,21 @@ class Media3PlayerView(
     private var mPlaylist: Array<Video> = arrayOf()
     private var trackNameProvider: TrackNameProvider = DefaultTrackNameProvider(context.resources)
     private val handler = Handler(Looper.getMainLooper())
-    private var player: ExoPlayer = ExoPlayer.Builder(context)
-        .setRenderersFactory(
-            DefaultRenderersFactory(context)
-                .setEnableDecoderFallback(enableDecoderFallback ?: false)
-                .setExtensionRendererMode(
-                    extensionRendererMode
-                        ?: DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON
-                )
-                .forceEnableMediaCodecAsynchronousQueueing()
-        )
-        .setMediaSourceFactory(
-            DefaultMediaSourceFactory(context).setDataSourceFactory(
-                DefaultDataSource.Factory(context, httpDataSourceFactory)
-            )
-        )
-        .setSeekParameters(SeekParameters(3000000, 3000000))
-        .build()
-    private val mediaSession = MediaSession.Builder(context, player).build()
-    private val mAudioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager;
-    private val mMaxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
-    private val mCurrentVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
+    private var player: ExoPlayer
+    private var mediaSession: MediaSession
     private var mLastTotalRxBytes: Long? = null;
     private val playerDB: PlayerDatabaseHelper = PlayerDatabaseHelper(context)
     private var thumbnailThread: ThumbnailThread = ThumbnailThread()
+    private var isFullscreen = width == null && height == null
 
     init {
-        if (language != null) {
-            player.trackSelectionParameters = player.trackSelectionParameters
-                .buildUpon()
-                .setPreferredTextLanguages(language)
-                .setPreferredAudioLanguages(language)
-                .setMaxVideoSizeSd()
-                .build()
-        } else {
-            player.trackSelectionParameters = player.trackSelectionParameters
-                .buildUpon()
-                .setMaxVideoSizeSd()
-                .build()
-        }
-        player.addListener(this)
-        player.addAnalyticsListener(EventLogger(object : EventLoggerHandler {
-            override fun onLog(level: Int, message: String) {
-                mChannel.invokeMethod("log", HashMap<String, Any?>().apply {
-                    this["level"] = level
-                    this["message"] = message
-                })
-            }
-        }))
-        mNativeView.findViewById<androidx.media3.ui.PlayerView>(R.id.video_view).player = player
         mRootView.addView(mNativeView, 0)
-        mChannel.invokeMethod("isInitialized", null)
-        mChannel.invokeMethod("volumeChanged", mCurrentVolume.toFloat() / mMaxVolume.toFloat())
-        checkPlaybackPosition(1000)
         thumbnailThread.start()
         createNotificationChannel()
+        player = initPlayer()
+        fullscreen(false)
+        mediaSession = MediaSession.Builder(context, player).build()
+        checkPlaybackPosition(1000)
     }
 
     inner class ThumbnailThread : Thread() {
@@ -215,6 +177,68 @@ class Media3PlayerView(
         }
     }
 
+    private fun initPlayer(): ExoPlayer {
+        val player = ExoPlayer.Builder(context)
+            .setRenderersFactory(
+                DefaultRenderersFactory(context)
+                    .setEnableDecoderFallback(enableDecoderFallback ?: false)
+                    .setExtensionRendererMode(
+                        extensionRendererMode
+                            ?: DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON
+                    )
+                    .forceEnableMediaCodecAsynchronousQueueing()
+            )
+            .setMediaSourceFactory(
+                DefaultMediaSourceFactory(context).setDataSourceFactory(
+                    DefaultDataSource.Factory(context, httpDataSourceFactory)
+                )
+            )
+            .setSeekParameters(SeekParameters(3000000, 3000000))
+            .build()
+
+        if (language != null) {
+            player.trackSelectionParameters = player.trackSelectionParameters
+                .buildUpon()
+                .setPreferredTextLanguages(language!!)
+                .setPreferredAudioLanguages(language!!)
+                .setMaxVideoSizeSd()
+                .build()
+        } else {
+            player.trackSelectionParameters = player.trackSelectionParameters
+                .buildUpon()
+                .setMaxVideoSizeSd()
+                .build()
+        }
+        player.addListener(this)
+        player.addAnalyticsListener(EventLogger(object : EventLoggerHandler {
+            override fun onLog(level: Int, message: String) {
+                mChannel.invokeMethod("log", HashMap<String, Any?>().apply {
+                    this["level"] = level
+                    this["message"] = message
+                })
+            }
+        }))
+        mNativeView.findViewById<androidx.media3.ui.PlayerView>(R.id.video_view).player = player
+        return player
+    }
+
+    private fun resetPlayer() {
+        val index = player.currentMediaItemIndex
+        val isPlaying = player.isPlaying
+        mPlaylist[index].startPosition = player.currentPosition
+        player.release()
+        mediaSession.release()
+        player = initPlayer()
+        mediaSession = MediaSession.Builder(context, player).build()
+
+        player.setMediaItems(mPlaylist.map {
+            buildMediaItem(it)
+        }.toList(), index, mPlaylist[index].startPosition)
+        if (isPlaying) {
+            player.playWhenReady = true
+            player.prepare()
+        }
+    }
 
     private fun checkPlaybackPosition(delayMs: Long): Boolean {
         return handler.postDelayed(
@@ -358,6 +382,7 @@ class Media3PlayerView(
                         this["index"] = oldPosition.mediaItemIndex
                         this["position"] = oldPosition.positionMs
                     })
+                    mPlaylist[oldPosition.mediaItemIndex].startPosition = oldPosition.positionMs
                     player.trackSelectionParameters = player.trackSelectionParameters
                         .buildUpon()
                         .setTrackTypeDisabled(C.TRACK_TYPE_AUDIO, false)
@@ -503,8 +528,6 @@ class Media3PlayerView(
 
                             is IllegalArgumentException -> {
                                 mChannel.invokeMethod("fatalError", cause.message)
-//                                player.seekTo(player.currentPosition + 1000)
-//                                play()
                             }
 
                             is IllegalStateException -> {
@@ -665,7 +688,7 @@ class Media3PlayerView(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 PictureInPictureParams.Builder()
-                    .setAutoEnterEnabled(player.isPlaying)
+                    .setAutoEnterEnabled(player.isPlaying && isFullscreen)
                     .build()
             } else {
                 PictureInPictureParams.Builder()
@@ -679,6 +702,20 @@ class Media3PlayerView(
         return when (player.playbackState) {
             Player.STATE_BUFFERING, Player.STATE_READY -> true
             else -> false
+        }
+    }
+
+    override fun setPlayerOption(name: String, value: Any) {
+        when (name) {
+            "extensionRendererMode" -> {
+                extensionRendererMode = value as Int
+                resetPlayer()
+            }
+
+            "enableDecoderFallback" -> {
+                enableDecoderFallback = value as Boolean
+                resetPlayer()
+            }
         }
     }
 
@@ -823,9 +860,6 @@ class Media3PlayerView(
         player.setMediaItems(playlist.map {
             buildMediaItem(it)
         }.toList(), index, playlist[index].startPosition)
-
-        player.playWhenReady = true
-        player.prepare()
     }
 
     override fun updateSource(data: HashMap<String, Any>, index: Int) {
@@ -857,21 +891,6 @@ class Media3PlayerView(
         videoView.animationMatrix = Matrix().apply {
             setValues(matrix.map { it.toFloat() }.toFloatArray())
         }
-//        val m = MatrixTransformation {
-//            val matrix = Matrix()
-//            matrix.setScale(-1f, 1f)
-//            matrix
-//        }
-
-//        player.setVideoEffects(listOf(
-//            MatrixTransformation {
-//                val matrix = Matrix()
-//                matrix.setScale(-1f, 1f)
-//                matrix
-//            }
-//        ))
-//        player.prepare()
-//        player.play()
     }
 
     override fun setAspectRatio(aspectRatio: Float?) {
@@ -885,17 +904,27 @@ class Media3PlayerView(
         )
     }
 
+    override fun fullscreen(flag: Boolean) {
+        if (flag) {
+            (mNativeView.layoutParams as FrameLayout.LayoutParams).width = FrameLayout.LayoutParams.MATCH_PARENT
+            (mNativeView.layoutParams as FrameLayout.LayoutParams).height = FrameLayout.LayoutParams.MATCH_PARENT
+            (mNativeView.layoutParams as FrameLayout.LayoutParams).topMargin = 0
+            (mNativeView.layoutParams as FrameLayout.LayoutParams).leftMargin = 0
+            mNativeView.requestLayout()
+        } else {
+            if (width != null) (mNativeView.layoutParams as FrameLayout.LayoutParams).width = width
+            if (height != null) (mNativeView.layoutParams as FrameLayout.LayoutParams).height = height
+            if (top != null) (mNativeView.layoutParams as FrameLayout.LayoutParams).topMargin = top
+            if (left != null) (mNativeView.layoutParams as FrameLayout.LayoutParams).leftMargin = left
+            mNativeView.requestLayout()
+        }
+        isFullscreen = flag
+        setPictureInPictureParams()
+    }
+
 
     override fun setPlaybackSpeed(speed: Float) {
         player.setPlaybackSpeed(speed)
-    }
-
-    override fun setVolume(volume: Float) {
-        mAudioManager.setStreamVolume(
-            AudioManager.STREAM_MUSIC,
-            (volume * mMaxVolume).roundToInt(),
-            AudioManager.FLAG_SHOW_UI
-        )
     }
 
     companion object {

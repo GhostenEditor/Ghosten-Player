@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SeasonMetadata extends StatefulWidget {
-  final TVSeason season;
-
   const SeasonMetadata({super.key, required this.season});
+
+  final TVSeason season;
 
   @override
   State<SeasonMetadata> createState() => _SeasonMetadataState();

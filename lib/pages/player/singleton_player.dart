@@ -1,54 +1,46 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:provider/provider.dart';
 import 'package:video_player/player.dart';
 
-import '../../providers/user_config.dart';
+import 'player_controls_full.dart';
 
-class SingletonPlayer extends StatefulWidget {
-  final String url;
-  final bool isTV;
+class SingletonPlayer<T> extends StatefulWidget {
+  const SingletonPlayer({super.key, required this.playlist, this.index = 0, this.theme});
 
-  const SingletonPlayer({super.key, required this.url, required this.isTV});
+  final List<PlaylistItem<T>> playlist;
+  final int index;
+  final int? theme;
 
   @override
-  State<SingletonPlayer> createState() => _SingletonPlayerState();
+  State<SingletonPlayer<T>> createState() => _SingletonPlayerState<T>();
 }
 
-class _SingletonPlayerState extends State<SingletonPlayer> {
-  late final userConfig = context.read<UserConfig>();
-  late final PlayerController controller = PlayerController([
-    PlaylistItem(
-      url: Uri.parse(widget.url),
-      sourceType: PlaylistItemSourceType.local,
-    ),
-  ], 0, Api.log);
+class _SingletonPlayerState<T> extends State<SingletonPlayer<T>> {
+  late final _controller = PlayerController<T>(Api.log);
+  late final _progressController = PlayerProgressController(_controller);
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   void dispose() {
-    controller.dispose();
+    _controller.dispose();
+    _progressController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return PlayerControls(
-      localizations: PlayerLocalizations(
-        settingsTitle: AppLocalizations.of(context)!.settingsTitle,
-        videoSettingsVideo: AppLocalizations.of(context)!.videoSettingsVideo,
-        videoSettingsAudio: AppLocalizations.of(context)!.videoSettingsAudio,
-        videoSettingsSubtitle: AppLocalizations.of(context)!.videoSettingsSubtitle,
-        videoSettingsSpeeding: AppLocalizations.of(context)!.videoSettingsSpeeding,
-        videoSize: AppLocalizations.of(context)!.videoSize,
-        videoSettingsNone: AppLocalizations.of(context)!.none,
-        tagUnknown: AppLocalizations.of(context)!.tagUnknown,
-        willSkipEnding: AppLocalizations.of(context)!.willSkipEnding,
-      ),
-      options: userConfig.playerConfig.config,
-      showThumbnails: true,
-      controller: controller,
-      isTV: widget.isTV,
+    return Stack(
+      children: [
+        PlayerPlatformView(initialized: () {
+          _controller.setSources(widget.playlist, widget.index);
+          _controller.play();
+        }),
+        PlayerControlsFull(_controller, _progressController, theme: widget.theme),
+      ],
     );
   }
 }

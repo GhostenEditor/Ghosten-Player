@@ -4,7 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../components/future_builder_handler.dart';
 import '../../components/scrollbar.dart';
-import '../../utils/notification.dart';
+import '../utils/notification.dart';
 
 class SystemSettingsServer extends StatefulWidget {
   const SystemSettingsServer({super.key});
@@ -23,7 +23,7 @@ class _SystemSettingsServerState extends State<SystemSettingsServer> {
           IconButton(
               onPressed: () async {
                 final flag = await showDialog<bool>(context: context, builder: (context) => const _SystemSettingsAdd());
-                if (flag == true) setState(() {});
+                if (flag ?? false) setState(() {});
               },
               icon: const Icon(Icons.add))
         ],

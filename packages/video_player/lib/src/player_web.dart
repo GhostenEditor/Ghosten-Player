@@ -146,18 +146,8 @@ class PlayerWeb extends PlayerPlatform {
   }
 
   @override
-  Future<void> setVolume(double volume) async {
-    invoke('volume', {'volume': (volume * 100).round()});
-  }
-
-  @override
   Future<bool?> requestPip() async {
     return false;
-  }
-
-  @override
-  Future<void> requestFullscreen() async {
-    invoke('fullscreen');
   }
 
   @override
@@ -181,17 +171,23 @@ class PlayerWeb extends PlayerPlatform {
   }
 
   @override
+  Future<void> enterFullscreen() async {}
+
+  @override
+  Future<void> exitFullscreen() async {}
+
+  @override
   void setMethodCallHandler(Future<dynamic> Function(MethodCall call)? handler) {
     PlayerWeb.handler = handler;
   }
 
   @override
-  void init(Map<String, dynamic> args) {
+  Future<void> init(Map<String, dynamic> args) async {
     invoke('init', args);
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     invoke('dispose');
   }
 }

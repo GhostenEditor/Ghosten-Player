@@ -1,119 +1,59 @@
 import 'package:api/api.dart';
-import 'package:flutter/widgets.dart';
 import 'package:video_player/player.dart';
 
 import '../utils/utils.dart';
 
-extension FromMedia on ExPlaylistItem {
-  static ExPlaylistItem fromEpisode(TVEpisode episode) {
-    return ExPlaylistItem(
-      id: episode.id,
+extension FromMedia<T> on PlaylistItem<T> {
+  static PlaylistItem<TVEpisode> fromEpisode(TVEpisode episode) {
+    Duration start = episode.skipIntro > (episode.lastPlayedPosition ?? Duration.zero) ? episode.skipIntro : (episode.lastPlayedPosition ?? Duration.zero);
+    if (episode.duration != null) {
+      if (start > episode.duration! * 0.95) {
+        start = episode.skipIntro > episode.duration! * 0.95 ? Duration.zero : episode.skipIntro;
+      }
+    }
+    return PlaylistItem(
       sourceType: episode.downloaded ? PlaylistItemSourceType.local : PlaylistItemSourceType.other,
       title: episode.displayTitle(),
       description: '${episode.seriesTitle} S${episode.season} E${episode.episode}${episode.airDate == null ? '' : ' - ${episode.airDate?.format()}'}',
       url: episode.url.normalize(),
       poster: episode.poster,
-      subtitles: episode.subtitles
-          .map((e) => Subtitle(
-                url: e.url!.host.isEmpty ? e.url!.replace(host: Api.baseUrl.host, port: Api.baseUrl.port, scheme: Api.baseUrl.scheme) : e.url!,
-                mimeType: SubtitleMimeType.fromString(e.mimeType)!,
-                language: e.language,
-              ))
-          .toList(),
-      start: episode.skipIntro > (episode.lastPlayedPosition ?? Duration.zero) ? episode.skipIntro : (episode.lastPlayedPosition ?? Duration.zero),
+      subtitles: episode.subtitles.map((e) => e.toSubtitle()).toList(),
+      start: start,
       end: episode.skipEnding,
-      downloadable: !episode.downloaded,
-      canSkipIntro: true,
-      canSkipEnding: true,
+      source: episode,
     );
   }
 
-  static ExPlaylistItem fromMovie(Movie movie) {
-    return ExPlaylistItem(
-      id: movie.id,
-      sourceType: movie.downloaded ? PlaylistItemSourceType.local : PlaylistItemSourceType.other,
-      title: movie.title ?? movie.filename,
-      description: '${movie.originalTitle} - ${movie.airDate?.format()}',
-      url: movie.url.normalize(),
-      poster: movie.poster,
-      subtitles: movie.subtitles
-          .map((e) => Subtitle(
-                url: e.url!.host.isEmpty ? e.url!.replace(host: Api.baseUrl.host, port: Api.baseUrl.port, scheme: Api.baseUrl.scheme) : e.url!,
-                mimeType: SubtitleMimeType.fromString(e.mimeType)!,
-                language: e.language,
-              ))
-          .toList(),
-      start: movie.lastPlayedPosition ?? Duration.zero,
-      downloadable: !movie.downloaded,
-    );
+  static PlaylistItem<Movie> fromMovie(Movie movie) {
+    return PlaylistItem(
+        sourceType: movie.downloaded ? PlaylistItemSourceType.local : PlaylistItemSourceType.other,
+        title: movie.displayTitle(),
+        description: movie.airDate?.format(),
+        url: movie.url.normalize(),
+        poster: movie.poster,
+        subtitles: movie.subtitles.map((e) => e.toSubtitle()).toList(),
+        start: movie.lastPlayedPosition ?? Duration.zero,
+        source: movie);
   }
 
-  static ExPlaylistItem fromChannel(Channel channel) {
-    return ExPlaylistItem(
-        id: channel.id,
-        sourceType: PlaylistItemSourceType.hls,
-        title: channel.title,
-        description: channel.category,
-        url: Uri.parse(channel.url),
-        poster: channel.image,
-        posterPadding: const EdgeInsets.only(top: 28, left: 24, right: 24, bottom: 12));
-  }
-}
-
-class ExPlaylistItem extends PlaylistItem {
-  final int id;
-  final bool downloadable;
-  final EdgeInsets posterPadding;
-  final bool canSkipIntro;
-  final bool canSkipEnding;
-
-  const ExPlaylistItem({
-    required this.id,
-    required super.url,
-    required super.sourceType,
-    super.title,
-    super.description,
-    super.poster,
-    super.subtitles,
-    super.start = Duration.zero,
-    super.end = Duration.zero,
-    this.downloadable = false,
-    this.posterPadding = EdgeInsets.zero,
-    this.canSkipIntro = false,
-    this.canSkipEnding = false,
-  });
-
-  @override
-  ExPlaylistItem copyWith({
-    String? poster,
-    String? title,
-    String? description,
-    Uri? url,
-    Duration? start,
-    Duration? end,
-    PlaylistItemSourceType? sourceType,
-    List<Subtitle>? subtitles,
-  }) {
-    return ExPlaylistItem(
-      id: id,
-      url: url ?? this.url,
-      sourceType: sourceType ?? this.sourceType,
-      title: title ?? this.title,
-      description: description ?? this.description,
-      poster: poster ?? this.poster,
-      subtitles: subtitles ?? this.subtitles,
-      start: start ?? this.start,
-      end: end ?? this.end,
-      downloadable: downloadable,
-      posterPadding: posterPadding,
-      canSkipIntro: canSkipIntro,
-      canSkipEnding: canSkipEnding,
+  static PlaylistItem<Channel> fromChannel(Channel channel) {
+    return PlaylistItem(
+      sourceType: PlaylistItemSourceType.hls,
+      title: channel.title,
+      description: channel.category,
+      url: channel.links.first,
+      poster: channel.image,
+      source: channel,
     );
   }
 }
 
-enum PlayerType {
-  tv,
-  movie,
-  live,
+extension on SubtitleData {
+  Subtitle toSubtitle() {
+    return Subtitle(
+      url: url!.host.isEmpty ? url!.replace(host: Api.baseUrl.host, port: Api.baseUrl.port, scheme: Api.baseUrl.scheme) : url!,
+      mimeType: SubtitleMimeType.fromString(mimeType)!,
+      language: language,
+    );
+  }
 }

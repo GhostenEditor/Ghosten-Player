@@ -35,13 +35,13 @@ class SystemSettingsDNSState extends State<SystemSettingsDNS> {
                       TVIconButton(
                           onPressed: () async {
                             final flag = await navigateToSlideLeft<bool>(context, _SystemSettingsDNSEdit(item: entry.$2));
-                            if (flag == true) setState(() {});
+                            if (flag ?? false) setState(() {});
                           },
                           icon: const Icon(Icons.edit_outlined)),
                       TVIconButton(
                           onPressed: () async {
                             final confirm = await showConfirm(context, AppLocalizations.of(context)!.deleteConfirmText);
-                            if (confirm == true && context.mounted) {
+                            if ((confirm ?? false) && context.mounted) {
                               final resp = await showNotification(context, Api.dnsOverrideDeleteById(entry.$2.id));
                               if (resp?.error == null && context.mounted) setState(() {});
                             }
@@ -55,7 +55,7 @@ class SystemSettingsDNSState extends State<SystemSettingsDNS> {
                 icon: const Icon(Icons.add),
                 onPressed: () async {
                   final flag = await navigateToSlideLeft<bool>(context, const _SystemSettingsDNSEdit());
-                  if (flag == true) setState(() {});
+                  if (flag ?? false) setState(() {});
                 },
               ),
             ]);
@@ -65,9 +65,8 @@ class SystemSettingsDNSState extends State<SystemSettingsDNS> {
 }
 
 class _SystemSettingsDNSEdit extends StatefulWidget {
-  final DNSOverride? item;
-
-  const _SystemSettingsDNSEdit({this.item});
+  const _SystemSettingsDNSEdit({DNSOverride? item}) : _item = item;
+  final DNSOverride? _item;
 
   @override
   State<_SystemSettingsDNSEdit> createState() => _SystemSettingsDNSEditState();
@@ -75,8 +74,8 @@ class _SystemSettingsDNSEdit extends StatefulWidget {
 
 class _SystemSettingsDNSEditState extends State<_SystemSettingsDNSEdit> {
   final _domains = ['api.themoviedb.org', 'image.tmdb.org'];
-  late final _controller1 = TextEditingController(text: widget.item?.domain ?? _domains[0]);
-  late final _controller2 = TextEditingController(text: widget.item?.ip);
+  late final _controller1 = TextEditingController(text: widget._item?.domain ?? _domains[0]);
+  late final _controller2 = TextEditingController(text: widget._item?.ip);
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -89,7 +88,7 @@ class _SystemSettingsDNSEditState extends State<_SystemSettingsDNSEdit> {
   @override
   Widget build(BuildContext context) {
     return SettingPage(
-      title: widget.item?.domain ?? AppLocalizations.of(context)!.pageTitleAdd,
+      title: widget._item?.domain ?? AppLocalizations.of(context)!.pageTitleAdd,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
         child: Form(
@@ -127,10 +126,10 @@ class _SystemSettingsDNSEditState extends State<_SystemSettingsDNSEdit> {
                   } else {
                     final matches = RegExp(r'^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$').firstMatch(value);
                     if (matches?.groupCount == 4) {
-                      if (int.parse(matches?[1] as String) < 1 << 8 &&
-                          int.parse(matches?[2] as String) < 1 << 8 &&
-                          int.parse(matches?[3] as String) < 1 << 8 &&
-                          int.parse(matches?[4] as String) < 1 << 8) {
+                      if (int.parse(matches![1]!) < 1 << 8 &&
+                          int.parse(matches[2]!) < 1 << 8 &&
+                          int.parse(matches[3]!) < 1 << 8 &&
+                          int.parse(matches[4]!) < 1 << 8) {
                         return null;
                       }
                     }
@@ -143,7 +142,7 @@ class _SystemSettingsDNSEditState extends State<_SystemSettingsDNSEdit> {
                 child: Text(AppLocalizations.of(context)!.buttonConfirm),
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
-                    if (widget.item == null) {
+                    if (widget._item == null) {
                       final resp = await showNotification(
                           context,
                           Api.dnsOverrideInsert(
@@ -155,7 +154,7 @@ class _SystemSettingsDNSEditState extends State<_SystemSettingsDNSEdit> {
                       final resp = await showNotification(
                           context,
                           Api.dnsOverrideUpdateById(
-                            id: widget.item!.id,
+                            id: widget._item!.id,
                             domain: _controller1.text.trim(),
                             ip: _controller2.text.trim(),
                           ));

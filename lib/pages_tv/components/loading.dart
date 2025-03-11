@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class Loading extends StatefulWidget {
-  final Color? color;
-
   const Loading({super.key, this.color});
+
+  final Color? color;
 
   @override
   State<Loading> createState() => _LoadingState();
@@ -23,8 +23,11 @@ class _LoadingState extends State<Loading> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Center(
         child: SpinKitFadingCircle(
-      color: widget.color ?? Colors.white,
-      size: 50.0,
+      color: widget.color ??
+          switch (Theme.of(context).brightness) {
+            Brightness.dark => Colors.white,
+            Brightness.light => Colors.black,
+          },
       controller: _loadingController,
     ));
   }

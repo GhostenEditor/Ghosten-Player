@@ -6,14 +6,6 @@ import 'icon_button.dart';
 import 'list_tile.dart';
 
 class ButtonSettingItem extends StatelessWidget {
-  final bool selected;
-  final bool autofocus;
-  final Widget? title;
-  final Widget? subtitle;
-  final Widget? leading;
-  final Widget? trailing;
-  final GestureTapCallback? onTap;
-
   const ButtonSettingItem({
     super.key,
     required this.title,
@@ -24,6 +16,14 @@ class ButtonSettingItem extends StatelessWidget {
     this.onTap,
     this.selected = false,
   });
+
+  final bool selected;
+  final bool autofocus;
+  final Widget? title;
+  final Widget? subtitle;
+  final Widget? leading;
+  final Widget? trailing;
+  final GestureTapCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -42,16 +42,6 @@ class ButtonSettingItem extends StatelessWidget {
 enum ActionSide { start, end }
 
 class SlidableSettingItem extends StatefulWidget {
-  final bool autofocus;
-  final bool selected;
-  final Widget? title;
-  final Widget? subtitle;
-  final Widget? leading;
-  final Widget? trailing;
-  final GestureTapCallback? onTap;
-  final List<TVIconButton> actions;
-  final ActionSide actionSide;
-
   const SlidableSettingItem({
     super.key,
     required this.title,
@@ -65,6 +55,16 @@ class SlidableSettingItem extends StatefulWidget {
     required this.actions,
   });
 
+  final bool autofocus;
+  final bool selected;
+  final Widget? title;
+  final Widget? subtitle;
+  final Widget? leading;
+  final Widget? trailing;
+  final GestureTapCallback? onTap;
+  final List<TVIconButton> actions;
+  final ActionSide actionSide;
+
   @override
   State<SlidableSettingItem> createState() => _SlidableSettingItemState();
 }
@@ -73,7 +73,7 @@ class _SlidableSettingItemState extends State<SlidableSettingItem> with SingleTi
   final _actionsFocusNode = FocusNode();
   final _focusNode = FocusNode();
   late final _controller = SlidableController(this);
-  bool focused = false;
+  bool _focused = false;
 
   @override
   void dispose() {
@@ -91,8 +91,8 @@ class _SlidableSettingItemState extends State<SlidableSettingItem> with SingleTi
         if (!f) {
           _controller.close(duration: const Duration(milliseconds: 400));
         }
-        if (focused != f) {
-          setState(() => focused = f);
+        if (_focused != f) {
+          setState(() => _focused = f);
         }
       },
       child: Slidable(
@@ -146,7 +146,7 @@ class _SlidableSettingItemState extends State<SlidableSettingItem> with SingleTi
                   subtitle: widget.subtitle,
                   leading: widget.leading,
                   trailing: widget.trailing,
-                  selected: widget.selected || focused,
+                  selected: widget.selected || _focused,
                   onTap: widget.onTap ??
                       () {
                         if (_controller.direction.value == 0) {
@@ -163,7 +163,7 @@ class _SlidableSettingItemState extends State<SlidableSettingItem> with SingleTi
                       },
                   focusNode: _focusNode,
                 ),
-                if (focused) const Icon(Icons.more_vert_rounded, color: Colors.grey, size: 18),
+                if (_focused) const Icon(Icons.more_vert_rounded, color: Colors.grey, size: 18),
               ],
             ),
           ),
@@ -174,13 +174,6 @@ class _SlidableSettingItemState extends State<SlidableSettingItem> with SingleTi
 }
 
 class RadioSettingItem<T> extends StatelessWidget {
-  final bool autofocus;
-  final Widget title;
-  final Widget? leading;
-  final T value;
-  final T? groupValue;
-  final ValueChanged<T?>? onChanged;
-
   const RadioSettingItem({
     super.key,
     required this.title,
@@ -190,6 +183,13 @@ class RadioSettingItem<T> extends StatelessWidget {
     this.autofocus = false,
     this.leading,
   });
+
+  final bool autofocus;
+  final Widget title;
+  final Widget? leading;
+  final T value;
+  final T? groupValue;
+  final ValueChanged<T?>? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -204,11 +204,6 @@ class RadioSettingItem<T> extends StatelessWidget {
 }
 
 class SwitchSettingItem extends StatelessWidget {
-  final bool autofocus;
-  final Widget title;
-  final bool value;
-  final ValueChanged<bool>? onChanged;
-
   const SwitchSettingItem({
     super.key,
     required this.title,
@@ -216,6 +211,11 @@ class SwitchSettingItem extends StatelessWidget {
     this.autofocus = false,
     this.value = false,
   });
+
+  final bool autofocus;
+  final Widget title;
+  final bool value;
+  final ValueChanged<bool>? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -231,16 +231,16 @@ class SwitchSettingItem extends StatelessWidget {
 }
 
 class IconButtonSettingItem extends StatelessWidget {
-  final bool autofocus;
-  final Widget icon;
-  final VoidCallback? onPressed;
-
   const IconButtonSettingItem({
     super.key,
     required this.icon,
     this.autofocus = false,
     this.onPressed,
   });
+
+  final bool autofocus;
+  final Widget icon;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -255,13 +255,6 @@ class IconButtonSettingItem extends StatelessWidget {
 }
 
 class StepperSettingItem extends StatelessWidget {
-  final Widget title;
-  final int value;
-  final int? max;
-  final int? min;
-  final int step;
-  final ValueChanged<int>? onChanged;
-
   const StepperSettingItem({
     super.key,
     required this.title,
@@ -271,6 +264,13 @@ class StepperSettingItem extends StatelessWidget {
     this.onChanged,
     required this.value,
   });
+
+  final Widget title;
+  final int value;
+  final int? max;
+  final int? min;
+  final int step;
+  final ValueChanged<int>? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -282,12 +282,12 @@ class StepperSettingItem extends StatelessWidget {
             switch (event.logicalKey) {
               case LogicalKeyboardKey.arrowLeft:
                 if (min == null || value > min! && onChanged != null) {
-                  onChanged!(clamp(value - step));
+                  onChanged!(_clamp(value - step));
                 }
                 return KeyEventResult.handled;
               case LogicalKeyboardKey.arrowRight:
                 if (max == null || value < max! && onChanged != null) {
-                  onChanged!(clamp(value + step));
+                  onChanged!(_clamp(value + step));
                 }
                 return KeyEventResult.handled;
             }
@@ -333,7 +333,7 @@ class StepperSettingItem extends StatelessWidget {
     );
   }
 
-  int clamp(int v) {
+  int _clamp(int v) {
     if (max != null) {
       v = v < max! ? v : max!;
     }
@@ -354,9 +354,9 @@ class DividerSettingItem extends StatelessWidget {
 }
 
 class GapSettingItem extends StatelessWidget {
-  final double? height;
-
   const GapSettingItem({super.key, this.height});
+
+  final double? height;
 
   @override
   Widget build(BuildContext context) {
@@ -365,14 +365,14 @@ class GapSettingItem extends StatelessWidget {
 }
 
 class SettingPage extends StatelessWidget {
-  final String title;
-  final Widget child;
-
   const SettingPage({
     super.key,
     required this.title,
     required this.child,
   });
+
+  final String title;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -389,7 +389,7 @@ class SettingPage extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          const Divider(color: Color(0xff111212), height: 1),
+          Divider(color: Theme.of(context).colorScheme.surfaceDim, height: 1),
           Expanded(
             child: child,
           ),

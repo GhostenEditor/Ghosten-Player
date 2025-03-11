@@ -48,7 +48,6 @@ class _HomeState extends State<TVHomePage> {
       },
       child: Scaffold(
         key: _scaffoldKey,
-        backgroundColor: Colors.black,
         extendBodyBehindAppBar: true,
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         floatingActionButton: StreamBuilder(
@@ -146,38 +145,42 @@ class _HomeState extends State<TVHomePage> {
 }
 
 class _HomeTabs extends StatefulWidget {
+  const _HomeTabs({required this.tabs, required this.onTabChange});
+
   final List<String> tabs;
   final Function(int) onTabChange;
-
-  const _HomeTabs({required this.tabs, required this.onTabChange});
 
   @override
   State<_HomeTabs> createState() => _HomeTabsState();
 }
 
 class _HomeTabsState extends State<_HomeTabs> {
-  double lineWidth = 0;
-  double lineOffset = 0;
-  bool tabFocused = false;
-  int active = 0;
+  double _lineWidth = 0;
+  double _lineOffset = 0;
+  bool _tabFocused = false;
+  int _active = 0;
   late final tabKeys = List.generate(widget.tabs.length, (_) => GlobalKey());
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     Future.delayed(const Duration(milliseconds: 10)).then((_) => setState(() {
-          updateActiveLine(tabKeys[active].currentContext!);
+          _updateActiveLine(tabKeys[_active].currentContext!);
         }));
   }
 
   @override
   Widget build(BuildContext context) {
+    final color = switch (Theme.of(context).brightness) {
+      Brightness.dark => Colors.white,
+      Brightness.light => Colors.black,
+    };
     return Focus(
       autofocus: true,
       onFocusChange: (f) {
-        if (tabFocused != f) {
+        if (_tabFocused != f) {
           setState(() {
-            tabFocused = f;
+            _tabFocused = f;
           });
         }
       },
@@ -185,19 +188,19 @@ class _HomeTabsState extends State<_HomeTabs> {
         if (event is KeyDownEvent || event is KeyRepeatEvent) {
           switch (event.logicalKey) {
             case LogicalKeyboardKey.arrowLeft:
-              if (active > 0) {
-                active -= 1;
-                widget.onTabChange(active);
-                updateActiveLine(tabKeys[active].currentContext!);
+              if (_active > 0) {
+                _active -= 1;
+                widget.onTabChange(_active);
+                _updateActiveLine(tabKeys[_active].currentContext!);
                 setState(() {});
                 return KeyEventResult.handled;
               }
 
             case LogicalKeyboardKey.arrowRight:
-              if (active < widget.tabs.length - 1) {
-                active += 1;
-                widget.onTabChange(active);
-                updateActiveLine(tabKeys[active].currentContext!);
+              if (_active < widget.tabs.length - 1) {
+                _active += 1;
+                widget.onTabChange(_active);
+                _updateActiveLine(tabKeys[_active].currentContext!);
               } else {
                 final siblings = node.parent!.children.toList();
                 final index = siblings.indexOf(node);
@@ -221,9 +224,9 @@ class _HomeTabsState extends State<_HomeTabs> {
               children: widget.tabs.indexed
                   .map((tab) => GestureDetector(
                         onTap: () {
-                          active = tab.$1;
-                          widget.onTabChange(active);
-                          updateActiveLine(tabKeys[active].currentContext!);
+                          _active = tab.$1;
+                          widget.onTabChange(_active);
+                          _updateActiveLine(tabKeys[_active].currentContext!);
                           setState(() {});
                         },
                         child: Padding(
@@ -231,7 +234,7 @@ class _HomeTabsState extends State<_HomeTabs> {
                           child: Text(
                             tab.$2,
                             key: tabKeys[tab.$1],
-                            style: Theme.of(context).textTheme.titleMedium!.copyWith(color: tab.$1 == active && tabFocused ? Colors.white : Colors.grey),
+                            style: Theme.of(context).textTheme.titleMedium!.copyWith(color: tab.$1 == _active && _tabFocused ? color : Colors.grey),
                           ),
                         ),
                       ))
@@ -240,12 +243,11 @@ class _HomeTabsState extends State<_HomeTabs> {
             AnimatedContainer(
               duration: const Duration(milliseconds: 400),
               curve: Curves.easeOut,
-              width: tabFocused ? lineWidth : lineWidth * 0.6,
+              width: _tabFocused ? _lineWidth : _lineWidth * 0.6,
               height: 2,
-              margin: EdgeInsets.only(left: tabFocused ? lineOffset : lineOffset + lineWidth * 0.2),
+              margin: EdgeInsets.only(left: _tabFocused ? _lineOffset : _lineOffset + _lineWidth * 0.2),
               decoration: BoxDecoration(
-                  color: tabFocused ? Colors.white : Colors.grey,
-                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(2), topRight: Radius.circular(2))),
+                  color: _tabFocused ? color : Colors.grey, borderRadius: const BorderRadius.only(topLeft: Radius.circular(2), topRight: Radius.circular(2))),
             )
           ],
         ),
@@ -253,11 +255,10 @@ class _HomeTabsState extends State<_HomeTabs> {
     );
   }
 
-  updateActiveLine(BuildContext context) {
-    final box = context.findRenderObject() as RenderBox;
+  void _updateActiveLine(BuildContext context) {
+    final box = context.findRenderObject()! as RenderBox;
     final offset = box.globalToLocal(Offset.zero, ancestor: box.parent?.parent?.parent?.parent);
-    box.size.width;
-    lineWidth = box.size.width;
-    lineOffset = -offset.dx;
+    _lineWidth = box.size.width;
+    _lineOffset = -offset.dx;
   }
 }

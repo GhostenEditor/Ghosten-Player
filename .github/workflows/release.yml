@@ -67,14 +67,29 @@ jobs:
           build_number=$((($MAJOR - 1) * 10000 + $MINOR * 100 + $PATCH))
           echo "BUILD_NUMBER=$build_number" >> $GITHUB_ENV
 
-      - run: |
+      - name: Build Mobile apk
+        run: |
           flutter build apk \
           --split-per-abi \
           --obfuscate \
           --split-debug-info=./build/app/outputs/flutter-apk/ \
           --build-number=${{ env.BUILD_NUMBER }} \
           --dart-define=BUILD_DATE=$(date "+%F") \
-          --dart-define=BUILD_VERSION=${{ env.VERSION }}
+          --dart-define=BUILD_VERSION=${{ env.VERSION }} \
+          --dart-define=DEFAULT_IPTV_URL=${{ vars.DEFAULT_IPTV_URL }} \
+          --flavor=phone
+
+      - name: Build TV apk
+        run: |
+          flutter build apk \
+          --split-per-abi \
+          --obfuscate \
+          --split-debug-info=./build/app/outputs/flutter-apk/ \
+          --build-number=${{ env.BUILD_NUMBER }} \
+          --dart-define=BUILD_DATE=$(date "+%F") \
+          --dart-define=BUILD_VERSION=${{ env.VERSION }} \
+          --dart-define=DEFAULT_IPTV_URL=${{ vars.DEFAULT_IPTV_URL }} \
+          --flavor=tv
 
       - name: Check if Tag Exists
         run: |
@@ -97,4 +112,4 @@ jobs:
           generateReleaseNotes: true
           draft: true
           tag: v${{ env.VERSION }}
-          token: ${{ secrets.TOKEN }}
+          token: ${{ github.token }}

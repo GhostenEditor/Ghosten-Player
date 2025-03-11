@@ -21,9 +21,9 @@ import 'mixins/action.dart';
 import 'mixins/searchable.dart';
 
 class MovieDetail extends StatefulWidget {
-  final Movie initialData;
-
   const MovieDetail({super.key, required this.initialData});
+
+  final Movie initialData;
 
   @override
   State<MovieDetail> createState() => _MovieDetailState();
@@ -47,7 +47,7 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin, SearchableM
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) {
-          if (_drawerNavigatorKey.currentState?.canPop() == true) {
+          if (_drawerNavigatorKey.currentState?.canPop() ?? false) {
             _drawerNavigatorKey.currentState!.pop();
           } else {
             Navigator.of(context).pop(refresh);
@@ -65,7 +65,7 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin, SearchableM
               navigatorKey: _navigatorKey,
               drawerNavigatorKey: _drawerNavigatorKey,
               showSide: _showSide,
-              endDrawer: buildEndDrawer(context, item),
+              endDrawer: _buildEndDrawer(context, item),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -152,7 +152,7 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin, SearchableM
                     item: item,
                     description: RichText(
                       text: TextSpan(
-                        style: Theme.of(context).textTheme.labelSmall!,
+                        style: Theme.of(context).textTheme.labelSmall,
                         children: [
                           const WidgetSpan(child: Icon(Icons.star, color: Colors.amber, size: 14)),
                           const WidgetSpan(child: SizedBox(width: 4)),
@@ -174,7 +174,7 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin, SearchableM
                     leading: const Icon(Icons.play_arrow_rounded),
                     title: Text(AppLocalizations.of(context)!.buttonWatchNow),
                     onTap: () {
-                      play(item);
+                      _play(item);
                     },
                   ),
                   ButtonSettingItem(
@@ -213,7 +213,7 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin, SearchableM
     );
   }
 
-  Widget buildEndDrawer(BuildContext context, Movie item) {
+  Widget _buildEndDrawer(BuildContext context, Movie item) {
     return SettingPage(
       title: AppLocalizations.of(context)!.buttonMore,
       child: Builder(builder: (context) {
@@ -227,11 +227,11 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin, SearchableM
             },
           ),
           ButtonSettingItem(
-            title: Text(AppLocalizations.of(context)!.buttonSyncMediaInfo),
+            title: Text(AppLocalizations.of(context)!.buttonScraperMediaInfo),
             leading: const Icon(Icons.info_outline),
             onTap: () async {
-              final resp = await showNotification(context, refreshMovie(context, item));
-              if (resp?.data == true) setState(() => refresh = true);
+              final resp = await showNotification(context, _refreshMovie(context, item));
+              if (resp?.data ?? false) setState(() => refresh = true);
             },
           ),
           const DividerSettingItem(),
@@ -266,17 +266,16 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin, SearchableM
     );
   }
 
-  play(Movie item) async {
+  Future<void> _play(Movie item) async {
     await toPlayer(
       context,
       [FromMedia.fromMovie(item)],
       theme: item.themeColor,
-      playerType: PlayerType.movie,
     );
     setState(() => refresh = true);
   }
 
-  Future<bool> refreshMovie(BuildContext context, Movie item) async {
+  Future<bool> _refreshMovie(BuildContext context, Movie item) async {
     return search(
       context,
       ({required String title, int? year, int? index}) => Api.movieUpdateById(

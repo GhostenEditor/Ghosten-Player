@@ -2,6 +2,8 @@ import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 
 class FadeInPageRoute<T> extends PageRoute<T> {
+  FadeInPageRoute({required this.builder, super.settings});
+
   @override
   final Duration transitionDuration = const Duration(milliseconds: 650);
 
@@ -24,8 +26,6 @@ class FadeInPageRoute<T> extends PageRoute<T> {
   final bool maintainState = true;
 
   final WidgetBuilder builder;
-
-  FadeInPageRoute({required this.builder, super.settings});
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {

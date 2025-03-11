@@ -1,44 +1,45 @@
 import 'dart:async';
 
 import 'package:animations/animations.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/player.dart';
 
-import '../../const.dart';
-import '../components/icon_button.dart';
+import '../../components/async_image.dart';
+import '../../components/future_builder_handler.dart';
+import '../../components/playing_icon.dart';
+import '../components/focusable_image.dart';
 import '../components/loading.dart';
 import '../components/setting.dart';
 import '../utils/utils.dart';
 
+enum _PlayerPanelType { progressbar, playlist, none }
+
 class PlayerControls extends StatefulWidget {
-  final int? theme;
-  final void Function(int, Duration, Duration)? onMediaChange;
-  final PlayerController controller;
-  final List<Widget> Function(BuildContext)? actions;
-  final PlayerLocalizations localizations;
-  final Duration seekStep;
-  final bool? showThumbnails;
-  final Map<String, dynamic>? options;
-
-  final Widget Function(BuildContext, int index, void Function(int) onTap)? playlistItemBuilder;
-
   const PlayerControls({
     super.key,
     required this.controller,
-    required this.localizations,
     this.onMediaChange,
     this.actions,
     this.theme,
-    this.seekStep = const Duration(seconds: 30),
     this.options,
     this.showThumbnails,
     this.playlistItemBuilder,
   });
+
+  final int? theme;
+  final void Function(int, Duration, Duration)? onMediaChange;
+  final PlayerController<dynamic> controller;
+  final List<Widget> Function(BuildContext)? actions;
+
+  final bool? showThumbnails;
+  final Map<String, dynamic>? options;
+
+  final Widget Function(BuildContext, int index, void Function(int) onTap)? playlistItemBuilder;
 
   @override
   State<PlayerControls> createState() => _PlayerControlsState();
@@ -46,24 +47,24 @@ class PlayerControls extends StatefulWidget {
 
 class _PlayerControlsState extends State<PlayerControls> {
   late final _controller = widget.controller;
-  late final _progressController = PlayerProgressController(
-    getVideoThumbnail: _controller.getVideoThumbnail,
-    theme: widget.theme,
-    showThumbnails: widget.showThumbnails,
-  );
+  late final _progressController = PlayerProgressController(_controller, theme: widget.theme);
   final _progressFocusNode = FocusNode();
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  final _isShowControls = ValueNotifier(false);
   final _controlsStream = StreamController<ControlsStreamStatus>();
   final _navigatorKey = GlobalKey<NavigatorState>();
+  final _panelType = ValueNotifier(_PlayerPanelType.none);
+  Duration _seekStep = const Duration(seconds: 30);
   StreamSubscription<bool>? _subscription;
+  bool _reverse = false;
 
   @override
   void initState() {
-    _controller.status.addListener(() => _progressController.setStatus(_controller.status.value));
-    _controller.position.addListener(() => _progressController.setPosition(_controller.position.value));
-    _controller.duration.addListener(() => _progressController.setDuration(_controller.duration.value));
-    _controller.bufferedPosition.addListener(() => _progressController.setBuffered(_controller.bufferedPosition.value));
+    if (widget.onMediaChange != null) {
+      _controller.mediaChange.addListener(() {
+        final data = _controller.mediaChange.value!;
+        widget.onMediaChange!(data.$1.index, data.$1.position, data.$2);
+      });
+    }
     _subscription = _controlsStream.stream.switchMap((status) {
       switch (status) {
         case ControlsStreamStatus.show:
@@ -74,27 +75,34 @@ class _PlayerControlsState extends State<PlayerControls> {
           return Stream.value(false);
       }
     }).listen((show) {
-      _isShowControls.value = show;
+      if (show) {
+        switch (_panelType.value) {
+          case _PlayerPanelType.none:
+            _reverse = false;
+            _panelType.value = _PlayerPanelType.progressbar;
+          case _PlayerPanelType.progressbar:
+          case _PlayerPanelType.playlist:
+        }
+      } else {
+        if (_panelType.value != _PlayerPanelType.none) {
+          _reverse = true;
+          _panelType.value = _PlayerPanelType.none;
+        }
+      }
     });
     _controlsStream.add(ControlsStreamStatus.showInfinite);
-    _controller.status.addListener(() {
-      switch (_controller.status.value) {
-        case PlayerStatus.playing:
-          if (_isShowControls.value) _controlsStream.add(ControlsStreamStatus.show);
-        case PlayerStatus.paused:
-        case PlayerStatus.ended:
+    widget.controller.status.addListener(() {
+      switch (widget.controller.status.value) {
         case PlayerStatus.error:
         case PlayerStatus.idle:
           _controlsStream.add(ControlsStreamStatus.showInfinite);
+        case PlayerStatus.playing:
+        case PlayerStatus.paused:
+        case PlayerStatus.ended:
         case PlayerStatus.buffering:
       }
     });
-    if (widget.onMediaChange != null) {
-      _controller.mediaChange.addListener(() {
-        final data = _controller.mediaChange.value!;
-        widget.onMediaChange!(data.$1.index, data.$1.position, data.$2);
-      });
-    }
+
     _controller.willSkip.addListener(() {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Align(
@@ -102,7 +110,7 @@ class _PlayerControlsState extends State<PlayerControls> {
           child: Card(
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12),
-              child: Text(widget.localizations.willSkipEnding),
+              child: Text(PlayerLocalizations.of(context).willSkipEnding),
             ),
           ),
         ),
@@ -131,151 +139,21 @@ class _PlayerControlsState extends State<PlayerControls> {
 
   @override
   void dispose() {
-    _subscription?.cancel();
-    _isShowControls.dispose();
     _progressFocusNode.dispose();
     _controlsStream.close();
     _progressController.dispose();
+    _panelType.dispose();
+    _subscription?.cancel();
     super.dispose();
-  }
-
-  Widget _buildDraw(BuildContext context) {
-    return NavigatorPopHandler(
-      onPopWithResult: (_) {
-        _navigatorKey.currentState!.maybePop();
-      },
-      child: Container(
-        width: 360,
-        color: const Color(0xff202124),
-        child: Navigator(
-          key: _navigatorKey,
-          onGenerateRoute: (settings) => FadeInPageRoute(
-              builder: (context) => PlayerSettings(
-                    controller: _controller,
-                    actions: widget.actions,
-                    localizations: widget.localizations,
-                  ),
-              settings: settings),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildControlsPanel(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: Stack(
-        children: [
-          Container(
-            decoration: const BoxDecoration(
-                gradient: LinearGradient(
-              colors: [Colors.transparent, Colors.black26, Colors.black26, Colors.transparent],
-              stops: [0, 0.3, 0.7, 1],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            )),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1000),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 72),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      PlayerInfoView(_controller),
-                      const SizedBox(height: 30),
-                      PlayerButtons(
-                        controller: _controller,
-                        isTV: true,
-                        onActionPlaylist: _showPlaylist,
-                        onActionMore: _showActionMore,
-                      ),
-                      Focus(
-                        autofocus: true,
-                        focusNode: _progressFocusNode,
-                        onKeyEvent: (node, event) => _onProgressKeyEvent(context, node, event),
-                        onFocusChange: (focused) {
-                          if (!focused) {
-                            if (_progressController.seeking) {
-                              _controller.play();
-                            }
-                            _progressController.endSeek(context);
-                          }
-                        },
-                        child: PlayerProgressView(
-                          _progressController,
-                          seekStart: () => _controller.pause(),
-                          seekEnd: (position) {
-                            _controller.seekTo(position);
-                            _controller.play();
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  KeyEventResult _onProgressKeyEvent(BuildContext context, FocusNode node, KeyEvent event) {
-    if (_progressFocusNode.hasFocus) {
-      if (event is KeyDownEvent || event is KeyRepeatEvent) {
-        _controlsStream.add(ControlsStreamStatus.show);
-        switch (event.logicalKey) {
-          case LogicalKeyboardKey.arrowLeft:
-            if (!_progressController.seeking) {
-              _controller.pause();
-              _progressController.startSeek(context);
-            }
-            _controlsStream.add(ControlsStreamStatus.showInfinite);
-            _progressController.updateSeek(context, _progressController.cachedPosition - widget.seekStep);
-            return KeyEventResult.handled;
-          case LogicalKeyboardKey.arrowRight:
-            if (!_progressController.seeking) {
-              _controller.pause();
-              _progressController.startSeek(context);
-            }
-            _controlsStream.add(ControlsStreamStatus.showInfinite);
-            _progressController.updateSeek(context, _progressController.cachedPosition + widget.seekStep);
-            return KeyEventResult.handled;
-          case LogicalKeyboardKey.arrowUp:
-            _controlsStream.add(ControlsStreamStatus.showInfinite);
-            return KeyEventResult.ignored;
-          case LogicalKeyboardKey.contextMenu:
-            _showPlaylist(context);
-            return KeyEventResult.handled;
-          case LogicalKeyboardKey.select:
-          case LogicalKeyboardKey.enter:
-            if (_progressController.seeking) {
-              _progressController.endSeek(context);
-              _controller.seekTo(_progressController.cachedPosition);
-              _controller.play();
-            } else {
-              if (_controller.status.value == PlayerStatus.playing) {
-                _controller.pause();
-                return KeyEventResult.handled;
-              } else if (_controller.status.value == PlayerStatus.paused) {
-                _controller.play();
-                return KeyEventResult.handled;
-              }
-            }
-        }
-      }
-    }
-    return KeyEventResult.ignored;
   }
 
   @override
   Widget build(BuildContext context) {
     return Theme(
-      data: Theme.of(context)
-          .copyWith(colorScheme: ColorScheme.fromSeed(seedColor: widget.theme != null ? Color(widget.theme!) : Colors.blue, brightness: Brightness.dark)),
+      data: ThemeData(
+          colorSchemeSeed: widget.theme != null ? Color(widget.theme!) : null,
+          brightness: Brightness.dark,
+          drawerTheme: const DrawerThemeData(endShape: RoundedRectangleBorder())),
       child: Builder(builder: (context) {
         return Scaffold(
           key: _scaffoldKey,
@@ -294,87 +172,105 @@ class _PlayerControlsState extends State<PlayerControls> {
                 }
               } else if (_progressController.seeking) {
                 _progressController.endSeek(context);
+                _controlsStream.add(ControlsStreamStatus.show);
                 _controller.play();
-              } else if (_isShowControls.value && (_controller.status.value == PlayerStatus.playing || _controller.status.value == PlayerStatus.buffering)) {
+              } else if (_panelType.value != _PlayerPanelType.none) {
                 _controlsStream.add(ControlsStreamStatus.hide);
               } else {
                 if (widget.onMediaChange != null && _controller.duration.value > Duration.zero) {
-                  widget.onMediaChange!(_controller.index.value, _controller.position.value, _controller.duration.value);
+                  widget.onMediaChange!(_controller.index.value!, _controller.position.value, _controller.duration.value);
                 }
                 if (context.mounted) Navigator.pop(context);
               }
             },
             child: Stack(
+              fit: StackFit.expand,
               children: [
                 ListenableBuilder(
-                    listenable: _controller.isCasting,
-                    builder: (context, _) {
-                      if (!_controller.isCasting.value) {
-                        return PlayerPlatformView(options: widget.options);
-                      } else {
-                        return const SizedBox();
-                      }
-                    }),
-                GestureDetector(
-                  onTap: _toggleControls,
-                  child: FocusScope(
-                    autofocus: true,
-                    canRequestFocus: true,
-                    onKeyEvent: (node, event) {
-                      if (!_isShowControls.value && event is KeyUpEvent) {
-                        switch (event.logicalKey) {
-                          case LogicalKeyboardKey.arrowUp:
-                          case LogicalKeyboardKey.arrowDown:
-                          case LogicalKeyboardKey.arrowLeft:
-                          case LogicalKeyboardKey.arrowRight:
-                          case LogicalKeyboardKey.select:
-                            _controlsStream.add(ControlsStreamStatus.show);
-                          case LogicalKeyboardKey.contextMenu:
-                            _showPlaylist(context);
-                        }
-                      }
-                      return KeyEventResult.ignored;
+                  listenable: _panelType,
+                  builder: (context, child) => PageTransitionSwitcher(
+                    reverse: _reverse,
+                    duration: const Duration(milliseconds: 500),
+                    layoutBuilder: (List<Widget> entries) {
+                      return Stack(
+                        alignment: Alignment.bottomCenter,
+                        children: entries,
+                      );
                     },
-                    child: ListenableBuilder(
-                        listenable: Listenable.merge([_isShowControls, _controller.pipMode]),
-                        builder: (context, child) => PageTransitionSwitcher(
-                              reverse: !_isShowControls.value,
-                              duration: const Duration(milliseconds: 500),
-                              transitionBuilder: (
-                                Widget child,
-                                Animation<double> animation,
-                                Animation<double> secondaryAnimation,
-                              ) {
-                                return SharedAxisTransition(
-                                  animation: animation,
-                                  secondaryAnimation: secondaryAnimation,
-                                  transitionType: SharedAxisTransitionType.vertical,
-                                  fillColor: Colors.transparent,
-                                  child: child,
-                                );
-                              },
-                              child: _isShowControls.value && !_controller.pipMode.value
-                                  ? child!
-                                  : ListenableBuilder(
-                                      listenable: _controller.status,
-                                      builder: (context, child) => _controller.status.value == PlayerStatus.buffering ? child! : const SizedBox.expand(),
-                                      child: Center(
-                                          child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Loading(color: Theme.of(context).colorScheme.primary),
-                                          const SizedBox(width: 10),
-                                          ListenableBuilder(
-                                              listenable: _controller.networkSpeed,
-                                              builder: (context, _) =>
-                                                  Text(_controller.networkSpeed.value.toNetworkSpeed(), style: Theme.of(context).textTheme.labelLarge))
-                                        ],
-                                      )),
-                                    ),
-                            ),
-                        child: _buildControlsPanel(context)),
+                    transitionBuilder: (
+                      Widget child,
+                      Animation<double> animation,
+                      Animation<double> secondaryAnimation,
+                    ) {
+                      return SharedAxisTransition(
+                        animation: animation,
+                        secondaryAnimation: secondaryAnimation,
+                        transitionType: SharedAxisTransitionType.vertical,
+                        fillColor: Colors.transparent,
+                        child: child,
+                      );
+                    },
+                    child: _panelType.value == _PlayerPanelType.none ? const SizedBox() : child,
+                  ),
+                  child: Container(
+                    decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                      colors: [Colors.transparent, Colors.black45],
+                      stops: [0.4, 1],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    )),
                   ),
                 ),
+                ListenableBuilder(
+                    listenable: _controller.status,
+                    builder: (context, child) => PageTransitionSwitcher(
+                          duration: const Duration(milliseconds: 200),
+                          layoutBuilder: (List<Widget> entries) {
+                            return Stack(
+                              alignment: Alignment.bottomCenter,
+                              children: entries,
+                            );
+                          },
+                          transitionBuilder: (
+                            Widget child,
+                            Animation<double> animation,
+                            Animation<double> secondaryAnimation,
+                          ) {
+                            return FadeThroughTransition(
+                              animation: animation,
+                              secondaryAnimation: secondaryAnimation,
+                              fillColor: Colors.transparent,
+                              child: child,
+                            );
+                          },
+                          child: switch (_controller.status.value) {
+                            PlayerStatus.buffering => Center(
+                                  child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                spacing: 12,
+                                children: [
+                                  Loading(color: Theme.of(context).colorScheme.primary),
+                                  ListenableBuilder(
+                                      listenable: widget.controller.networkSpeed,
+                                      builder: (context, _) =>
+                                          Text(widget.controller.networkSpeed.value.toNetworkSpeed(), style: Theme.of(context).textTheme.labelSmall))
+                                ],
+                              )),
+                            PlayerStatus.paused => Center(
+                                child: Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: const BoxDecoration(
+                                    color: Colors.black45,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(Icons.pause, size: 50),
+                                ),
+                              ),
+                            _ => const SizedBox(),
+                          },
+                        )),
+                _buildPanel(context),
               ],
             ),
           ),
@@ -383,196 +279,251 @@ class _PlayerControlsState extends State<PlayerControls> {
     );
   }
 
-  void _toggleControls() {
-    if (_isShowControls.value) {
-      _controlsStream.add(ControlsStreamStatus.hide);
-    } else {
-      _controlsStream.add(ControlsStreamStatus.show);
-    }
+  Widget _buildDraw(BuildContext context) {
+    return NavigatorPopHandler(
+      onPopWithResult: (_) {
+        _navigatorKey.currentState!.maybePop();
+      },
+      child: Container(
+        width: 360,
+        color: const Color(0xff202124),
+        child: Navigator(
+          key: _navigatorKey,
+          onGenerateRoute: (settings) => FadeInPageRoute(
+              builder: (context) => PlayerSettings(
+                    controller: _controller,
+                    actions: widget.actions,
+                    onSeekSpeedChanged: (speed) => _seekStep = Duration(seconds: speed),
+                  ),
+              settings: settings),
+        ),
+      ),
+    );
   }
 
-  _showPlaylist(BuildContext context) async {
-    _controlsStream.add(ControlsStreamStatus.showInfinite);
-    await showDialog(
-        context: context,
-        builder: (context) => Dialog(
-              backgroundColor: Colors.transparent,
-              surfaceTintColor: Colors.transparent,
-              insetPadding: EdgeInsets.zero,
-              alignment: Alignment.bottomLeft,
-              child: SizedBox(
-                height: 200,
-                child: PlayerPlaylistView(
-                  activeIndex: _controller.index.value,
-                  playlist: _controller.playlist,
-                  onTap: _controller.next,
-                  playlistItemBuilder: widget.playlistItemBuilder,
-                ),
-              ),
-            ));
-    _controlsStream.add(ControlsStreamStatus.show);
+  Widget _buildPanel(BuildContext context) {
+    return FocusScope(
+      autofocus: true,
+      skipTraversal: true,
+      onKeyEvent: (node, event) => _onProgressKeyEvent(context, node, event),
+      child: ListenableBuilder(
+          listenable: _panelType,
+          builder: (context, _) => PageTransitionSwitcher(
+                reverse: _reverse,
+                duration: const Duration(milliseconds: 500),
+                layoutBuilder: (List<Widget> entries) {
+                  return Stack(
+                    alignment: Alignment.bottomCenter,
+                    children: entries,
+                  );
+                },
+                transitionBuilder: (
+                  Widget child,
+                  Animation<double> animation,
+                  Animation<double> secondaryAnimation,
+                ) {
+                  return SharedAxisTransition(
+                    animation: animation,
+                    secondaryAnimation: secondaryAnimation,
+                    transitionType: SharedAxisTransitionType.vertical,
+                    fillColor: Colors.transparent,
+                    child: child,
+                  );
+                },
+                child: switch (_panelType.value) {
+                  _PlayerPanelType.progressbar => _buildProgressBar(context),
+                  _PlayerPanelType.playlist => _buildPlaylist(context),
+                  _PlayerPanelType.none => const SizedBox.expand(),
+                },
+              )),
+    );
   }
 
-  _showActionMore() {
-    _scaffoldKey.currentState!.openEndDrawer();
-  }
-}
-
-class PlayerButtons extends StatelessWidget {
-  final PlayerController controller;
-  final bool isTV;
-  final VoidCallback? onActionMore;
-  final Function(BuildContext)? onActionPlaylist;
-  final Cast? cast;
-
-  const PlayerButtons({
-    super.key,
-    required this.controller,
-    required this.isTV,
-    this.onActionMore,
-    this.onActionPlaylist,
-    this.cast,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        ListenableBuilder(
-            listenable: controller.isFirst,
-            builder: (context, child) => controller.isFirst.value ? const SizedBox() : child!,
-            child: TVIconButton(onPressed: () => controller.next(controller.index.value - 1), icon: const Icon(Icons.skip_previous_rounded))),
-        if (isTV)
-          ListenableBuilder(
-              listenable: controller.status,
-              builder: (context, _) {
-                return TVIconButton(
-                  onPressed: switch (controller.status.value) {
-                    PlayerStatus.playing || PlayerStatus.paused || PlayerStatus.buffering => () =>
-                        controller.seekTo(controller.position.value - const Duration(seconds: 10)),
-                    _ => null,
-                  },
-                  icon: const Icon(Icons.fast_rewind_rounded),
-                );
-              }),
-        ListenableBuilder(
-            listenable: controller.status,
-            builder: (context, _) {
-              return switch (controller.status.value) {
-                PlayerStatus.playing => TVIconButton(onPressed: controller.pause, icon: const Icon(Icons.pause)),
-                PlayerStatus.buffering => SizedBox(width: 48, child: Center(child: Transform.scale(scale: 0.5, child: const CircularProgressIndicator()))),
-                PlayerStatus.paused ||
-                PlayerStatus.idle ||
-                PlayerStatus.ended =>
-                  TVIconButton(onPressed: controller.play, icon: const Icon(Icons.play_arrow_rounded)),
-                PlayerStatus.error => TVIconButton(onPressed: null, icon: Icon(Icons.error_outline, color: Theme.of(context).colorScheme.error)),
-              };
-            }),
-        if (isTV)
-          ListenableBuilder(
-              listenable: controller.status,
-              builder: (context, _) {
-                return TVIconButton(
-                  onPressed: switch (controller.status.value) {
-                    PlayerStatus.playing || PlayerStatus.paused || PlayerStatus.buffering => () =>
-                        controller.seekTo(controller.position.value + const Duration(seconds: 10)),
-                    _ => null,
-                  },
-                  icon: const Icon(Icons.fast_forward_rounded),
-                );
-              }),
-        ListenableBuilder(
-            listenable: controller.isLast,
-            builder: (context, child) => controller.isLast.value ? const SizedBox() : child!,
-            child: TVIconButton(onPressed: () => controller.next(controller.index.value + 1), icon: const Icon(Icons.skip_next_rounded))),
-        const SizedBox(width: 12),
-        const Spacer(),
-        if (!isTV && cast != null)
-          TVIconButton(
-              onPressed: () async {
-                final device = await _showCastModal(context);
-                if (device != null) {
-                  await controller.pause();
-                  if (!context.mounted) return;
-                  if (controller.currentItem.sourceType != PlaylistItemSourceType.hls) {
-                    controller.playlist[controller.index.value] = controller.currentItem
-                        .copyWith(start: controller.position.value > controller.currentItem.start ? controller.position.value : controller.currentItem.start);
-                  }
-                  controller.isCasting.value = true;
-                  final resp = await Navigator.of(context).push<(int, Duration)>(PageRouteBuilder(
-                    pageBuilder: (context, animation, secondaryAnimation) => PlayerCast(
-                      device: device,
-                      playlist: controller.playlist,
-                      index: controller.index.value,
-                      isTV: isTV,
-                    ),
-                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                      const begin = Offset(0.0, 1.0);
-                      const end = Offset.zero;
-                      const curve = Curves.easeOut;
-
-                      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-
-                      return SlideTransition(
-                        position: animation.drive(tween),
-                        child: child,
-                      );
-                    },
-                  ));
-                  if (resp != null && context.mounted) {
-                    if (controller.isCasting.value) {
-                      controller.index.value = resp.$1;
-                      if (controller.playlist[resp.$1].sourceType != PlaylistItemSourceType.hls) {
-                        controller.playlist[resp.$1] = controller.playlist[resp.$1]
-                            .copyWith(start: resp.$2 > controller.playlist[resp.$1].start ? resp.$2 : controller.playlist[resp.$1].start);
-                      }
-                      controller.isCasting.value = false;
-                      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  Widget _buildProgressBar(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 1000),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 72, vertical: 32),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            PlayerInfoView(widget.controller),
+            const SizedBox(height: 30),
+            Focus(
+              autofocus: true,
+              focusNode: _progressFocusNode,
+              onKeyEvent: (FocusNode node, KeyEvent event) {
+                if (_progressFocusNode.hasFocus) {
+                  if (event is KeyDownEvent || event is KeyRepeatEvent) {
+                    _controlsStream.add(ControlsStreamStatus.show);
+                    switch (event.logicalKey) {
+                      case LogicalKeyboardKey.arrowLeft:
+                        if (!_progressController.seeking) {
+                          widget.controller.pause();
+                          _progressController.startSeek(context);
+                        }
+                        _controlsStream.add(ControlsStreamStatus.showInfinite);
+                        _progressController.updateSeek(context, _progressController.cachedPosition - _seekStep);
+                        return KeyEventResult.handled;
+                      case LogicalKeyboardKey.arrowRight:
+                        _controlsStream.add(ControlsStreamStatus.show);
+                        if (!_progressController.seeking) {
+                          widget.controller.pause();
+                          _progressController.startSeek(context);
+                        }
+                        _controlsStream.add(ControlsStreamStatus.showInfinite);
+                        _progressController.updateSeek(context, _progressController.cachedPosition + _seekStep);
+                        return KeyEventResult.handled;
+                      case LogicalKeyboardKey.enter:
+                      case LogicalKeyboardKey.select:
+                        if (_progressController.seeking) {
+                          _progressController.endSeek(context);
+                          widget.controller.seekTo(_progressController.cachedPosition);
+                          widget.controller.play();
+                        } else {
+                          if (widget.controller.status.value == PlayerStatus.playing) {
+                            widget.controller.pause();
+                            return KeyEventResult.handled;
+                          } else if (widget.controller.status.value == PlayerStatus.paused) {
+                            widget.controller.play();
+                            return KeyEventResult.handled;
+                          }
+                        }
                     }
                   }
                 }
+                return KeyEventResult.ignored;
               },
-              icon: const Icon(Icons.airplay_rounded)),
-        if (onActionPlaylist != null && controller.playlist.length > 1)
-          TVIconButton(onPressed: () => onActionPlaylist!(context), icon: const Icon(Icons.playlist_play_rounded)),
-        ListenableBuilder(
-            listenable: controller.canPip,
-            builder: (context, child) => controller.canPip.value ? child! : const SizedBox(),
-            child: TVIconButton(onPressed: _requestPip, icon: const Icon(Icons.picture_in_picture_rounded))),
-        if (kIsWeb) TVIconButton(onPressed: () => controller.requestFullscreen(), icon: const Icon(Icons.fullscreen_rounded)),
-        if (onActionMore != null) TVIconButton(onPressed: onActionMore, icon: const Icon(Icons.more_vert))
-      ],
+              child: PlayerProgressView(
+                _progressController,
+                seekStart: () => widget.controller.pause(),
+                seekEnd: (position) {
+                  widget.controller.seekTo(position);
+                  widget.controller.play();
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
-  void _requestPip() async {
-    await controller.requestPip();
+  Widget _buildPlaylist(BuildContext context) {
+    return SizedBox(
+      height: 200,
+      child: ListenableBuilder(
+          listenable: Listenable.merge([
+            widget.controller.index,
+            widget.controller.playlist,
+          ]),
+          builder: (context, _) => FocusScope(
+                child: PlayerPlaylistView(
+                  playlist: widget.controller.playlist.value,
+                  activeIndex: widget.controller.index.value,
+                  onTap: (index) => widget.controller.next(index),
+                ),
+              )),
+    );
   }
 
-  Future<CastDevice?> _showCastModal(BuildContext context) {
-    return showModalBottomSheet<CastDevice>(
-      context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(3.0))),
-      builder: (context) => PlayerCastSearcher(cast!),
-    );
+  KeyEventResult _onProgressKeyEvent(BuildContext context, FocusNode node, KeyEvent event) {
+    if (event is KeyDownEvent || event is KeyRepeatEvent) {
+      switch (event.logicalKey) {
+        case LogicalKeyboardKey.contextMenu:
+          _endSeeking();
+          Scaffold.of(context).openEndDrawer();
+          return KeyEventResult.handled;
+        case LogicalKeyboardKey.enter:
+        case LogicalKeyboardKey.select:
+          if (_panelType.value == _PlayerPanelType.none) {
+            switch (widget.controller.status.value) {
+              case PlayerStatus.playing:
+              case PlayerStatus.buffering:
+                widget.controller.pause();
+              case PlayerStatus.paused:
+                widget.controller.play();
+              case PlayerStatus.ended:
+              case PlayerStatus.error:
+              case PlayerStatus.idle:
+            }
+            return KeyEventResult.handled;
+          }
+        case LogicalKeyboardKey.arrowUp:
+          switch (_panelType.value) {
+            case _PlayerPanelType.progressbar:
+              _endSeeking();
+              _controlsStream.add(ControlsStreamStatus.hide);
+            case _PlayerPanelType.playlist:
+              _reverse = true;
+              _panelType.value = _PlayerPanelType.progressbar;
+              _controlsStream.add(ControlsStreamStatus.show);
+            case _PlayerPanelType.none:
+              _reverse = false;
+              _panelType.value = _PlayerPanelType.progressbar;
+              _controlsStream.add(ControlsStreamStatus.show);
+          }
+          return KeyEventResult.handled;
+        case LogicalKeyboardKey.arrowDown:
+          switch (_panelType.value) {
+            case _PlayerPanelType.progressbar:
+              _endSeeking();
+              _reverse = false;
+              if (_controller.playlist.value.length > 1) {
+                _panelType.value = _PlayerPanelType.playlist;
+                _controlsStream.add(ControlsStreamStatus.showInfinite);
+              } else {
+                _reverse = true;
+                _endSeeking();
+                _controlsStream.add(ControlsStreamStatus.hide);
+                _scaffoldKey.currentState!.openEndDrawer();
+              }
+            case _PlayerPanelType.playlist:
+              _controlsStream.add(ControlsStreamStatus.hide);
+              _scaffoldKey.currentState!.openEndDrawer();
+            case _PlayerPanelType.none:
+              _reverse = false;
+              _panelType.value = _PlayerPanelType.progressbar;
+              _controlsStream.add(ControlsStreamStatus.show);
+          }
+        case LogicalKeyboardKey.arrowLeft:
+        case LogicalKeyboardKey.arrowRight:
+          if (_panelType.value == _PlayerPanelType.none) {
+            _reverse = false;
+            _panelType.value = _PlayerPanelType.progressbar;
+            _controlsStream.add(ControlsStreamStatus.show);
+            return KeyEventResult.handled;
+          }
+      }
+    }
+    return KeyEventResult.ignored;
+  }
+
+  void _endSeeking() {
+    if (_progressController.seeking) {
+      _progressController.endSeek(context);
+      widget.controller.seekTo(_progressController.cachedPosition);
+      widget.controller.play();
+    }
   }
 }
 
 class PlayerSettings extends StatelessWidget {
-  final PlayerController controller;
-  final PlayerLocalizations localizations;
-
-  final List<Widget> Function(BuildContext)? actions;
-
   const PlayerSettings({
     super.key,
     required this.controller,
     this.actions,
-    required this.localizations,
+    required this.onSeekSpeedChanged,
   });
+
+  final PlayerController<dynamic> controller;
+  final ValueChanged<int> onSeekSpeedChanged;
+  final List<Widget> Function(BuildContext)? actions;
 
   @override
   Widget build(BuildContext context) {
+    final localizations = PlayerLocalizations.of(context);
     return SettingPage(
       title: localizations.settingsTitle,
       child: ListenableBuilder(
@@ -656,6 +607,41 @@ class PlayerSettings extends StatelessWidget {
                         );
                       }),
                   const Divider(),
+                  FutureBuilderHandler(
+                    future: SharedPreferences.getInstance(),
+                    builder: (context, snapshot) {
+                      final prefs = snapshot.requireData;
+                      return StatefulBuilder(builder: (context, setState) {
+                        return ButtonSettingItem(
+                          title: Builder(builder: (context) {
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(AppLocalizations.of(context)!.playerFastForwardSpeed),
+                                Text('${prefs.getInt('playerConfig.fastForwardSpeed') ?? 30} ${AppLocalizations.of(context)!.second}')
+                              ],
+                            );
+                          }),
+                          subtitle: MediaQuery(
+                              data: const MediaQueryData(navigationMode: NavigationMode.directional),
+                              child: Slider(
+                                value: prefs.getInt('playerConfig.fastForwardSpeed')?.toDouble() ?? 30,
+                                min: 5,
+                                max: 100,
+                                divisions: 19,
+                                label: (prefs.getInt('playerConfig.fastForwardSpeed') ?? 30).toString(),
+                                onChanged: (double value) {
+                                  setState(() {
+                                    prefs.setInt('playerConfig.fastForwardSpeed', value.round());
+                                  });
+                                  onSeekSpeedChanged(value.round());
+                                },
+                              )),
+                        );
+                      });
+                    },
+                  ),
+                  const Divider(),
                   if (actions != null) ...actions!(context),
                   if (actions != null) const Divider(),
                   ListenableBuilder(
@@ -710,6 +696,7 @@ class PlayerSettings extends StatelessWidget {
     required Function(dynamic) onSelected,
   }) {
     final selectedTrack = tracks.firstWhereOrNull((v) => v.id == selected);
+    final localizations = PlayerLocalizations.of(context);
     return ButtonSettingItem(
       leading: icon,
       title: Text(label),
@@ -744,10 +731,10 @@ class PlayerSettings extends StatelessWidget {
 }
 
 class PlayerSubSettings extends StatelessWidget {
+  const PlayerSubSettings({super.key, required this.title, required this.items});
+
   final String title;
   final List<Widget> items;
-
-  const PlayerSubSettings({super.key, required this.title, required this.items});
 
   @override
   Widget build(BuildContext context) {
@@ -763,20 +750,33 @@ class PlayerSubSettings extends StatelessWidget {
   }
 }
 
-class PlayerPlaylistView extends StatefulWidget {
-  final List<PlaylistItem> playlist;
-  final void Function(int) onTap;
-  final int activeIndex;
-  final Widget Function(BuildContext, int index, void Function(int) onTap)? playlistItemBuilder;
+class PlayerPlaylistView<T> extends StatefulWidget {
+  const PlayerPlaylistView({
+    super.key,
+    required this.onTap,
+    this.activeIndex,
+    required this.playlist,
+  });
 
-  const PlayerPlaylistView({super.key, required this.playlist, required this.onTap, required this.activeIndex, this.playlistItemBuilder});
+  final ValueChanged<int> onTap;
+  final int? activeIndex;
+  final List<PlaylistItem<dynamic>> playlist;
 
   @override
-  State<PlayerPlaylistView> createState() => _PlayerPlaylistViewState();
+  State<PlayerPlaylistView<T>> createState() => _PlayerPlaylistViewState<T>();
 }
 
-class _PlayerPlaylistViewState extends State<PlayerPlaylistView> {
-  late final _controller = ScrollController(initialScrollOffset: widget.activeIndex * 200 - 100);
+class _PlayerPlaylistViewState<T> extends State<PlayerPlaylistView<T>> {
+  late final _controller = ScrollController(initialScrollOffset: (widget.activeIndex ?? 0) * 216);
+
+  @override
+  void didUpdateWidget(covariant PlayerPlaylistView<T> oldWidget) {
+    final index = widget.activeIndex;
+    if (index != oldWidget.activeIndex && index != null && index >= 0 && index < widget.playlist.length) {
+      _controller.animateTo(index * (200 + 12), duration: const Duration(milliseconds: 400), curve: Curves.easeOut);
+    }
+    super.didUpdateWidget(oldWidget);
+  }
 
   @override
   void dispose() {
@@ -794,37 +794,42 @@ class _PlayerPlaylistViewState extends State<PlayerPlaylistView> {
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 48),
         itemCount: widget.playlist.length,
         itemBuilder: (context, index) {
-          if (widget.playlistItemBuilder != null) {
-            return widget.playlistItemBuilder!(context, index, widget.onTap);
-          }
           final item = widget.playlist[index];
           return SizedBox(
             width: 200,
-            child: InkWell(
-              autofocus: index == widget.activeIndex,
-              onTap: () => widget.onTap(index),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: item.poster != null
-                        ? Image.network(item.poster!)
-                        : Container(
-                            color: Theme.of(context).colorScheme.surfaceContainerHighest.withAlpha(0x11),
-                            child: const Icon(Icons.image_not_supported, size: 50)),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (item.title != null) Text(item.title!, style: Theme.of(context).textTheme.titleSmall, overflow: TextOverflow.ellipsis),
-                        if (item.description != null) Text(item.description!, style: Theme.of(context).textTheme.bodySmall, overflow: TextOverflow.ellipsis),
-                      ],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: 8,
+              children: [
+                Stack(
+                  children: [
+                    FocusableImage(
+                      width: 200,
+                      height: 112,
+                      poster: item.poster,
+                      autofocus: index == widget.activeIndex,
+                      onTap: () => widget.onTap(index),
                     ),
-                  ),
-                ],
-              ),
+                    if (index == widget.activeIndex)
+                      Container(
+                        width: 200,
+                        height: 112,
+                        decoration: BoxDecoration(
+                          color: Colors.black45,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Align(alignment: Alignment.topRight, child: PlayingIcon(color: Theme.of(context).colorScheme.primary)),
+                      ),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (item.title != null) Text(item.title!, style: Theme.of(context).textTheme.titleSmall, overflow: TextOverflow.ellipsis),
+                    if (item.description != null) Text(item.description!, style: Theme.of(context).textTheme.bodySmall, overflow: TextOverflow.ellipsis),
+                  ],
+                ),
+              ],
             ),
           );
         },
@@ -835,106 +840,38 @@ class _PlayerPlaylistViewState extends State<PlayerPlaylistView> {
 }
 
 class PlayerInfoView extends StatelessWidget {
-  final PlayerController _controller;
-  final bool showPoster;
-
   const PlayerInfoView(this._controller, {super.key, this.showPoster = true});
+
+  final PlayerController<dynamic> _controller;
+  final bool showPoster;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
-      child: ListenableBuilder(
-          builder: (context, _) => OrientationBuilder(builder: (context, orientation) {
-                return switch (MediaQuery.of(context).orientation) {
-                  Orientation.portrait => Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+    return ListenableBuilder(
+        listenable: _controller.index,
+        builder: (context, _) => Padding(
+              padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
+              child: Row(
+                children: [
+                  if (showPoster && _controller.currentItem?.poster != null)
+                    AsyncImage(_controller.currentItem!.poster!, height: 100, radius: BorderRadius.circular(4)),
+                  if (showPoster && _controller.currentItem?.poster != null) const SizedBox(width: 30),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (_controller.title.value != null)
-                          Text(_controller.title.value!, style: Theme.of(context).textTheme.titleLarge, overflow: TextOverflow.ellipsis),
+                          Text(_controller.title.value!, style: Theme.of(context).textTheme.displaySmall, overflow: TextOverflow.ellipsis, maxLines: 2),
                         const SizedBox(height: 10),
-                        Text(_controller.subTitle.value, style: Theme.of(context).textTheme.bodyMedium, overflow: TextOverflow.ellipsis),
-                        ListenableBuilder(
-                            listenable: _controller.status,
-                            builder: (context, _) {
-                              return switch (_controller.status.value) {
-                                PlayerStatus.buffering => ListenableBuilder(
-                                    listenable: _controller.networkSpeed,
-                                    builder: (context, child) =>
-                                        Text(_controller.networkSpeed.value.toNetworkSpeed(), style: Theme.of(context).textTheme.labelSmall)),
-                                _ => Text(' ', style: Theme.of(context).textTheme.labelSmall),
-                              };
-                            }),
+                        Text(_controller.subTitle.value, style: Theme.of(context).textTheme.bodyLarge, overflow: TextOverflow.ellipsis),
                         if (_controller.fatalError.value != null)
                           Text(_controller.fatalError.value!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
                       ],
                     ),
-                  Orientation.landscape => Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        if (showPoster && _controller.currentItem.poster != null) _AsyncImage(_controller.currentItem.poster!, height: 100, radius: 4),
-                        if (showPoster && _controller.currentItem.poster != null) const SizedBox(width: 30),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (_controller.title.value != null)
-                                Text(_controller.title.value!, style: Theme.of(context).textTheme.displaySmall, overflow: TextOverflow.ellipsis, maxLines: 2),
-                              const SizedBox(height: 10),
-                              Text(_controller.subTitle.value, style: Theme.of(context).textTheme.bodyLarge, overflow: TextOverflow.ellipsis),
-                              ListenableBuilder(
-                                  listenable: _controller.status,
-                                  builder: (context, _) {
-                                    return switch (_controller.status.value) {
-                                      PlayerStatus.buffering => ListenableBuilder(
-                                          listenable: _controller.networkSpeed,
-                                          builder: (context, child) =>
-                                              Text(_controller.networkSpeed.value.toNetworkSpeed(), style: Theme.of(context).textTheme.labelSmall)),
-                                      _ => Text(' ', style: Theme.of(context).textTheme.labelSmall),
-                                    };
-                                  }),
-                              if (_controller.fatalError.value != null)
-                                Text(_controller.fatalError.value!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
-                            ],
-                          ),
-                        ),
-                      ],
-                    )
-                };
-              }),
-          listenable: Listenable.merge([_controller.title, _controller.fatalError])),
-    );
-  }
-}
-
-class _AsyncImage extends StatelessWidget {
-  final String src;
-  final double? height;
-  final double radius;
-
-  const _AsyncImage(
-    this.src, {
-    this.height,
-    this.radius = 0,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(radius),
-      ),
-      child: CachedNetworkImage(
-        imageUrl: src,
-        alignment: Alignment.center,
-        fit: BoxFit.cover,
-        filterQuality: FilterQuality.medium,
-        height: height,
-        httpHeaders: const {headerUserAgent: ua},
-        errorWidget: (context, url, error) => const Center(child: Icon(Icons.broken_image, size: 36)),
-      ),
-    );
+                  ),
+                ],
+              ),
+            ));
   }
 }
 

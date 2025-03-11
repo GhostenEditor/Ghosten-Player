@@ -7,16 +7,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../components/async_image.dart';
+import '../../../pages/components/theme_builder.dart';
 import '../../../utils/utils.dart';
 import '../../components/filled_button.dart';
 
 class Carousel extends StatelessWidget {
-  final ValueChanged<bool>? onFocusChange;
-  final ValueChanged<int> onChange;
-  final int len;
-  final int index;
-  final Widget child;
-
   const Carousel({
     super.key,
     required this.len,
@@ -25,6 +20,12 @@ class Carousel extends StatelessWidget {
     required this.onChange,
     this.onFocusChange,
   });
+
+  final ValueChanged<bool>? onFocusChange;
+  final ValueChanged<int> onChange;
+  final int len;
+  final int index;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -61,11 +62,6 @@ class Carousel extends StatelessWidget {
 }
 
 class CarouselPagination extends StatefulWidget {
-  final Function(int) onChange;
-  final ValueChanged<bool>? onFocusChange;
-  final int len;
-  final int index;
-
   const CarouselPagination({
     super.key,
     required this.onChange,
@@ -74,42 +70,52 @@ class CarouselPagination extends StatefulWidget {
     this.onFocusChange,
   });
 
+  final Function(int) onChange;
+  final ValueChanged<bool>? onFocusChange;
+  final int len;
+  final int index;
+
   @override
   State<CarouselPagination> createState() => _CarouselPaginationState();
 }
 
 class _CarouselPaginationState extends State<CarouselPagination> with RouteAware {
-  bool focused = false;
-  final timer = Stream.periodic(const Duration(seconds: 15));
-  StreamSubscription<dynamic>? subscription;
+  bool _focused = false;
+  final _timer = Stream.periodic(const Duration(seconds: 15));
+  StreamSubscription<dynamic>? _subscription;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (widget.len > 0) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        widget.onChange(0);
+      });
+    }
     routeObserver.subscribe(this, ModalRoute.of(context)!);
   }
 
   @override
   void dispose() {
     routeObserver.unsubscribe(this);
-    subscription?.cancel();
+    _subscription?.cancel();
     super.dispose();
   }
 
   @override
   void didPopNext() {
-    subscription?.resume();
+    _subscription?.resume();
   }
 
   @override
   void didPushNext() {
-    subscription?.pause();
+    _subscription?.pause();
   }
 
   @override
   void initState() {
     super.initState();
-    subscription = timer.listen((_) {
+    _subscription = _timer.listen((_) {
       if (widget.index < widget.len - 1) {
         widget.onChange(widget.index + 1);
       } else {
@@ -122,8 +128,8 @@ class _CarouselPaginationState extends State<CarouselPagination> with RouteAware
   Widget build(BuildContext context) {
     return Focus(
       onFocusChange: (f) {
-        if (focused != f) {
-          setState(() => focused = f);
+        if (_focused != f) {
+          setState(() => _focused = f);
           if (widget.onFocusChange != null) widget.onFocusChange!(f);
         }
       },
@@ -151,8 +157,7 @@ class _CarouselPaginationState extends State<CarouselPagination> with RouteAware
       child: Center(
         child: Material(
           color: Colors.black54,
-          shape: StadiumBorder(side: focused ? const BorderSide(color: Colors.white, width: 4) : BorderSide.none),
-          clipBehavior: Clip.antiAlias,
+          shape: StadiumBorder(side: _focused ? BorderSide(color: Theme.of(context).colorScheme.inverseSurface, width: 4, strokeAlign: 2) : BorderSide.none),
           child: Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
@@ -182,9 +187,9 @@ class _CarouselPaginationState extends State<CarouselPagination> with RouteAware
 }
 
 class CarouselBackground extends StatelessWidget {
-  final String? src;
-
   const CarouselBackground({super.key, required this.src});
+
+  final String? src;
 
   @override
   Widget build(BuildContext context) {
@@ -213,9 +218,9 @@ class CarouselBackground extends StatelessWidget {
           child: Container(
             key: UniqueKey(),
             child: src != null
-                ? AsyncImage(key: UniqueKey(), src!, fit: BoxFit.cover)
+                ? AsyncImage(key: UniqueKey(), src!)
                 : Image.asset(
-                    'assets/images/bg-pixel.webp',
+                    'assets/tv/images/bg-pixel.webp',
                     repeat: ImageRepeat.repeat,
                   ),
           ),
@@ -224,20 +229,20 @@ class CarouselBackground extends StatelessWidget {
             decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Colors.black.withAlpha(0xee),
-              Colors.black.withAlpha(0x66),
+              Theme.of(context).scaffoldBackgroundColor.withAlpha(0xEE),
+              Theme.of(context).scaffoldBackgroundColor.withAlpha(0x66),
             ],
             stops: const [0.3, 0.7],
             begin: Alignment.bottomLeft,
             end: Alignment.topRight,
           ),
         )),
-        const DecoratedBox(
+        DecoratedBox(
             decoration: BoxDecoration(
           gradient: LinearGradient(colors: [
-            Colors.transparent,
-            Color(0xFF000000),
-          ], stops: [
+            Theme.of(context).scaffoldBackgroundColor.withAlpha(0),
+            Theme.of(context).scaffoldBackgroundColor,
+          ], stops: const [
             0.7,
             1
           ], begin: Alignment.topCenter, end: Alignment.bottomCenter),
@@ -248,18 +253,15 @@ class CarouselBackground extends StatelessWidget {
 }
 
 class CarouselItem extends StatelessWidget {
+  const CarouselItem({super.key, required this.item, this.onPressed});
+
   final MediaRecommendation item;
   final VoidCallback? onPressed;
 
-  const CarouselItem({super.key, required this.item, this.onPressed});
-
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: Theme.of(context).copyWith(
-        colorScheme: item.themeColor == null ? null : ColorScheme.fromSeed(seedColor: Color(item.themeColor!), brightness: Theme.of(context).brightness),
-      ),
-      child: Padding(
+    return ThemeBuilder(item.themeColor, builder: (context) {
+      return Padding(
         padding: const EdgeInsets.only(left: 48, right: 48, top: 48),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -299,7 +301,7 @@ class CarouselItem extends StatelessWidget {
                   const SizedBox(height: 18),
                   if (item.overview != null)
                     DefaultTextStyle(
-                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.white70),
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).textTheme.bodyMedium?.color?.withAlpha(0xB3)),
                       maxLines: 5,
                       overflow: TextOverflow.ellipsis,
                       child: Text(item.overview!),
@@ -314,20 +316,19 @@ class CarouselItem extends StatelessWidget {
               ),
             ),
             Flexible(
-                flex: 1,
                 child: Align(
-                  alignment: Alignment.centerRight,
-                  child: item.poster != null
-                      ? AsyncImage(
-                          item.poster!,
-                          width: MediaQuery.of(context).size.width / 5,
-                          radius: BorderRadius.circular(6),
-                        )
-                      : const SizedBox(),
-                )),
+              alignment: Alignment.centerRight,
+              child: item.poster != null
+                  ? AsyncImage(
+                      item.poster!,
+                      width: MediaQuery.of(context).size.width / 5,
+                      radius: BorderRadius.circular(6),
+                    )
+                  : const SizedBox(),
+            )),
           ],
         ),
-      ),
-    );
+      );
+    });
   }
 }

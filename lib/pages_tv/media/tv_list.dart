@@ -19,9 +19,9 @@ import 'components/media_grid_item.dart';
 import 'mixins/channel.dart';
 
 class TVListPage extends StatefulWidget {
-  final GlobalKey<NavigatorState> endDrawerNavigatorKey;
-
   const TVListPage({super.key, required this.endDrawerNavigatorKey});
+
+  final GlobalKey<NavigatorState> endDrawerNavigatorKey;
 
   @override
   State<TVListPage> createState() => _TVListPageState();
@@ -69,7 +69,7 @@ class _TVListPageState extends State<TVListPage> with NeedUpdateMixin, ChannelMi
                     child: Container(
                       width: 200,
                       height: 200,
-                      color: Colors.black,
+                      color: Theme.of(context).scaffoldBackgroundColor,
                     ),
                   )),
         ),
@@ -115,7 +115,12 @@ class _TVListPageState extends State<TVListPage> with NeedUpdateMixin, ChannelMi
                                     final season = await Api.tvSeasonQueryById(series.nextToPlay!.seasonId);
                                     final playlist = season.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList();
                                     if (!context.mounted) return;
-                                    await toPlayer(context, playlist, id: series.nextToPlay!.id, theme: item.themeColor, playerType: PlayerType.tv);
+                                    await toPlayer(
+                                      context,
+                                      playlist,
+                                      index: season.episodes.indexWhere((episode) => episode.id == series.nextToPlay!.id),
+                                      theme: item.themeColor,
+                                    );
                                     setState(() {});
                                   },
                                 ),
@@ -142,7 +147,7 @@ class _TVListPageState extends State<TVListPage> with NeedUpdateMixin, ChannelMi
             ),
             buildChannel(
               context,
-              label: AppLocalizations.of(context)!.recentWatched,
+              label: AppLocalizations.of(context)!.watchNow,
               future: Api.tvSeriesNextToPlayQueryAll(),
               height: 240,
               builder: (context, item) => Stack(
@@ -168,7 +173,12 @@ class _TVListPageState extends State<TVListPage> with NeedUpdateMixin, ChannelMi
                         final season = await Api.tvSeasonQueryById(item.seasonId);
                         final playlist = season.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList();
                         if (!context.mounted) return;
-                        await toPlayer(context, playlist, id: item.id, theme: item.themeColor, playerType: PlayerType.tv);
+                        await toPlayer(
+                          context,
+                          playlist,
+                          index: season.episodes.indexWhere((episode) => episode.id == item.id),
+                          theme: item.themeColor,
+                        );
                         setState(() {});
                       }),
                   if (item.duration != null && item.lastPlayedTime != null)
@@ -202,7 +212,7 @@ class _TVListPageState extends State<TVListPage> with NeedUpdateMixin, ChannelMi
                   title: Text(item.displayRecentTitle()),
                   subtitle: Text(item.airDate?.format() ?? ''),
                   imageUrl: item.poster,
-                  onTap: () => onMediaTap(item)),
+                  onTap: () => _onMediaTap(item)),
             ),
             buildChannel(
               context,
@@ -216,7 +226,7 @@ class _TVListPageState extends State<TVListPage> with NeedUpdateMixin, ChannelMi
                   title: Text(item.displayRecentTitle()),
                   subtitle: Text(item.airDate?.format() ?? ''),
                   imageUrl: item.poster,
-                  onTap: () => onMediaTap(item)),
+                  onTap: () => _onMediaTap(item)),
             ),
             buildGridChannel(
               context,
@@ -229,7 +239,7 @@ class _TVListPageState extends State<TVListPage> with NeedUpdateMixin, ChannelMi
                 imageUrl: item.poster,
                 title: Text(item.displayTitle()),
                 subtitle: Text(item.airDate?.format() ?? ''),
-                onTap: () => onMediaTap(item),
+                onTap: () => _onMediaTap(item),
               ),
             ),
           ],
@@ -238,8 +248,8 @@ class _TVListPageState extends State<TVListPage> with NeedUpdateMixin, ChannelMi
     );
   }
 
-  onMediaTap(TVSeries item) async {
+  Future<void> _onMediaTap(TVSeries item) async {
     final flag = await navigateTo<bool>(context, TVDetail(initialData: item));
-    if (flag == true && mounted) setState(() {});
+    if ((flag ?? false) && mounted) setState(() {});
   }
 }

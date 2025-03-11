@@ -22,67 +22,29 @@ class SettingsSyncPage extends StatefulWidget {
 enum BluetoothState { withPermission, withoutPermission, discovering, nonAdaptor }
 
 class _SettingsSyncPageState extends State<SettingsSyncPage> {
-  final devices = <BluetoothDevice>[];
-  StreamSubscription<BluetoothDevice>? subscription;
-  BluetoothState bluetoothState = BluetoothState.withoutPermission;
-  bool needStartServer = true;
+  final _devices = <BluetoothDevice>[];
+  StreamSubscription<BluetoothDevice>? _subscription;
+  BluetoothState _bluetoothState = BluetoothState.withoutPermission;
+  bool _needStartServer = true;
 
   @override
   void initState() {
-    init();
+    _init();
     super.initState();
   }
 
   @override
   void dispose() {
-    needStartServer = false;
+    _needStartServer = false;
     Bluetooth.close().catchError((_) {});
-    subscription?.cancel();
+    _subscription?.cancel();
     super.dispose();
-  }
-
-  init() async {
-    try {
-      if (await Bluetooth.requestPermission() && await Bluetooth.requestEnable()) {
-        setState(() => bluetoothState = BluetoothState.withPermission);
-        startServer();
-        startDiscovery();
-      }
-    } catch (e) {
-      setState(() => bluetoothState = BluetoothState.nonAdaptor);
-    }
-  }
-
-  startServer() {
-    Bluetooth.startServer().listen((device) async {
-      Bluetooth.connection().listen((resp) async {
-        switch (resp.type) {
-          case BlueToothMessageType.file:
-            await Bluetooth.disconnect();
-            if (mounted) {
-              final confirmed =
-                  await showConfirm(context, AppLocalizations.of(context)!.dataSyncConfirmSync(device.name ?? AppLocalizations.of(context)!.tagUnknown));
-              if (confirmed == true) {
-                Api.syncData(resp.data);
-              }
-            }
-          case BlueToothMessageType.text:
-            Bluetooth.write(BluetoothMessage.text(appVersion));
-        }
-      });
-    }, onError: (error) {
-      if (mounted) {
-        showNotification(context, Future.error(error));
-      }
-    }, onDone: () {
-      if (needStartServer) startServer();
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: switch (bluetoothState) {
+        body: switch (_bluetoothState) {
       BluetoothState.withPermission || BluetoothState.discovering => Row(
           children: [
             Flexible(
@@ -99,7 +61,7 @@ class _SettingsSyncPageState extends State<SettingsSyncPage> {
                         autofocus: true,
                         title: Text(AppLocalizations.of(context)!.dataSyncActionRescanBluetoothDevices),
                         leading: const Icon(Icons.sync),
-                        onTap: () => startDiscovery(),
+                        onTap: () => _startDiscovery(),
                       ),
                       ButtonSettingItem(
                         title: Text(AppLocalizations.of(context)!.dataSyncActionSetDiscoverable),
@@ -111,8 +73,8 @@ class _SettingsSyncPageState extends State<SettingsSyncPage> {
                         title: Text(AppLocalizations.of(context)!.dataSyncActionRollback),
                         leading: const Icon(Icons.settings_backup_restore),
                         onTap: () async {
-                          final confirmed = await showConfirm(context, AppLocalizations.of(context)!.dataSyncConfirmRollback);
-                          if (confirmed == true && context.mounted) {
+                          final flag = await showConfirm(context, AppLocalizations.of(context)!.dataSyncConfirmRollback);
+                          if ((flag ?? false) && context.mounted) {
                             showNotification(context, Api.rollbackData());
                           }
                         },
@@ -122,19 +84,19 @@ class _SettingsSyncPageState extends State<SettingsSyncPage> {
                 )),
             Flexible(
                 flex: 3,
-                child: devices.isEmpty
-                    ? bluetoothState == BluetoothState.discovering
+                child: _devices.isEmpty
+                    ? _bluetoothState == BluetoothState.discovering
                         ? const Center(child: Loading())
                         : const NoData()
                     : ListView.builder(
                         padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 36),
                         itemBuilder: (context, index) {
-                          if (index < devices.length) {
-                            final device = devices[index];
+                          if (index < _devices.length) {
+                            final device = _devices[index];
                             return ButtonSettingItem(
                               title: Text(device.name ?? AppLocalizations.of(context)!.tagUnknown),
                               subtitle: Text(device.address),
-                              onTap: () => showNotification(context, startConnection(device)),
+                              onTap: () => showNotification(context, _startConnection(device)),
                               trailing: Icon(device.isConnected
                                   ? Icons.import_export
                                   : device.bonded
@@ -145,12 +107,11 @@ class _SettingsSyncPageState extends State<SettingsSyncPage> {
                             return const Padding(padding: EdgeInsets.symmetric(vertical: 32), child: Loading());
                           }
                         },
-                        itemCount: bluetoothState == BluetoothState.discovering ? devices.length + 1 : devices.length)),
+                        itemCount: _bluetoothState == BluetoothState.discovering ? _devices.length + 1 : _devices.length)),
           ],
         ),
       BluetoothState.withoutPermission => Center(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
@@ -172,32 +133,70 @@ class _SettingsSyncPageState extends State<SettingsSyncPage> {
     });
   }
 
-  startDiscovery() {
-    setState(() {
-      devices.clear();
-      bluetoothState = BluetoothState.discovering;
-    });
-    if (subscription != null) {
-      subscription!.cancel();
+  Future<void> _init() async {
+    try {
+      if (await Bluetooth.requestPermission() && await Bluetooth.requestEnable()) {
+        setState(() => _bluetoothState = BluetoothState.withPermission);
+        _startServer();
+        _startDiscovery();
+      }
+    } catch (e) {
+      setState(() => _bluetoothState = BluetoothState.nonAdaptor);
     }
-    Bluetooth.getBondedDevices().then((value) => setState(() => devices.addAll(value)));
-    subscription = Bluetooth.startDiscovery().listen(
+  }
+
+  void _startServer() {
+    Bluetooth.startServer().listen((device) async {
+      Bluetooth.connection().listen((resp) async {
+        switch (resp.type) {
+          case BlueToothMessageType.file:
+            await Bluetooth.disconnect();
+            if (mounted) {
+              final confirmed =
+                  await showConfirm(context, AppLocalizations.of(context)!.dataSyncConfirmSync(device.name ?? AppLocalizations.of(context)!.tagUnknown));
+              if (confirmed ?? false) {
+                Api.syncData(resp.data);
+              }
+            }
+          case BlueToothMessageType.text:
+            Bluetooth.write(BluetoothMessage.text(appVersion));
+        }
+      });
+    }, onError: (error) {
+      if (mounted) {
+        showNotification(context, Future.error(error));
+      }
+    }, onDone: () {
+      if (_needStartServer) _startServer();
+    });
+  }
+
+  void _startDiscovery() {
+    setState(() {
+      _devices.clear();
+      _bluetoothState = BluetoothState.discovering;
+    });
+    if (_subscription != null) {
+      _subscription!.cancel();
+    }
+    Bluetooth.getBondedDevices().then((value) => setState(() => _devices.addAll(value)));
+    _subscription = Bluetooth.startDiscovery().listen(
         (device) {
-          final index = devices.indexWhere((element) => element.address == device.address);
+          final index = _devices.indexWhere((element) => element.address == device.address);
           if (index >= 0) {
-            devices[index] = device;
+            _devices[index] = device;
           } else {
-            devices.add(device);
+            _devices.add(device);
           }
           setState(() {});
         },
         onError: (error) {},
         onDone: () {
-          setState(() => bluetoothState = BluetoothState.withPermission);
+          setState(() => _bluetoothState = BluetoothState.withPermission);
         });
   }
 
-  Future<void> startConnection(BluetoothDevice device) async {
+  Future<void> _startConnection(BluetoothDevice device) async {
     await Bluetooth.connect(device.address);
     await Bluetooth.write(BluetoothMessage.text(appVersion));
     final resp = await Bluetooth.connection().first;

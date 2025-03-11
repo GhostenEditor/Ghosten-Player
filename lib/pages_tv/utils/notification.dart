@@ -11,10 +11,10 @@ import '../components/loading.dart';
 import '../components/text_button.dart';
 
 class NotificationResponse<T> {
+  const NotificationResponse({this.data, this.error});
+
   final T? data;
   final Object? error;
-
-  const NotificationResponse({this.data, this.error});
 }
 
 Future<NotificationResponse<T?>?> showNotification<T>(
@@ -39,22 +39,20 @@ Future<NotificationResponse<T?>?> showNotification<T>(
                 },
                 child: _NotificationLayout(snapshot: snapshot),
               )));
-  if (snapshot?.hasError == true && context.mounted) {
+  if ((snapshot?.hasError ?? false) && context.mounted) {
     await showDialog(
         context: context,
         builder: (context) => AlertDialog(
-              content: ErrorMessage(
-                snapshot: snapshot!,
-              ),
+              content: ErrorMessage(error: snapshot?.error),
             ));
   }
   return NotificationResponse(data: snapshot?.data, error: snapshot?.error);
 }
 
 class _NotificationLayout<T> extends StatelessWidget {
-  final AsyncSnapshot<T> snapshot;
-
   const _NotificationLayout({super.key, required this.snapshot});
+
+  final AsyncSnapshot<T> snapshot;
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +84,7 @@ Future<bool?> showConfirm(BuildContext context, String confirmText, [String? sub
                 const DecoratedBox(
                   decoration: BoxDecoration(
                     image: DecorationImage(
-                      image: AssetImage('assets/images/bg-stripe.png'),
+                      image: AssetImage('assets/tv/images/bg-stripe.png'),
                       repeat: ImageRepeat.repeat,
                     ),
                   ),

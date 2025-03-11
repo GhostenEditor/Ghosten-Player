@@ -4,9 +4,9 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../const.dart';
 
 class NoData extends StatelessWidget {
-  final Widget? action;
-
   const NoData({super.key, this.action});
+
+  final Widget? action;
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +14,7 @@ class NoData extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Image.asset(assetsNoData, width: 200, height: 200, filterQuality: FilterQuality.medium),
+          Image.asset(assetsNoData, width: 200, height: 200),
           Padding(
             padding: action == null ? const EdgeInsets.only(bottom: 16) : EdgeInsets.zero,
             child: Text(AppLocalizations.of(context)!.noData),
