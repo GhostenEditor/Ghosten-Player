@@ -108,7 +108,7 @@ jobs:
       - name: Push APK to Releases
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "build/app/outputs/flutter-apk/app-arm64-v8a-release.apk,build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk"
+          artifacts: "build/app/outputs/flutter-apk/app-arm*-release.apk"
           generateReleaseNotes: true
           draft: true
           tag: v${{ env.VERSION }}
