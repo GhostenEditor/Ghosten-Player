@@ -28,3 +28,4 @@ jobs:
           daysUntilClose: 7
           # Label requiring a response.
           responseRequiredLabel: "waiting for customer response"
+          responseRequiredColor: 000000
