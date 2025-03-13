@@ -9,8 +9,8 @@
 
 </div>
 
-一款同时适配📱 Android Phone 和 📺 Android TV 的视频播放器，同时支持云播放(阿里云盘、夸克网盘和Webdav)
-和本地播放，支持刮削影视元信息，管理网盘文件，多线程加速等功能。界面简洁纯净，操作简单。
+Ghosten Player 是一款同时适配📱 Android Phone 和 📺 Android TV 的视频播放器。整合影视资源，自动刮削媒体信息，支持IPTV播放，优雅打造私人影视库。
+界面简洁，功能丰富，开箱即用。
 
 ---
 
@@ -18,24 +18,39 @@
 
 ## Features
 
-- 支持 **Android TV** 和 **Android Phone** (桌面端开发中)
-- 支持阿里云盘、夸克网盘、Webdav和本地媒体文件播放
-- 纯本地运行，无需后端服务支持 [^1]
-- 支持跳过片头/片尾
-- 支持视频轨道选择
-- 支持内嵌字幕和外置字幕播放[^2]
-- 支持文件下载和边下边播
-- 支持多线程网络加速
-- 支持网盘文件的整理
-- 多账号登录
-- 支持中英双语
-- 支持手机端辅助TV端输入
-- 浅色和深色模式
-- 观看IPTV直播
-- DLNA投屏
-- 软件体积小 (≈ 15 MB)
-- 设备间的数据同步
-- 自动更新
+- 自动刮削媒体信息
+- 客户端
+    - Android Phone 和 Android Pad
+    - Android TV
+    - Windows (开发中)
+    - Macos (开发中)
+- 网盘支持
+    - 支持阿里云盘、夸克网盘、Webdav和本地媒体文件
+    - 多账号登录
+    - 网盘文件查看和管理
+    - 文件下载和边下边播
+    - 多线程网络加速
+- IPTV
+    - 内置IPTV源，不定时更新
+    - 线路切换
+    - 自动分组
+    - 节目时间表 (开发中)
+- 播放器
+    - 手势操作(双击播放/暂停，音量/亮度调节，画面缩放，拖动快进等)
+    - 跳过片头/片尾
+    - 播放内嵌字幕和外置字幕[^2]
+    - 倍速播放
+    - 视频轨道选择
+    - DLNA投屏
+- UI
+    - 中英双语
+    - 浅色和深色模式
+    - 支持手机端辅助TV端输入
+- 其他
+    - 纯本地运行，无需后端服务支持 [^1]
+    - 软件体积小 (≈ 15 MB)
+    - 设备间的数据同步
+    - 自动更新
 
 [^1]: 网盘由网盘供应商提供服务支持，与本项目无关
 
@@ -45,10 +60,12 @@
 
 [Releases](https://github.com/GhostenEditor/Ghosten-Player/releases/latest) 根据设备的架构自行选择安装包，安装包选择见下表
 
-| 架构          | APK                         | 说明                   |
-|-------------|-----------------------------|----------------------|
-| arm64-v8a   | app-arm64-v8a-release.apk   | 适合大部分设备，手机多数为此架构     |
-| armeabi-v7a | app-armeabi-v7a-release.apk | 适合部分配置较低的设备，TV多数为此架构 |
+自v1.6.0版本后，移动端和TV端分开打包，且不能混用
+
+| 架构 / 客户端    | Phone/Pad                                      | TV                                          |
+|-------------|------------------------------------------------|---------------------------------------------|
+| arm64-v8a   | app-arm64-v8a-release.apk<br/>适合大部分设备，手机多数为此架构 | app-arm64-v8a-tv-release.apk                |
+| armeabi-v7a | app-armeabi-v7a-release.apk<br/>适合部分配置较低的设备    | app-armeabi-v7a-tv-release.apk<br/>TV多数为此架构 |
 
 ## 版本适配
 
@@ -94,17 +111,21 @@ Android 6+
 
 ## 其他说明
 
-使用说明和常见问题解决方案详见 [Wiki](https://github.com/GhostenEditor/Ghosten-Player/wiki) ，如果遇到Bug或者有应用优化建议，欢迎提 [Issue](https://github.com/GhostenEditor/Ghosten-Player/issues)，我会在第一时间回复 😊
+使用说明和常见问题解决方案详见 [Wiki](https://github.com/GhostenEditor/Ghosten-Player/wiki)
+，如果遇到Bug或者有应用优化建议，欢迎提 [Issue](https://github.com/GhostenEditor/Ghosten-Player/issues)，我会在第一时间回复
+😊
 
 ## Roadmap
 
 按照以下顺序进行开发
 
-- [ ] 移动端UI以及播放器UI调整
+- [x] 移动端UI以及播放器UI调整
+- [ ] 增加搜索功能，包括语音搜索
+- [ ] IPTV增加节目列表
+- [ ] 增加弹幕功能
 - [ ] 整合MPV播放器，兼容老旧的音视频格式
-- [ ] TV端增加搜索功能
 - [ ] 应用上架Google Play
-- [ ] 增加ftp和smb协议的支持
+- [ ] 增加ftp和smb协议和emby的支持
 - [ ] 保存媒体信息至文件(nfo)
 - [ ] 桌面端(Developing)
 - [ ] DLNA投屏的兼容问题
