@@ -48,6 +48,7 @@ final tvDarkTheme = ThemeData(
     shape: RoundedRectangleBorder(),
     endShape: RoundedRectangleBorder(),
   ),
+  scaffoldBackgroundColor: Colors.black,
   colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF98C2FF), brightness: Brightness.dark),
   dividerTheme: const DividerThemeData(color: Colors.white12),
   scrollbarTheme: const ScrollbarThemeData(radius: Radius.circular(10)),
