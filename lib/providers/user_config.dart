@@ -1,7 +1,7 @@
-import 'dart:convert';
+import 'dart:math';
 
-import 'package:api/api.dart';
 import 'package:flutter/material.dart';
+import 'package:scaled_app/scaled_app.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '/utils/utils.dart';
@@ -33,113 +33,65 @@ extension FromString on ThemeMode {
   }
 }
 
-class PlayerConfig {
-  int mode;
-  int speed;
-  bool? showThumbnails;
-  bool enableDecoderFallback;
-
-  PlayerConfig({
-    required this.mode,
-    required this.speed,
-    required this.showThumbnails,
-    required this.enableDecoderFallback,
-  });
-
-  PlayerConfig.fromJson(dynamic json)
-      : mode = json?['mode'] ?? 1,
-        speed = json?['speed'] ?? 30,
-        enableDecoderFallback = json?['enableDecoderFallback'] ?? false,
-        showThumbnails = json?['showThumbnails'] ?? false;
-
-  Map<String, dynamic> toMap() => {
-        'mode': mode,
-        'speed': speed,
-        'showThumbnails': showThumbnails,
-        'enableDecoderFallback': enableDecoderFallback,
-      };
-
-  get config => {
-        'showThumbnails': showThumbnails,
-        'enableDecoderFallback': enableDecoderFallback,
-      };
-}
-
 class UserConfig extends ChangeNotifier {
+  UserConfig._fromPrefs(this.prefs)
+      : language = SystemLanguage.fromString(prefs.getString('system.language')),
+        themeMode = FromString.fromString(prefs.getString('system.themeMode')),
+        autoUpdateFrequency = AutoUpdateFrequency.fromString(prefs.getString('system.autoUpdateFrequency')),
+        lastCheckUpdateTime = DateTime.tryParse(prefs.getString('system.lastCheckUpdateTime') ?? ''),
+        autoPlay = prefs.getBool('playerConfig.autoPlay') ?? false,
+        displayScale = prefs.getDouble('system.displayScale') ?? 1,
+        scraperBehavior = prefs.getString('scraper.behavior') ?? 'skip';
+  final SharedPreferences prefs;
   SystemLanguage language;
   ThemeMode themeMode;
-  SortConfig tvList;
-  SortConfig movieList;
-  PlayerConfig playerConfig;
   AutoUpdateFrequency autoUpdateFrequency;
   DateTime? lastCheckUpdateTime;
-  final SharedPreferences prefs;
+  bool autoPlay;
+  double displayScale;
+  String scraperBehavior;
 
   static Future<UserConfig> init() async {
     final prefs = await SharedPreferences.getInstance();
-    final data = prefs.getString('userConfig');
-    final json = jsonDecode(data ?? '{}');
-    return UserConfig._fromJson(json, prefs);
+    return UserConfig._fromPrefs(prefs);
   }
-
-  UserConfig._fromJson(dynamic json, this.prefs)
-      : language = SystemLanguage.fromString(json['language']),
-        themeMode = FromString.fromString(json['themeMode']),
-        tvList = SortConfig.fromJson(json['tvList']),
-        movieList = SortConfig.fromJson(json['movieList']),
-        playerConfig = PlayerConfig.fromJson(json['playerConfig']),
-        autoUpdateFrequency = AutoUpdateFrequency.fromString(json['autoUpdateFrequency']),
-        lastCheckUpdateTime = json['lastCheckUpdateTime'] != null ? DateTime.parse(json['lastCheckUpdateTime']) : null;
 
   void setAutoUpdate(AutoUpdateFrequency f) {
     autoUpdateFrequency = f;
-    save();
+    prefs.setString('system.autoUpdateFrequency', autoUpdateFrequency.name);
   }
 
-  void setMediaList(LibraryType type, SortConfig mediaList) {
-    switch (type) {
-      case LibraryType.tv:
-        tvList = mediaList;
-      case LibraryType.movie:
-        movieList = mediaList;
-    }
-    save();
+  void setAutoPlay(bool a) {
+    autoPlay = a;
+    notifyListeners();
+    prefs.setBool('playerConfig.autoPlay', autoPlay);
   }
 
   void setTheme(ThemeMode themeMode) {
     this.themeMode = themeMode;
     notifyListeners();
-    save();
+    prefs.setString('system.themeMode', themeMode.name);
   }
 
   void setLanguage(SystemLanguage language) {
     this.language = language;
     notifyListeners();
-    save();
+    prefs.setString('system.language', language.name);
   }
 
-  void save() {
-    prefs.setString('userConfig', toJson());
+  void setDisplayScale(double s) {
+    if (displayScale != s) {
+      displayScale = s;
+      ScaledWidgetsFlutterBinding.instance.scaleFactor = (deviceSize) => max(1, deviceSize.width / 1140) * displayScale;
+      prefs.setDouble('system.displayScale', displayScale);
+    }
   }
 
-  void setPlayerRendererMode(int mode) {
-    playerConfig.mode = mode;
-    save();
-  }
-
-  void setPlayerFastForwardSpeed(int speed) {
-    playerConfig.speed = speed;
-    save();
-  }
-
-  void setPlayerShowThumbnails(bool show) {
-    playerConfig.showThumbnails = show;
-    save();
-  }
-
-  void setPlayerEnableDecoderFallback(bool enableDecoderFallback) {
-    playerConfig.enableDecoderFallback = enableDecoderFallback;
-    save();
+  void setScraperBehavior(String scraperBehavior) {
+    if (this.scraperBehavior != scraperBehavior) {
+      this.scraperBehavior = scraperBehavior;
+      prefs.setString('scraper.behavior', scraperBehavior);
+    }
   }
 
   bool shouldCheckUpdate() {
@@ -151,7 +103,7 @@ class UserConfig extends ChangeNotifier {
       case AutoUpdateFrequency.everyday:
         if (lastCheckUpdateTime == null || lastCheckUpdateTime!.add(const Duration(days: 1)) <= now) {
           lastCheckUpdateTime = now;
-          save();
+          prefs.setString('system.lastCheckUpdateTime', lastCheckUpdateTime!.toString());
           return true;
         } else {
           return false;
@@ -159,7 +111,7 @@ class UserConfig extends ChangeNotifier {
       case AutoUpdateFrequency.everyWeek:
         if (lastCheckUpdateTime == null || lastCheckUpdateTime!.add(const Duration(days: 7)) <= now) {
           lastCheckUpdateTime = now;
-          save();
+          prefs.setString('system.lastCheckUpdateTime', lastCheckUpdateTime!.toString());
           return true;
         } else {
           return false;
@@ -168,16 +120,6 @@ class UserConfig extends ChangeNotifier {
         return false;
     }
   }
-
-  String toJson() => jsonEncode({
-        'language': language.name,
-        'themeMode': themeMode.name,
-        'tvList': tvList.toMap(),
-        'movieList': movieList.toMap(),
-        'playerConfig': playerConfig.toMap(),
-        'autoUpdateFrequency': autoUpdateFrequency.name,
-        'lastCheckUpdateTime': lastCheckUpdateTime?.toString()
-      });
 
   Locale? get locale {
     return switch (language) {

@@ -1,7 +1,7 @@
 name: ghosten_player
 description: "Ghosten Player: A Video Player"
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-version: 1.5.1
+version: 1.6.0
 environment:
   sdk: ^3.6.1
 dependencies:
@@ -21,6 +21,7 @@ dependencies:
   dio: ^5.7.0
   file_picker:
     path: packages/file_picker
+  flutter_bloc: ^9.1.0
   flutter_markdown: ^0.7.0
   flutter_slidable: ^4.0.0
   flutter_spinkit: ^5.2.0
@@ -33,9 +34,13 @@ dependencies:
   rxdart: ^0.28.0
   scaled_app: ^2.3.0
   shared_preferences: ^2.5.0
+  shimmer: ^3.0.0
+  screen_brightness: ^2.1.0
+  smooth_page_indicator: ^1.2.0
   url_launcher: ^6.3.0
   video_player:
     path: packages/video_player
+  volume_controller: ^3.2.0
   webview_cookie_manager: ^2.0.0
   webview_flutter: ^4.10.0
 
@@ -48,11 +53,11 @@ flutter:
   uses-material-design: true
   generate: true
   assets:
-    - assets/images/
+    - assets/common/images/
+    - path: assets/tv/images/
+      flavors:
+        - tv
   fonts:
     - family: Roboto Condensed
       fonts:
         - asset: fonts/RobotoCondensed-Regular.ttf
-
-
-

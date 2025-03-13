@@ -1,16 +1,6 @@
 import 'package:flutter/material.dart';
 
 class FocusCard<T> extends StatefulWidget {
-  final Widget child;
-
-  final GestureTapCallback? onTap;
-  final PopupMenuItemBuilder<T>? itemBuilder;
-  final PopupMenuItemBuilder<T>? itemLongPressBuilder;
-  final double? width;
-  final double? height;
-
-  final bool autofocus;
-
   const FocusCard({
     super.key,
     required this.child,
@@ -21,6 +11,16 @@ class FocusCard<T> extends StatefulWidget {
     this.itemBuilder,
     this.itemLongPressBuilder,
   });
+
+  final Widget child;
+
+  final GestureTapCallback? onTap;
+  final PopupMenuItemBuilder<T>? itemBuilder;
+  final PopupMenuItemBuilder<T>? itemLongPressBuilder;
+  final double? width;
+  final double? height;
+
+  final bool autofocus;
 
   @override
   State<FocusCard<T>> createState() => _FocusCardState<T>();
@@ -37,16 +37,16 @@ class _FocusCardState<T> extends State<FocusCard<T>> {
       height: widget.height,
       child: Material(
         type: MaterialType.card,
-        color: Theme.of(context).colorScheme.surface,
         surfaceTintColor: Theme.of(context).colorScheme.surfaceTint,
-        shape: Theme.of(context).cardTheme.shape,
-        elevation: Theme.of(context).cardTheme.elevation ?? 1,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4),
+        ),
         shadowColor: Theme.of(context).cardTheme.shadowColor,
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           focusNode: _focusNode,
-          onTap: widget.itemBuilder == null ? widget.onTap : () => onTap(context, widget.itemBuilder!),
-          onLongPress: widget.itemLongPressBuilder == null ? null : () => onTap(context, widget.itemLongPressBuilder!),
+          onTap: widget.itemBuilder == null ? widget.onTap : () => _onTap(context, widget.itemBuilder!),
+          onLongPress: widget.itemLongPressBuilder == null ? null : () => _onTap(context, widget.itemLongPressBuilder!),
           autofocus: widget.autofocus,
           focusColor: Colors.transparent,
           customBorder: Theme.of(context).cardTheme.shape,
@@ -57,7 +57,7 @@ class _FocusCardState<T> extends State<FocusCard<T>> {
     return child;
   }
 
-  onTap(BuildContext context, PopupMenuItemBuilder<T> builder) {
+  void _onTap(BuildContext context, PopupMenuItemBuilder<T> builder) {
     final RenderBox button = context.findRenderObject()! as RenderBox;
     final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject()! as RenderBox;
     final RelativeRect position = RelativeRect.fromRect(

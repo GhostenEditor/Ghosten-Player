@@ -18,7 +18,7 @@ class SettingsAboutPage extends StatefulWidget {
 }
 
 class _SettingsAboutPageState extends State<SettingsAboutPage> {
-  late final userConfig = Provider.of<UserConfig>(context, listen: true);
+  late final _userConfig = Provider.of<UserConfig>(context);
 
   @override
   Widget build(BuildContext context) {
@@ -32,10 +32,10 @@ class _SettingsAboutPageState extends State<SettingsAboutPage> {
         ),
         ButtonSettingItem(
           title: Text(AppLocalizations.of(context)!.autoCheckForUpdates),
-          subtitle: Text(AppLocalizations.of(context)!.autoUpdateFrequency(userConfig.autoUpdateFrequency.name)),
+          subtitle: Text(AppLocalizations.of(context)!.autoUpdateFrequency(_userConfig.autoUpdateFrequency.name)),
           onTap: () async {
             final flag = await navigateToSlideLeft<bool>(context, const SettingsAutoCheckForUpdatesPage());
-            if (flag == true && context.mounted) setState(() {});
+            if ((flag ?? false) && context.mounted) setState(() {});
           },
         ),
         ButtonSettingItem(
@@ -61,7 +61,7 @@ class _SettingsAutoCheckForUpdatesPageState extends State<SettingsAutoCheckForUp
 
   @override
   Widget build(BuildContext context) {
-    final userConfig = Provider.of<UserConfig>(context, listen: true);
+    final userConfig = Provider.of<UserConfig>(context);
 
     return PopScope(
       canPop: false,

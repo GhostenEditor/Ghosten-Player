@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../components/async_image.dart';
-import '../../components/gap.dart';
 import '../../components/no_data.dart';
 import '../../utils/utils.dart';
 import '../components/future_builder_handler.dart';
@@ -15,10 +14,10 @@ import '../settings/settings_login.dart';
 import 'utils.dart';
 
 class DriverFilePicker extends StatefulWidget {
+  const DriverFilePicker({super.key, this.fileType, this.selectableType});
+
   final FileType? fileType;
   final FileType? selectableType;
-
-  const DriverFilePicker({super.key, this.fileType, this.selectableType});
 
   @override
   State<DriverFilePicker> createState() => _DriverFilePickerState();
@@ -104,7 +103,7 @@ class _DriverFilePickerState extends State<DriverFilePicker> {
                                       autofocus: snapshot.requireData.isEmpty,
                                       onPressed: () async {
                                         final flag = await navigateTo<bool>(navigatorKey.currentContext!, const SettingsLoginPage());
-                                        if (flag == true) setState(() {});
+                                        if (flag ?? false) setState(() {});
                                       },
                                       icon: const Icon(Icons.add)),
                                 ],
@@ -127,7 +126,7 @@ class _DriverFilePickerState extends State<DriverFilePicker> {
                   if (currentNode != null) {
                     final nearestScope = currentNode.nearestScope!;
                     final focusedChild = nearestScope.focusedChild;
-                    if (focusedChild == null || focusedChild.focusInDirection(indent.direction) != true) {
+                    if (focusedChild == null || !focusedChild.focusInDirection(indent.direction)) {
                       switch (indent.direction) {
                         case TraversalDirection.left:
                           nearestScope.parent?.focusInDirection(indent.direction);
@@ -157,12 +156,6 @@ class _DriverFilePickerState extends State<DriverFilePicker> {
 }
 
 class _FileListPage extends StatefulWidget {
-  final int driverId;
-  final String parentFileId;
-  final FileType? type;
-  final String? category;
-  final FileType? selectableType;
-
   const _FileListPage({
     required this.driverId,
     required this.parentFileId,
@@ -170,6 +163,12 @@ class _FileListPage extends StatefulWidget {
     this.category,
     this.selectableType,
   });
+
+  final int driverId;
+  final String parentFileId;
+  final FileType? type;
+  final String? category;
+  final FileType? selectableType;
 
   @override
   State<_FileListPage> createState() => _FileListPageState();
@@ -198,7 +197,7 @@ class _FileListPageState extends State<_FileListPage> {
                                 if (event is KeyUpEvent) {
                                   switch (event.logicalKey) {
                                     case LogicalKeyboardKey.arrowRight:
-                                      onPage(item.id);
+                                      _onPage(item.id);
                                       return KeyEventResult.handled;
                                   }
                                 }
@@ -214,15 +213,14 @@ class _FileListPageState extends State<_FileListPage> {
                                   : null,
                               groupValue: _selectedFile),
                           title: Text(item.name),
-                          subtitle: Row(children: [
+                          subtitle: Row(spacing: 12, children: [
                             if (item.updatedAt != null) Text(item.updatedAt!.formatFull()),
-                            if (item.updatedAt != null) Gap.hMD,
                             if (item.size != null) Text(item.size!.toSizeDisplay()),
                           ]),
                           trailing: item.type == FileType.folder
                               ? TVIconButton(
                                   icon: const Icon(Icons.chevron_right),
-                                  onPressed: () => onPage(item.id),
+                                  onPressed: () => _onPage(item.id),
                                 )
                               : null,
                           onTap: (widget.selectableType == null || item.type == widget.selectableType)
@@ -236,7 +234,7 @@ class _FileListPageState extends State<_FileListPage> {
     );
   }
 
-  onPage(String parentFileId) {
+  void _onPage(String parentFileId) {
     navigateToSlideLeft(
         context,
         _FileListPage(

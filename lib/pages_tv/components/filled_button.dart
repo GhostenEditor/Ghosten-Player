@@ -1,12 +1,6 @@
 import 'package:flutter/material.dart';
 
 class TVFilledButton extends StatefulWidget {
-  final VoidCallback? onPressed;
-  final Widget? child;
-  final Widget? icon;
-  final bool? autofocus;
-  final FocusNode? focusNode;
-
   const TVFilledButton({
     super.key,
     required this.onPressed,
@@ -30,26 +24,32 @@ class TVFilledButton extends StatefulWidget {
     );
   }
 
+  final VoidCallback? onPressed;
+  final Widget? child;
+  final Widget? icon;
+  final bool? autofocus;
+  final FocusNode? focusNode;
+
   @override
   State<TVFilledButton> createState() => _TVFilledButtonState();
 }
 
 class _TVFilledButtonState extends State<TVFilledButton> {
-  bool focused = false;
+  bool _focused = false;
 
   @override
   Widget build(BuildContext context) {
     return Material(
       color: Theme.of(context).colorScheme.inverseSurface,
       shape: StadiumBorder(
-        side: focused ? BorderSide(width: 2, color: Theme.of(context).colorScheme.inverseSurface, strokeAlign: 3) : BorderSide.none,
+        side: _focused ? BorderSide(width: 2, color: Theme.of(context).colorScheme.inverseSurface, strokeAlign: 3) : BorderSide.none,
       ),
-      textStyle: const TextStyle(color: Colors.black),
+      textStyle: TextStyle(color: Theme.of(context).colorScheme.onInverseSurface),
       child: InkWell(
         autofocus: widget.autofocus ?? false,
         onFocusChange: (f) {
-          if (focused != f) {
-            setState(() => focused = f);
+          if (_focused != f) {
+            setState(() => _focused = f);
           }
         },
         focusNode: widget.focusNode,
@@ -62,7 +62,7 @@ class _TVFilledButtonState extends State<TVFilledButton> {
               : Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    IconTheme.merge(data: const IconThemeData(color: Colors.black), child: widget.icon!),
+                    IconTheme.merge(data: IconThemeData(color: Theme.of(context).colorScheme.onInverseSurface), child: widget.icon!),
                     const SizedBox(width: 6),
                     if (widget.child != null) widget.child!,
                   ],

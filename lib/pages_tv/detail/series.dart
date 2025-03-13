@@ -21,9 +21,9 @@ import 'mixins/searchable.dart';
 import 'season.dart';
 
 class TVDetail extends StatefulWidget {
-  final TVSeries initialData;
-
   const TVDetail({super.key, required this.initialData});
+
+  final TVSeries initialData;
 
   @override
   State<TVDetail> createState() => _TVDetailState();
@@ -47,7 +47,7 @@ class _TVDetailState extends State<TVDetail> with ActionMixin, SearchableMixin {
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) {
-          if (_drawerNavigatorKey.currentState?.canPop() == true) {
+          if (_drawerNavigatorKey.currentState?.canPop() ?? false) {
             _drawerNavigatorKey.currentState!.pop();
           } else {
             Navigator.of(context).pop(refresh);
@@ -65,7 +65,7 @@ class _TVDetailState extends State<TVDetail> with ActionMixin, SearchableMixin {
               navigatorKey: _navigatorKey,
               drawerNavigatorKey: _drawerNavigatorKey,
               showSide: _showSide,
-              endDrawer: buildEndDrawer(context, item),
+              endDrawer: _buildEndDrawer(context, item),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -151,7 +151,7 @@ class _TVDetailState extends State<TVDetail> with ActionMixin, SearchableMixin {
                     item: item,
                     description: RichText(
                       text: TextSpan(
-                        style: Theme.of(context).textTheme.labelSmall!,
+                        style: Theme.of(context).textTheme.labelSmall,
                         children: [
                           const WidgetSpan(child: Icon(Icons.star, color: Colors.amber, size: 14)),
                           const WidgetSpan(child: SizedBox(width: 4)),
@@ -183,7 +183,7 @@ class _TVDetailState extends State<TVDetail> with ActionMixin, SearchableMixin {
                             }),
                           )
                         : null,
-                    onTap: () => play(context, item),
+                    onTap: () => _play(context, item),
                   ),
                   ButtonSettingItem(
                     leading: const Icon(Icons.playlist_play),
@@ -224,7 +224,7 @@ class _TVDetailState extends State<TVDetail> with ActionMixin, SearchableMixin {
     );
   }
 
-  Widget buildEndDrawer(BuildContext context, TVSeries item) {
+  Widget _buildEndDrawer(BuildContext context, TVSeries item) {
     return SettingPage(
       title: AppLocalizations.of(context)!.buttonMore,
       child: Builder(builder: (context) {
@@ -232,11 +232,11 @@ class _TVDetailState extends State<TVDetail> with ActionMixin, SearchableMixin {
           ButtonSettingItem(
             autofocus: true,
             leading: const Icon(Icons.video_library_outlined),
-            title: Text(AppLocalizations.of(context)!.buttonSyncDriver),
+            title: Text(AppLocalizations.of(context)!.buttonSyncLibrary),
             onTap: () async {
               final res = await showNotification(context, Api.tvSeriesSyncById(item.id));
               if (res?.error is DioException) {
-                if ((res?.error as DioException).response?.statusCode == 404) {
+                if ((res!.error! as DioException).response?.statusCode == 404) {
                   if (!context.mounted) return;
                   Navigator.of(context).pop(true);
                 }
@@ -253,10 +253,10 @@ class _TVDetailState extends State<TVDetail> with ActionMixin, SearchableMixin {
           const Divider(),
           ButtonSettingItem(
             leading: const Icon(Icons.info_outline),
-            title: Text(AppLocalizations.of(context)!.buttonSyncMediaInfo),
+            title: Text(AppLocalizations.of(context)!.buttonScraperMediaInfo),
             onTap: () async {
-              final resp = await showNotification(context, refreshTVSeries(context, item));
-              if (resp?.data == true) setState(() => refresh = true);
+              final resp = await showNotification(context, _refreshTVSeries(context, item));
+              if (resp?.data ?? false) setState(() => refresh = true);
             },
           ),
           const Divider(),
@@ -279,18 +279,18 @@ class _TVDetailState extends State<TVDetail> with ActionMixin, SearchableMixin {
     );
   }
 
-  play(BuildContext context, TVSeries item) async {
+  Future<void> _play(BuildContext context, TVSeries item) async {
     final res = item.nextToPlay;
     if (res != null) {
       final season = await Api.tvSeasonQueryById(res.seasonId);
       final playlist = season.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList();
       if (!context.mounted) return;
-      await toPlayer(context, playlist, id: res.id, theme: item.themeColor, playerType: PlayerType.tv);
+      await toPlayer(context, playlist, index: season.episodes.indexWhere((episode) => episode.id == res.id), theme: item.themeColor);
       if (context.mounted) setState(() => refresh = true);
     }
   }
 
-  Future<bool> refreshTVSeries(BuildContext context, TVSeries item) {
+  Future<bool> _refreshTVSeries(BuildContext context, TVSeries item) {
     return search(
       context,
       ({required String title, int? year, int? index}) => Api.tvSeriesUpdateById(

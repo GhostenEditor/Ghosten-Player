@@ -4,14 +4,14 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../../validators/validators.dart';
 
 class PromptFilename extends StatefulWidget {
-  final String text;
-  final int? year;
-
   const PromptFilename({
     super.key,
     this.year,
     required this.text,
   });
+
+  final String text;
+  final int? year;
 
   @override
   State<PromptFilename> createState() => _PromptFilenameState();

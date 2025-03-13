@@ -1,21 +1,12 @@
+import 'package:api/api.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../const.dart';
+import '../utils/utils.dart';
+import '../views/image_viewer.dart';
 
 class AsyncImage extends StatelessWidget {
-  final String src;
-  final double? width;
-  final double? height;
-  final BorderRadius radius;
-  final Alignment alignment;
-  final BoxFit fit;
-  final bool ink;
-  final bool needLoading;
-  final double errorIconSize;
-  final EdgeInsets padding;
-  final Map<String, String>? httpHeaders;
-
   const AsyncImage(
     this.src, {
     super.key,
@@ -29,11 +20,27 @@ class AsyncImage extends StatelessWidget {
     this.errorIconSize = 36,
     this.padding = EdgeInsets.zero,
     this.httpHeaders = const {headerUserAgent: ua},
+    this.viewable = false,
+    this.showErrorWidget = true,
   });
+
+  final String src;
+  final double? width;
+  final double? height;
+  final BorderRadius radius;
+  final Alignment alignment;
+  final BoxFit fit;
+  final bool ink;
+  final bool needLoading;
+  final double errorIconSize;
+  final EdgeInsets padding;
+  final Map<String, String>? httpHeaders;
+  final bool viewable;
+  final bool showErrorWidget;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final image = Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         borderRadius: radius,
@@ -46,7 +53,9 @@ class AsyncImage extends StatelessWidget {
         width: width,
         height: height,
         httpHeaders: httpHeaders,
-        errorWidget: (context, url, error) => Center(child: Icon(Icons.broken_image, size: errorIconSize)),
+        errorWidget: (context, url, error) => showErrorWidget
+            ? Center(child: Icon(Icons.broken_image, size: errorIconSize, color: Theme.of(context).colorScheme.error.withAlpha(0x33)))
+            : const SizedBox(),
         placeholder: (context, _) => needLoading ? const _AnimatedLoading() : const SizedBox(),
         imageBuilder: ink
             ? (context, imageProvider) {
@@ -61,7 +70,6 @@ class AsyncImage extends StatelessWidget {
                           image: imageProvider,
                           fit: fit,
                           alignment: alignment,
-                          filterQuality: FilterQuality.medium,
                         )),
                   ),
                 );
@@ -69,6 +77,7 @@ class AsyncImage extends StatelessWidget {
             : null,
       ),
     );
+    return viewable ? GestureDetector(onLongPress: () => navigateTo(navigatorKey.currentContext!, ImageViewer(url: Uri.parse(src))), child: image) : image;
   }
 }
 

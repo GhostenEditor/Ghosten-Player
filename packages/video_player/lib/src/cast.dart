@@ -1,10 +1,12 @@
+import '../player.dart';
+
 abstract class Cast {
   Stream<List<CastDevice>> discover();
 
   const Cast();
 }
 
-abstract class CastDevice {
+abstract class CastDevice implements PlayerBaseController {
   final String friendlyName;
   final String id;
 
@@ -16,6 +18,8 @@ abstract class CastDevice {
   Future<void> play();
 
   Future<void> pause();
+
+  Future<void> start();
 
   Future<void> stop();
 
@@ -30,13 +34,4 @@ abstract class CastDevice {
   Future<dynamic> getMediaInfo();
 
   Future<dynamic> getTransportInfo();
-
-  Stream<PositionInfo> position();
-}
-
-class PositionInfo {
-  final Duration position;
-  final Duration duration;
-
-  PositionInfo({required this.position, required this.duration});
 }

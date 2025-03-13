@@ -1,13 +1,13 @@
 import 'package:api/api.dart';
 
 class ImdbUri {
+  const ImdbUri(this.type, this.id, {this.season, this.episode});
+
   static const domain = 'https://www.themoviedb.org';
   final MediaType type;
   final String id;
   final int? season;
   final int? episode;
-
-  const ImdbUri(this.type, this.id, {this.season, this.episode});
 
   Uri toUri() {
     return Uri.parse(switch (type) {

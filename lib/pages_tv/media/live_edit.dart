@@ -10,9 +10,9 @@ import '../utils/driver_file_picker.dart';
 import '../utils/notification.dart';
 
 class LiveEdit extends StatefulWidget {
-  final Playlist? item;
-
   const LiveEdit({super.key, this.item});
+
+  final Playlist? item;
 
   @override
   State<LiveEdit> createState() => _LiveEditState();
@@ -20,7 +20,7 @@ class LiveEdit extends StatefulWidget {
 
 class _LiveEditState extends State<LiveEdit> {
   late final _controller = TextEditingController(text: widget.item?.url);
-  late final items = [
+  late final _items = [
     FormItem(
       'title',
       labelText: AppLocalizations.of(context)!.liveCreateFormItemLabelTitle,
@@ -59,7 +59,7 @@ class _LiveEditState extends State<LiveEdit> {
               fit: FlexFit.tight,
               child: DecoratedBox(
                 decoration: const BoxDecoration(
-                  image: DecorationImage(image: AssetImage('assets/images/bg-wheat.webp'), repeat: ImageRepeat.repeat),
+                  image: DecorationImage(image: AssetImage('assets/tv/images/bg-wheat.webp'), repeat: ImageRepeat.repeat),
                 ),
                 child: InputAssistance(onData: (data) {
                   final ctx = FocusManager.instance.primaryFocus?.context;
@@ -77,7 +77,7 @@ class _LiveEditState extends State<LiveEdit> {
                   Text(widget.item == null ? AppLocalizations.of(context)!.pageTitleAdd : AppLocalizations.of(context)!.pageTitleEdit,
                       style: Theme.of(context).textTheme.displaySmall!.copyWith(fontWeight: FontWeight.bold)),
                   StepperForm(
-                    items: items,
+                    items: _items,
                     onComplete: (data) async {
                       if (widget.item == null) {
                         final resp = await showNotification(context, Api.playlistInsert(data));

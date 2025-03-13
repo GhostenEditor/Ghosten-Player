@@ -4,14 +4,6 @@ import '../../../components/gap.dart';
 import '../../components/focusable_image.dart';
 
 class MediaGridItem extends StatefulWidget {
-  final String? imageUrl;
-  final Widget? title;
-  final Widget? subtitle;
-  final double? imageWidth;
-  final double? imageHeight;
-  final bool? autofocus;
-  final GestureTapCallback? onTap;
-
   const MediaGridItem({
     super.key,
     this.onTap,
@@ -23,12 +15,20 @@ class MediaGridItem extends StatefulWidget {
     this.autofocus,
   });
 
+  final String? imageUrl;
+  final Widget? title;
+  final Widget? subtitle;
+  final double? imageWidth;
+  final double? imageHeight;
+  final bool? autofocus;
+  final GestureTapCallback? onTap;
+
   @override
   State<MediaGridItem> createState() => MediaGridItemState();
 }
 
 class MediaGridItemState extends State<MediaGridItem> {
-  bool focused = false;
+  bool _focused = false;
 
   @override
   Widget build(BuildContext context) {
@@ -44,21 +44,24 @@ class MediaGridItemState extends State<MediaGridItem> {
             poster: widget.imageUrl,
             onTap: widget.onTap,
             onFocusChange: (f) {
-              if (focused != f) {
-                setState(() => focused = f);
+              if (_focused != f) {
+                setState(() => _focused = f);
               }
             },
           ),
           Gap.vSM,
           if (widget.title != null)
             DefaultTextStyle(
-              style: Theme.of(context).textTheme.titleMedium!.copyWith(fontWeight: FontWeight.bold, color: focused ? Colors.white : Colors.grey),
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium!
+                  .copyWith(fontWeight: FontWeight.bold, color: _focused ? null : Theme.of(context).colorScheme.onSurfaceVariant),
               overflow: TextOverflow.ellipsis,
               child: widget.title!,
             ),
           if (widget.subtitle != null)
             DefaultTextStyle(
-              style: Theme.of(context).textTheme.labelMedium!.copyWith(color: Colors.grey),
+              style: Theme.of(context).textTheme.labelMedium!.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
               overflow: TextOverflow.ellipsis,
               child: widget.subtitle!,
             ),

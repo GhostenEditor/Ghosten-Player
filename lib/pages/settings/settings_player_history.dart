@@ -7,8 +7,8 @@ import '../../components/future_builder_handler.dart';
 import '../../components/gap.dart';
 import '../../components/no_data.dart';
 import '../../models/models.dart';
-import '../../utils/player.dart';
 import '../../utils/utils.dart';
+import '../utils/player.dart';
 
 class SystemSettingsPlayerHistory extends StatefulWidget {
   const SystemSettingsPlayerHistory({super.key});
@@ -54,8 +54,16 @@ class _SystemSettingsPlayerHistoryState extends State<SystemSettingsPlayerHistor
                                   ),
                                 ),
                               ),
-                        trailing: const Icon(Icons.play_arrow_rounded),
                         title: Text(item.title, overflow: TextOverflow.ellipsis, maxLines: 2),
+                        trailing: item.duration > Duration.zero
+                            ? SizedBox.square(
+                                dimension: 16,
+                                child: CircularProgressIndicator(
+                                  value: item.lastPlayedPosition.inMilliseconds / item.duration.inMilliseconds,
+                                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                                ),
+                              )
+                            : null,
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -74,8 +82,6 @@ class _SystemSettingsPlayerHistoryState extends State<SystemSettingsPlayerHistor
                                 ),
                               ),
                             ),
-                            if (item.duration > Duration.zero)
-                              LinearProgressIndicator(value: item.lastPlayedPosition.inMilliseconds / item.duration.inMilliseconds),
                           ],
                         ),
                         onTap: () async {
@@ -87,7 +93,6 @@ class _SystemSettingsPlayerHistoryState extends State<SystemSettingsPlayerHistor
                                 context,
                                 [FromMedia.fromMovie(movie)],
                                 theme: movie.themeColor,
-                                playerType: PlayerType.movie,
                               );
                               setState(() {});
                             case MediaType.episode:
@@ -97,8 +102,7 @@ class _SystemSettingsPlayerHistoryState extends State<SystemSettingsPlayerHistor
                               await toPlayer(
                                 context,
                                 season.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList(),
-                                playerType: PlayerType.tv,
-                                id: episode.id,
+                                index: season.episodes.indexWhere((e) => episode.id == e.id),
                                 theme: season.themeColor,
                               );
                               setState(() {});

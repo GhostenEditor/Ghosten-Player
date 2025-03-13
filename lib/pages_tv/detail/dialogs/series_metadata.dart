@@ -9,9 +9,9 @@ import '../../components/setting.dart';
 import '../../components/text_button.dart';
 
 class SeriesMetadata extends StatefulWidget {
-  final TVSeries series;
-
   const SeriesMetadata({super.key, required this.series});
+
+  final TVSeries series;
 
   @override
   State<SeriesMetadata> createState() => _SeriesMetadataState();

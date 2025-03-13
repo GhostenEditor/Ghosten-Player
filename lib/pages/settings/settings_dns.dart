@@ -3,11 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../components/future_builder_handler.dart';
-import '../../components/gap.dart';
 import '../../components/no_data.dart';
-import '../../utils/notification.dart';
 import '../../utils/utils.dart';
 import '../../validators/validators.dart';
+import '../utils/notification.dart';
 
 class SystemSettingsDNS extends StatefulWidget {
   const SystemSettingsDNS({super.key});
@@ -26,7 +25,7 @@ class SystemSettingsDNSState extends State<SystemSettingsDNS> {
           IconButton(
               onPressed: () async {
                 final flag = await navigateTo<bool>(context, const _SystemSettingsDNSEdit());
-                if (flag == true) setState(() {});
+                if (flag ?? false) setState(() {});
               },
               icon: const Icon(Icons.add))
         ],
@@ -57,7 +56,7 @@ class SystemSettingsDNSState extends State<SystemSettingsDNS> {
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () async {
                           final flag = await navigateTo<bool>(context, _SystemSettingsDNSEdit(item: item));
-                          if (flag == true) setState(() {});
+                          if (flag ?? false) setState(() {});
                         },
                       );
                     },
@@ -68,9 +67,9 @@ class SystemSettingsDNSState extends State<SystemSettingsDNS> {
 }
 
 class _SystemSettingsDNSEdit extends StatefulWidget {
-  final DNSOverride? item;
-
   const _SystemSettingsDNSEdit({this.item});
+
+  final DNSOverride? item;
 
   @override
   State<_SystemSettingsDNSEdit> createState() => _SystemSettingsDNSEditState();
@@ -136,6 +135,7 @@ class _SystemSettingsDNSEditState extends State<_SystemSettingsDNSEdit> {
           child: Form(
             key: _formKey,
             child: Column(
+              spacing: 12,
               children: [
                 DropdownButtonFormField(
                     value: _controller1.text,
@@ -149,7 +149,6 @@ class _SystemSettingsDNSEditState extends State<_SystemSettingsDNSEdit> {
                     items: _domains.map((domain) => DropdownMenuItem(value: domain, child: Text(domain))).toList(),
                     validator: (value) => requiredValidator(context, value),
                     onChanged: (v) => setState(() => _controller1.text = v!)),
-                Gap.vMD,
                 TextFormField(
                   decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)!.dnsFormItemLabelIP,
@@ -167,10 +166,10 @@ class _SystemSettingsDNSEditState extends State<_SystemSettingsDNSEdit> {
                     } else {
                       final matches = RegExp(r'^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$').firstMatch(value);
                       if (matches?.groupCount == 4) {
-                        if (int.parse(matches?[1] as String) < 1 << 8 &&
-                            int.parse(matches?[2] as String) < 1 << 8 &&
-                            int.parse(matches?[3] as String) < 1 << 8 &&
-                            int.parse(matches?[4] as String) < 1 << 8) {
+                        if (int.parse(matches![1]!) < 1 << 8 &&
+                            int.parse(matches[2]!) < 1 << 8 &&
+                            int.parse(matches[3]!) < 1 << 8 &&
+                            int.parse(matches[4]!) < 1 << 8) {
                           return null;
                         }
                       }

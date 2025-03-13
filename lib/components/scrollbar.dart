@@ -1,10 +1,8 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 class ScrollbarListView extends StatefulWidget {
-  final SliverChildDelegate childrenDelegate;
-  final Axis scrollDirection;
-  final EdgeInsetsGeometry? padding;
-
   ScrollbarListView({
     super.key,
     this.scrollDirection = Axis.vertical,
@@ -38,6 +36,42 @@ class ScrollbarListView extends StatefulWidget {
           addRepaintBoundaries: addRepaintBoundaries,
           addSemanticIndexes: addSemanticIndexes,
         );
+
+  ScrollbarListView.separated({
+    super.key,
+    required NullableIndexedWidgetBuilder itemBuilder,
+    required IndexedWidgetBuilder separatorBuilder,
+    this.scrollDirection = Axis.vertical,
+    ChildIndexGetter? findChildIndexCallback,
+    required int itemCount,
+    bool addAutomaticKeepAlives = true,
+    bool addRepaintBoundaries = true,
+    bool addSemanticIndexes = true,
+    this.padding,
+  }) : childrenDelegate = SliverChildBuilderDelegate(
+          (BuildContext context, int index) {
+            final int itemIndex = index ~/ 2;
+            if (index.isEven) {
+              return itemBuilder(context, itemIndex);
+            }
+            return separatorBuilder(context, itemIndex);
+          },
+          findChildIndexCallback: findChildIndexCallback,
+          childCount: _computeActualChildCount(itemCount),
+          addAutomaticKeepAlives: addAutomaticKeepAlives,
+          addRepaintBoundaries: addRepaintBoundaries,
+          addSemanticIndexes: addSemanticIndexes,
+          semanticIndexCallback: (Widget widget, int index) {
+            return index.isEven ? index ~/ 2 : null;
+          },
+        );
+  final SliverChildDelegate childrenDelegate;
+  final Axis scrollDirection;
+  final EdgeInsetsGeometry? padding;
+
+  static int _computeActualChildCount(int itemCount) {
+    return max(0, itemCount * 2 - 1);
+  }
 
   @override
   State<ScrollbarListView> createState() => _ScrollbarListViewState();

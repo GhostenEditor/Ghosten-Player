@@ -3,14 +3,6 @@ import 'package:flutter/material.dart';
 enum _IconButtonVariant { standard, filled, filledTonal, outlined }
 
 class TVIconButton extends StatefulWidget {
-  final VoidCallback? onPressed;
-  final Widget icon;
-  final bool autofocus;
-  final VisualDensity? visualDensity;
-  final EdgeInsetsGeometry? padding;
-  final Size? minimumSize;
-  final _IconButtonVariant _variant;
-
   const TVIconButton({
     super.key,
     required this.onPressed,
@@ -30,22 +22,29 @@ class TVIconButton extends StatefulWidget {
     this.padding,
     this.minimumSize,
   }) : _variant = _IconButtonVariant.filledTonal;
+  final VoidCallback? onPressed;
+  final Widget icon;
+  final bool autofocus;
+  final VisualDensity? visualDensity;
+  final EdgeInsetsGeometry? padding;
+  final Size? minimumSize;
+  final _IconButtonVariant _variant;
 
   @override
   State<TVIconButton> createState() => _TVIconButtonState();
 }
 
 class _TVIconButtonState extends State<TVIconButton> {
-  bool focused = false;
+  bool _focused = false;
   final _focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
     _focusNode.addListener(() {
-      if (focused != _focusNode.hasFocus) {
+      if (_focused != _focusNode.hasFocus) {
         setState(() {
-          focused = _focusNode.hasFocus;
+          _focused = _focusNode.hasFocus;
         });
       }
     });
@@ -60,7 +59,7 @@ class _TVIconButtonState extends State<TVIconButton> {
   @override
   Widget build(BuildContext context) {
     final style = IconButton.styleFrom(
-      side: focused ? BorderSide(width: 4, color: Theme.of(context).colorScheme.inverseSurface, strokeAlign: 2) : null,
+      side: _focused ? BorderSide(width: 4, color: Theme.of(context).colorScheme.inverseSurface, strokeAlign: 2) : null,
       minimumSize: widget.minimumSize,
     );
     switch (widget._variant) {

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
@@ -16,14 +18,45 @@ class CastAdaptor extends Cast {
 }
 
 class CastDeviceAdaptor extends CastDevice {
-  const CastDeviceAdaptor({
+  CastDeviceAdaptor({
     required super.id,
     required super.friendlyName,
   });
 
-  factory CastDeviceAdaptor.fromJson(dynamic data) {
+  factory CastDeviceAdaptor.fromJson(Json data) {
     return CastDeviceAdaptor(id: data['id'], friendlyName: data['friendlyName']);
   }
+
+  late final Stream<(int, int)> _stream = PlatformApi.screenEvent
+      .switchMap((value) => switch (value) {
+            ScreenState.on || ScreenState.off => Stream.periodic(const Duration(seconds: 1)),
+            ScreenState.present => Stream.periodic(const Duration(seconds: 1)).switchMap((_) => Stream.fromFuture(Future.microtask(() async {
+                  try {
+                    final data = await Api.dlnaGetPositionInfo(id) as Json;
+                    final duration = data['duration'];
+                    final position = data['position'];
+                    if (duration is int && position is int) {
+                      return (position, duration);
+                    } else {
+                      return null;
+                    }
+                  } catch (e) {
+                    return null;
+                  }
+                })))
+          })
+      .mapNotNull((e) => e);
+
+  @override
+  final ValueNotifier<Duration> position = ValueNotifier(Duration.zero);
+  @override
+  final ValueNotifier<Duration> duration = ValueNotifier(Duration.zero);
+  @override
+  final ValueNotifier<Duration> bufferedPosition = ValueNotifier(Duration.zero);
+  @override
+  final ValueNotifier<PlayerStatus> status = ValueNotifier(PlayerStatus.idle);
+
+  StreamSubscription<dynamic>? _subscription;
 
   @override
   Future<dynamic> getMediaInfo() {
@@ -47,10 +80,7 @@ class CastDeviceAdaptor extends CastDevice {
     } catch (error) {
       ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(SnackBar(
         backgroundColor: Colors.black87,
-        content: ErrorMessage(
-          snapshot: AsyncSnapshot.withError(ConnectionState.done, error),
-          safeArea: false,
-        ),
+        content: ErrorMessage(error: error, safeArea: false),
         behavior: SnackBarBehavior.floating,
       ));
       rethrow;
@@ -68,43 +98,31 @@ class CastDeviceAdaptor extends CastDevice {
   }
 
   @override
-  Stream<PositionInfo> position() {
-    return PlatformApi.screenEvent
-        .switchMap((value) => switch (value) {
-              ScreenState.on || ScreenState.off => Stream.periodic(const Duration(seconds: 1)),
-              ScreenState.present => Stream.periodic(const Duration(seconds: 1)).switchMap((_) => Stream.fromFuture(Future.microtask(() async {
-                    try {
-                      final data = await Api.dlnaGetPositionInfo(id);
-                      final duration = data['duration'];
-                      final position = data['position'];
-                      if (duration is int && position is int) {
-                        return PositionInfo(
-                          duration: Duration(seconds: duration),
-                          position: Duration(seconds: position),
-                        );
-                      } else {
-                        return null;
-                      }
-                    } catch (e) {
-                      return null;
-                    }
-                  })))
-            })
-        .mapNotNull((e) => e);
-  }
-
-  @override
   Future<void> seek(Duration seek) {
     return Api.dlnaSeek(id, seek);
   }
 
   @override
+  Future<void> start() async {
+    _subscription = _stream.listen((data) {
+      position.value = Duration(seconds: data.$1);
+      duration.value = Duration(seconds: data.$2);
+    });
+  }
+
+  @override
   Future<void> stop() {
+    _subscription?.cancel();
     return Api.dlnaStop(id);
   }
 
   @override
   Future<void> setVolume(double volume) {
     return Api.dlnaSetVolume(id, volume);
+  }
+
+  @override
+  Future<String?> getVideoThumbnail(int position) {
+    throw UnimplementedError();
   }
 }

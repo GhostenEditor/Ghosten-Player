@@ -72,8 +72,12 @@ class MethodChannelApi extends ApiPlatform {
   /// Library Start
 
   @override
-  Future<void> libraryRefreshById(int id) async {
-    final data = await client.post('/library/refresh/id/cb', data: {'id': id});
+  Future<void> libraryRefreshById(int id, bool incremental, String behavior) async {
+    final data = await client.post('/library/refresh/id/cb', data: {
+      'id': id,
+      'incremental': incremental,
+      'behavior': behavior,
+    });
     final eventChannel = EventChannel('$_pluginNamespace/update/${data['id']}');
 
     ApiPlatform.streamController.addStream(eventChannel
@@ -98,9 +102,10 @@ class MethodChannelApi extends ApiPlatform {
     try {
       final res = await Dio(BaseOptions(connectTimeout: const Duration(seconds: 30))).get(updateUrl);
       final data = UpdateResp.fromJson(res.data);
+      final suffix = switch (appFlavor) { 'tv' => '-tv', _ => '' };
       final url = switch (await _methodChannel.invokeMethod('arch')) {
-        'arm64' => data.assets.firstWhereOrNull((item) => item.name == 'app-arm64-v8a-release.apk'),
-        _ => data.assets.firstWhereOrNull((item) => item.name == 'app-armeabi-v7a-release.apk'),
+        'arm64' => data.assets.firstWhereOrNull((item) => item.name == 'app-arm64-v8a$suffix-release.apk'),
+        _ => data.assets.firstWhereOrNull((item) => item.name == 'app-armeabi-v7a$suffix-release.apk'),
       }
           ?.url;
       if (url != null && currentVersion < data.tagName) {
@@ -125,10 +130,10 @@ class MethodChannelApi extends ApiPlatform {
 
   /// Cast Start
   @override
-  Stream<List<dynamic>> dlnaDiscover() async* {
+  Stream<List<Json>> dlnaDiscover() async* {
     final data = await client.post('/dlna/discover/cb');
     final eventChannel = EventChannel('$_pluginNamespace/update/${data['id']}');
-    yield* eventChannel.receiveBroadcastStream().map((event) => jsonDecode(event) as List<dynamic>);
+    yield* eventChannel.receiveBroadcastStream().map((event) => jsonDecode(event) as List<Json>);
   }
 
   ///  Cast End

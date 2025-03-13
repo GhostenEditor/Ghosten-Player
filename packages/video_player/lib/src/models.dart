@@ -117,10 +117,20 @@ enum AspectRatioType {
 enum PlaylistItemSourceType {
   local,
   hls,
-  other,
+  rtsp,
+  other;
+
+  static PlaylistItemSourceType fromBroadcastUri(Uri uri) {
+    return switch (uri.scheme.toLowerCase()) {
+      'http' || 'https' => PlaylistItemSourceType.hls,
+      'rtsp' => PlaylistItemSourceType.rtsp,
+      'file' => PlaylistItemSourceType.local,
+      _ => PlaylistItemSourceType.other,
+    };
+  }
 }
 
-class PlaylistItem {
+class PlaylistItem<T> {
   final String? poster;
   final String? title;
   final String? description;
@@ -129,10 +139,12 @@ class PlaylistItem {
   final Duration end;
   final PlaylistItemSourceType sourceType;
   final List<Subtitle>? subtitles;
+  final T source;
 
   const PlaylistItem({
     required this.url,
     required this.sourceType,
+    required this.source,
     this.title,
     this.description,
     this.poster,
@@ -141,7 +153,7 @@ class PlaylistItem {
     this.end = Duration.zero,
   });
 
-  PlaylistItem copyWith({
+  PlaylistItem<T> copyWith({
     String? poster,
     String? title,
     String? description,
@@ -160,6 +172,7 @@ class PlaylistItem {
       end: end ?? this.end,
       sourceType: sourceType ?? this.sourceType,
       subtitles: subtitles ?? this.subtitles,
+      source: source,
     );
   }
 
@@ -175,6 +188,12 @@ class PlaylistItem {
       'subtitle': subtitles?.map((e) => e.toJson()).toList()
     };
   }
+
+  @override
+  int get hashCode => url.hashCode;
+
+  @override
+  bool operator ==(Object other) => other is PlaylistItem && url == other.url && title == other.title && url == other.url;
 }
 
 enum SubtitleMimeType {

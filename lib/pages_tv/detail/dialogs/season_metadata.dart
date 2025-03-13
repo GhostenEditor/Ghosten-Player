@@ -8,9 +8,9 @@ import '../../components/setting.dart';
 import '../../components/text_button.dart';
 
 class SeasonMetadata extends StatefulWidget {
-  final TVSeason season;
-
   const SeasonMetadata({super.key, required this.season});
+
+  final TVSeason season;
 
   @override
   State<SeasonMetadata> createState() => _SeasonMetadataState();

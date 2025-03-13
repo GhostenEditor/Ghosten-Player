@@ -1,3 +1,5 @@
+import 'package:equatable/equatable.dart';
+
 typedef Json = Map<String, dynamic>;
 typedef JsonList = List<dynamic>;
 
@@ -40,7 +42,7 @@ class MediaSearchQuery {
   }
 }
 
-class MediaBase {
+class MediaBase extends Equatable {
   final int id;
   final String? title;
   final String? poster;
@@ -51,6 +53,7 @@ class MediaBase {
   final bool favorite;
   final DateTime? airDate;
   final String? overview;
+  final String updateAt;
 
   MediaBase.fromJson(Json json)
       : id = json['id'],
@@ -62,7 +65,11 @@ class MediaBase {
         airDate = (json['airDate'] as String?)?.toDateTime(),
         logo = json['logo'],
         backdrop = json['backdrop'],
-        overview = json['overview'];
+        overview = json['overview'],
+        updateAt = json['updateAt'];
+
+  @override
+  List<Object?> get props => [updateAt];
 }
 
 class Media extends MediaBase {
@@ -224,6 +231,7 @@ class TVEpisode extends Media {
   final int episode;
   final int season;
   final int seasonId;
+  final int seriesId;
   final String? seriesTitle;
   final String? seasonTitle;
   final Duration skipIntro;
@@ -241,6 +249,7 @@ class TVEpisode extends Media {
         season = json['season'],
         seasonId = json['seasonId'],
         seasonTitle = json['seasonTitle'],
+        seriesId = json['seriesId'],
         seriesTitle = json['seriesTitle'],
         skipIntro = (json['skipIntro'] as int?).toDuration(),
         skipEnding = (json['skipEnding'] as int?).toDuration(),
@@ -406,15 +415,13 @@ class Playlist {
 }
 
 class Channel {
-  final int id;
-  final String url;
+  final List<Uri> links;
   final String? title;
   final String? image;
   final String? category;
 
   Channel.fromJson(Json json)
-      : id = json['id'],
-        url = json['url'],
+      : links = (json['links'] as List<dynamic>).map((l) => Uri.tryParse(l)).nonNulls.toList(),
         title = json['title'],
         image = json['image'],
         category = json['category'];

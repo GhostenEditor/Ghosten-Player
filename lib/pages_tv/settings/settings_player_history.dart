@@ -4,7 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../components/async_image.dart';
 import '../../models/models.dart';
-import '../../utils/player.dart';
+import '../../pages/utils/player.dart';
 import '../../utils/utils.dart';
 import '../components/future_builder_handler.dart';
 import '../components/setting.dart';
@@ -76,7 +76,6 @@ class _SystemSettingsPlayerHistoryState extends State<SystemSettingsPlayerHistor
                             navigatorKey.currentContext!,
                             [FromMedia.fromMovie(movie)],
                             theme: movie.themeColor,
-                            playerType: PlayerType.movie,
                           );
                           setState(() {});
                         case MediaType.episode:
@@ -86,8 +85,7 @@ class _SystemSettingsPlayerHistoryState extends State<SystemSettingsPlayerHistor
                           await toPlayer(
                             navigatorKey.currentContext!,
                             season.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList(),
-                            playerType: PlayerType.tv,
-                            id: episode.id,
+                            index: season.episodes.indexWhere((e) => episode.id == e.id),
                             theme: season.themeColor,
                           );
                           setState(() {});

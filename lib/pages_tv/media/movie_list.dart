@@ -17,9 +17,9 @@ import 'components/media_grid_item.dart';
 import 'mixins/channel.dart';
 
 class MovieListPage extends StatefulWidget {
-  final GlobalKey<NavigatorState> endDrawerNavigatorKey;
-
   const MovieListPage({super.key, required this.endDrawerNavigatorKey});
+
+  final GlobalKey<NavigatorState> endDrawerNavigatorKey;
 
   @override
   State<MovieListPage> createState() => _MovieListPageState();
@@ -68,7 +68,7 @@ class _MovieListPageState extends State<MovieListPage> with NeedUpdateMixin, Cha
                     child: Container(
                       width: 200,
                       height: 200,
-                      color: Colors.black,
+                      color: Theme.of(context).scaffoldBackgroundColor,
                     ),
                   )),
         ),
@@ -116,7 +116,6 @@ class _MovieListPageState extends State<MovieListPage> with NeedUpdateMixin, Cha
                                         context,
                                         [FromMedia.fromMovie(movie)],
                                         theme: item.themeColor,
-                                        playerType: PlayerType.movie,
                                       );
                                       setState(() {});
                                     },
@@ -143,7 +142,7 @@ class _MovieListPageState extends State<MovieListPage> with NeedUpdateMixin, Cha
                 }),
             buildChannel(
               context,
-              label: AppLocalizations.of(context)!.recentWatched,
+              label: AppLocalizations.of(context)!.watchNow,
               future: Api.movieNextToPlayQueryAll(),
               height: 340,
               builder: (context, item) => Stack(
@@ -171,9 +170,7 @@ class _MovieListPageState extends State<MovieListPage> with NeedUpdateMixin, Cha
                       await toPlayer(
                         context,
                         [FromMedia.fromMovie(movie)],
-                        id: item.id,
                         theme: item.themeColor,
-                        playerType: PlayerType.movie,
                       );
                       setState(() {});
                     },
@@ -209,7 +206,7 @@ class _MovieListPageState extends State<MovieListPage> with NeedUpdateMixin, Cha
                 title: Text(item.displayTitle()),
                 subtitle: Text(item.airDate?.format() ?? ''),
                 imageUrl: item.poster,
-                onTap: () => onMediaTap(item),
+                onTap: () => _onMediaTap(item),
               ),
             ),
             buildChannel(
@@ -224,7 +221,7 @@ class _MovieListPageState extends State<MovieListPage> with NeedUpdateMixin, Cha
                 title: Text(item.displayTitle()),
                 subtitle: Text(item.airDate?.format() ?? ''),
                 imageUrl: item.poster,
-                onTap: () => onMediaTap(item),
+                onTap: () => _onMediaTap(item),
               ),
             ),
             buildGridChannel(
@@ -237,7 +234,7 @@ class _MovieListPageState extends State<MovieListPage> with NeedUpdateMixin, Cha
                 imageUrl: item.poster,
                 title: Text(item.displayTitle()),
                 subtitle: Text(item.airDate?.format() ?? ''),
-                onTap: () => onMediaTap(item),
+                onTap: () => _onMediaTap(item),
               ),
             ),
           ],
@@ -246,9 +243,9 @@ class _MovieListPageState extends State<MovieListPage> with NeedUpdateMixin, Cha
     );
   }
 
-  onMediaTap(Movie item) async {
+  Future<void> _onMediaTap(Movie item) async {
     final flag = await navigateTo<bool>(context, MovieDetail(initialData: item));
-    if (flag == true && mounted) {
+    if ((flag ?? false) && mounted) {
       setState(() {});
     }
   }

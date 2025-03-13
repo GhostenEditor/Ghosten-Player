@@ -56,6 +56,13 @@ android {
             signingConfig = signingConfigs.release
         }
     }
+
+    flavorDimensions "default"
+
+    productFlavors {
+        tv {}
+        mobile {}
+    }
 }
 
 flutter {

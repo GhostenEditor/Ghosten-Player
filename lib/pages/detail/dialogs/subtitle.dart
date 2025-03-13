@@ -3,15 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:video_player/player.dart';
 
-import '../../../components/gap.dart';
 import '../../../providers/user_config.dart';
-import '../../../utils/utils.dart';
 import '../../../validators/validators.dart';
+import '../../utils/utils.dart';
 
 class SubtitleDialog extends StatefulWidget {
-  final SubtitleData? subtitle;
-
   const SubtitleDialog({super.key, this.subtitle});
+
+  final SubtitleData? subtitle;
 
   @override
   State<SubtitleDialog> createState() => _SubtitleDialogState();
@@ -39,6 +38,7 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
         key: _formKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          spacing: 12,
           children: [
             TextFormField(
               autofocus: true,
@@ -76,7 +76,6 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
                 FocusScope.of(context).nextFocus();
               },
             ),
-            Gap.vMD,
             DropdownButtonFormField(
                 value: _mimeType,
                 decoration: InputDecoration(
@@ -86,13 +85,11 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
                   labelText: AppLocalizations.of(context)!.subtitleFormItemLabelType,
                 ),
                 items: [
-                  DropdownMenuItem(
-                      value: null, child: Text(AppLocalizations.of(context)!.formItemNotSelectedHint, style: Theme.of(context).textTheme.labelSmall)),
+                  DropdownMenuItem(child: Text(AppLocalizations.of(context)!.formItemNotSelectedHint, style: Theme.of(context).textTheme.labelSmall)),
                   ...SubtitleMimeType.values.map((mime) => DropdownMenuItem(value: mime.name, child: Text(mime.name.toUpperCase())))
                 ],
                 validator: (value) => requiredValidator(context, value),
                 onChanged: (v) => setState(() => _mimeType = v)),
-            Gap.vMD,
             DropdownButtonFormField(
                 value: _language,
                 decoration: InputDecoration(
@@ -102,8 +99,7 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
                   labelText: AppLocalizations.of(context)!.subtitleFormItemLabelLanguage,
                 ),
                 items: [
-                  DropdownMenuItem(
-                      value: null, child: Text(AppLocalizations.of(context)!.formItemNotSelectedHint, style: Theme.of(context).textTheme.labelSmall)),
+                  DropdownMenuItem(child: Text(AppLocalizations.of(context)!.formItemNotSelectedHint, style: Theme.of(context).textTheme.labelSmall)),
                   ...SystemLanguage.values.map((lang) => DropdownMenuItem(value: lang.name, child: Text(lang.name.toUpperCase())))
                 ],
                 onChanged: (v) => setState(() => _language = v)),
@@ -116,7 +112,7 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
             if (_formKey.currentState!.validate() && _mimeType != null) {
               Navigator.of(context).pop(SubtitleData(
                 url: Uri.parse(_controller.text),
-                mimeType: _mimeType!,
+                mimeType: _mimeType,
                 language: _language,
                 title: _filename,
               ));

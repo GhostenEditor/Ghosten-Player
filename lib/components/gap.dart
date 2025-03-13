@@ -5,9 +5,6 @@ const double _defaultGapSizeMd = 12;
 const double _defaultGapSizeLg = 16;
 
 class Gap extends StatelessWidget {
-  final double? width;
-  final double? height;
-
   const Gap({
     super.key,
     this.width,
@@ -21,12 +18,14 @@ class Gap extends StatelessWidget {
   const Gap.horizontal({super.key, double size = _defaultGapSizeMd})
       : width = size,
         height = null;
+  final double? width;
+  final double? height;
 
   static const vLG = Gap.vertical(size: _defaultGapSizeLg);
-  static const vMD = Gap.vertical(size: _defaultGapSizeMd);
+  static const vMD = Gap.vertical();
   static const vSM = Gap.vertical(size: _defaultGapSizeSm);
   static const hLG = Gap.horizontal(size: _defaultGapSizeLg);
-  static const hMD = Gap.horizontal(size: _defaultGapSizeMd);
+  static const hMD = Gap.horizontal();
   static const hSM = Gap.horizontal(size: _defaultGapSizeSm);
 
   @override

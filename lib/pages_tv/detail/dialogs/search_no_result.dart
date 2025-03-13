@@ -6,10 +6,10 @@ import '../../components/filled_button.dart';
 import '../../components/text_button.dart';
 
 class SearchNoResult extends StatefulWidget {
+  const SearchNoResult({super.key, required this.text, this.year});
+
   final String text;
   final int? year;
-
-  const SearchNoResult({super.key, required this.text, this.year});
 
   @override
   State<SearchNoResult> createState() => _SearchNoResultState();
@@ -35,19 +35,19 @@ class _SearchNoResultState extends State<SearchNoResult> {
         const DecoratedBox(
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage('assets/images/bg-stripe.png'),
+              image: AssetImage('assets/tv/images/bg-stripe.png'),
               repeat: ImageRepeat.repeat,
             ),
           ),
         ),
-        const DecoratedBox(
+        DecoratedBox(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                Colors.black38,
-                Colors.black,
+                Theme.of(context).scaffoldBackgroundColor.withAlpha(0x61),
+                Theme.of(context).scaffoldBackgroundColor,
               ],
-              stops: [0.2, 0.5],
+              stops: const [0.2, 0.5],
             ),
           ),
         ),
@@ -58,7 +58,6 @@ class _SearchNoResultState extends State<SearchNoResult> {
             child: Form(
               key: _formKey,
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Flexible(
@@ -78,7 +77,6 @@ class _SearchNoResultState extends State<SearchNoResult> {
                             autofocus: true,
                             decoration: InputDecoration(
                               border: const UnderlineInputBorder(),
-                              filled: true,
                               isDense: true,
                               labelText: AppLocalizations.of(context)!.formLabelTitle,
                             ),
@@ -94,7 +92,6 @@ class _SearchNoResultState extends State<SearchNoResult> {
                             keyboardType: TextInputType.number,
                             decoration: InputDecoration(
                               border: const UnderlineInputBorder(),
-                              filled: true,
                               isDense: true,
                               labelText: AppLocalizations.of(context)!.formLabelYear,
                             ),

@@ -8,10 +8,10 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'future_builder_handler.dart';
 
 class InputAssistance extends StatelessWidget {
+  const InputAssistance({super.key, required this.onData, this.disabled = false});
+
   final bool disabled;
   final Function(String) onData;
-
-  const InputAssistance({super.key, required this.onData, this.disabled = false});
 
   @override
   Widget build(BuildContext context) {
@@ -20,18 +20,16 @@ class InputAssistance extends StatelessWidget {
         builder: (context, sn) {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
                 clipBehavior: Clip.antiAlias,
                 margin: const EdgeInsets.symmetric(horizontal: 72),
                 decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
                 child: ImageFiltered(
-                  imageFilter: disabled ? ImageFilter.blur(sigmaX: 16, sigmaY: 16) : ImageFilter.blur(sigmaX: 0, sigmaY: 0),
+                  imageFilter: disabled ? ImageFilter.blur(sigmaX: 16, sigmaY: 16) : ImageFilter.blur(),
                   child: QrImageView(
                     backgroundColor: Colors.white,
                     data: sn.requireData.uri.toString(),
-                    version: QrVersions.auto,
                     padding: const EdgeInsets.all(16),
                     eyeStyle: const QrEyeStyle(
                       eyeShape: QrEyeShape.circle,

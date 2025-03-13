@@ -2,13 +2,12 @@ import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../../components/gap.dart';
 import '../../../validators/validators.dart';
 
 class MovieMetadata extends StatefulWidget {
-  final Movie movie;
-
   const MovieMetadata({super.key, required this.movie});
+
+  final Movie movie;
 
   @override
   State<MovieMetadata> createState() => _MovieMetadataState();
@@ -35,6 +34,7 @@ class _MovieMetadataState extends State<MovieMetadata> {
         key: _formKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          spacing: 12,
           children: [
             TextFormField(
               autofocus: true,
@@ -49,7 +49,6 @@ class _MovieMetadataState extends State<MovieMetadata> {
               validator: (value) => requiredValidator(context, value),
               onEditingComplete: () => FocusScope.of(context).nextFocus(),
             ),
-            Gap.vMD,
             TextFormField(
               autofocus: true,
               controller: _controller2,

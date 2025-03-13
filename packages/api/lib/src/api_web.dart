@@ -60,8 +60,12 @@ class ApiWeb extends ApiPlatform {
   /// Library Start
 
   @override
-  Future<void> libraryRefreshById(int id) async {
-    final data = await client.post('/library/refresh/id/cb', data: {'id': id});
+  Future<void> libraryRefreshById(int id, bool incremental, String behavior) async {
+    final data = await client.post('/library/refresh/id/cb', data: {
+      'id': id,
+      'incremental': incremental,
+      'behavior': behavior,
+    });
     final sessionId = data['id'];
     Stream<double?> s() async* {
       loop:
@@ -121,7 +125,7 @@ class ApiWeb extends ApiPlatform {
 
   /// Cast Start
   @override
-  Stream<List<dynamic>> dlnaDiscover() async* {
+  Stream<List<Json>> dlnaDiscover() async* {
     final data = await client.post<Json>('/dlna/discover/cb');
     if (data != null) {
       final sessionId = data['id'];
@@ -196,10 +200,22 @@ class Client extends ApiClient {
   }
 
   PlatformException convert(DioException exception) {
-    return PlatformException(
-      code: exception.response?.headers.value('Error-Code') ?? ((exception.response?.statusCode ?? 0) * 100).toString(),
-      message: exception.response?.data.toString() ?? exception.message,
-      stacktrace: exception.stackTrace.toString(),
-    );
+    return switch (exception.type) {
+      DioExceptionType.connectionTimeout || DioExceptionType.sendTimeout || DioExceptionType.receiveTimeout => PlatformException(
+          code: '40800',
+          message: exception.response?.data.toString() ?? exception.message,
+          stacktrace: exception.stackTrace.toString(),
+        ),
+      DioExceptionType.badCertificate ||
+      DioExceptionType.badResponse ||
+      DioExceptionType.cancel ||
+      DioExceptionType.connectionError ||
+      DioExceptionType.unknown =>
+        PlatformException(
+          code: exception.response?.headers.value('Error-Code') ?? ((exception.response?.statusCode ?? 0) * 100).toString(),
+          message: exception.response?.data.toString() ?? exception.message,
+          stacktrace: exception.stackTrace.toString(),
+        ),
+    };
   }
 }

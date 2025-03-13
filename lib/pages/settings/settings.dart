@@ -1,26 +1,23 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
-import '../../components/appbar_progress.dart';
 import '../../components/logo.dart';
 import '../../components/scrollbar.dart';
 import '../../const.dart';
-import '../../providers/user_config.dart';
-import '../../utils/notification.dart';
 import '../../utils/utils.dart';
 import '../account/account.dart';
+import '../components/appbar_progress.dart';
 import '../library.dart';
+import '../utils/utils.dart';
 import 'settings_diagnotics.dart';
-import 'settings_dns.dart';
 import 'settings_downloader.dart';
 import 'settings_log.dart';
-import 'settings_player.dart';
+import 'settings_other.dart';
 import 'settings_player_history.dart';
 import 'settings_server.dart';
-import 'settings_sync.dart';
+import 'settings_sponsor.dart';
 import 'settings_updater.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -28,13 +25,11 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userConfig = Provider.of<UserConfig>(context, listen: true);
     return Scaffold(
         appBar: AppBar(
           title: Text(AppLocalizations.of(context)!.settingsTitle),
           bottom: const AppbarProgressIndicator(),
-          leading: const Padding(padding: EdgeInsets.all(12), child: Logo()),
-          systemOverlayStyle: getSystemUiOverlayStyle(context),
+          leading: isMobile(context) ? const Padding(padding: EdgeInsets.all(12), child: Logo()) : null,
         ),
         body: ScrollbarListView(
           padding: const EdgeInsets.only(bottom: 16),
@@ -47,12 +42,12 @@ class SettingsPage extends StatelessWidget {
             _buildItem(
               AppLocalizations.of(context)!.settingsItemTV,
               Icons.tv,
-              onTap: () => navigateTo(context, LibraryManage(title: AppLocalizations.of(context)!.settingsItemTV, type: LibraryType.tv)),
+              onTap: () => navigateTo(context, const LibraryManage(type: LibraryType.tv)),
             ),
             _buildItem(
               AppLocalizations.of(context)!.settingsItemMovie,
               Icons.movie_creation_outlined,
-              onTap: () => navigateTo(context, LibraryManage(title: AppLocalizations.of(context)!.settingsItemMovie, type: LibraryType.movie)),
+              onTap: () => navigateTo(context, const LibraryManage(type: LibraryType.movie)),
             ),
             const Divider(),
             _buildItem(
@@ -61,48 +56,11 @@ class SettingsPage extends StatelessWidget {
               onTap: () => navigateTo(context, const SystemSettingsPlayerHistory()),
             ),
             _buildItem(
-              AppLocalizations.of(context)!.settingsItemPlayerSettings,
-              Icons.play_circle_outline,
-              onTap: () => navigateTo(context, const SystemSettingsPlayer()),
-            ),
-            _buildItem(
               AppLocalizations.of(context)!.settingsItemDownload,
               Icons.download_outlined,
               onTap: () => navigateTo(context, const SystemSettingsDownloader()),
             ),
             const Divider(),
-            _buildPopupMenuItem(
-              title: AppLocalizations.of(context)!.settingsItemLanguage,
-              icon: Icons.language,
-              trailing: AppLocalizations.of(context)!.systemLanguage(userConfig.language.name),
-              onSelected: userConfig.setLanguage,
-              itemBuilder: (BuildContext context) => SystemLanguage.values
-                  .map((language) => CheckedPopupMenuItem(
-                        value: language,
-                        checked: userConfig.language == language,
-                        child: Text(AppLocalizations.of(context)!.systemLanguage(language.name)),
-                      ))
-                  .toList(),
-            ),
-            _buildPopupMenuItem(
-              title: AppLocalizations.of(context)!.settingsItemTheme,
-              icon: Icons.light_mode_outlined,
-              trailing: AppLocalizations.of(context)!.systemTheme(userConfig.themeMode.name),
-              onSelected: userConfig.setTheme,
-              itemBuilder: (BuildContext context) => ThemeMode.values
-                  .map((theme) => CheckedPopupMenuItem(
-                        value: theme,
-                        checked: userConfig.themeMode == theme,
-                        child: Text(AppLocalizations.of(context)!.systemTheme(theme.name).padRight(8, ' ')),
-                      ))
-                  .toList(),
-            ),
-            const Divider(),
-            _buildItem(
-              AppLocalizations.of(context)!.settingsItemDNS,
-              Icons.dns_outlined,
-              onTap: () => navigateTo(context, const SystemSettingsDNS()),
-            ),
             if (alphaVersion)
               _buildItem(
                 AppLocalizations.of(context)!.settingsItemServer,
@@ -111,19 +69,9 @@ class SettingsPage extends StatelessWidget {
                 onTap: () => navigateTo(context, const SystemSettingsServer()),
               ),
             _buildItem(
-              AppLocalizations.of(context)!.settingsItemDataSync,
-              Icons.sync,
-              onTap: () => navigateTo(context, const SettingsSyncPage()),
-            ),
-            _buildItem(
-              AppLocalizations.of(context)!.settingsItemDataReset,
-              Icons.restart_alt,
-              onTap: () async {
-                final confirmed = await showConfirm(context, AppLocalizations.of(context)!.confirmTextResetData);
-                if (confirmed == true && context.mounted) {
-                  await showNotification(context, Api.resetData(), successText: AppLocalizations.of(context)!.modalNotificationResetSuccessText);
-                }
-              },
+              AppLocalizations.of(context)!.settingsItemNetworkDiagnotics,
+              Icons.rule_rounded,
+              onTap: () => navigateTo(context, const SettingsDiagnotics()),
             ),
             _buildItem(
               AppLocalizations.of(context)!.settingsItemLog,
@@ -131,21 +79,27 @@ class SettingsPage extends StatelessWidget {
               onTap: () => navigateTo(context, const SettingsLogPage()),
             ),
             _buildItem(
-              AppLocalizations.of(context)!.settingsItemNetworkDiagnotics,
-              Icons.rule_rounded,
-              onTap: () => navigateTo(context, const SettingsDiagnotics()),
+              AppLocalizations.of(context)!.settingsItemOthers,
+              Icons.more_horiz_rounded,
+              onTap: () => navigateTo(context, const SystemSettingsOther()),
+            ),
+            const Divider(),
+            _buildItem(
+              AppLocalizations.of(context)!.settingsItemFeedback,
+              Icons.feedback_outlined,
+              onTap: () {
+                launchUrlString('https://github.com/$repoAuthor/$repoName/issues', browserConfiguration: const BrowserConfiguration(showTitle: true));
+              },
+            ),
+            _buildItem(
+              AppLocalizations.of(context)!.settingsItemSponsor,
+              Icons.card_giftcard_rounded,
+              onTap: () => navigateTo(context, const SettingsSponsor()),
             ),
             _buildItem(
               AppLocalizations.of(context)!.settingsItemInfo,
               Icons.info_outline,
               onTap: () => navigateTo(context, const SystemSettingsUpdater()),
-            ),
-            _buildItem(
-              AppLocalizations.of(context)!.settingsItemFeedback,
-              Icons.feedback_outlined,
-              onTap: () {
-                launchUrlString('https://github.com/$repoAuthor/$repoName/issues', browserConfiguration: BrowserConfiguration(showTitle: true));
-              },
             ),
           ],
         ));
@@ -156,32 +110,12 @@ class SettingsPage extends StatelessWidget {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(title),
+            Expanded(child: Text(title)),
             if (trailing != null) trailing,
           ],
         ),
         leading: Icon(icon),
         trailing: onTap == null ? null : const Icon(Icons.chevron_right),
         onTap: onTap);
-  }
-
-  Widget _buildPopupMenuItem<T>({
-    required String title,
-    required String trailing,
-    IconData? icon,
-    PopupMenuItemSelected<T>? onSelected,
-    required PopupMenuItemBuilder<T> itemBuilder,
-  }) {
-    return PopupMenuButton<T>(
-      offset: const Offset(1, 0),
-      tooltip: '',
-      onSelected: onSelected,
-      itemBuilder: itemBuilder,
-      child: ListTile(
-        leading: Icon(icon),
-        trailing: Text(trailing),
-        title: Text(title),
-      ),
-    );
   }
 }

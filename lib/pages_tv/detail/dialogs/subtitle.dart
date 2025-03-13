@@ -13,9 +13,9 @@ import '../../components/text_button.dart';
 import '../../utils/driver_file_picker.dart';
 
 class SubtitleDialog extends StatefulWidget {
-  final SubtitleData? subtitle;
-
   const SubtitleDialog({super.key, this.subtitle});
+
+  final SubtitleData? subtitle;
 
   @override
   State<SubtitleDialog> createState() => _SubtitleDialogState();
@@ -89,8 +89,7 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
                     labelText: AppLocalizations.of(context)!.subtitleFormItemLabelType,
                   ),
                   items: [
-                    DropdownMenuItem(
-                        value: null, child: Text(AppLocalizations.of(context)!.formItemNotSelectedHint, style: Theme.of(context).textTheme.labelSmall)),
+                    DropdownMenuItem(child: Text(AppLocalizations.of(context)!.formItemNotSelectedHint, style: Theme.of(context).textTheme.labelSmall)),
                     ...SubtitleMimeType.values.map((mime) => DropdownMenuItem(value: mime.name, child: Text(mime.name.toUpperCase())))
                   ],
                   validator: (value) => requiredValidator(context, value),
@@ -104,8 +103,7 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
                     labelText: AppLocalizations.of(context)!.subtitleFormItemLabelLanguage,
                   ),
                   items: [
-                    DropdownMenuItem(
-                        value: null, child: Text(AppLocalizations.of(context)!.formItemNotSelectedHint, style: Theme.of(context).textTheme.labelSmall)),
+                    DropdownMenuItem(child: Text(AppLocalizations.of(context)!.formItemNotSelectedHint, style: Theme.of(context).textTheme.labelSmall)),
                     ...SystemLanguage.values.map((lang) => DropdownMenuItem(value: lang.name, child: Text(lang.name.toUpperCase())))
                   ],
                   onChanged: (v) => setState(() => _language = v)),
@@ -115,7 +113,7 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
                   if (_formKey.currentState!.validate() && _mimeType != null) {
                     Navigator.of(context).pop(SubtitleData(
                       url: Uri.parse(_controller.text),
-                      mimeType: _mimeType!,
+                      mimeType: _mimeType,
                       language: _language,
                       title: _filename,
                     ));

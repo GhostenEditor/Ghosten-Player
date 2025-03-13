@@ -1,8 +1,8 @@
-import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../components/mobile_builder.dart';
+import '../components/logo.dart';
+import 'components/mobile_builder.dart';
 import 'media/live_list.dart';
 import 'media/movie_list.dart';
 import 'media/tv_list.dart';
@@ -20,23 +20,16 @@ class _HomeViewState extends State<HomeView> {
 
   Widget get child => switch (index) {
         0 => const TVListPage(),
-        1 => const MovieList(),
-        2 => const LiveList(),
+        1 => const MovieListPage(),
+        2 => const LiveListPage(),
         3 => const SettingsPage(),
         _ => const Placeholder(),
       };
 
   @override
   Widget build(BuildContext context) {
-    final body = PageTransitionSwitcher(
-      transitionBuilder: (child, animation, secondaryAnimation) => FadeThroughTransition(
-        animation: animation,
-        secondaryAnimation: secondaryAnimation,
-        child: child,
-      ),
-      child: child,
-    );
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       bottomNavigationBar: MobileBuilder(
         builder: (context, isMobile, child) => isMobile ? child : null,
         child: NavigationBar(
@@ -54,6 +47,7 @@ class _HomeViewState extends State<HomeView> {
           ).toList(),
         ),
       ),
+      backgroundColor: index == 2 ? Colors.transparent : null,
       body: Row(
         children: <Widget>[
           MobileBuilder(
@@ -61,7 +55,7 @@ class _HomeViewState extends State<HomeView> {
             child: Row(
               children: [
                 NavigationRail(
-                  leading: const SizedBox(),
+                  leading: const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Logo(size: 36)),
                   labelType: NavigationRailLabelType.all,
                   destinations: _destinations(context)
                       .map((destination) => NavigationRailDestination(
@@ -74,13 +68,11 @@ class _HomeViewState extends State<HomeView> {
                   useIndicator: true,
                   onDestinationSelected: (index) => setState(() => this.index = index),
                 ),
-                const VerticalDivider(),
+                if (index != 2) VerticalDivider(color: Theme.of(context).colorScheme.surfaceContainerHighest),
               ],
             ),
           ),
-          Expanded(
-            child: body,
-          ),
+          Expanded(child: child),
         ],
       ),
     );

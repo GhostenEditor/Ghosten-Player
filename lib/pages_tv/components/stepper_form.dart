@@ -4,26 +4,23 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'filled_button.dart';
 
 class StepperForm extends StatefulWidget {
+  const StepperForm({super.key, required this.items, required this.onComplete});
+
   final List<FormItem> items;
   final Function(Map<String, String?>) onComplete;
-
-  const StepperForm({super.key, required this.items, required this.onComplete});
 
   @override
   State<StepperForm> createState() => _StepperFormState();
 }
 
 class _StepperFormState extends State<StepperForm> {
-  final formKey = GlobalKey<FormState>();
-
-  late final dirties = List.generate(widget.items.length, (_) => false);
-  late final focusNodes = List.generate(widget.items.length + 1, (_) => FocusNode());
-
-  int currentStep = 0;
+  late final _dirties = List.generate(widget.items.length, (_) => false);
+  late final _focusNodes = List.generate(widget.items.length + 1, (_) => FocusNode());
+  int _currentStep = 0;
 
   @override
   void dispose() {
-    for (final focusNode in focusNodes) {
+    for (final focusNode in _focusNodes) {
       focusNode.dispose();
     }
     for (final item in widget.items) {
@@ -40,61 +37,61 @@ class _StepperFormState extends State<StepperForm> {
         if (didPop) {
           return;
         }
-        if (currentStep == 0) {
+        if (_currentStep == 0) {
           Navigator.of(context).pop();
         } else {
           setState(() {
-            currentStep -= 1;
+            _currentStep -= 1;
           });
         }
       },
       child: Stepper(
-        currentStep: currentStep,
+        currentStep: _currentStep,
         steps: [
           ...widget.items.indexed.map((entry) => Step(
               title: Text(entry.$2.labelText),
-              isActive: currentStep == entry.$1,
-              state: stepState(entry.$2, entry.$1),
+              isActive: _currentStep == entry.$1,
+              state: _stepState(entry.$2, entry.$1),
               content: TextField(
                 controller: widget.items[entry.$1].controller,
-                focusNode: focusNodes[entry.$1],
+                focusNode: _focusNodes[entry.$1],
                 decoration: InputDecoration(
                   isDense: true,
                   prefixIcon: entry.$2.prefixIcon,
                   suffixIcon: entry.$2.suffixIcon,
                   helperText: entry.$2.helperText,
                   border: const OutlineInputBorder(),
-                  errorText: dirties[entry.$1] && entry.$2.validator != null ? entry.$2.validator!(widget.items[entry.$1].controller.text) : null,
+                  errorText: _dirties[entry.$1] && entry.$2.validator != null ? entry.$2.validator!(widget.items[entry.$1].controller.text) : null,
                 ),
                 obscureText: entry.$2.obscureText,
                 onEditingComplete: () {
                   setState(() {
-                    currentStep = entry.$1 + 1;
-                    dirties[entry.$1] = true;
-                    Future.delayed(const Duration(milliseconds: 100)).then((_) => focusNodes[currentStep].requestFocus());
+                    _currentStep = entry.$1 + 1;
+                    _dirties[entry.$1] = true;
+                    Future.delayed(const Duration(milliseconds: 100)).then((_) => _focusNodes[_currentStep].requestFocus());
                   });
                 },
               ))),
           Step(
             title: Text(AppLocalizations.of(context)!.buttonComplete),
-            isActive: currentStep == 2,
+            isActive: _currentStep == 2,
             content: Align(
               alignment: Alignment.bottomRight,
               child: Padding(
                 padding: const EdgeInsets.only(top: 8),
                 child: TVFilledButton(
-                  focusNode: focusNodes.last,
+                  focusNode: _focusNodes.last,
                   child: Text(AppLocalizations.of(context)!.buttonSubmit),
                   onPressed: () {
                     if (!widget.items.indexed
-                        .any((entry) => entry.$2.validator != null ? entry.$2.validator!(widget.items[entry.$1].controller.text) != null : false)) {
+                        .any((entry) => entry.$2.validator != null && entry.$2.validator!(widget.items[entry.$1].controller.text) != null)) {
                       widget.onComplete(widget.items.indexed.fold({}, (acc, entry) {
                         acc[entry.$2.name] = widget.items[entry.$1].controller.text;
                         return acc;
                       }));
                     } else {
-                      for (int i = 0; i < dirties.length; i++) {
-                        dirties[i] = true;
+                      for (int i = 0; i < _dirties.length; i++) {
+                        _dirties[i] = true;
                       }
                       setState(() {});
                     }
@@ -106,7 +103,7 @@ class _StepperFormState extends State<StepperForm> {
         ],
         onStepTapped: (int index) {
           setState(() {
-            currentStep = index;
+            _currentStep = index;
           });
         },
         controlsBuilder: (context, _) => const SizedBox(),
@@ -114,19 +111,19 @@ class _StepperFormState extends State<StepperForm> {
     );
   }
 
-  StepState stepState(FormItem item, int index) {
-    if (dirties[index]) {
+  StepState _stepState(FormItem item, int index) {
+    if (_dirties[index]) {
       if (item.validator != null && item.validator!(widget.items[index].controller.text) != null) {
         return StepState.error;
       } else {
-        if (index == currentStep) {
+        if (index == _currentStep) {
           return StepState.editing;
         } else {
           return StepState.complete;
         }
       }
     } else {
-      if (index == currentStep) {
+      if (index == _currentStep) {
         return StepState.editing;
       } else {
         return StepState.indexed;
@@ -136,17 +133,6 @@ class _StepperFormState extends State<StepperForm> {
 }
 
 class FormItem {
-  final String? value;
-  final String labelText;
-  final String? helperText;
-  final String? hintText;
-  final String name;
-  final Widget? prefixIcon;
-  final Widget? suffixIcon;
-  final FormFieldValidator<String?>? validator;
-  final bool obscureText;
-  final TextEditingController controller;
-
   FormItem(
     this.name, {
     required this.labelText,
@@ -159,4 +145,14 @@ class FormItem {
     this.obscureText = false,
     TextEditingController? controller,
   }) : controller = controller ?? TextEditingController(text: value);
+  final String? value;
+  final String labelText;
+  final String? helperText;
+  final String? hintText;
+  final String name;
+  final Widget? prefixIcon;
+  final Widget? suffixIcon;
+  final FormFieldValidator<String?>? validator;
+  final bool obscureText;
+  final TextEditingController controller;
 }

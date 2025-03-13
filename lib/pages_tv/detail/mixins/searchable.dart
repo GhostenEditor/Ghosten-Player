@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:api/api.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -21,41 +20,6 @@ mixin SearchableMixin {
   }) async {
     try {
       await future(title: title, year: year, index: index);
-    } on DioException catch (e) {
-      switch (e.type) {
-        case DioExceptionType.badResponse:
-          switch (e.response?.statusCode) {
-            case 404:
-              if (!context.mounted) return false;
-              final res = await navigateTo<(String, int?)>(navigatorKey.currentContext!, SearchNoResult(text: title, year: year));
-              if (res != null) {
-                if (!context.mounted) return false;
-                return search(context, future, title: res.$1, year: res.$2);
-              } else {
-                rethrow;
-              }
-            case 300:
-              if (!context.mounted) return false;
-              final data = (e.response?.data! as List<dynamic>).map((e) => SearchResult.fromJson(e)).toList();
-              final res = await navigateTo<int>(
-                  navigatorKey.currentContext!,
-                  _SearchResultSelect(
-                    items: data,
-                    title: title,
-                    year: year,
-                  ));
-              if (!context.mounted) return false;
-              if (res != null) {
-                return search(context, future, title: title, year: year, index: res);
-              } else {
-                rethrow;
-              }
-            default:
-              rethrow;
-          }
-        default:
-          rethrow;
-      }
     } on PlatformException catch (e) {
       switch (e.code) {
         case '40401':
@@ -92,11 +56,11 @@ mixin SearchableMixin {
 }
 
 class _SearchResultSelect extends StatefulWidget {
+  const _SearchResultSelect({required this.items, required this.title, this.year});
+
   final String title;
   final int? year;
   final List<SearchResult> items;
-
-  const _SearchResultSelect({required this.items, required this.title, this.year});
 
   @override
   State<_SearchResultSelect> createState() => _SearchResultSelectState();
@@ -111,19 +75,19 @@ class _SearchResultSelectState extends State<_SearchResultSelect> {
         const DecoratedBox(
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage('assets/images/bg-stripe.png'),
+              image: AssetImage('assets/tv/images/bg-stripe.png'),
               repeat: ImageRepeat.repeat,
             ),
           ),
         ),
-        const DecoratedBox(
+        DecoratedBox(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                Colors.black38,
-                Colors.black,
+                Theme.of(context).scaffoldBackgroundColor.withAlpha(0x61),
+                Theme.of(context).scaffoldBackgroundColor,
               ],
-              stops: [0.2, 0.5],
+              stops: const [0.2, 0.5],
             ),
           ),
         ),
@@ -161,6 +125,7 @@ class _SearchResultSelectState extends State<_SearchResultSelect> {
                           padding: const EdgeInsets.all(8.0),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
+                            spacing: 12,
                             children: [
                               Row(
                                 children: [
@@ -177,9 +142,9 @@ class _SearchResultSelectState extends State<_SearchResultSelect> {
                                   if (item.airDate != null) Text(item.airDate!.format(), style: Theme.of(context).textTheme.labelMedium),
                                 ],
                               ),
-                              Gap.vMD,
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
+                                spacing: 16,
                                 children: [
                                   FocusableImage(
                                     autofocus: index == 0,
@@ -188,7 +153,6 @@ class _SearchResultSelectState extends State<_SearchResultSelect> {
                                     poster: item.poster,
                                     onTap: () => Navigator.of(context).pop(index),
                                   ),
-                                  Gap.hLG,
                                   Expanded(
                                     child: Text(
                                       item.overview ?? ' ',

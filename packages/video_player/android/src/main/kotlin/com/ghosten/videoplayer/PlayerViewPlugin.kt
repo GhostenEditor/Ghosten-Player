@@ -34,39 +34,71 @@ class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activit
             else -> {
                 when (call.method) {
                     "init" -> {
-                        mPlayerView = Media3PlayerView(
-                            activity.applicationContext,
-                            activity,
-                            mChannel,
-                            call.argument("extensionRendererMode"),
-                            call.argument("enableDecoderFallback"),
-                            call.argument("language"),
-                        )
+                        if (mPlayerView == null)
+                            mPlayerView = Media3PlayerView(
+                                activity.applicationContext,
+                                activity,
+                                mChannel,
+                                call.argument("extensionRendererMode"),
+                                call.argument("enableDecoderFallback"),
+                                call.argument("language"),
+                                call.argument("width"),
+                                call.argument("height"),
+                                call.argument("top"),
+                                call.argument("left"),
+                            )
                     }
 
-                    "play" -> mPlayerView?.play()
-                    "pause" -> mPlayerView?.pause()
-                    "next" -> mPlayerView?.next(call.arguments as Int)
-                    "seekTo" -> mPlayerView?.seekTo((call.arguments as Int).toLong())
-                    "updateSource" -> mPlayerView?.updateSource(call.argument("source")!!, call.argument("index")!!)
-                    "setSources" -> mPlayerView?.setSources(call.argument("playlist")!!, call.argument("index")!!)
-                    "setTransform" -> mPlayerView?.setTransform(call.argument("matrix")!!)
-                    "setAspectRatio" -> mPlayerView?.setAspectRatio((call.arguments as Double?)?.toFloat())
-                    "dispose" -> {
-                        mPlayerView?.dispose()
-                        mPlayerView = null
+                    else -> {
+                        when (call.method) {
+                            "play" -> mPlayerView?.play()
+                            "pause" -> mPlayerView?.pause()
+                            "next" -> mPlayerView?.next(call.arguments as Int)
+                            "seekTo" -> mPlayerView?.seekTo((call.arguments as Int).toLong())
+                            "updateSource" -> mPlayerView?.updateSource(
+                                call.argument("source")!!,
+                                call.argument("index")!!
+                            )
+
+                            "setSources" -> mPlayerView?.setSources(
+                                call.argument("playlist")!!,
+                                call.argument("index")!!
+                            )
+
+                            "setTransform" -> mPlayerView?.setTransform(call.argument("matrix")!!)
+                            "setAspectRatio" -> mPlayerView?.setAspectRatio((call.arguments as Double?)?.toFloat())
+                            "fullscreen" -> mPlayerView?.fullscreen(call.arguments as Boolean)
+                            "dispose" -> {
+                                mPlayerView?.dispose()
+                                mPlayerView = null
+                            }
+
+                            "setTrack" -> mPlayerView?.setTrack(
+                                call.argument<String>("type"),
+                                call.argument<String?>("id")
+                            )
+
+                            "setSkipPosition" -> mPlayerView?.setSkipPosition(
+                                call.argument("type")!!,
+                                call.argument("list")!!
+                            )
+
+                            "getVideoThumbnail" -> return mPlayerView!!.getVideoThumbnail(
+                                result,
+                                call.argument<Long>("position")!!
+                            )
+
+                            "setPlaybackSpeed" -> mPlayerView?.setPlaybackSpeed((call.arguments as Double).toFloat())
+                            "setPlayerOption" -> mPlayerView?.setPlayerOption(
+                                call.argument("name")!!,
+                                call.argument("value")!!
+                            )
+
+                            else -> return result.notImplemented()
+                        }
                     }
 
-                    "setVolume" -> mPlayerView?.setVolume((call.arguments as Double).toFloat())
-                    "setTrack" -> mPlayerView?.setTrack(call.argument<String>("type"), call.argument<String?>("id"))
-                    "setSkipPosition" -> mPlayerView?.setSkipPosition(call.argument("type")!!, call.argument("list")!!)
-                    "getVideoThumbnail" -> return mPlayerView!!.getVideoThumbnail(
-                        result,
-                        call.argument<Long>("position")!!
-                    )
 
-                    "setPlaybackSpeed" -> mPlayerView?.setPlaybackSpeed((call.arguments as Double).toFloat())
-                    else -> return result.notImplemented()
                 }
                 result.success(null)
             }
