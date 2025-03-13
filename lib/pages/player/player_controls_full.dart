@@ -47,7 +47,7 @@ class _PlayerControlsFullState<T> extends State<PlayerControlsFull<T>> with Play
     _subscription = _controlsStream.stream.switchMap((status) {
       switch (status) {
         case ControlsStreamStatus.show:
-          return ConcatStream([Stream.value(true), TimerStream(false, const Duration(seconds: 500))]);
+          return ConcatStream([Stream.value(true), TimerStream(false, const Duration(seconds: 5))]);
         case ControlsStreamStatus.showInfinite:
           return Stream.value(true);
         case ControlsStreamStatus.hide:

@@ -2,13 +2,13 @@ import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:readmore/readmore.dart';
 import 'package:video_player/player.dart';
 
 import '../../components/async_image.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
 import '../components/theme_builder.dart';
+import 'components/overview.dart';
 import 'dialogs/season_metadata.dart';
 import 'episode.dart';
 import 'mixins/action.dart';
@@ -139,14 +139,9 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin<SeasonDeta
                                 builder: (context, poster) =>
                                     poster != null ? AsyncImage(poster, width: 100, radius: BorderRadius.circular(4), viewable: true) : const SizedBox()),
                             BlocSelector<TVSeasonCubit, TVSeason?, String?>(
-                                selector: (season) => season?.overview,
-                                builder: (context, overview) => Expanded(
-                                      child: ReadMoreText(
-                                        overview ?? AppLocalizations.of(context)!.noOverview,
-                                        trimLines: 7,
-                                        trimMode: TrimMode.Line,
-                                      ),
-                                    )),
+                              selector: (season) => season?.overview,
+                              builder: (context, overview) => Expanded(child: OverviewSection(text: overview, trimLines: 7)),
+                            ),
                           ],
                         ),
                       ),

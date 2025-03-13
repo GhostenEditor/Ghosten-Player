@@ -2,7 +2,6 @@ import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:readmore/readmore.dart';
 
 import '../../components/async_image.dart';
 import '../../components/gap.dart';
@@ -10,6 +9,7 @@ import '../../utils/utils.dart';
 import '../components/theme_builder.dart';
 import '../utils/notification.dart';
 import 'components/actors.dart';
+import 'components/overview.dart';
 import 'dialogs/episode_metadata.dart';
 import 'dialogs/subtitle.dart';
 import 'mixins/action.dart';
@@ -166,11 +166,7 @@ class _EpisodeDetailState extends State<EpisodeDetail> with ActionMixin<EpisodeD
                                               const WidgetSpan(child: Gap.hSM),
                                               TextSpan(text: item.fileSize.toSizeDisplay(), style: Theme.of(context).textTheme.labelSmall),
                                             ])),
-                                            ReadMoreText(
-                                              item.overview ?? AppLocalizations.of(context)!.noOverview,
-                                              trimLines: 4,
-                                              trimMode: TrimMode.Line,
-                                            ),
+                                            OverviewSection(text: item.overview, trimLines: 4),
                                           ],
                                         ),
                                       )

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
-import 'package:readmore/readmore.dart';
 import 'package:video_player/player.dart';
 
 import '../../components/async_image.dart';
@@ -21,6 +20,7 @@ import '../components/theme_builder.dart';
 import '../player/player_controls_lite.dart';
 import '../utils/notification.dart';
 import 'components/actors.dart';
+import 'components/overview.dart';
 import 'components/player_backdrop.dart';
 import 'components/player_scaffold.dart';
 import 'components/playlist.dart';
@@ -110,14 +110,9 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
                                     builder: (context, poster) =>
                                         poster != null ? AsyncImage(poster, width: 100, radius: BorderRadius.circular(4), viewable: true) : const SizedBox()),
                                 BlocSelector<MovieCubit, Movie?, String?>(
-                                    selector: (movie) => movie?.overview,
-                                    builder: (context, overview) => Expanded(
-                                          child: ReadMoreText(
-                                            overview ?? AppLocalizations.of(context)!.noOverview,
-                                            trimLines: 7,
-                                            trimMode: TrimMode.Line,
-                                          ),
-                                        )),
+                                  selector: (movie) => movie?.overview,
+                                  builder: (context, overview) => Expanded(child: OverviewSection(text: overview, trimLines: 7)),
+                                ),
                               ],
                             ),
                           ),
