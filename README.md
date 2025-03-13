@@ -63,11 +63,11 @@ Android 6+
 <img src="https://github.com/user-attachments/assets/06126725-a87c-468a-8b4e-61fe91f3b5b6" alt="TV Screenshot 2" width="48%"/>
 </div>
 <div style="display: flex;">
-<img src="https://github.com/user-attachments/assets/d39b9e8c-b630-4861-b325-c38c3e8a404c" alt="TV Screenshot 3" width="48%"/>
-<img src="https://github.com/user-attachments/assets/c061c773-1f89-496c-86cf-04caca4a7503" alt="TV Screenshot 4" width="48%"/>
+<img src="https://github.com/user-attachments/assets/841093d0-b803-4b63-93a7-70fc75f97c32" alt="TV Screenshot 3" width="48%"/>
+<img src="https://github.com/user-attachments/assets/ca811ddf-fb65-4c3b-9505-94509a4f1fec" alt="TV Screenshot 4" width="48%"/>
 </div>
 <div style="display: flex;">
-<img src="https://github.com/user-attachments/assets/967731bc-a13c-485b-a360-b71f53da3f53" alt="TV Screenshot 5" width="48%"/>
+<img src="https://github.com/user-attachments/assets/d320a145-3fd4-453f-a541-9e19e580d1d5" alt="TV Screenshot 5" width="48%"/>
 <img src="https://github.com/user-attachments/assets/45cb240a-a921-46c2-a2ce-c31e5709656a" alt="TV Screenshot 6" width="48%"/>
 </div> 
 <div style="display: flex;">
@@ -75,19 +75,19 @@ Android 6+
 <img src="https://github.com/user-attachments/assets/a43ec774-3ad1-4387-bb04-68a040bca288" alt="TV Screenshot 8" width="48%"/>
 </div>
 
-### Android Phone 截图
+# Android Phone 截图
 
 <div style="display: flex;">
-<img src="https://github.com/user-attachments/assets/2191a341-e9ac-43e4-a79f-17ba6f979d86" alt="Mobile Screenshot 1" width="24%"/>
-<img src="https://github.com/user-attachments/assets/28ee59ee-0846-49f1-8ead-b16bb67be54c" alt="Mobile Screenshot 2" width="24%"/>
-<img src="https://github.com/user-attachments/assets/92828f5b-5a99-40ff-8f72-4fedbad0aacb" alt="Mobile Screenshot 3" width="24%"/>
-<img src="https://github.com/user-attachments/assets/a292ac1c-3e7a-44a9-a0a8-d4426422431f" alt="Mobile Screenshot 4" width="24%"/>
+<img src="https://github.com/user-attachments/assets/19b41deb-f959-4008-b1ed-859c6399a04a" alt="Mobile Screenshot 1" width="24%"/>
+<img src="https://github.com/user-attachments/assets/f9fb8a0c-e233-49d0-8451-f7d154e1643e" alt="Mobile Screenshot 2" width="24%"/>
+<img src="https://github.com/user-attachments/assets/456dc7b9-2bcd-492a-ae14-f9d69b481ebe" alt="Mobile Screenshot 3" width="24%"/>
+<img src="https://github.com/user-attachments/assets/65215d01-12be-417f-8b96-f35d2a272373" alt="Mobile Screenshot 4" width="24%"/>
 </div>
 <div style="display: flex;">
-<img src="https://github.com/user-attachments/assets/8a7d5de9-abbe-4338-8a94-2215f55dda17" alt="Mobile Screenshot 5" width="24%"/>
-<img src="https://github.com/user-attachments/assets/32f3d4b9-7e1b-4366-8cb5-af517dad5dcb" alt="Mobile Screenshot 6" width="24%"/>
-<img src="https://github.com/user-attachments/assets/34a46f8b-d22b-414c-8f8a-ef94e2044059" alt="Mobile Screenshot 7" width="24%"/>
-<img src="https://github.com/user-attachments/assets/a8add8a5-180e-4a4b-bec3-9f7928a8b647" alt="Mobile Screenshot 8" width="24%"/>
+<img src="https://github.com/user-attachments/assets/5487f5de-d97d-4a5e-8461-5e6ca80f4864" alt="Mobile Screenshot 5" width="24%"/>
+<img src="https://github.com/user-attachments/assets/c9e73ce6-ce33-4644-a49b-db534a8d4c91" alt="Mobile Screenshot 6" width="24%"/>
+<img src="https://github.com/user-attachments/assets/2d9c0993-7611-47ab-9ed7-6f490f56b3b1" alt="Mobile Screenshot 7" width="24%"/>
+<img src="https://github.com/user-attachments/assets/ab981465-4077-4b6a-a276-49716b03f9fa" alt="Mobile Screenshot 8" width="24%"/>
 </div>
 
 [^3]: 预览中的影视媒体仅作为展示用
