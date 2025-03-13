@@ -421,7 +421,7 @@ class Channel {
   final String? category;
 
   Channel.fromJson(Json json)
-      : links = (json['links'] as List<dynamic>).map((l) => Uri.parse(l)).toList(),
+      : links = (json['links'] as List<dynamic>).map((l) => Uri.tryParse(l)).nonNulls.toList(),
         title = json['title'],
         image = json['image'],
         category = json['category'];

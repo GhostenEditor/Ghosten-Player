@@ -7,6 +7,8 @@ jobs:
   build:
     name: Build APK
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v1
 
@@ -77,11 +79,12 @@ jobs:
           --dart-define=BUILD_DATE=$(date "+%F") \
           --dart-define=BUILD_VERSION=${{ env.VERSION }} \
           --dart-define=DEFAULT_IPTV_URL=${{ vars.DEFAULT_IPTV_URL }} \
-          --flavor=phone
+          --flavor=mobile
 
       - name: Build TV apk
         run: |
           flutter build apk \
+          --target=lib/main_tv.dart \
           --split-per-abi \
           --obfuscate \
           --split-debug-info=./build/app/outputs/flutter-apk/ \
@@ -90,6 +93,11 @@ jobs:
           --dart-define=BUILD_VERSION=${{ env.VERSION }} \
           --dart-define=DEFAULT_IPTV_URL=${{ vars.DEFAULT_IPTV_URL }} \
           --flavor=tv
+
+      - name: Rename Android APK
+        run: |
+          mv build/app/outputs/flutter-apk/app-arm64-v8a-mobile-release.apk build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          mv build/app/outputs/flutter-apk/app-armeabi-v7a-mobile-release.apk build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
 
       - name: Check if Tag Exists
         run: |
@@ -107,10 +115,11 @@ jobs:
 
       - name: Push APK to Releases
         uses: softprops/action-gh-release@v2
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          token: ${{ secrets.TOKEN }}
           tag_name: v${{ env.VERSION }}
-          release_name: v${{ env.VERSION }}
           draft: true
-          files: |
-            build/app/outputs/flutter-apk/app-arm*-release.apk
+          generate_release_notes: true
+          prerelease: false
+          files: build/app/outputs/flutter-apk/app-arm*-release.apk

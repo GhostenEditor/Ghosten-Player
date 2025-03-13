@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:provider/provider.dart';
 import 'package:video_player/player.dart';
 
 import '../../components/async_image.dart';
@@ -12,7 +11,6 @@ import '../../components/no_data.dart';
 import '../../components/playing_icon.dart';
 import '../../const.dart';
 import '../../models/models.dart';
-import '../../providers/user_config.dart';
 import '../components/image_card.dart';
 import '../player/player_controls_lite.dart';
 import '../utils/notification.dart';
@@ -27,7 +25,6 @@ class LiveListPage extends StatefulWidget {
 
 class _LiveListPageState extends State<LiveListPage> {
   final _controller = PlayerController<Channel>(Api.log);
-  late final _autoPlay = Provider.of<UserConfig>(context, listen: false).autoPlay;
 
   @override
   void dispose() {
@@ -120,7 +117,7 @@ class _LiveListPageState extends State<LiveListPage> {
                                                     if (MediaQuery.of(context).size.aspectRatio <= 1) {
                                                       final playlist = await Api.playlistChannelsQueryById(item.id);
                                                       await _controller.setSources(playlist.map(FromMedia.fromChannel).toList(), 0);
-                                                      if (_autoPlay) _controller.play();
+                                                      _controller.play();
                                                       if (context.mounted) {
                                                         _showBottomSheet(
                                                             context: context,
@@ -365,7 +362,6 @@ class IptvCubit extends Cubit<List<Playlist>?> {
         playlists = await Api.playlistQueryAll();
       } catch (e) {
         ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(SnackBar(
-          backgroundColor: Colors.black87,
           content: Text(AppLocalizations.of(navigatorKey.currentContext!)!.iptvSourceFetchFailed),
           behavior: SnackBarBehavior.floating,
         ));

@@ -14,7 +14,6 @@ import android.os.Handler
 import android.os.Looper
 import android.view.View
 import android.widget.FrameLayout
-import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.media3.common.*
@@ -492,7 +491,6 @@ class Media3PlayerView(
                             }
 
                             else -> {
-                                Toast.makeText(context, "播放错误", Toast.LENGTH_SHORT).show()
                                 mChannel.invokeMethod("fatalError", cause.message)
                             }
                         }
@@ -539,7 +537,6 @@ class Media3PlayerView(
                             }
 
                             else -> {
-                                Toast.makeText(context, loaderCause.toString(), Toast.LENGTH_SHORT).show()
                                 mChannel.invokeMethod("fatalError", loaderCause?.message)
                             }
                         }
@@ -547,14 +544,12 @@ class Media3PlayerView(
                     }
 
                     else -> {
-                        Toast.makeText(context, cause.toString(), Toast.LENGTH_SHORT).show()
                         mChannel.invokeMethod("fatalError", cause?.message)
                     }
                 }
             }
 
             else -> {
-                Toast.makeText(context, error.toString(), Toast.LENGTH_SHORT).show()
                 mChannel.invokeMethod("fatalError", error.cause?.message)
             }
         }
@@ -631,7 +626,7 @@ class Media3PlayerView(
         return when (video.type) {
             C.CONTENT_TYPE_HLS -> HlsMediaSource.Factory(httpDataSourceFactory)
                 .createMediaSource(MediaItem.fromUri(uri)).mediaItem
-
+            C.CONTENT_TYPE_RTSP -> MediaItem.fromUri(uri)
             C.CONTENT_TYPE_OTHER -> {
                 var mediaItem = ProgressiveMediaSource.Factory(httpDataSourceFactory)
                     .createMediaSource(MediaItem.fromUri(uri))
@@ -841,6 +836,7 @@ class Media3PlayerView(
                     "hls" -> C.CONTENT_TYPE_HLS
                     "dash" -> C.CONTENT_TYPE_DASH
                     "ss" -> C.CONTENT_TYPE_SS
+                    "rtsp" -> C.CONTENT_TYPE_RTSP
                     "local" -> 5
                     else -> C.CONTENT_TYPE_OTHER
                 },
@@ -868,6 +864,7 @@ class Media3PlayerView(
                 "hls" -> C.CONTENT_TYPE_HLS
                 "dash" -> C.CONTENT_TYPE_DASH
                 "ss" -> C.CONTENT_TYPE_SS
+                "rtsp" -> C.CONTENT_TYPE_RTSP
                 "local" -> 5
                 else -> C.CONTENT_TYPE_OTHER
             },

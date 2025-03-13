@@ -102,9 +102,10 @@ class MethodChannelApi extends ApiPlatform {
     try {
       final res = await Dio(BaseOptions(connectTimeout: const Duration(seconds: 30))).get(updateUrl);
       final data = UpdateResp.fromJson(res.data);
+      final suffix = switch (appFlavor) { 'tv' => '-tv', _ => '' };
       final url = switch (await _methodChannel.invokeMethod('arch')) {
-        'arm64' => data.assets.firstWhereOrNull((item) => item.name == 'app-arm64-v8a-release.apk'),
-        _ => data.assets.firstWhereOrNull((item) => item.name == 'app-armeabi-v7a-release.apk'),
+        'arm64' => data.assets.firstWhereOrNull((item) => item.name == 'app-arm64-v8a$suffix-release.apk'),
+        _ => data.assets.firstWhereOrNull((item) => item.name == 'app-armeabi-v7a$suffix-release.apk'),
       }
           ?.url;
       if (url != null && currentVersion < data.tagName) {

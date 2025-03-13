@@ -550,28 +550,35 @@ class _PlaylistState extends State<_Playlist> {
   }
 }
 
-class SwitchLinkButton<T> extends StatelessWidget {
+class SwitchLinkButton<T> extends StatefulWidget {
   const SwitchLinkButton(this.controller, {super.key});
 
   final PlayerController<T> controller;
 
   @override
+  State<SwitchLinkButton<T>> createState() => _SwitchLinkButtonState<T>();
+}
+
+class _SwitchLinkButtonState<T> extends State<SwitchLinkButton<T>> {
+  @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-        listenable: controller.index,
-        builder: (context, _) => (controller.currentItem?.source is Channel && (controller.currentItem!.source as Channel).links.length > 1)
+        listenable: widget.controller.index,
+        builder: (context, _) => (widget.controller.currentItem?.source is Channel && (widget.controller.currentItem!.source as Channel).links.length > 1)
             ? PopupMenuButton(
                 onSelected: (url) {
-                  final currentItem = controller.currentItem!;
-                  final item = PlaylistItem(url: url, sourceType: currentItem.sourceType, source: currentItem.source, poster: currentItem.poster);
-                  controller.playlist.value[controller.index.value!] = item;
-                  controller.updateSource(item, controller.index.value!);
+                  final currentItem = widget.controller.currentItem!;
+                  final item =
+                      PlaylistItem(url: url, sourceType: PlaylistItemSourceType.fromBroadcastUri(url), source: currentItem.source, poster: currentItem.poster);
+                  widget.controller.playlist.value[widget.controller.index.value!] = item;
+                  widget.controller.updateSource(item, widget.controller.index.value!);
+                  setState(() {});
                 },
-                itemBuilder: (context) => (controller.currentItem!.source as Channel)
+                itemBuilder: (context) => (widget.controller.currentItem!.source as Channel)
                     .links
                     .indexed
                     .map((entry) => CheckedPopupMenuItem(
-                          checked: controller.currentItem?.url == entry.$2,
+                          checked: widget.controller.currentItem?.url == entry.$2,
                           value: entry.$2,
                           child: Text('${AppLocalizations.of(context)!.playerBroadcastLine} ${entry.$1 + 1}'),
                         ))
@@ -579,7 +586,7 @@ class SwitchLinkButton<T> extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Text(
-                      '${AppLocalizations.of(context)!.playerBroadcastLine} ${(controller.currentItem!.source as Channel).links.indexOf(controller.currentItem!.url) + 1}'),
+                      '${AppLocalizations.of(context)!.playerBroadcastLine} ${(widget.controller.currentItem!.source as Channel).links.indexOf(widget.controller.currentItem!.url) + 1}'),
                 ),
               )
             : const SizedBox());

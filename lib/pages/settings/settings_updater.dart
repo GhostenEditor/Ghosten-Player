@@ -84,7 +84,7 @@ class SystemSettingsUpdaterState extends State<SystemSettingsUpdater> {
                         Version.fromString(appVersion),
                         needUpdate: (data, url) => showModalBottomSheet(
                             context: context,
-                            constraints: const BoxConstraints(minWidth: double.infinity, maxHeight: 320),
+                            constraints: const BoxConstraints(minWidth: double.infinity),
                             builder: (context) => UpdateBottomSheet(data, url: url)),
                       );
                       setState(() => _loading = false);

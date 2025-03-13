@@ -33,6 +33,7 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
         'token',
         labelText: AppLocalizations.of(context)!.accountCreateFormItemLabelRefreshToken,
         prefixIcon: Icons.shield_outlined,
+        maxLines: 5,
         validator: (value) => requiredValidator(context, value),
       ),
       FormItem(

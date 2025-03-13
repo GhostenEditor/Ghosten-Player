@@ -38,7 +38,7 @@ extension FromMedia<T> on PlaylistItem<T> {
 
   static PlaylistItem<Channel> fromChannel(Channel channel) {
     return PlaylistItem(
-      sourceType: PlaylistItemSourceType.hls,
+      sourceType: PlaylistItemSourceType.fromBroadcastUri(channel.links.first),
       title: channel.title,
       description: channel.category,
       url: channel.links.first,

@@ -11,6 +11,7 @@ class FormItem {
     this.suffixIcon,
     this.validator,
     this.obscureText = false,
+    this.maxLines = 1,
     TextEditingController? controller,
   }) : controller = controller ?? TextEditingController(text: value);
   late final TextEditingController controller;
@@ -19,6 +20,7 @@ class FormItem {
   final String? helperText;
   final String? hintText;
   final String name;
+  final int maxLines;
   final IconData? prefixIcon;
   final Widget? suffixIcon;
   final FormFieldValidator<String?>? validator;
@@ -78,6 +80,8 @@ class _FormGroupState extends State<FormGroup> {
               prefixIcon: Icon(item.prefixIcon),
               suffixIcon: item.suffixIcon,
             ),
+            minLines: 1,
+            maxLines: item.maxLines,
             obscureText: item.obscureText,
             validator: item.validator,
             onEditingComplete: () => FocusScope.of(context).nextFocus(),

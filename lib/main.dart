@@ -25,10 +25,7 @@ import 'theme.dart';
 import 'utils/utils.dart';
 
 void main(List<String> args) async {
-  UserConfig? userConfig;
-  ScaledWidgetsFlutterBinding.ensureInitialized(scaleFactor: (deviceSize) {
-    return max(1, deviceSize.width / 1140) * (userConfig?.displayScale ?? 1);
-  });
+  ScaledWidgetsFlutterBinding.ensureInitialized();
   await Api.initialized();
   if (kIsWeb) {
     BrowserContextMenu.disableContextMenu();
@@ -40,7 +37,8 @@ void main(List<String> args) async {
     PlatformApi.deviceType = DeviceType.fromString(args[0]);
   }
   setPreferredOrientations(false);
-  userConfig = await UserConfig.init();
+  final userConfig = await UserConfig.init();
+  ScaledWidgetsFlutterBinding.instance.scaleFactor = (deviceSize) => max(1, deviceSize.width / 1140) * userConfig.displayScale;
   Provider.debugCheckInvalidValueType = null;
   if (!kIsWeb && userConfig.shouldCheckUpdate()) {
     Api.checkUpdate(
@@ -48,7 +46,7 @@ void main(List<String> args) async {
       Version.fromString(appVersion),
       needUpdate: (data, url) => showModalBottomSheet(
           context: navigatorKey.currentContext!,
-          constraints: const BoxConstraints(minWidth: double.infinity, maxHeight: 320),
+          constraints: const BoxConstraints(minWidth: double.infinity),
           builder: (context) => UpdateBottomSheet(data, url: url)),
     );
   }

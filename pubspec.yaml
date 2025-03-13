@@ -37,7 +37,6 @@ dependencies:
   shimmer: ^3.0.0
   screen_brightness: ^2.1.0
   smooth_page_indicator: ^1.2.0
-  speech_to_text: ^7.0.0
   url_launcher: ^6.3.0
   video_player:
     path: packages/video_player
@@ -58,9 +57,6 @@ flutter:
     - path: assets/tv/images/
       flavors:
         - tv
-    - path: assets/phone/images/
-      flavors:
-        - phone
   fonts:
     - family: Roboto Condensed
       fonts:

@@ -95,80 +95,82 @@ class _SlidableSettingItemState extends State<SlidableSettingItem> with SingleTi
           setState(() => _focused = f);
         }
       },
-      child: Slidable(
-        controller: _controller,
-        startActionPane: widget.actionSide == ActionSide.start
-            ? ActionPane(
-                motion: const BehindMotion(),
-                extentRatio: widget.actions.length * 0.16,
-                children: widget.actions.map((action) => Padding(padding: const EdgeInsets.only(right: 4), child: action)).toList(),
-              )
-            : null,
-        endActionPane: widget.actionSide == ActionSide.end
-            ? ActionPane(
-                extentRatio: widget.actions.length * 0.16,
-                motion: const BehindMotion(),
-                children: widget.actions.map((action) => Padding(padding: const EdgeInsets.only(left: 4), child: action)).toList(),
-              )
-            : null,
-        child: Material(
-          type: MaterialType.transparency,
-          child: Actions(
-            actions: {
-              DirectionalFocusIntent: CallbackAction<DirectionalFocusIntent>(onInvoke: (indent) {
-                switch (indent.direction) {
-                  case TraversalDirection.left:
-                    if (_controller.direction.value == 0 && widget.actionSide == ActionSide.start) {
-                      _controller.openStartActionPane(duration: const Duration(milliseconds: 400));
-                      return null;
-                    }
-                  case TraversalDirection.right:
-                    if (_controller.direction.value == 0 && widget.actionSide == ActionSide.end) {
-                      _controller.openEndActionPane(duration: const Duration(milliseconds: 400));
-                      return null;
-                    }
-                  case TraversalDirection.up:
-                  case TraversalDirection.down:
-                }
-                FocusManager.instance.primaryFocus?.focusInDirection(indent.direction);
-                return null;
-              }),
-            },
-            child: Stack(
-              alignment: switch (widget.actionSide) {
-                ActionSide.start => Alignment.centerLeft,
-                ActionSide.end => Alignment.centerRight,
+      child: LayoutBuilder(builder: (context, constraints) {
+        return Slidable(
+          controller: _controller,
+          startActionPane: widget.actionSide == ActionSide.start
+              ? ActionPane(
+                  motion: const BehindMotion(),
+                  extentRatio: (52 * widget.actions.length) / constraints.maxWidth,
+                  children: widget.actions.map((action) => Padding(padding: const EdgeInsets.only(right: 4), child: action)).toList(),
+                )
+              : null,
+          endActionPane: widget.actionSide == ActionSide.end
+              ? ActionPane(
+                  extentRatio: (52 * widget.actions.length) / constraints.maxWidth,
+                  motion: const BehindMotion(),
+                  children: widget.actions.map((action) => Padding(padding: const EdgeInsets.only(left: 4), child: action)).toList(),
+                )
+              : null,
+          child: Material(
+            type: MaterialType.transparency,
+            child: Actions(
+              actions: {
+                DirectionalFocusIntent: CallbackAction<DirectionalFocusIntent>(onInvoke: (indent) {
+                  switch (indent.direction) {
+                    case TraversalDirection.left:
+                      if (_controller.direction.value == 0 && widget.actionSide == ActionSide.start) {
+                        _controller.openStartActionPane(duration: const Duration(milliseconds: 400));
+                        return null;
+                      }
+                    case TraversalDirection.right:
+                      if (_controller.direction.value == 0 && widget.actionSide == ActionSide.end) {
+                        _controller.openEndActionPane(duration: const Duration(milliseconds: 400));
+                        return null;
+                      }
+                    case TraversalDirection.up:
+                    case TraversalDirection.down:
+                  }
+                  FocusManager.instance.primaryFocus?.focusInDirection(indent.direction);
+                  return null;
+                }),
               },
-              children: [
-                TVListTile(
-                  autofocus: widget.autofocus,
-                  title: widget.title,
-                  subtitle: widget.subtitle,
-                  leading: widget.leading,
-                  trailing: widget.trailing,
-                  selected: widget.selected || _focused,
-                  onTap: widget.onTap ??
-                      () {
-                        if (_controller.direction.value == 0) {
-                          switch (widget.actionSide) {
-                            case ActionSide.start:
-                              _controller.openStartActionPane(duration: const Duration(milliseconds: 400));
+              child: Stack(
+                alignment: switch (widget.actionSide) {
+                  ActionSide.start => Alignment.centerLeft,
+                  ActionSide.end => Alignment.centerRight,
+                },
+                children: [
+                  TVListTile(
+                    autofocus: widget.autofocus,
+                    title: widget.title,
+                    subtitle: widget.subtitle,
+                    leading: widget.leading,
+                    trailing: widget.trailing,
+                    selected: widget.selected || _focused,
+                    onTap: widget.onTap ??
+                        () {
+                          if (_controller.direction.value == 0) {
+                            switch (widget.actionSide) {
+                              case ActionSide.start:
+                                _controller.openStartActionPane(duration: const Duration(milliseconds: 400));
 
-                            case ActionSide.end:
-                              _controller.openEndActionPane(duration: const Duration(milliseconds: 400));
+                              case ActionSide.end:
+                                _controller.openEndActionPane(duration: const Duration(milliseconds: 400));
+                            }
+                          } else {
+                            _controller.close(duration: const Duration(milliseconds: 400));
                           }
-                        } else {
-                          _controller.close(duration: const Duration(milliseconds: 400));
-                        }
-                      },
-                  focusNode: _focusNode,
-                ),
-                if (_focused) const Icon(Icons.more_vert_rounded, color: Colors.grey, size: 18),
-              ],
+                        },
+                    focusNode: _focusNode,
+                  ),
+                  if (_focused) const Icon(Icons.more_vert_rounded, color: Colors.grey, size: 18),
+                ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 }

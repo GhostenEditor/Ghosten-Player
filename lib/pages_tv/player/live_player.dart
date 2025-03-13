@@ -9,8 +9,10 @@ import 'package:rxdart/rxdart.dart';
 import 'package:video_player/player.dart';
 
 import '../../components/async_image.dart';
+import '../../theme.dart';
 import '../components/focusable_image.dart';
 import '../components/loading.dart';
+import '../components/setting.dart';
 
 class LivePlayerPage extends StatefulWidget {
   const LivePlayerPage({super.key, required this.playlist, required this.index});
@@ -63,7 +65,7 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
   @override
   Widget build(BuildContext context) {
     return Theme(
-      data: ThemeData.dark(),
+      data: tvDarkTheme,
       child: Scaffold(
         key: _scaffoldKey,
         backgroundColor: Colors.transparent,
@@ -97,11 +99,43 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
                 }),
           ),
         ),
-        floatingActionButton: SwitchLinkButton(_controller),
+        endDrawer: SizedBox(
+            width: 300,
+            child: SettingPage(
+              title: AppLocalizations.of(context)!.playerBroadcastLine,
+              child: StatefulBuilder(builder: (context, setState) {
+                return ListenableBuilder(
+                    listenable: _controller.index,
+                    builder: (context, _) => ListView.builder(
+                          padding: const EdgeInsets.all(12),
+                          itemCount: _controller.currentItem?.source.links.length ?? 0,
+                          itemBuilder: (context, index) {
+                            final url = _controller.currentItem!.source.links[index];
+                            return RadioSettingItem(
+                              autofocus: _controller.currentItem?.url == url,
+                              groupValue: _controller.currentItem?.url,
+                              value: url,
+                              title: Text('${AppLocalizations.of(context)!.playerBroadcastLine} ${index + 1}'),
+                              onChanged: (_) {
+                                final currentItem = _controller.currentItem!;
+                                final item = PlaylistItem(
+                                    url: url, sourceType: PlaylistItemSourceType.fromBroadcastUri(url), source: currentItem.source, poster: currentItem.poster);
+                                _controller.playlist.value[_controller.index.value!] = item;
+                                _controller.updateSource(item, _controller.index.value!);
+                                setState(() {});
+                              },
+                            );
+                          },
+                        ));
+              }),
+            )),
         body: Stack(
           fit: StackFit.expand,
           children: [
-            PlayerPlatformView(initialized: () => _controller.setSources(widget.playlist, widget.index)),
+            PlayerPlatformView(initialized: () async {
+              await _controller.setSources(widget.playlist, widget.index);
+              await _controller.play();
+            }),
             PopScope(
               canPop: false,
               onPopInvokedWithResult: (didPop, _) {
@@ -125,11 +159,10 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
                       case LogicalKeyboardKey.arrowDown:
                         if (_controller.index.value != null) _controller.next(_controller.index.value! - 1);
                         return KeyEventResult.handled;
-                      case LogicalKeyboardKey.arrowLeft:
-                        _controller.seekTo(_controller.position.value - const Duration(seconds: 30));
-                        return KeyEventResult.handled;
                       case LogicalKeyboardKey.arrowRight:
-                        _controller.seekTo(_controller.position.value + const Duration(seconds: 30));
+                        if (_controller.currentItem != null && _controller.currentItem!.source.links.length > 1) {
+                          _scaffoldKey.currentState!.openEndDrawer();
+                        }
                         return KeyEventResult.handled;
                       case LogicalKeyboardKey.select:
                         if (_isShowControls.value) {
@@ -138,6 +171,7 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
                           _controlsStream.add(ControlsStreamStatus.show);
                         }
                         return KeyEventResult.handled;
+                      case LogicalKeyboardKey.arrowLeft:
                       case LogicalKeyboardKey.contextMenu:
                       case LogicalKeyboardKey.browserFavorites:
                         if (_controller.index.value != null) _drawerUpdateStream.value = 170 * (_controller.index.value! ~/ 2 - 1);
@@ -187,7 +221,22 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                       )),
-                      child: Align(alignment: Alignment.bottomCenter, child: _PlayerInfo(controller: _controller)),
+                      child: Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ListenableBuilder(
+                                  listenable: _controller.fatalError,
+                                  builder: (context, _) => _controller.fatalError.value != null
+                                      ? Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                                          child: Text(_controller.fatalError.value!, style: TextStyle(color: Theme.of(context).colorScheme.error), maxLines: 6),
+                                        )
+                                      : const SizedBox()),
+                              _PlayerInfo(controller: _controller),
+                            ],
+                          )),
                     ),
                   ),
                 ),
@@ -324,46 +373,5 @@ class _ChannelGridItem extends StatelessWidget {
         )
       ],
     );
-  }
-}
-
-class SwitchLinkButton<T> extends StatelessWidget {
-  const SwitchLinkButton(this.controller, {super.key});
-
-  final PlayerController<T> controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListenableBuilder(
-        listenable: controller.index,
-        builder: (context, _) => (controller.currentItem?.source is Channel && (controller.currentItem!.source as Channel).links.length > 1)
-            ? PopupMenuButton(
-                onSelected: (url) {
-                  final currentItem = controller.currentItem!;
-                  final item = PlaylistItem(url: url, sourceType: currentItem.sourceType, source: currentItem.source, poster: currentItem.poster);
-                  controller.playlist.value[controller.index.value!] = item;
-                  controller.updateSource(item, controller.index.value!);
-                },
-                itemBuilder: (context) => (controller.currentItem!.source as Channel)
-                    .links
-                    .indexed
-                    .map((entry) => CheckedPopupMenuItem(
-                          checked: controller.currentItem?.url == entry.$2,
-                          value: entry.$2,
-                          child: Text('${AppLocalizations.of(context)!.playerBroadcastLine} ${entry.$1 + 1}'),
-                        ))
-                    .toList(),
-                child: Material(
-                  child: Focus(
-                    autofocus: true,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text(
-                          '${AppLocalizations.of(context)!.playerBroadcastLine} ${(controller.currentItem!.source as Channel).links.indexOf(controller.currentItem!.url) + 1}'),
-                    ),
-                  ),
-                ),
-              )
-            : const SizedBox());
   }
 }

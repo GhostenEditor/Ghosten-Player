@@ -46,7 +46,7 @@ class _LiveListPageState extends State<LiveListPage> with WidgetsBindingObserver
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Flexible(
-                flex: 1,
+                flex: 2,
                 child: snapshot.requireData.isEmpty
                     ? NoData(
                         action: TVIconButton.filledTonal(onPressed: _addPlaylist, autofocus: true, icon: const Icon(Icons.add)),
@@ -125,7 +125,7 @@ class _LiveListPageState extends State<LiveListPage> with WidgetsBindingObserver
               ),
               if (snapshot.requireData.isNotEmpty)
                 Flexible(
-                    flex: 2,
+                    flex: 3,
                     child: Actions(
                       actions: {
                         DirectionalFocusIntent: CallbackAction<DirectionalFocusIntent>(onInvoke: (indent) {

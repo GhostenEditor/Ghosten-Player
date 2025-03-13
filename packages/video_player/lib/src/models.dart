@@ -117,7 +117,17 @@ enum AspectRatioType {
 enum PlaylistItemSourceType {
   local,
   hls,
-  other,
+  rtsp,
+  other;
+
+  static PlaylistItemSourceType fromBroadcastUri(Uri uri) {
+    return switch (uri.scheme.toLowerCase()) {
+      'http' || 'https' => PlaylistItemSourceType.hls,
+      'rtsp' => PlaylistItemSourceType.rtsp,
+      'file' => PlaylistItemSourceType.local,
+      _ => PlaylistItemSourceType.other,
+    };
+  }
 }
 
 class PlaylistItem<T> {

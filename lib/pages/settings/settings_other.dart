@@ -40,7 +40,7 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
             leading: const Icon(Icons.abc_rounded),
           ),
           Padding(
-            padding: const EdgeInsets.only(right: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Slider(
                 value: userConfig.displayScale,
                 min: 0.75,

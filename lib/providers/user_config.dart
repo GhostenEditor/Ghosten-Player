@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:scaled_app/scaled_app.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '/utils/utils.dart';
@@ -79,6 +82,7 @@ class UserConfig extends ChangeNotifier {
   void setDisplayScale(double s) {
     if (displayScale != s) {
       displayScale = s;
+      ScaledWidgetsFlutterBinding.instance.scaleFactor = (deviceSize) => max(1, deviceSize.width / 1140) * displayScale;
       prefs.setDouble('system.displayScale', displayScale);
     }
   }

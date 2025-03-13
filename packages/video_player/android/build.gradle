@@ -69,7 +69,9 @@ def media3_version = "1.5.1"
 dependencies {
     implementation "androidx.media3:media3-ui:${media3_version}"
     implementation "androidx.media3:media3-datasource:${media3_version}"
+    implementation "androidx.media3:media3-datasource-rtmp:${media3_version}"
     implementation "androidx.media3:media3-session:${media3_version}"
     implementation "androidx.media3:media3-exoplayer:${media3_version}"
     implementation "androidx.media3:media3-exoplayer-hls:${media3_version}"
+    implementation "androidx.media3:media3-exoplayer-rtsp:${media3_version}"
 }
