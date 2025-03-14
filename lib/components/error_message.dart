@@ -4,18 +4,19 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ErrorMessage extends StatelessWidget {
-  const ErrorMessage({super.key, required this.error, this.leading, this.safeArea = true, this.padding});
+  const ErrorMessage({super.key, required this.error, this.leading, this.safeArea = true, this.padding, this.minHeight});
 
   final Object? error;
   final Widget? leading;
   final bool safeArea;
   final EdgeInsetsGeometry? padding;
+  final double? minHeight;
 
   @override
   Widget build(BuildContext context) {
     final exception = _toCommonException(context);
     final child = ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: 80),
+      constraints: BoxConstraints(minHeight: minHeight ?? 80),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -67,7 +68,7 @@ class ErrorMessage extends StatelessWidget {
           details: AppLocalizations.of(context)!.errorDetails(error.code, error.message as Object? ?? ''),
           stackTrace: error.stacktrace == null ? null : StackTrace.fromString(error.stacktrace!),
         ),
-      _ => CommonException(code: '', message: error.toString())
+      _ => CommonException(code: error.toString())
     };
   }
 }
