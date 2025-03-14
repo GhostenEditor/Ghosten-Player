@@ -51,12 +51,12 @@ class _MovieListPageState extends State<MovieListPage> {
               },
               noDataBuilder: (context) => FilledButton(
                 autofocus: true,
-                child: Text(AppLocalizations.of(context)!.settingsItemTV),
+                child: Text(AppLocalizations.of(context)!.settingsItemMovie),
                 onPressed: () async {
                   Scaffold.of(context).openEndDrawer();
                   await Future.delayed(const Duration(milliseconds: 100));
                   if (context.mounted) {
-                    navigateTo(context, const LibraryManage(type: LibraryType.tv));
+                    navigateTo(context, const LibraryManage(type: LibraryType.movie));
                   }
                 },
               ),
