@@ -481,7 +481,7 @@ abstract class ApiPlatform extends PlatformInterface {
   /// Miscellaneous End
 
   /// Cast Start
-  Stream<List<Json>> dlnaDiscover() {
+  Stream<List<dynamic>> dlnaDiscover() {
     throw UnimplementedError('dlnaDiscover() has not been implemented.');
   }
 

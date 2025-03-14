@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../components/logo.dart';
@@ -19,8 +20,8 @@ class _HomeViewState extends State<HomeView> {
   int index = 0;
 
   Widget get child => switch (index) {
-        0 => const TVListPage(),
-        1 => const MovieListPage(),
+        0 => BlocProvider(create: (_) => TVListCubit(null), child: const TVListPage()),
+        1 => BlocProvider(create: (_) => MovieListCubit(null), child: const MovieListPage()),
         2 => const LiveListPage(),
         3 => const SettingsPage(),
         _ => const Placeholder(),

@@ -27,7 +27,9 @@ class _TVListPageState extends State<TVListPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _subscription = Api.needUpdate$.listen((event) => setState(() {}));
+    _subscription = Api.needUpdate$.listen((event) {
+      if (mounted) context.read<TVListCubit>().update();
+    });
   }
 
   @override
@@ -39,67 +41,55 @@ class _TVListPageState extends State<TVListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => TVListCubit(null),
-      child: Builder(builder: (context) {
-        return RefreshIndicator(
-          onRefresh: () => context.read<TVListCubit>().update(),
-          child: MediaScaffold(
-            backdrop: _backdrop,
-            slivers: [
-              MediaCarousel<TVListCubit, TVListModel?>(
-                onChanged: (index) {
-                  _backdrop.value = context.read<TVListCubit>().state?.carousels[index].backdrop;
-                },
-                noDataBuilder: (context) => FilledButton(
-                  autofocus: true,
-                  child: Text(AppLocalizations.of(context)!.settingsItemTV),
-                  onPressed: () async {
-                    Scaffold.of(context).openEndDrawer();
-                    await Future.delayed(const Duration(milliseconds: 100));
-                    if (context.mounted) {
-                      navigateTo(context, const LibraryManage(type: LibraryType.tv));
-                    }
-                  },
-                ),
-                selector: (state) => state?.carousels.length,
-                itemBuilder: (BuildContext context, int index) => BlocSelector<TVListCubit, TVListModel?, MediaRecommendation>(
-                    selector: (state) => state!.carousels[index],
-                    builder: (context, item) => CarouselItem(
-                          item: item,
-                          onPressed: () async {
-                            final series = await Api.tvSeriesQueryById(item.id);
-                            if (context.mounted) await _onMediaTap(context, series);
-                          },
-                        )),
-              ),
-              MediaChannel<TVListCubit, TVListModel?>(
-                label: AppLocalizations.of(context)!.watchNow,
-                height: 160,
-                selector: (state) => state?.watchNow.length ?? 0,
-                builder: _buildRecentMediaCard,
-              ),
-              MediaChannel<TVListCubit, TVListModel?>(
-                label: AppLocalizations.of(context)!.tagNewAdd,
-                selector: (state) => state?.newAdd.length ?? 0,
-                height: 230,
-                builder: (context, index) => _buildMediaCard(context, (state) => state!.newAdd[index], width: 120, height: 180),
-              ),
-              MediaChannel<TVListCubit, TVListModel?>(
-                label: AppLocalizations.of(context)!.tagNewRelease,
-                selector: (state) => state?.newRelease.length ?? 0,
-                height: 230,
-                builder: (context, index) => _buildMediaCard(context, (state) => state!.newRelease[index], width: 120, height: 180),
-              ),
-              MediaGridChannel<TVListCubit, TVListModel?>(
-                label: AppLocalizations.of(context)!.tagAll,
-                selector: (state) => state?.all.length ?? 0,
-                builder: (context, index) => _buildMediaCard(context, (state) => state!.all[index]),
-              ),
-            ],
+    return RefreshIndicator(
+      onRefresh: () => context.read<TVListCubit>().update(),
+      child: MediaScaffold(
+        backdrop: _backdrop,
+        slivers: [
+          MediaCarousel<TVListCubit, TVListModel?>(
+            onChanged: (index) {
+              _backdrop.value = context.read<TVListCubit>().state?.carousels[index].backdrop;
+            },
+            noDataBuilder: (context) => FilledButton(
+              child: Text(AppLocalizations.of(context)!.settingsItemTV),
+              onPressed: () => navigateTo(context, const LibraryManage(type: LibraryType.tv)),
+            ),
+            selector: (state) => state?.carousels.length,
+            itemBuilder: (BuildContext context, int index) => BlocSelector<TVListCubit, TVListModel?, MediaRecommendation>(
+                selector: (state) => state!.carousels[index],
+                builder: (context, item) => CarouselItem(
+                      item: item,
+                      onPressed: () async {
+                        final series = await Api.tvSeriesQueryById(item.id);
+                        if (context.mounted) await _onMediaTap(context, series);
+                      },
+                    )),
           ),
-        );
-      }),
+          MediaChannel<TVListCubit, TVListModel?>(
+            label: AppLocalizations.of(context)!.watchNow,
+            height: 160,
+            selector: (state) => state?.watchNow.length ?? 0,
+            builder: _buildRecentMediaCard,
+          ),
+          MediaChannel<TVListCubit, TVListModel?>(
+            label: AppLocalizations.of(context)!.tagNewAdd,
+            selector: (state) => state?.newAdd.length ?? 0,
+            height: 230,
+            builder: (context, index) => _buildMediaCard(context, (state) => state!.newAdd[index], width: 120, height: 180),
+          ),
+          MediaChannel<TVListCubit, TVListModel?>(
+            label: AppLocalizations.of(context)!.tagNewRelease,
+            selector: (state) => state?.newRelease.length ?? 0,
+            height: 230,
+            builder: (context, index) => _buildMediaCard(context, (state) => state!.newRelease[index], width: 120, height: 180),
+          ),
+          MediaGridChannel<TVListCubit, TVListModel?>(
+            label: AppLocalizations.of(context)!.tagAll,
+            selector: (state) => state?.all.length ?? 0,
+            builder: (context, index) => _buildMediaCard(context, (state) => state!.all[index]),
+          ),
+        ],
+      ),
     );
   }
 

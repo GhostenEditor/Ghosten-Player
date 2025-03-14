@@ -568,8 +568,7 @@ class _SwitchLinkButtonState<T> extends State<SwitchLinkButton<T>> {
             ? PopupMenuButton(
                 onSelected: (url) {
                   final currentItem = widget.controller.currentItem!;
-                  final item =
-                      PlaylistItem(url: url, sourceType: PlaylistItemSourceType.fromBroadcastUri(url), source: currentItem.source, poster: currentItem.poster);
+                  final item = currentItem.copyWith(url: url, sourceType: PlaylistItemSourceType.fromBroadcastUri(url));
                   widget.controller.playlist.value[widget.controller.index.value!] = item;
                   widget.controller.updateSource(item, widget.controller.index.value!);
                   setState(() {});

@@ -23,7 +23,8 @@ class CastDeviceAdaptor extends CastDevice {
     required super.friendlyName,
   });
 
-  factory CastDeviceAdaptor.fromJson(Json data) {
+  factory CastDeviceAdaptor.fromJson(dynamic data) {
+    // ignore: avoid_dynamic_calls
     return CastDeviceAdaptor(id: data['id'], friendlyName: data['friendlyName']);
   }
 
@@ -80,7 +81,7 @@ class CastDeviceAdaptor extends CastDevice {
     } catch (error) {
       ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(SnackBar(
         backgroundColor: Colors.black87,
-        content: ErrorMessage(error: error, safeArea: false),
+        content: ErrorMessage(error: error, safeArea: false, minHeight: 0),
         behavior: SnackBarBehavior.floating,
       ));
       rethrow;

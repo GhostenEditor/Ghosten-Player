@@ -11,6 +11,7 @@ import 'package:video_player/player.dart';
 import '../../components/error_message.dart';
 import '../../utils/utils.dart';
 import '../player/player_controls_full.dart';
+import '../utils/utils.dart';
 import 'cast_adaptor.dart';
 import 'player_appbar.dart';
 import 'player_controls_gesture.dart';
@@ -144,12 +145,23 @@ class _PlayerControlsLiteState<T> extends State<PlayerControlsLite<T>> {
                 actions: [
                   IconButton(
                       onPressed: () async {
+                        if (_controller.index.value == null) return;
                         final device = await showModalBottomSheet<CastDevice>(
                           context: context,
-                          builder: (context) => PlayerCastSearcher(const CastAdaptor(), errorWidget: (context, error) => ErrorMessage(error: error)),
+                          builder: (context) => PlayerCastSearcher(const CastAdaptor(),
+                              errorWidget: (context, error) => ErrorMessage(error: error, padding: const EdgeInsets.symmetric(horizontal: 16))),
                         );
                         if (device != null && context.mounted) {
-                          Navigator.of(context).push(MaterialPageRoute(builder: (context) => PlayerCast(device: device, playlist: _controller.playlist.value)));
+                          _controller.pause();
+                          await navigateToSlideUp(
+                              context,
+                              PlayerCast(
+                                device: device,
+                                playlist: _controller.playlist.value,
+                                index: _controller.index.value!,
+                                theme: widget.theme,
+                              ));
+                          if (context.mounted) await _controller.play();
                         }
                       },
                       icon: const Icon(Icons.airplay_rounded)),

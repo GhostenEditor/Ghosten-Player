@@ -27,7 +27,9 @@ class _MovieListPageState extends State<MovieListPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _subscription = Api.needUpdate$.listen((event) => setState(() {}));
+    _subscription = Api.needUpdate$.listen((event) {
+      if (mounted) context.read<MovieListCubit>().update();
+    });
   }
 
   @override
@@ -39,64 +41,52 @@ class _MovieListPageState extends State<MovieListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => MovieListCubit(null),
-      child: Builder(builder: (context) {
-        return RefreshIndicator(
-          onRefresh: () => context.read<MovieListCubit>().update(),
-          child: MediaScaffold(backdrop: _backdrop, slivers: [
-            MediaCarousel<MovieListCubit, MovieListModel?>(
-              onChanged: (index) {
-                _backdrop.value = context.read<MovieListCubit>().state?.carousels[index].backdrop;
-              },
-              noDataBuilder: (context) => FilledButton(
-                autofocus: true,
-                child: Text(AppLocalizations.of(context)!.settingsItemTV),
-                onPressed: () async {
-                  Scaffold.of(context).openEndDrawer();
-                  await Future.delayed(const Duration(milliseconds: 100));
-                  if (context.mounted) {
-                    navigateTo(context, const LibraryManage(type: LibraryType.tv));
-                  }
-                },
-              ),
-              selector: (state) => state?.carousels.length,
-              itemBuilder: (BuildContext context, int index) => BlocSelector<MovieListCubit, MovieListModel?, MediaRecommendation>(
-                  selector: (state) => state!.carousels[index],
-                  builder: (context, item) => CarouselItem(
-                        item: item,
-                        onPressed: () async {
-                          final series = await Api.movieQueryById(item.id);
-                          if (context.mounted) await _onMediaTap(context, series);
-                        },
-                      )),
-            ),
-            MediaChannel<MovieListCubit, MovieListModel?>(
-              label: AppLocalizations.of(context)!.watchNow,
-              height: 230,
-              selector: (state) => state?.watchNow.length ?? 0,
-              builder: _buildRecentMediaCard,
-            ),
-            MediaChannel<MovieListCubit, MovieListModel?>(
-              label: AppLocalizations.of(context)!.tagNewAdd,
-              selector: (state) => state?.newAdd.length ?? 0,
-              height: 230,
-              builder: (context, index) => _buildMediaCard(context, (state) => state!.newAdd[index], width: 120, height: 180),
-            ),
-            MediaChannel<MovieListCubit, MovieListModel?>(
-              label: AppLocalizations.of(context)!.tagNewRelease,
-              selector: (state) => state?.newRelease.length ?? 0,
-              height: 230,
-              builder: (context, index) => _buildMediaCard(context, (state) => state!.newRelease[index], width: 120, height: 180),
-            ),
-            MediaGridChannel<MovieListCubit, MovieListModel?>(
-              label: AppLocalizations.of(context)!.tagAll,
-              selector: (state) => state?.all.length ?? 0,
-              builder: (context, index) => _buildMediaCard(context, (state) => state!.all[index]),
-            ),
-          ]),
-        );
-      }),
+    return RefreshIndicator(
+      onRefresh: () => context.read<MovieListCubit>().update(),
+      child: MediaScaffold(backdrop: _backdrop, slivers: [
+        MediaCarousel<MovieListCubit, MovieListModel?>(
+          onChanged: (index) {
+            _backdrop.value = context.read<MovieListCubit>().state?.carousels[index].backdrop;
+          },
+          noDataBuilder: (context) => FilledButton(
+            child: Text(AppLocalizations.of(context)!.settingsItemMovie),
+            onPressed: () => navigateTo(context, const LibraryManage(type: LibraryType.movie)),
+          ),
+          selector: (state) => state?.carousels.length,
+          itemBuilder: (BuildContext context, int index) => BlocSelector<MovieListCubit, MovieListModel?, MediaRecommendation>(
+              selector: (state) => state!.carousels[index],
+              builder: (context, item) => CarouselItem(
+                    item: item,
+                    onPressed: () async {
+                      final series = await Api.movieQueryById(item.id);
+                      if (context.mounted) await _onMediaTap(context, series);
+                    },
+                  )),
+        ),
+        MediaChannel<MovieListCubit, MovieListModel?>(
+          label: AppLocalizations.of(context)!.watchNow,
+          height: 230,
+          selector: (state) => state?.watchNow.length ?? 0,
+          builder: _buildRecentMediaCard,
+        ),
+        MediaChannel<MovieListCubit, MovieListModel?>(
+          label: AppLocalizations.of(context)!.tagNewAdd,
+          selector: (state) => state?.newAdd.length ?? 0,
+          height: 230,
+          builder: (context, index) => _buildMediaCard(context, (state) => state!.newAdd[index], width: 120, height: 180),
+        ),
+        MediaChannel<MovieListCubit, MovieListModel?>(
+          label: AppLocalizations.of(context)!.tagNewRelease,
+          selector: (state) => state?.newRelease.length ?? 0,
+          height: 230,
+          builder: (context, index) => _buildMediaCard(context, (state) => state!.newRelease[index], width: 120, height: 180),
+        ),
+        MediaGridChannel<MovieListCubit, MovieListModel?>(
+          label: AppLocalizations.of(context)!.tagAll,
+          selector: (state) => state?.all.length ?? 0,
+          builder: (context, index) => _buildMediaCard(context, (state) => state!.all[index]),
+        ),
+      ]),
     );
   }
 

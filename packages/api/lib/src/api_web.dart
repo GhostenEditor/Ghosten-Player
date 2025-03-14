@@ -125,7 +125,7 @@ class ApiWeb extends ApiPlatform {
 
   /// Cast Start
   @override
-  Stream<List<Json>> dlnaDiscover() async* {
+  Stream<List<dynamic>> dlnaDiscover() async* {
     final data = await client.post<Json>('/dlna/discover/cb');
     if (data != null) {
       final sessionId = data['id'];
