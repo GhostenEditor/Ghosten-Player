@@ -92,7 +92,7 @@ Android 6+
 <img src="https://github.com/user-attachments/assets/a43ec774-3ad1-4387-bb04-68a040bca288" alt="TV Screenshot 8" width="48%"/>
 </div>
 
-# Android Phone 截图
+### Android Phone 截图
 
 <div style="display: flex;">
 <img src="https://github.com/user-attachments/assets/19b41deb-f959-4008-b1ed-859c6399a04a" alt="Mobile Screenshot 1" width="24%"/>
