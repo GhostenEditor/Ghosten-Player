@@ -1,4 +1,4 @@
-![Ghosten-Player](https://socialify.git.ci/GhostenEditor/Ghosten-Player/image?custom_description=Available+for+%F0%9F%93%B1+Android+Phone+%E2%80%A2+%F0%9F%93%BA+Android+TV+%EF%BC%81&description=1&font=Source+Code+Pro&forks=1&issues=1&logo=https%3A%2F%2Fgithub.com%2FGhostenEditor%2FGhosten-Player%2Fraw%2Fmain%2Fassets%2Fimages%2Flogo.png&name=1&pattern=Plus&pulls=1&stargazers=1&theme=Auto)
+![Ghosten-Player](https://socialify.git.ci/GhostenEditor/Ghosten-Player/image?custom_description=Available+for+%F0%9F%93%B1+Android+Phone+%E2%80%A2+%F0%9F%93%BA+Android+TV+%EF%BC%81&description=1&font=Source+Code+Pro&forks=1&issues=1&logo=https%3A%2F%2Fgithub.com%2FGhostenEditor%2FGhosten-Player%2Fraw%2Fmain%2Fassets%2Fcommon%2Fimages%2Flogo.png&name=1&pattern=Plus&pulls=1&stargazers=1&theme=Auto)
 
 <div align="center">
 
