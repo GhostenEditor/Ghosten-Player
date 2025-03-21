@@ -6,13 +6,17 @@ on:
   workflow_dispatch:
 
 jobs:
-  noResponse:
+  close-need-info:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions-cool/issues-helper@v3
+      - name: close-issues
+        uses: actions-cool/issues-helper@v3
         with:
           actions: 'close-issues'
           token: ${{ secrets.GITHUB_TOKEN }}
+          labels: 'waiting for customer response'
+          inactive-day: 7
+          close-reason: 'not_planned'
           body: |
             Without additional information, I'm unfortunately not sure how to
             resolve this issue. I'm therefore reluctantly going to close this
@@ -21,5 +25,3 @@ jobs:
             If you can offer the additional information, reopen this issue.
 
             Thanks for your contribution.
-          inactive-day: 7
-          labels: "waiting for customer response"
