@@ -3,7 +3,6 @@ name: No Response
 on:
   schedule:
     - cron: "0 0 */1 * *"
-  workflow_dispatch:
 
 jobs:
   close-need-info:
@@ -13,14 +12,13 @@ jobs:
         uses: actions-cool/issues-helper@v3
         with:
           actions: 'close-issues'
-          token: ${{ secrets.GITHUB_TOKEN }}
           labels: 'waiting for customer response'
-          inactive-day: 7
+          inactive-day: 3
           close-reason: 'not_planned'
           body: |
-            Without additional information, I'm unfortunately not sure how to
+            Hello @${{ github.event.issue.user.login }}, without additional information, I'm unfortunately not sure how to
             resolve this issue. I'm therefore reluctantly going to close this
-            bug for now.
+            issue for now.
 
             If you can offer the additional information, reopen this issue.
 
