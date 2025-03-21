@@ -1,0 +1,42 @@
+name: No Response
+
+on:
+  schedule:
+    - cron: "0 0 */1 * *"
+
+jobs:
+  close-need-info:
+    runs-on: ubuntu-latest
+    steps:
+      - name: close-issues(waiting for customer response)
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'close-issues'
+          labels: 'waiting for customer response'
+          inactive-day: 3
+          close-reason: 'not_planned'
+          body: |
+            Hello @${{ github.event.issue.user.login }}, without additional information, I'm unfortunately not sure how to
+            resolve this issue. I'm therefore reluctantly going to close this
+            issue for now.
+
+            If you can offer the additional information, reopen this issue.
+
+            Thanks for your contribution.
+            
+      - name: close-issues(lack of information)
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'close-issues'
+          labels: 'lack of information'
+          inactive-day: 3
+          close-reason: 'not_planned'
+          body: |
+            Hello @${{ github.event.issue.user.login }}, without additional information, I'm unfortunately not sure how to
+            resolve this issue. I'm therefore reluctantly going to close this
+            issue for now.
+
+            If you can offer the additional information, reopen this issue.
+
+            Thanks for your contribution.
+      

@@ -1,0 +1,22 @@
+name: Issue Invalid
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  create-comment:
+    runs-on: ubuntu-latest
+    if: github.event.label.name == 'invalid'
+    steps:
+      - name: Create comment
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'create-comment'
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            Hello @${{ github.event.issue.user.login }}, your issue is invalid and will be closed.
+      - name: Close issue
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'close-issue'
