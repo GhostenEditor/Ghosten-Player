@@ -1,20 +1,18 @@
 ![Ghosten-Player](https://socialify.git.ci/GhostenEditor/Ghosten-Player/image?custom_description=Available+for+%F0%9F%93%B1+Android+Phone+%E2%80%A2+%F0%9F%93%BA+Android+TV+%EF%BC%81&description=1&font=Source+Code+Pro&forks=1&issues=1&logo=https%3A%2F%2Fgithub.com%2FGhostenEditor%2FGhosten-Player%2Fraw%2Fmain%2Fassets%2Fcommon%2Fimages%2Flogo.png&name=1&pattern=Plus&pulls=1&stargazers=1&theme=Auto)
 
-<div align="center">
-
-![android 6.0 or above](https://img.shields.io/badge/android-6.0_or_above-purple?style=for-the-badge&logo=android)
-[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/GhostenEditor/Ghosten-Player/release.yml?logo=github&style=for-the-badge&label=android%20build)](https://github.com/GhostenEditor/Ghosten-Player/actions/workflows/release.yml)
-[![GitHub Release](https://img.shields.io/github/v/release/GhostenEditor/Ghosten-Player?style=for-the-badge)](https://github.com/GhostenEditor/Ghosten-Player/releases/latest)
-![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/GhostenEditor/Ghosten-Player/total?style=for-the-badge)
-
-</div>
+![android 6.0 or above](https://img.shields.io/badge/android-6.0_or_above-purple?logo=android)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/GhostenEditor/Ghosten-Player/release.yml?logo=github&label=android%20build)](https://github.com/GhostenEditor/Ghosten-Player/actions/workflows/release.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/GhostenEditor/Ghosten-Player)](https://github.com/GhostenEditor/Ghosten-Player/releases/latest)
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/GhostenEditor/Ghosten-Player/total)
 
 Ghosten Player 是一款同时适配📱 Android Phone 和 📺 Android TV 的视频播放器。整合影视资源，自动刮削媒体信息，支持IPTV播放，优雅打造私人影视库。
 界面简洁，功能丰富，开箱即用。
 
 ---
 
-喜欢或者对您有用的话就给颗🌟Star吧，您的支持是我维护的最大动力(′･ω･`)
+如果项目对您有帮助，就请给颗🌟Star吧。
+
+项目处于用爱发电阶段，请考虑[赞助](#赞助)支持项目持续维护。您的支持是我维护的最大动力(′･ω･`)
 
 ## Features
 
