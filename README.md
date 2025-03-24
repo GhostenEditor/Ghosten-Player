@@ -69,6 +69,13 @@ Ghosten Player 是一款同时适配📱 Android Phone 和 📺 Android TV 的�
 
 Android 6+
 
+## Demo
+[https://ghosteneditor.github.io](https://ghosteneditor.github.io)
+
+Demo仅作展示用，部分功能受Web限制，并非完整版，详情以 [Releases](https://github.com/GhostenEditor/Ghosten-Player/releases/latest) 最新版为准
+
+> 注: 请使用桌面端的Chrome或Edge浏览器查看demo，移动端可能存在兼容问题
+
 ## 预览 [^3]
 
 ### TV 截图
