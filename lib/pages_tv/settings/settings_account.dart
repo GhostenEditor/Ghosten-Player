@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 import 'package:api/api.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -150,6 +152,8 @@ class AccountPreference extends StatelessWidget {
     bool proxy = false;
     int? concurrency;
     int? sliceSize;
+    _AlipanVideoClarity alipanVideoClarity;
+
     return SettingPage(
         title: AppLocalizations.of(context)!.pageTitleAccountSetting,
         child: FutureBuilderHandler(
@@ -159,6 +163,7 @@ class AccountPreference extends StatelessWidget {
             proxy = data['proxy'] ?? false;
             concurrency = data['concurrency'];
             sliceSize = data['sliceSize'];
+            alipanVideoClarity = _AlipanVideoClarity.fromString(data['alipanVideoClarity']);
             return PopScope(
               canPop: false,
               onPopInvokedWithResult: (didPop, _) {
@@ -167,6 +172,8 @@ class AccountPreference extends StatelessWidget {
                   if (data.containsKey('proxy')) 'proxy': proxy,
                   if (data.containsKey('concurrency')) 'concurrency': concurrency,
                   if (data.containsKey('sliceSize')) 'sliceSize': concurrency == null ? null : sliceSize,
+                  if (data.containsKey('alipanVideoClarity'))
+                    'alipan_video_clarity': alipanVideoClarity == _AlipanVideoClarity.none ? null : alipanVideoClarity.name,
                 });
                 Navigator.of(context).pop();
               },
@@ -201,7 +208,7 @@ class AccountPreference extends StatelessWidget {
                       StepperSettingItem(
                         title: Text(AppLocalizations.of(context)!.playerParallelsCount),
                         min: 2,
-                        max: 8,
+                        max: data.containsKey('proxy') ? 6 : 32,
                         value: concurrency ?? 4,
                         onChanged: (value) => setState(() => concurrency = value),
                       ),
@@ -212,6 +219,26 @@ class AccountPreference extends StatelessWidget {
                         max: 20,
                         value: sliceSize ?? 5,
                         onChanged: (value) => setState(() => sliceSize = value),
+                      ),
+                    if (data.containsKey('alipanVideoClarity'))
+                      PopupMenuButton(
+                        tooltip: '',
+                        offset: const Offset(1, 0),
+                        enabled: !proxy,
+                        onSelected: (value) => setState(() => alipanVideoClarity = value),
+                        itemBuilder: (BuildContext context) => _AlipanVideoClarity.values
+                            .map((clarity) => CheckedPopupMenuItem(
+                                  checked: alipanVideoClarity == clarity,
+                                  value: clarity,
+                                  child: Text(clarity.name.toUpperCase()),
+                                ))
+                            .toList(),
+                        child: ListTile(
+                          enabled: !proxy,
+                          title: Text(AppLocalizations.of(context)!.playerVideoClarity),
+                          subtitle: Text(AppLocalizations.of(context)!.playerAlipanVideoClarityTip),
+                          trailing: Text(alipanVideoClarity.name.toUpperCase()),
+                        ),
                       ),
                   ],
                 );
@@ -286,5 +313,18 @@ class Stepper extends StatelessWidget {
       v = v > min! ? v : min!;
     }
     return v;
+  }
+}
+
+enum _AlipanVideoClarity {
+  none,
+  LD,
+  SD,
+  HD,
+  FHD,
+  QHD;
+
+  static _AlipanVideoClarity fromString(String? str) {
+    return _AlipanVideoClarity.values.firstWhere((element) => element.name == str, orElse: () => _AlipanVideoClarity.none);
   }
 }

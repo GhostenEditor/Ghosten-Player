@@ -174,7 +174,7 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
                       case LogicalKeyboardKey.arrowLeft:
                       case LogicalKeyboardKey.contextMenu:
                       case LogicalKeyboardKey.browserFavorites:
-                        if (_controller.index.value != null) _drawerUpdateStream.value = 170 * (_controller.index.value! ~/ 2 - 1);
+                        if (_controller.index.value != null) _drawerUpdateStream.value = 170 * (_controller.index.value! ~/ 2);
                         _scrollController.dispose();
                         _scrollController = ScrollController(initialScrollOffset: _drawerUpdateStream.value.toDouble());
                         _scaffoldKey.currentState!.openDrawer();

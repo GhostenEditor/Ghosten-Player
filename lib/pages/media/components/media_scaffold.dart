@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import '../../../components/logo.dart';
@@ -42,10 +44,12 @@ class _MediaScaffoldState extends State<MediaScaffold> {
     return Stack(
       fit: StackFit.passthrough,
       children: [
-        AspectRatio(
-          aspectRatio: 2,
-          child: ListenableBuilder(listenable: widget.backdrop, builder: (context, _) => CarouselBackground(src: widget.backdrop.value)),
-        ),
+        LayoutBuilder(builder: (context, c) {
+          return AspectRatio(
+            aspectRatio: max(c.biggest.aspectRatio, 2),
+            child: ListenableBuilder(listenable: widget.backdrop, builder: (context, _) => CarouselBackground(src: widget.backdrop.value)),
+          );
+        }),
         AspectRatio(
           aspectRatio: 2,
           child: ListenableBuilder(

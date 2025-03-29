@@ -2,6 +2,7 @@ import 'package:api/api.dart';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:install_plugin/install_plugin.dart';
@@ -175,7 +176,15 @@ class _SettingsUpdating extends StatefulWidget {
 
 class _SettingsUpdatingState extends State<_SettingsUpdating> {
   static final Map<String, _DownloadTask> _downloading = {};
+  final _controller = ScrollController();
+  double _cachedOffset = 0;
   bool _failed = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -214,9 +223,34 @@ class _SettingsUpdatingState extends State<_SettingsUpdating> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(child: Markdown(data: widget.data.comment)),
-              ElevatedButton(
+              Expanded(
+                  child: Focus(
                 autofocus: true,
+                onKeyEvent: (FocusNode node, KeyEvent event) {
+                  if (event is KeyDownEvent || event is KeyRepeatEvent) {
+                    switch (event.logicalKey) {
+                      case LogicalKeyboardKey.arrowUp:
+                        _cachedOffset = (_cachedOffset - 100).clamp(_controller.position.minScrollExtent, _controller.position.maxScrollExtent);
+                        if (_cachedOffset != _controller.offset) {
+                          _controller.animateTo(_cachedOffset, duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
+                          return KeyEventResult.handled;
+                        }
+                      case LogicalKeyboardKey.arrowDown:
+                        _cachedOffset = (_cachedOffset + 100).clamp(_controller.position.minScrollExtent, _controller.position.maxScrollExtent);
+                        if (_cachedOffset != _controller.offset) {
+                          _controller.animateTo(_cachedOffset, duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
+                          return KeyEventResult.handled;
+                        }
+                    }
+                  }
+                  return KeyEventResult.ignored;
+                },
+                child: Scrollbar(
+                  controller: _controller,
+                  child: Markdown(data: widget.data.comment, controller: _controller),
+                ),
+              )),
+              ElevatedButton(
                 onPressed: _downloading.containsKey(widget.url) ? null : _download,
                 style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 64),

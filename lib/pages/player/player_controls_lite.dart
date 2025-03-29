@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:animations/animations.dart';
 import 'package:api/api.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:rxdart/rxdart.dart';
@@ -108,7 +109,7 @@ class _PlayerControlsLiteState<T> extends State<PlayerControlsLite<T>> {
   void dispose() {
     _isShowControls.dispose();
     _subscription?.cancel();
-    ScreenBrightness.instance.resetApplicationScreenBrightness();
+    if (!kIsWeb) ScreenBrightness.instance.resetApplicationScreenBrightness();
     super.dispose();
   }
 

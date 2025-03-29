@@ -145,7 +145,12 @@ class MediaGridChannel<B extends StateStreamable<S>, S> extends StatelessWidget 
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
-                    child: Text(label, style: Theme.of(context).textTheme.titleMedium),
+                    child: Row(
+                      children: [
+                        Text(label, style: Theme.of(context).textTheme.titleMedium),
+                        Text(' ($count)', style: Theme.of(context).textTheme.labelSmall),
+                      ],
+                    ),
                   ),
                 ),
                 SliverPadding(

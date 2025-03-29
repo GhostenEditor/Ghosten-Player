@@ -165,28 +165,31 @@ class CarouselBackground extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        Material(
-          clipBehavior: Clip.hardEdge,
-          child: PageTransitionSwitcher(
-            duration: const Duration(seconds: 2),
-            layoutBuilder: (List<Widget> entries) => Stack(
-              fit: StackFit.expand,
-              children: entries,
+        Padding(
+          padding: const EdgeInsets.only(bottom: 1),
+          child: Material(
+            clipBehavior: Clip.hardEdge,
+            child: PageTransitionSwitcher(
+              duration: const Duration(seconds: 2),
+              layoutBuilder: (List<Widget> entries) => Stack(
+                fit: StackFit.expand,
+                children: entries,
+              ),
+              transitionBuilder: (
+                Widget child,
+                Animation<double> primaryAnimation,
+                Animation<double> secondaryAnimation,
+              ) {
+                return SharedAxisTransition(
+                  animation: primaryAnimation.drive(CurveTween(curve: Curves.easeOut)),
+                  secondaryAnimation: secondaryAnimation.drive(CurveTween(curve: Curves.easeOut)),
+                  transitionType: SharedAxisTransitionType.horizontal,
+                  fillColor: Colors.transparent,
+                  child: child,
+                );
+              },
+              child: src != null ? AsyncImage(key: ValueKey(src), src!) : const SizedBox(),
             ),
-            transitionBuilder: (
-              Widget child,
-              Animation<double> primaryAnimation,
-              Animation<double> secondaryAnimation,
-            ) {
-              return SharedAxisTransition(
-                animation: primaryAnimation.drive(CurveTween(curve: Curves.easeOut)),
-                secondaryAnimation: secondaryAnimation.drive(CurveTween(curve: Curves.easeOut)),
-                transitionType: SharedAxisTransitionType.horizontal,
-                fillColor: Colors.transparent,
-                child: child,
-              );
-            },
-            child: src != null ? AsyncImage(key: ValueKey(src), src!) : const SizedBox(),
           ),
         ),
         DecoratedBox(
@@ -208,7 +211,7 @@ class CarouselBackground extends StatelessWidget {
             Theme.of(context).scaffoldBackgroundColor,
           ], stops: const [
             0.3,
-            1
+            1.2
           ], begin: Alignment.topCenter, end: Alignment.bottomCenter),
         )),
       ],

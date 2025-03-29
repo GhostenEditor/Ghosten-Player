@@ -50,6 +50,14 @@ class _LiveEditState extends State<LiveEdit> {
   ];
 
   @override
+  void dispose() {
+    for (final item in _items) {
+      item.controller.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Row(

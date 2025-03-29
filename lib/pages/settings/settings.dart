@@ -61,13 +61,12 @@ class SettingsPage extends StatelessWidget {
               onTap: () => navigateTo(context, const SystemSettingsDownloader()),
             ),
             const Divider(),
-            if (alphaVersion)
-              _buildItem(
-                AppLocalizations.of(context)!.settingsItemServer,
-                Icons.storage_outlined,
-                trailing: const Badge(label: Text('Alpha')),
-                onTap: () => navigateTo(context, const SystemSettingsServer()),
-              ),
+            _buildItem(
+              AppLocalizations.of(context)!.settingsItemServer,
+              Icons.storage_outlined,
+              trailing: const Badge(label: Text('Beta')),
+              onTap: () => navigateTo(context, const SystemSettingsServer()),
+            ),
             _buildItem(
               AppLocalizations.of(context)!.settingsItemNetworkDiagnotics,
               Icons.rule_rounded,

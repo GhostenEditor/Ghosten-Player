@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../components/error_message.dart';
 import '../../utils/utils.dart';
 import '../components/image_card.dart';
 import '../detail/movie.dart';
@@ -44,55 +45,68 @@ class _MovieListPageState extends State<MovieListPage> {
     return RefreshIndicator(
       onRefresh: () => context.read<MovieListCubit>().update(),
       child: MediaScaffold(backdrop: _backdrop, slivers: [
-        MediaCarousel<MovieListCubit, MovieListModel?>(
-          onChanged: (index) {
-            _backdrop.value = context.read<MovieListCubit>().state?.carousels[index].backdrop;
-          },
-          noDataBuilder: (context) => FilledButton(
-            child: Text(AppLocalizations.of(context)!.settingsItemMovie),
-            onPressed: () => navigateTo(context, const LibraryManage(type: LibraryType.movie)),
-          ),
-          selector: (state) => state?.carousels.length,
-          itemBuilder: (BuildContext context, int index) => BlocSelector<MovieListCubit, MovieListModel?, MediaRecommendation>(
-              selector: (state) => state!.carousels[index],
-              builder: (context, item) => CarouselItem(
-                    item: item,
-                    onPressed: () async {
-                      final series = await Api.movieQueryById(item.id);
-                      if (context.mounted) await _onMediaTap(context, series);
-                    },
-                  )),
-        ),
-        MediaChannel<MovieListCubit, MovieListModel?>(
+        BlocBuilder<MovieListCubit, AsyncSnapshot<MovieListModel>>(builder: (context, snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.none:
+            case ConnectionState.waiting:
+            case ConnectionState.active:
+              return const SliverFillRemaining(child: Center(child: CircularProgressIndicator()));
+            case ConnectionState.done:
+              if (snapshot.hasData) {
+                return MediaCarousel<MovieListCubit, AsyncSnapshot<MovieListModel>>(
+                  onChanged: (index) {
+                    _backdrop.value = context.read<MovieListCubit>().state.data?.carousels[index].backdrop;
+                  },
+                  noDataBuilder: (context) => FilledButton(
+                    child: Text(AppLocalizations.of(context)!.settingsItemMovie),
+                    onPressed: () => navigateTo(context, const LibraryManage(type: LibraryType.movie)),
+                  ),
+                  selector: (state) => state?.data?.carousels.length,
+                  itemBuilder: (BuildContext context, int index) => BlocSelector<MovieListCubit, AsyncSnapshot<MovieListModel>, MediaRecommendation>(
+                      selector: (state) => state.requireData.carousels[index],
+                      builder: (context, item) => CarouselItem(
+                            item: item,
+                            onPressed: () async {
+                              final series = await Api.movieQueryById(item.id);
+                              if (context.mounted) await _onMediaTap(context, series);
+                            },
+                          )),
+                );
+              } else {
+                return SliverFillRemaining(child: Center(child: ErrorMessage(error: snapshot.error)));
+              }
+          }
+        }),
+        MediaChannel<MovieListCubit, AsyncSnapshot<MovieListModel>>(
           label: AppLocalizations.of(context)!.watchNow,
           height: 230,
-          selector: (state) => state?.watchNow.length ?? 0,
+          selector: (state) => state?.data?.watchNow.length ?? 0,
           builder: _buildRecentMediaCard,
         ),
-        MediaChannel<MovieListCubit, MovieListModel?>(
+        MediaChannel<MovieListCubit, AsyncSnapshot<MovieListModel>>(
           label: AppLocalizations.of(context)!.tagNewAdd,
-          selector: (state) => state?.newAdd.length ?? 0,
+          selector: (state) => state?.data?.newAdd.length ?? 0,
           height: 230,
-          builder: (context, index) => _buildMediaCard(context, (state) => state!.newAdd[index], width: 120, height: 180),
+          builder: (context, index) => _buildMediaCard(context, (state) => state.requireData.newAdd[index], width: 120, height: 180),
         ),
-        MediaChannel<MovieListCubit, MovieListModel?>(
+        MediaChannel<MovieListCubit, AsyncSnapshot<MovieListModel>>(
           label: AppLocalizations.of(context)!.tagNewRelease,
-          selector: (state) => state?.newRelease.length ?? 0,
+          selector: (state) => state?.data?.newRelease.length ?? 0,
           height: 230,
-          builder: (context, index) => _buildMediaCard(context, (state) => state!.newRelease[index], width: 120, height: 180),
+          builder: (context, index) => _buildMediaCard(context, (state) => state.requireData.newRelease[index], width: 120, height: 180),
         ),
-        MediaGridChannel<MovieListCubit, MovieListModel?>(
+        MediaGridChannel<MovieListCubit, AsyncSnapshot<MovieListModel>>(
           label: AppLocalizations.of(context)!.tagAll,
-          selector: (state) => state?.all.length ?? 0,
-          builder: (context, index) => _buildMediaCard(context, (state) => state!.all[index]),
+          selector: (state) => state?.data?.all.length ?? 0,
+          builder: (context, index) => _buildMediaCard(context, (state) => state.requireData.all[index]),
         ),
       ]),
     );
   }
 
   Widget _buildRecentMediaCard(BuildContext context, int index) {
-    return BlocSelector<MovieListCubit, MovieListModel?, Movie>(
-        selector: (state) => state!.watchNow[index],
+    return BlocSelector<MovieListCubit, AsyncSnapshot<MovieListModel>, Movie>(
+        selector: (state) => state.requireData.watchNow[index],
         builder: (context, item) {
           return ImageCard(
             item.poster,
@@ -107,11 +121,11 @@ class _MovieListPageState extends State<MovieListPage> {
                       style: Theme.of(context).textTheme.labelSmall)
                 else
                   const Spacer(),
-                if (item.duration != null && item.lastPlayedTime != null)
+                if (item.duration != null && item.lastPlayedPosition != null)
                   Text('${(item.lastPlayedPosition!.inSeconds / item.duration!.inSeconds * 100).toStringAsFixed(1)}%'),
               ],
             ),
-            floating: item.duration != null && item.lastPlayedTime != null
+            floating: item.duration != null && item.lastPlayedPosition != null
                 ? Align(
                     alignment: const Alignment(0, 0.95),
                     child: Padding(
@@ -133,8 +147,8 @@ class _MovieListPageState extends State<MovieListPage> {
         });
   }
 
-  Widget _buildMediaCard(BuildContext context, BlocWidgetSelector<MovieListModel?, Movie> selector, {double? width, double? height}) {
-    return BlocSelector<MovieListCubit, MovieListModel?, Movie>(
+  Widget _buildMediaCard(BuildContext context, BlocWidgetSelector<AsyncSnapshot<MovieListModel>, Movie> selector, {double? width, double? height}) {
+    return BlocSelector<MovieListCubit, AsyncSnapshot<MovieListModel>, Movie>(
         selector: selector,
         builder: (context, item) {
           return ImageCard(
@@ -171,25 +185,34 @@ class MovieListModel {
   final List<Movie> all;
 }
 
-class MovieListCubit extends Cubit<MovieListModel?> {
+class MovieListCubit extends Cubit<AsyncSnapshot<MovieListModel>> {
   MovieListCubit(super.initialState) {
     update();
   }
 
   Future<void> update() async {
-    final items = await Future.wait([
-      Api.movieRecommendation(),
-      Api.movieNextToPlayQueryAll(),
-      Api.movieQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.createAt, direction: SortDirection.desc, filter: FilterType.all), limit: 8)),
-      Api.movieQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.airDate, direction: SortDirection.desc, filter: FilterType.all), limit: 8)),
-      Api.movieQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.title, direction: SortDirection.asc, filter: FilterType.all)))
-    ]);
-    emit(MovieListModel(
-      carousels: items[0] as List<MediaRecommendation>,
-      watchNow: items[1] as List<Movie>,
-      newAdd: items[2] as List<Movie>,
-      newRelease: items[3] as List<Movie>,
-      all: items[4] as List<Movie>,
-    ));
+    try {
+      if (state.hasError) {
+        emit(const AsyncSnapshot.waiting());
+      }
+      final items = await Future.wait([
+        Api.movieRecommendation(),
+        Api.movieNextToPlayQueryAll(),
+        Api.movieQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.createAt, direction: SortDirection.desc, filter: FilterType.all), limit: 8)),
+        Api.movieQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.airDate, direction: SortDirection.desc, filter: FilterType.all), limit: 8)),
+        Api.movieQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.title, direction: SortDirection.asc, filter: FilterType.all)))
+      ]);
+      emit(AsyncSnapshot.withData(
+          ConnectionState.done,
+          MovieListModel(
+            carousels: items[0] as List<MediaRecommendation>,
+            watchNow: items[1] as List<Movie>,
+            newAdd: items[2] as List<Movie>,
+            newRelease: items[3] as List<Movie>,
+            all: items[4] as List<Movie>,
+          )));
+    } catch (e) {
+      emit(AsyncSnapshot.withError(ConnectionState.done, e));
+    }
   }
 }

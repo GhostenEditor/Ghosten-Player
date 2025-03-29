@@ -158,8 +158,8 @@ abstract class ApiPlatform extends PlatformInterface {
     return data!.map((e) => Server.fromJson(e)).toList();
   }
 
-  Future<void> serverInsert(String host) {
-    return client.put('/server/insert', data: {'host': host});
+  Future<void> serverInsert(Json data) {
+    return client.put('/server/insert', data: data);
   }
 
   Future<void> serverActiveById(int id) {

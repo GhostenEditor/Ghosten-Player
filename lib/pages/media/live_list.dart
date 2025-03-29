@@ -44,7 +44,7 @@ class _LiveListPageState extends State<LiveListPage> {
               fit: FlexFit.tight,
               child: Column(
                 children: [
-                  PlayerControlsLite(_controller),
+                  PlayerControlsLite(_controller, artwork: Container(color: Colors.black)),
                   Expanded(
                     child: Scaffold(
                       primary: false,

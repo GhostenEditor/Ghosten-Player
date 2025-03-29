@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:animations/animations.dart';
 import 'package:api/api.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -151,7 +152,7 @@ class _PlayerControlsFullState<T> extends State<PlayerControlsFull<T>> with Play
                 ],
               ),
               extendBodyBehindAppBar: true,
-              backgroundColor: Colors.transparent,
+              backgroundColor: kIsWeb ? Colors.black : Colors.transparent,
               endDrawer: Drawer(
                 child: PlayerSettings(
                   controller: _controller,

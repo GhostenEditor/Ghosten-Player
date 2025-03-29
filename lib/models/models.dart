@@ -11,11 +11,12 @@ extension FromMedia<T> on PlaylistItem<T> {
         start = episode.skipIntro > episode.duration! * 0.95 ? Duration.zero : episode.skipIntro;
       }
     }
+
     return PlaylistItem(
-      sourceType: episode.downloaded ? PlaylistItemSourceType.local : PlaylistItemSourceType.other,
+      sourceType: PlaylistItemSourceType.fromUri(episode.url!),
       title: episode.displayTitle(),
       description: '${episode.seriesTitle} S${episode.season} E${episode.episode}${episode.airDate == null ? '' : ' - ${episode.airDate?.format()}'}',
-      url: episode.url.normalize(),
+      url: episode.url!.normalize(),
       poster: episode.poster,
       subtitles: episode.subtitles.map((e) => e.toSubtitle()).toList(),
       start: start,
@@ -26,10 +27,10 @@ extension FromMedia<T> on PlaylistItem<T> {
 
   static PlaylistItem<Movie> fromMovie(Movie movie) {
     return PlaylistItem(
-        sourceType: movie.downloaded ? PlaylistItemSourceType.local : PlaylistItemSourceType.other,
+        sourceType: PlaylistItemSourceType.fromUri(movie.url!),
         title: movie.displayTitle(),
         description: movie.airDate?.format(),
-        url: movie.url.normalize(),
+        url: movie.url!.normalize(),
         poster: movie.poster,
         subtitles: movie.subtitles.map((e) => e.toSubtitle()).toList(),
         start: movie.lastPlayedPosition ?? Duration.zero,

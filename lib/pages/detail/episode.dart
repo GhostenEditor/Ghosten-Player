@@ -117,7 +117,7 @@ class _EpisodeDetailState extends State<EpisodeDetail> with ActionMixin<EpisodeD
                                           padding: EdgeInsets.zero,
                                           onTap: item.downloaded
                                               ? null
-                                              : () => showNotification(context, Api.downloadTaskCreate(item.url.queryParameters['id']!),
+                                              : () => showNotification(context, Api.downloadTaskCreate(item.url!.queryParameters['id']!),
                                                   successText: AppLocalizations.of(context)!.tipsForDownload),
                                           child: ListTile(
                                             contentPadding: const EdgeInsets.symmetric(horizontal: 16),

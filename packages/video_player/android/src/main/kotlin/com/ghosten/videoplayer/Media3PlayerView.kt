@@ -29,10 +29,8 @@ import androidx.media3.exoplayer.SeekParameters
 import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.mediacodec.MediaCodecDecoderException
 import androidx.media3.exoplayer.mediacodec.MediaCodecRenderer.DecoderInitializationException
-import androidx.media3.exoplayer.source.BehindLiveWindowException
-import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
-import androidx.media3.exoplayer.source.ProgressiveMediaSource
-import androidx.media3.exoplayer.source.UnrecognizedInputFormatException
+import androidx.media3.exoplayer.rtsp.RtspMediaSource
+import androidx.media3.exoplayer.source.*
 import androidx.media3.exoplayer.upstream.Loader
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaStyleNotificationHelper
@@ -44,6 +42,7 @@ import io.flutter.plugin.common.MethodChannel
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
+import java.net.HttpURLConnection
 import java.net.SocketTimeoutException
 import java.util.*
 import java.util.concurrent.ExecutionException
@@ -230,8 +229,8 @@ class Media3PlayerView(
         player = initPlayer()
         mediaSession = MediaSession.Builder(context, player).build()
 
-        player.setMediaItems(mPlaylist.map {
-            buildMediaItem(it)
+        player.setMediaSources(mPlaylist.map {
+            buildMediaSource(it)
         }.toList(), index, mPlaylist[index].startPosition)
         if (isPlaying) {
             player.playWhenReady = true
@@ -259,7 +258,7 @@ class Media3PlayerView(
 
     override fun onIsPlayingChanged(isPlaying: Boolean) {
         setPictureInPictureParams()
-        if (player.playbackState == Player.STATE_BUFFERING) {
+        if (player.playbackState == Player.STATE_BUFFERING || player.playbackState == Player.STATE_IDLE) {
             return
         }
         mChannel.invokeMethod("updateStatus", if (isPlaying) "playing" else "paused")
@@ -466,10 +465,17 @@ class Media3PlayerView(
             is ExoPlaybackException -> {
                 when (val cause = error.cause) {
                     is HttpDataSource.InvalidResponseCodeException -> {
-                        mChannel.invokeMethod(
-                            "fatalError",
-                            "${cause.responseCode} ${cause.responseBody.decodeToString()}"
-                        )
+                        if (cause.responseCode == HttpURLConnection.HTTP_FORBIDDEN) {
+                            val host = cause.dataSpec.uri.host
+                            if (host != null && host.endsWith("aliyuncs.com")) {
+                                play()
+                            }
+                        } else {
+                            mChannel.invokeMethod(
+                                "fatalError",
+                                "${cause.responseCode} ${cause.responseBody.decodeToString()}"
+                            )
+                        }
                     }
 
                     is HttpDataSource.HttpDataSourceException -> {
@@ -621,16 +627,17 @@ class Media3PlayerView(
         }
     }
 
-    private fun buildMediaItem(video: Video): MediaItem {
+    private fun buildMediaSource(video: Video): MediaSource {
         val uri = Uri.parse(video.url)
         return when (video.type) {
             C.CONTENT_TYPE_HLS -> HlsMediaSource.Factory(httpDataSourceFactory)
-                .createMediaSource(MediaItem.fromUri(uri)).mediaItem
-            C.CONTENT_TYPE_RTSP -> MediaItem.fromUri(uri)
+                .createMediaSource(MediaItem.fromUri(uri))
+
+            C.CONTENT_TYPE_RTSP -> RtspMediaSource.Factory()
+                .createMediaSource(MediaItem.fromUri(uri))
+
             C.CONTENT_TYPE_OTHER -> {
-                var mediaItem = ProgressiveMediaSource.Factory(httpDataSourceFactory)
-                    .createMediaSource(MediaItem.fromUri(uri))
-                    .mediaItem
+                var mediaItem = MediaItem.fromUri(uri)
                 if (video.subtitle != null) {
                     mediaItem = mediaItem.buildUpon().setSubtitleConfigurations(video.subtitle.map {
                         MediaItem.SubtitleConfiguration.Builder(Uri.parse(it.url))
@@ -647,7 +654,7 @@ class Media3PlayerView(
                             .build()
                     }).build()
                 }
-                mediaItem
+                ProgressiveMediaSource.Factory(httpDataSourceFactory).createMediaSource(mediaItem)
             }
 
             5 -> {
@@ -667,7 +674,7 @@ class Media3PlayerView(
                             .build()
                     }).build()
                 }
-                mediaItem
+                ProgressiveMediaSource.Factory(httpDataSourceFactory).createMediaSource(mediaItem)
             }
 
             else -> throw IllegalStateException("Unsupported type: ${video.type}")
@@ -853,8 +860,8 @@ class Media3PlayerView(
         }.toTypedArray()
 
         mPlaylist = playlist
-        player.setMediaItems(playlist.map {
-            buildMediaItem(it)
+        player.setMediaSources(playlist.map {
+            buildMediaSource(it)
         }.toList(), index, playlist[index].startPosition)
     }
 
@@ -879,7 +886,8 @@ class Media3PlayerView(
             (data[END_POSITION] as Int? ?: 0).toLong(),
         )
         mPlaylist[index] = video
-        player.replaceMediaItem(index, buildMediaItem(video))
+        player.removeMediaItem(index)
+        player.addMediaSource(index, buildMediaSource(video))
         player.prepare()
     }
 
