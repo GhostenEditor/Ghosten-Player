@@ -80,6 +80,12 @@ class _LibraryManageState extends State<LibraryManage> {
                             showSuccess: false),
                       ),
                       TVIconButton(
+                        icon: const Icon(Icons.cloud_sync_rounded),
+                        onPressed: () => showNotification(
+                            context, Api.libraryRefreshById(entry.$2.id, true, Provider.of<UserConfig>(context, listen: false).scraperBehavior),
+                            showSuccess: false),
+                      ),
+                      TVIconButton(
                         icon: const Icon(Icons.delete_outline),
                         onPressed: () async {
                           final confirmed = await showConfirm(

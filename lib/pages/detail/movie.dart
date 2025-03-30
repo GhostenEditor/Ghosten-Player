@@ -200,7 +200,7 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
                       const PopupMenuDivider(),
                       PopupMenuItem(
                         padding: EdgeInsets.zero,
-                        onTap: () => showNotification(context, Api.tvSeriesRenameById(widget.id)),
+                        onTap: () => showNotification(context, Api.movieRenameById(widget.id)),
                         child: ListTile(
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                           title: Text(AppLocalizations.of(context)!.buttonSaveMediaInfoToDriver),
@@ -215,7 +215,7 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
                         final res = await showDialog<(String, int?)>(context: context, builder: (context) => MovieMetadata(movie: item));
                         if (res != null) {
                           final (title, year) = res;
-                          await Api.tvSeriesMetadataUpdateById(id: widget.id, title: title, airDate: year == null ? null : DateTime(year));
+                          await Api.movieMetadataUpdateById(id: widget.id, title: title, airDate: year == null ? null : DateTime(year));
                           if (context.mounted) context.read<MovieCubit>().update();
                         }
                       }),
@@ -241,7 +241,7 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
                         onTap: item.downloaded
                             ? null
                             : () async {
-                                final resp = await showNotification(context, Api.downloadTaskCreate(item.url.queryParameters['id']!),
+                                final resp = await showNotification(context, Api.downloadTaskCreate(item.url!.queryParameters['id']!),
                                     successText: AppLocalizations.of(context)!.tipsForDownload);
                                 if (resp?.error == null && context.mounted) context.read<MovieCubit>().update();
                               },
@@ -253,7 +253,7 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
                       ),
                       if (item.scrapper.id != null) buildHomeAction(context, ImdbUri(MediaType.series, item.scrapper.id!).toUri()),
                       const PopupMenuDivider(),
-                      buildDeleteAction(context, () => Api.tvSeriesDeleteById(widget.id)),
+                      buildDeleteAction(context, () => Api.movieDeleteById(widget.id)),
                     ];
                   },
                   tooltip: '',

@@ -137,7 +137,7 @@ class _LibraryItem extends StatelessWidget {
           onTap: () => showNotification(context, refreshMedia(context, item.id, incremental: true), showSuccess: false),
           child: ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            leading: const Icon(Icons.sync),
+            leading: const Icon(Icons.cloud_sync_rounded),
             title: Text(AppLocalizations.of(context)!.buttonIncrementalSyncLibrary),
           ),
         ),
@@ -161,25 +161,27 @@ class _LibraryItem extends StatelessWidget {
       child: Column(
         children: [
           Expanded(
-            child: Container(
-              color: Theme.of(context).colorScheme.onSurface.withAlpha(0x11),
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                spacing: 12,
-                children: [
-                  switch (type) {
-                    LibraryType.tv => const Icon(Icons.tv, size: 36),
-                    LibraryType.movie => const Icon(Icons.movie_creation_outlined, size: 36),
-                  },
-                  Text(
-                    item.filename,
-                    style: Theme.of(context).textTheme.titleLarge,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
+            child: item.poster == null
+                ? Container(
+                    color: Theme.of(context).colorScheme.onSurface.withAlpha(0x11),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      spacing: 12,
+                      children: [
+                        switch (type) {
+                          LibraryType.tv => const Icon(Icons.tv, size: 36),
+                          LibraryType.movie => const Icon(Icons.movie_creation_outlined, size: 36),
+                        },
+                        Text(
+                          item.filename,
+                          style: Theme.of(context).textTheme.titleLarge,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  )
+                : AsyncImage(item.poster!, ink: true),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),

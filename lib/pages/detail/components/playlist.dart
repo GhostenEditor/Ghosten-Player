@@ -70,7 +70,7 @@ class _PlaylistSectionState extends State<PlaylistSection> {
                 width: widget.imageWidth,
                 height: widget.imageHeight,
                 title: Text(item.title!),
-                subtitle: Text(item.description!),
+                subtitle: item.description != null ? Text(item.description!) : null,
                 floating: widget.activeIndex == index
                     ? Container(
                         color: Theme.of(context).scaffoldBackgroundColor.withAlpha(0x66),

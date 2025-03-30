@@ -196,33 +196,36 @@ class CarouselBackground extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        PageTransitionSwitcher(
-          duration: const Duration(seconds: 2),
-          layoutBuilder: (List<Widget> entries) => Stack(
-            fit: StackFit.expand,
-            children: entries,
-          ),
-          transitionBuilder: (
-            Widget child,
-            Animation<double> primaryAnimation,
-            Animation<double> secondaryAnimation,
-          ) {
-            return SharedAxisTransition(
-              animation: primaryAnimation.drive(CurveTween(curve: Curves.easeOut)),
-              secondaryAnimation: secondaryAnimation.drive(CurveTween(curve: Curves.easeOut)),
-              transitionType: SharedAxisTransitionType.horizontal,
-              fillColor: Colors.transparent,
-              child: child,
-            );
-          },
-          child: Container(
-            key: UniqueKey(),
-            child: src != null
-                ? AsyncImage(key: UniqueKey(), src!)
-                : Image.asset(
-                    'assets/tv/images/bg-pixel.webp',
-                    repeat: ImageRepeat.repeat,
-                  ),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 1),
+          child: PageTransitionSwitcher(
+            duration: const Duration(seconds: 2),
+            layoutBuilder: (List<Widget> entries) => Stack(
+              fit: StackFit.expand,
+              children: entries,
+            ),
+            transitionBuilder: (
+              Widget child,
+              Animation<double> primaryAnimation,
+              Animation<double> secondaryAnimation,
+            ) {
+              return SharedAxisTransition(
+                animation: primaryAnimation.drive(CurveTween(curve: Curves.easeOut)),
+                secondaryAnimation: secondaryAnimation.drive(CurveTween(curve: Curves.easeOut)),
+                transitionType: SharedAxisTransitionType.horizontal,
+                fillColor: Colors.transparent,
+                child: child,
+              );
+            },
+            child: Container(
+              key: UniqueKey(),
+              child: src != null
+                  ? AsyncImage(key: UniqueKey(), src!)
+                  : Image.asset(
+                      'assets/tv/images/bg-pixel.webp',
+                      repeat: ImageRepeat.repeat,
+                    ),
+            ),
           ),
         ),
         DecoratedBox(

@@ -23,9 +23,6 @@ class _StepperFormState extends State<StepperForm> {
     for (final focusNode in _focusNodes) {
       focusNode.dispose();
     }
-    for (final item in widget.items) {
-      item.controller.dispose();
-    }
     super.dispose();
   }
 

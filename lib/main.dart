@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:scaled_app/scaled_app.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import 'package:video_player/player.dart';
 
 import 'const.dart';
@@ -26,32 +27,37 @@ import 'utils/utils.dart';
 
 void main(List<String> args) async {
   ScaledWidgetsFlutterBinding.ensureInitialized();
-  await Api.initialized();
-  if (kIsWeb) {
-    BrowserContextMenu.disableContextMenu();
-    PlatformApi.deviceType = DeviceType.web;
+  final initialized = await Api.initialized();
+  if (initialized ?? false) {
+    if (kIsWeb) {
+      BrowserContextMenu.disableContextMenu();
+      PlatformApi.deviceType = DeviceType.web;
+    } else {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.top]);
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+      HttpOverrides.global = MyHttpOverrides();
+      PlatformApi.deviceType = DeviceType.fromString(args[0]);
+    }
+    setPreferredOrientations(false);
+    final userConfig = await UserConfig.init();
+    ScaledWidgetsFlutterBinding.instance.scaleFactor = (deviceSize) => max(1, deviceSize.width / 1140) * userConfig.displayScale;
+    Provider.debugCheckInvalidValueType = null;
+    if (!kIsWeb && userConfig.shouldCheckUpdate()) {
+      Api.checkUpdate(
+        updateUrl,
+        Version.fromString(appVersion),
+        needUpdate: (data, url) => showModalBottomSheet(
+            context: navigatorKey.currentContext!,
+            constraints: const BoxConstraints(minWidth: double.infinity),
+            builder: (context) => UpdateBottomSheet(data, url: url)),
+      );
+    }
+    runApp(ChangeNotifierProvider(create: (_) => userConfig, child: const MainApp()));
+    PlatformApi.deeplinkEvent.listen(scanToLogin);
   } else {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.top]);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    HttpOverrides.global = MyHttpOverrides();
-    PlatformApi.deviceType = DeviceType.fromString(args[0]);
+    runApp(const UpdateToLatest());
   }
-  setPreferredOrientations(false);
-  final userConfig = await UserConfig.init();
-  ScaledWidgetsFlutterBinding.instance.scaleFactor = (deviceSize) => max(1, deviceSize.width / 1140) * userConfig.displayScale;
-  Provider.debugCheckInvalidValueType = null;
-  if (!kIsWeb && userConfig.shouldCheckUpdate()) {
-    Api.checkUpdate(
-      updateUrl,
-      Version.fromString(appVersion),
-      needUpdate: (data, url) => showModalBottomSheet(
-          context: navigatorKey.currentContext!,
-          constraints: const BoxConstraints(minWidth: double.infinity),
-          builder: (context) => UpdateBottomSheet(data, url: url)),
-    );
-  }
-  runApp(ChangeNotifierProvider(create: (_) => userConfig, child: const MainApp()));
-  PlatformApi.deeplinkEvent.listen(scanToLogin);
 }
 
 @pragma('vm:entry-point')
@@ -161,6 +167,42 @@ class _QuitConfirmState extends State<QuitConfirm> {
             },
             child: widget.child,
           );
+  }
+}
+
+class UpdateToLatest extends StatelessWidget {
+  const UpdateToLatest({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: Scaffold(
+        appBar: AppBar(),
+        extendBodyBehindAppBar: true,
+        body: Center(
+          child: Builder(builder: (context) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 10,
+              children: [
+                Text(AppLocalizations.of(context)!.versionDeprecatedTip),
+                FilledButton.tonal(
+                  onPressed: () {
+                    launchUrlString('https://github.com/$repoAuthor/$repoName', browserConfiguration: const BrowserConfiguration(showTitle: true));
+                  },
+                  child: Text(AppLocalizations.of(context)!.updateNow),
+                ),
+              ],
+            );
+          }),
+        ),
+      ),
+    );
   }
 }
 

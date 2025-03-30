@@ -151,8 +151,8 @@ class Movie extends Media {
   final Duration? lastPlayedPosition;
   final bool downloaded;
   final String ext;
-  final Uri url;
-  final int fileSize;
+  final Uri? url;
+  final int? fileSize;
   final List<SubtitleData> subtitles;
   final Duration? duration;
   final Scrapper scrapper;
@@ -169,7 +169,7 @@ class Movie extends Media {
         studios = (json['studios'] as JsonList).toStudios(),
         downloaded = json['downloaded'] ?? false,
         ext = json['ext'],
-        url = Uri.parse(json['url']),
+        url = json['url'] != null ? Uri.parse(json['url']) : null,
         fileSize = json['fileSize'],
         duration = (json['duration'] as int?)?.toDuration(),
         subtitles = (json['subtitles'] as JsonList).toSubtitles(),
@@ -239,7 +239,7 @@ class TVEpisode extends Media {
   final Duration? lastPlayedPosition;
   final bool downloaded;
   final String ext;
-  final Uri url;
+  final Uri? url;
   final int fileSize;
   final Duration? duration;
   final List<SubtitleData> subtitles;
@@ -257,7 +257,7 @@ class TVEpisode extends Media {
         lastPlayedPosition = (json['lastPlayedPosition'] as int?).toDuration(),
         downloaded = json['downloaded'] ?? false,
         ext = json['ext'],
-        url = Uri.parse(json['url']),
+        url = json['url'] != null ? Uri.parse(json['url']) : null,
         fileSize = json['fileSize'],
         subtitles = (json['subtitles'] as JsonList).toSubtitles(),
         super.fromJson();
@@ -280,7 +280,7 @@ class Actor {
   final int id;
   final String name;
   final String originalName;
-  final bool adult;
+  final bool? adult;
   final int? gender;
   final String? character;
   final String? profile;
@@ -367,6 +367,7 @@ class Library {
   final String driverName;
   final DriverType driverType;
   final String? driverAvatar;
+  final String? poster;
 
   Library.fromJson(Json json)
       : id = json['id'],
@@ -374,7 +375,8 @@ class Library {
         driverName = json['driverName'],
         driverAvatar = json['driverAvatar'],
         driverType = DriverType.fromString(json['driverType']),
-        driverId = json['driverId'];
+        driverId = json['driverId'],
+        poster = json['poster'];
 }
 
 class DNSOverride {
@@ -394,13 +396,28 @@ class Server {
   final int id;
   final String host;
   final bool active;
-
-  const Server({required this.id, required this.host, required this.active});
+  final bool invalid;
+  final ServerType type;
+  final String? username;
 
   Server.fromJson(Json json)
       : id = json['id'],
         host = json['host'],
-        active = json['active'];
+        active = json['active'],
+        invalid = json['invalid'],
+        username = json['username'],
+        type = ServerType.fromString(json['type']);
+}
+
+enum ServerType {
+  local,
+  remote,
+  emby,
+  jellyfin;
+
+  static ServerType fromString(String? str) {
+    return ServerType.values.firstWhere((element) => element.name == str, orElse: () => ServerType.local);
+  }
 }
 
 class Playlist {
@@ -715,6 +732,7 @@ enum DriverType {
   alipan,
   quark,
   webdav,
+  emby,
   local;
 
   static DriverType fromString(String? name) {
@@ -722,6 +740,7 @@ enum DriverType {
       'alipan' => DriverType.alipan,
       'quark' => DriverType.quark,
       'webdav' => DriverType.webdav,
+      'emby' => DriverType.emby,
       'local' => DriverType.local,
       _ => throw Exception('Wrong Driver Type of "$name"'),
     };

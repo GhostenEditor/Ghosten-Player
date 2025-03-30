@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:api/api.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:webview_cookie_manager/webview_cookie_manager.dart';
@@ -79,6 +80,17 @@ class _SettingsLoginPageState extends State<SettingsLoginPage> {
   }
 
   @override
+  void dispose() {
+    for (final item in _alipan) {
+      item.controller.dispose();
+    }
+    for (final item in _webdav) {
+      item.controller.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Row(
@@ -97,7 +109,7 @@ class _SettingsLoginPageState extends State<SettingsLoginPage> {
                     disabled: switch (_driverType) {
                       DriverType.webdav || DriverType.alipan => false,
                       DriverType.quark => true,
-                      DriverType.local => throw UnimplementedError(),
+                      _ => throw UnimplementedError(),
                     },
                     onData: (data) {
                       final ctx = FocusManager.instance.primaryFocus?.context;
@@ -152,13 +164,15 @@ class _SettingsLoginPageState extends State<SettingsLoginPage> {
                                   Navigator.of(context).pop(true);
                                 }
                               })),
-                      DriverType.quark => _QuarkLogin(onComplete: (data) async {
-                          final flag = await showDialog<bool>(context: context, builder: (context) => _buildLoginLoading(Api.driverInsert(data)));
-                          if ((flag ?? false) && context.mounted) {
-                            Navigator.of(context).pop(true);
-                          }
-                        }),
-                      DriverType.local => throw UnimplementedError(),
+                      DriverType.quark => kIsWeb
+                          ? const SizedBox()
+                          : _QuarkLogin(onComplete: (data) async {
+                              final flag = await showDialog<bool>(context: context, builder: (context) => _buildLoginLoading(Api.driverInsert(data)));
+                              if ((flag ?? false) && context.mounted) {
+                                Navigator.of(context).pop(true);
+                              }
+                            }),
+                      _ => throw UnimplementedError(),
                     },
                   ),
                 ],

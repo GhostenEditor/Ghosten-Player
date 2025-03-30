@@ -16,14 +16,20 @@ interface ApiMethodHandler {
 
 
 class ApiService : Service() {
-    private external fun apiStart(port: Int, dbPath: String, downloadPath: String, cachePath: String, logPath: String)
+    private external fun apiStart(
+        port: Int,
+        dbPath: String,
+        downloadPath: String,
+        cachePath: String,
+        logPath: String
+    ): Boolean
+
     private external fun apiStop()
     external fun apiInitialized(): Boolean
     external fun call(method: String, data: String, params: String): ByteArray
     external fun callWithCallback(method: String, data: String, params: String, callback: ApiMethodHandler): ByteArray
     external fun log(level: Int, message: String)
 
-    var apiStarted = false
     private var apiThread: ProxyThread? = null
     private val binder = LocalBinder()
     private var loaded = false
@@ -110,14 +116,16 @@ class ApiService : Service() {
                 if (!cacheFolder.exists()) {
                     cacheFolder.mkdir()
                 }
-                apiStart(
-                    PORT,
-                    databasePath.path,
-                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES).path,
-                    cacheFolder.path,
-                    applicationContext.cacheDir.path + "/logs",
-                )
-                apiStarted = false
+                if (!apiStart(
+                        PORT,
+                        databasePath.path,
+                        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES).path,
+                        cacheFolder.path,
+                        applicationContext.cacheDir.path + "/logs",
+                    )
+                ) {
+                    shouldLoop = false
+                }
             }
         }
 

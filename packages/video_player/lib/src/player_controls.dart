@@ -299,6 +299,7 @@ class PlayerSettings extends StatelessWidget {
                           icon: const Icon(Icons.subtitles_outlined),
                           label: localizations.videoSettingsSubtitle,
                           tracks: controller.trackGroup.value.sub,
+                          selected: controller.trackGroup.value.selectedSub,
                           onSelected: (id) => controller.setTrack('sub', id)),
                   ])),
           ListenableBuilder(

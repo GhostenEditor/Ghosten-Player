@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../components/error_message.dart';
 import '../../utils/utils.dart';
 import '../components/image_card.dart';
 import '../detail/series.dart';
@@ -46,47 +47,60 @@ class _TVListPageState extends State<TVListPage> {
       child: MediaScaffold(
         backdrop: _backdrop,
         slivers: [
-          MediaCarousel<TVListCubit, TVListModel?>(
-            onChanged: (index) {
-              _backdrop.value = context.read<TVListCubit>().state?.carousels[index].backdrop;
-            },
-            noDataBuilder: (context) => FilledButton(
-              child: Text(AppLocalizations.of(context)!.settingsItemTV),
-              onPressed: () => navigateTo(context, const LibraryManage(type: LibraryType.tv)),
-            ),
-            selector: (state) => state?.carousels.length,
-            itemBuilder: (BuildContext context, int index) => BlocSelector<TVListCubit, TVListModel?, MediaRecommendation>(
-                selector: (state) => state!.carousels[index],
-                builder: (context, item) => CarouselItem(
-                      item: item,
-                      onPressed: () async {
-                        final series = await Api.tvSeriesQueryById(item.id);
-                        if (context.mounted) await _onMediaTap(context, series);
-                      },
-                    )),
-          ),
-          MediaChannel<TVListCubit, TVListModel?>(
+          BlocBuilder<TVListCubit, AsyncSnapshot<TVListModel>>(builder: (context, snapshot) {
+            switch (snapshot.connectionState) {
+              case ConnectionState.none:
+              case ConnectionState.waiting:
+              case ConnectionState.active:
+                return const SliverFillRemaining(child: Center(child: CircularProgressIndicator()));
+              case ConnectionState.done:
+                if (snapshot.hasData) {
+                  return MediaCarousel<TVListCubit, AsyncSnapshot<TVListModel>>(
+                    onChanged: (index) {
+                      _backdrop.value = context.read<TVListCubit>().state.requireData.carousels[index].backdrop;
+                    },
+                    noDataBuilder: (context) => FilledButton(
+                      child: Text(AppLocalizations.of(context)!.settingsItemTV),
+                      onPressed: () => navigateTo(context, const LibraryManage(type: LibraryType.tv)),
+                    ),
+                    selector: (state) => state?.data?.carousels.length,
+                    itemBuilder: (BuildContext context, int index) => BlocSelector<TVListCubit, AsyncSnapshot<TVListModel>, MediaRecommendation>(
+                        selector: (state) => state.requireData.carousels[index],
+                        builder: (context, item) => CarouselItem(
+                              item: item,
+                              onPressed: () async {
+                                final series = await Api.tvSeriesQueryById(item.id);
+                                if (context.mounted) await _onMediaTap(context, series);
+                              },
+                            )),
+                  );
+                } else {
+                  return SliverFillRemaining(child: Center(child: ErrorMessage(error: snapshot.error)));
+                }
+            }
+          }),
+          MediaChannel<TVListCubit, AsyncSnapshot<TVListModel>>(
             label: AppLocalizations.of(context)!.watchNow,
             height: 160,
-            selector: (state) => state?.watchNow.length ?? 0,
+            selector: (state) => state?.data?.watchNow.length ?? 0,
             builder: _buildRecentMediaCard,
           ),
-          MediaChannel<TVListCubit, TVListModel?>(
+          MediaChannel<TVListCubit, AsyncSnapshot<TVListModel>>(
             label: AppLocalizations.of(context)!.tagNewAdd,
-            selector: (state) => state?.newAdd.length ?? 0,
+            selector: (state) => state?.data?.newAdd.length ?? 0,
             height: 230,
-            builder: (context, index) => _buildMediaCard(context, (state) => state!.newAdd[index], width: 120, height: 180),
+            builder: (context, index) => _buildMediaCard(context, (state) => state.requireData.newAdd[index], width: 120, height: 180),
           ),
-          MediaChannel<TVListCubit, TVListModel?>(
+          MediaChannel<TVListCubit, AsyncSnapshot<TVListModel>>(
             label: AppLocalizations.of(context)!.tagNewRelease,
-            selector: (state) => state?.newRelease.length ?? 0,
+            selector: (state) => state?.data?.newRelease.length ?? 0,
             height: 230,
-            builder: (context, index) => _buildMediaCard(context, (state) => state!.newRelease[index], width: 120, height: 180),
+            builder: (context, index) => _buildMediaCard(context, (state) => state.requireData.newRelease[index], width: 120, height: 180),
           ),
-          MediaGridChannel<TVListCubit, TVListModel?>(
+          MediaGridChannel<TVListCubit, AsyncSnapshot<TVListModel>>(
             label: AppLocalizations.of(context)!.tagAll,
-            selector: (state) => state?.all.length ?? 0,
-            builder: (context, index) => _buildMediaCard(context, (state) => state!.all[index]),
+            selector: (state) => state?.data?.all.length ?? 0,
+            builder: (context, index) => _buildMediaCard(context, (state) => state.requireData.all[index]),
           ),
         ],
       ),
@@ -94,8 +108,8 @@ class _TVListPageState extends State<TVListPage> {
   }
 
   Widget _buildRecentMediaCard(BuildContext context, int index) {
-    return BlocSelector<TVListCubit, TVListModel?, TVEpisode>(
-        selector: (state) => state!.watchNow[index],
+    return BlocSelector<TVListCubit, AsyncSnapshot<TVListModel>, TVEpisode>(
+        selector: (state) => state.requireData.watchNow[index],
         builder: (context, item) {
           return ImageCard(
             item.poster,
@@ -110,11 +124,11 @@ class _TVListPageState extends State<TVListPage> {
                       style: Theme.of(context).textTheme.labelSmall)
                 else
                   const Spacer(),
-                if (item.duration != null && item.lastPlayedTime != null)
+                if (item.duration != null && item.lastPlayedPosition != null)
                   Text('${(item.lastPlayedPosition!.inSeconds / item.duration!.inSeconds * 100).toStringAsFixed(1)}%'),
               ],
             ),
-            floating: item.duration != null && item.lastPlayedTime != null
+            floating: item.duration != null && item.lastPlayedPosition != null
                 ? Align(
                     alignment: const Alignment(0, 0.9),
                     child: Padding(
@@ -137,8 +151,8 @@ class _TVListPageState extends State<TVListPage> {
         });
   }
 
-  Widget _buildMediaCard(BuildContext context, BlocWidgetSelector<TVListModel?, TVSeries> selector, {double? width, double? height}) {
-    return BlocSelector<TVListCubit, TVListModel?, TVSeries>(
+  Widget _buildMediaCard(BuildContext context, BlocWidgetSelector<AsyncSnapshot<TVListModel>, TVSeries> selector, {double? width, double? height}) {
+    return BlocSelector<TVListCubit, AsyncSnapshot<TVListModel>, TVSeries>(
         selector: selector,
         builder: (context, item) {
           return ImageCard(
@@ -175,25 +189,35 @@ class TVListModel {
   final List<TVSeries> all;
 }
 
-class TVListCubit extends Cubit<TVListModel?> {
+class TVListCubit extends Cubit<AsyncSnapshot<TVListModel>> {
   TVListCubit(super.initialState) {
     update();
   }
 
   Future<void> update() async {
-    final items = await Future.wait([
-      Api.tvRecommendation(),
-      Api.tvSeriesNextToPlayQueryAll(),
-      Api.tvSeriesQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.createAt, direction: SortDirection.desc, filter: FilterType.all), limit: 8)),
-      Api.tvSeriesQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.airDate, direction: SortDirection.desc, filter: FilterType.all), limit: 8)),
-      Api.tvSeriesQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.title, direction: SortDirection.asc, filter: FilterType.all)))
-    ]);
-    emit(TVListModel(
-      carousels: items[0] as List<MediaRecommendation>,
-      watchNow: items[1] as List<TVEpisode>,
-      newAdd: items[2] as List<TVSeries>,
-      newRelease: items[3] as List<TVSeries>,
-      all: items[4] as List<TVSeries>,
-    ));
+    try {
+      if (state.hasError) {
+        emit(const AsyncSnapshot.waiting());
+      }
+      final items = await Future.wait([
+        Api.tvRecommendation(),
+        Api.tvSeriesNextToPlayQueryAll(),
+        Api.tvSeriesQueryAll(
+            const MediaSearchQuery(sort: SortConfig(type: SortType.createAt, direction: SortDirection.desc, filter: FilterType.all), limit: 8)),
+        Api.tvSeriesQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.airDate, direction: SortDirection.desc, filter: FilterType.all), limit: 8)),
+        Api.tvSeriesQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.title, direction: SortDirection.asc, filter: FilterType.all)))
+      ]);
+      emit(AsyncSnapshot.withData(
+          ConnectionState.done,
+          TVListModel(
+            carousels: items[0] as List<MediaRecommendation>,
+            watchNow: items[1] as List<TVEpisode>,
+            newAdd: items[2] as List<TVSeries>,
+            newRelease: items[3] as List<TVSeries>,
+            all: items[4] as List<TVSeries>,
+          )));
+    } catch (e) {
+      emit(AsyncSnapshot.withError(ConnectionState.done, e));
+    }
   }
 }

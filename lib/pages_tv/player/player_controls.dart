@@ -90,7 +90,7 @@ class _PlayerControlsState extends State<PlayerControls> {
         }
       }
     });
-    _controlsStream.add(ControlsStreamStatus.showInfinite);
+    _controlsStream.add(ControlsStreamStatus.show);
     widget.controller.status.addListener(() {
       switch (widget.controller.status.value) {
         case PlayerStatus.error:
@@ -422,7 +422,10 @@ class _PlayerControlsState extends State<PlayerControls> {
                 child: PlayerPlaylistView(
                   playlist: widget.controller.playlist.value,
                   activeIndex: widget.controller.index.value,
-                  onTap: (index) => widget.controller.next(index),
+                  onTap: (index) {
+                    widget.controller.next(index);
+                    _panelType.value = _PlayerPanelType.progressbar;
+                  },
                 ),
               )),
     );

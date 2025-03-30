@@ -4,7 +4,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../const.dart';
-import '../../pages/settings/settings_server.dart';
 import '../../utils/utils.dart';
 import '../components/setting.dart';
 import '../utils/utils.dart';
@@ -16,6 +15,7 @@ import 'settings_library.dart';
 import 'settings_log.dart';
 import 'settings_other.dart';
 import 'settings_player_history.dart';
+import 'settings_server.dart';
 import 'settings_sponsor.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -54,13 +54,12 @@ class SettingsPage extends StatelessWidget {
           onTap: () => navigateToSlideLeft(context, const SystemSettingsDownloader()),
         ),
         const DividerSettingItem(),
-        if (alphaVersion)
-          ButtonSettingItem(
-            title: Text(AppLocalizations.of(context)!.settingsItemServer),
-            leading: const Icon(Icons.storage_outlined),
-            trailing: const Badge(label: Text('Alpha')),
-            onTap: () => navigateToSlideLeft(context, const SystemSettingsServer()),
-          ),
+        ButtonSettingItem(
+          title: Text(AppLocalizations.of(context)!.settingsItemServer),
+          leading: const Icon(Icons.storage_outlined),
+          trailing: const Badge(label: Text('Beta')),
+          onTap: () => navigateToSlideLeft(context, const SystemSettingsServer()),
+        ),
         ButtonSettingItem(
           title: Text(AppLocalizations.of(context)!.settingsItemNetworkDiagnotics),
           leading: const Icon(Icons.rule_rounded),

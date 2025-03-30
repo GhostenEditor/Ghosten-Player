@@ -218,7 +218,7 @@ class _EpisodeDetailState extends State<EpisodeDetail> with ActionMixin {
               }
             },
           ),
-          buildDownloadAction(context, item.url),
+          buildDownloadAction(context, item.url!),
           if (widget.scrapper.id != null)
             buildHomeAction(context, ImdbUri(MediaType.episode, widget.scrapper.id!, season: item.season, episode: item.episode).toUri()),
           const DividerSettingItem(),

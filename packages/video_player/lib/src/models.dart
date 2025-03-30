@@ -128,6 +128,21 @@ enum PlaylistItemSourceType {
       _ => PlaylistItemSourceType.other,
     };
   }
+
+  static PlaylistItemSourceType fromUri(Uri uri) {
+    if (uri.scheme == 'file') {
+      return PlaylistItemSourceType.local;
+    }
+    final path = uri.path.split('.');
+    String? ext;
+    if (path.length > 1) {
+      ext = path.last;
+    }
+    return switch (ext) {
+      'm3u8' => PlaylistItemSourceType.hls,
+      _ => PlaylistItemSourceType.other,
+    };
+  }
 }
 
 class PlaylistItem<T> {

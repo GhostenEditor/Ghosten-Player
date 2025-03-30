@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:scaled_app/scaled_app.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import 'const.dart';
 import 'pages_tv/home.dart';
@@ -16,18 +17,22 @@ import 'utils/utils.dart';
 
 void main() async {
   ScaledWidgetsFlutterBinding.ensureInitialized(scaleFactor: (deviceSize) => deviceSize.width / 960);
-  await Api.initialized();
-  HttpOverrides.global = MyHttpOverrides();
-  final userConfig = await UserConfig.init();
-  Provider.debugCheckInvalidValueType = null;
-  if (userConfig.shouldCheckUpdate()) {
-    Api.checkUpdate(
-      updateUrl,
-      Version.fromString(appVersion),
-      needUpdate: (data, url) => navigateTo(navigatorKey.currentContext!, const SettingsUpdate()),
-    );
+  final initialized = await Api.initialized();
+  if (initialized ?? false) {
+    HttpOverrides.global = MyHttpOverrides();
+    final userConfig = await UserConfig.init();
+    Provider.debugCheckInvalidValueType = null;
+    if (userConfig.shouldCheckUpdate()) {
+      Api.checkUpdate(
+        updateUrl,
+        Version.fromString(appVersion),
+        needUpdate: (data, url) => navigateTo(navigatorKey.currentContext!, const SettingsUpdate()),
+      );
+    }
+    runApp(ChangeNotifierProvider(create: (_) => userConfig, child: const MainApp()));
+  } else {
+    runApp(const UpdateToLatest());
   }
-  runApp(ChangeNotifierProvider(create: (_) => userConfig, child: const MainApp()));
 }
 
 class MainApp extends StatelessWidget {
@@ -76,6 +81,42 @@ class MainApp extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class UpdateToLatest extends StatelessWidget {
+  const UpdateToLatest({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: tvTheme,
+      darkTheme: tvDarkTheme,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: Scaffold(
+        appBar: AppBar(backgroundColor: Colors.transparent),
+        extendBodyBehindAppBar: true,
+        body: Center(
+          child: Builder(builder: (context) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 10,
+              children: [
+                Text(AppLocalizations.of(context)!.versionDeprecatedTip),
+                FilledButton.tonal(
+                  onPressed: () {
+                    launchUrlString('https://github.com/$repoAuthor/$repoName', browserConfiguration: const BrowserConfiguration(showTitle: true));
+                  },
+                  child: Text(AppLocalizations.of(context)!.updateNow),
+                ),
+              ],
+            );
+          }),
+        ),
+      ),
     );
   }
 }
