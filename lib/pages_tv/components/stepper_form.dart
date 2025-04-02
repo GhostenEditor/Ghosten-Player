@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'filled_button.dart';
+import 'keyboard_reopen.dart';
 
 class StepperForm extends StatefulWidget {
   const StepperForm({super.key, required this.items, required this.onComplete});
@@ -42,68 +43,70 @@ class _StepperFormState extends State<StepperForm> {
           });
         }
       },
-      child: Stepper(
-        currentStep: _currentStep,
-        steps: [
-          ...widget.items.indexed.map((entry) => Step(
-              title: Text(entry.$2.labelText),
-              isActive: _currentStep == entry.$1,
-              state: _stepState(entry.$2, entry.$1),
-              content: TextField(
-                controller: widget.items[entry.$1].controller,
-                focusNode: _focusNodes[entry.$1],
-                decoration: InputDecoration(
-                  isDense: true,
-                  prefixIcon: entry.$2.prefixIcon,
-                  suffixIcon: entry.$2.suffixIcon,
-                  helperText: entry.$2.helperText,
-                  border: const OutlineInputBorder(),
-                  errorText: _dirties[entry.$1] && entry.$2.validator != null ? entry.$2.validator!(widget.items[entry.$1].controller.text) : null,
-                ),
-                obscureText: entry.$2.obscureText,
-                onEditingComplete: () {
-                  setState(() {
-                    _currentStep = entry.$1 + 1;
-                    _dirties[entry.$1] = true;
-                    Future.delayed(const Duration(milliseconds: 100)).then((_) => _focusNodes[_currentStep].requestFocus());
-                  });
-                },
-              ))),
-          Step(
-            title: Text(AppLocalizations.of(context)!.buttonComplete),
-            isActive: _currentStep == 2,
-            content: Align(
-              alignment: Alignment.bottomRight,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: TVFilledButton(
-                  focusNode: _focusNodes.last,
-                  child: Text(AppLocalizations.of(context)!.buttonSubmit),
-                  onPressed: () {
-                    if (!widget.items.indexed
-                        .any((entry) => entry.$2.validator != null && entry.$2.validator!(widget.items[entry.$1].controller.text) != null)) {
-                      widget.onComplete(widget.items.indexed.fold({}, (acc, entry) {
-                        acc[entry.$2.name] = widget.items[entry.$1].controller.text;
-                        return acc;
-                      }));
-                    } else {
-                      for (int i = 0; i < _dirties.length; i++) {
-                        _dirties[i] = true;
-                      }
-                      setState(() {});
-                    }
+      child: KeyboardReopen(
+        child: Stepper(
+          currentStep: _currentStep,
+          steps: [
+            ...widget.items.indexed.map((entry) => Step(
+                title: Text(entry.$2.labelText),
+                isActive: _currentStep == entry.$1,
+                state: _stepState(entry.$2, entry.$1),
+                content: TextField(
+                  controller: widget.items[entry.$1].controller,
+                  focusNode: _focusNodes[entry.$1],
+                  decoration: InputDecoration(
+                    isDense: true,
+                    prefixIcon: entry.$2.prefixIcon,
+                    suffixIcon: entry.$2.suffixIcon,
+                    helperText: entry.$2.helperText,
+                    border: const OutlineInputBorder(),
+                    errorText: _dirties[entry.$1] && entry.$2.validator != null ? entry.$2.validator!(widget.items[entry.$1].controller.text) : null,
+                  ),
+                  obscureText: entry.$2.obscureText,
+                  onEditingComplete: () {
+                    setState(() {
+                      _currentStep = entry.$1 + 1;
+                      _dirties[entry.$1] = true;
+                      Future.delayed(const Duration(milliseconds: 100)).then((_) => _focusNodes[_currentStep].requestFocus());
+                    });
                   },
+                ))),
+            Step(
+              title: Text(AppLocalizations.of(context)!.buttonComplete),
+              isActive: _currentStep == 2,
+              content: Align(
+                alignment: Alignment.bottomRight,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: TVFilledButton(
+                    focusNode: _focusNodes.last,
+                    child: Text(AppLocalizations.of(context)!.buttonSubmit),
+                    onPressed: () {
+                      if (!widget.items.indexed
+                          .any((entry) => entry.$2.validator != null && entry.$2.validator!(widget.items[entry.$1].controller.text) != null)) {
+                        widget.onComplete(widget.items.indexed.fold({}, (acc, entry) {
+                          acc[entry.$2.name] = widget.items[entry.$1].controller.text;
+                          return acc;
+                        }));
+                      } else {
+                        for (int i = 0; i < _dirties.length; i++) {
+                          _dirties[i] = true;
+                        }
+                        setState(() {});
+                      }
+                    },
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
-        onStepTapped: (int index) {
-          setState(() {
-            _currentStep = index;
-          });
-        },
-        controlsBuilder: (context, _) => const SizedBox(),
+          ],
+          onStepTapped: (int index) {
+            setState(() {
+              _currentStep = index;
+            });
+          },
+          controlsBuilder: (context, _) => const SizedBox(),
+        ),
       ),
     );
   }

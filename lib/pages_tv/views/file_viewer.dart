@@ -8,6 +8,7 @@ import '../../utils/utils.dart';
 import '../../validators/validators.dart';
 import '../../views/image_viewer.dart';
 import '../components/filled_button.dart';
+import '../components/keyboard_reopen.dart';
 import '../components/list_tile.dart';
 import '../components/setting.dart';
 import '../utils/notification.dart';
@@ -172,32 +173,34 @@ class _FileNameDialogState extends State<_FileNameDialog> {
       title: widget.dialogTitle,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Form(
-              key: _formKey,
-              child: TextFormField(
-                autofocus: true,
-                controller: _controller,
-                decoration: InputDecoration(
-                  isDense: true,
-                  labelText: AppLocalizations.of(context)!.formLabelTitle,
+        child: KeyboardReopen(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Form(
+                key: _formKey,
+                child: TextFormField(
+                  autofocus: true,
+                  controller: _controller,
+                  decoration: InputDecoration(
+                    isDense: true,
+                    labelText: AppLocalizations.of(context)!.formLabelTitle,
+                  ),
+                  validator: (value) => requiredValidator(context, value),
+                  onEditingComplete: () => FocusScope.of(context).nextFocus(),
                 ),
-                validator: (value) => requiredValidator(context, value),
-                onEditingComplete: () => FocusScope.of(context).nextFocus(),
               ),
-            ),
-            const Spacer(),
-            TVFilledButton(
-              child: Text(AppLocalizations.of(context)!.buttonConfirm),
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  Navigator.of(context).pop(_controller.text);
-                }
-              },
-            ),
-          ],
+              const Spacer(),
+              TVFilledButton(
+                child: Text(AppLocalizations.of(context)!.buttonConfirm),
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    Navigator.of(context).pop(_controller.text);
+                  }
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
