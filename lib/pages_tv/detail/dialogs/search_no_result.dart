@@ -3,6 +3,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../validators/validators.dart';
 import '../../components/filled_button.dart';
+import '../../components/keyboard_reopen.dart';
 import '../../components/text_button.dart';
 
 class SearchNoResult extends StatefulWidget {
@@ -67,57 +68,59 @@ class _SearchNoResultState extends State<SearchNoResult> {
                   const SizedBox(width: 64),
                   Flexible(
                     flex: 3,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: TextFormField(
-                            controller: _controller1,
-                            autofocus: true,
-                            decoration: InputDecoration(
-                              border: const UnderlineInputBorder(),
-                              isDense: true,
-                              labelText: AppLocalizations.of(context)!.formLabelTitle,
+                    child: KeyboardReopen(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: TextFormField(
+                              controller: _controller1,
+                              autofocus: true,
+                              decoration: InputDecoration(
+                                border: const UnderlineInputBorder(),
+                                isDense: true,
+                                labelText: AppLocalizations.of(context)!.formLabelTitle,
+                              ),
+                              validator: (value) => requiredValidator(context, value),
+                              onEditingComplete: () => FocusScope.of(context).nextFocus(),
                             ),
-                            validator: (value) => requiredValidator(context, value),
-                            onEditingComplete: () => FocusScope.of(context).nextFocus(),
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: TextFormField(
-                            autofocus: true,
-                            controller: _controller2,
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              border: const UnderlineInputBorder(),
-                              isDense: true,
-                              labelText: AppLocalizations.of(context)!.formLabelYear,
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: TextFormField(
+                              autofocus: true,
+                              controller: _controller2,
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                border: const UnderlineInputBorder(),
+                                isDense: true,
+                                labelText: AppLocalizations.of(context)!.formLabelYear,
+                              ),
+                              validator: (value) => yearValidator(context, value),
+                              onEditingComplete: () => FocusScope.of(context).nextFocus(),
                             ),
-                            validator: (value) => yearValidator(context, value),
-                            onEditingComplete: () => FocusScope.of(context).nextFocus(),
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: TVFilledButton(
-                            child: Text(AppLocalizations.of(context)!.buttonConfirm),
-                            onPressed: () {
-                              if (_formKey.currentState!.validate()) {
-                                Navigator.of(context).pop((_controller1.text, int.tryParse(_controller2.text)));
-                              }
-                            },
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: TVFilledButton(
+                              child: Text(AppLocalizations.of(context)!.buttonConfirm),
+                              onPressed: () {
+                                if (_formKey.currentState!.validate()) {
+                                  Navigator.of(context).pop((_controller1.text, int.tryParse(_controller2.text)));
+                                }
+                              },
+                            ),
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: TVTextButton(
-                            child: Text(AppLocalizations.of(context)!.buttonCancel),
-                            onPressed: () => Navigator.of(context).pop(),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: TVTextButton(
+                              child: Text(AppLocalizations.of(context)!.buttonCancel),
+                              onPressed: () => Navigator.of(context).pop(),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   )
                 ],

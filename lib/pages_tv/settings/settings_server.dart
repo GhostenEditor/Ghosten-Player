@@ -6,6 +6,7 @@ import '../../components/future_builder_handler.dart';
 import '../../validators/validators.dart';
 import '../components/filled_button.dart';
 import '../components/icon_button.dart';
+import '../components/keyboard_reopen.dart';
 import '../components/setting.dart';
 import '../utils/notification.dart';
 import '../utils/utils.dart';
@@ -22,17 +23,6 @@ class _SystemSettingsServerState extends State<SystemSettingsServer> {
   Widget build(BuildContext context) {
     return SettingPage(
       title: AppLocalizations.of(context)!.settingsItemServer,
-      // appBar: AppBar(
-      //   title: Badge(label: const Text('Beta'), child: Text()),
-      //   actions: [
-      //     IconButton(
-      //         onPressed: () async {
-      //           final flag = await navigateTo<bool>(context, const _SystemSettingsAdd());
-      //           if (flag ?? false) setState(() {});
-      //         },
-      //         icon: const Icon(Icons.add))
-      //   ],
-      // ),
       child: FutureBuilderHandler(
           future: Api.serverQueryAll(),
           builder: (context, snapshot) => ListView(
@@ -48,6 +38,7 @@ class _SystemSettingsServerState extends State<SystemSettingsServer> {
                                   child: const Icon(Icons.close, color: Colors.white, size: 12),
                                 )
                               : null,
+                          autofocus: item.active,
                           title: Text(item.host),
                           subtitle: Row(
                             spacing: 8,
@@ -146,81 +137,83 @@ class _SystemSettingsAddState extends State<_SystemSettingsAdd> {
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
         child: Form(
           key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            spacing: 12,
-            children: [
-              DropdownButtonFormField(
-                value: 'emby',
-                isExpanded: true,
-                decoration: const InputDecoration(
-                  labelText: '类型',
-                  prefixIcon: Icon(Icons.domain),
-                  isDense: true,
-                  hintText: '8.8.8.8',
+          child: KeyboardReopen(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              spacing: 12,
+              children: [
+                DropdownButtonFormField(
+                  value: 'emby',
+                  isExpanded: true,
+                  decoration: const InputDecoration(
+                    labelText: '类型',
+                    prefixIcon: Icon(Icons.domain),
+                    isDense: true,
+                    hintText: '8.8.8.8',
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 'emby', child: Text('Emby')),
+                    // DropdownMenuItem(value: 'jellyfin', child: Text('Jellyfin')),
+                  ],
+                  onChanged: (ty) => _type = ty!,
                 ),
-                items: const [
-                  DropdownMenuItem(value: 'emby', child: Text('Emby')),
-                  // DropdownMenuItem(value: 'jellyfin', child: Text('Jellyfin')),
-                ],
-                onChanged: (ty) => _type = ty!,
-              ),
-              TextFormField(
-                controller: _serverAddress,
-                autofocus: true,
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.link),
-                  border: const UnderlineInputBorder(),
-                  labelText: AppLocalizations.of(context)!.serverFormItemLabelServer,
-                  isDense: true,
+                TextFormField(
+                  controller: _serverAddress,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.link),
+                    border: const UnderlineInputBorder(),
+                    labelText: AppLocalizations.of(context)!.serverFormItemLabelServer,
+                    isDense: true,
+                  ),
+                  validator: (value) => urlValidator(context, value, true),
+                  onEditingComplete: () => FocusScope.of(context).nextFocus(),
                 ),
-                validator: (value) => urlValidator(context, value, true),
-                onEditingComplete: () => FocusScope.of(context).nextFocus(),
-              ),
-              TextFormField(
-                controller: _username,
-                autofocus: true,
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.account_circle_outlined),
-                  border: const UnderlineInputBorder(),
-                  labelText: AppLocalizations.of(context)!.loginFormItemLabelUsername,
-                  isDense: true,
+                TextFormField(
+                  controller: _username,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.account_circle_outlined),
+                    border: const UnderlineInputBorder(),
+                    labelText: AppLocalizations.of(context)!.loginFormItemLabelUsername,
+                    isDense: true,
+                  ),
+                  validator: (value) => requiredValidator(context, value),
+                  onEditingComplete: () => FocusScope.of(context).nextFocus(),
                 ),
-                validator: (value) => requiredValidator(context, value),
-                onEditingComplete: () => FocusScope.of(context).nextFocus(),
-              ),
-              TextFormField(
-                controller: _userPassword,
-                autofocus: true,
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.password),
-                  border: const UnderlineInputBorder(),
-                  labelText: AppLocalizations.of(context)!.loginFormItemLabelPwd,
-                  isDense: true,
+                TextFormField(
+                  controller: _userPassword,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.password),
+                    border: const UnderlineInputBorder(),
+                    labelText: AppLocalizations.of(context)!.loginFormItemLabelPwd,
+                    isDense: true,
+                  ),
+                  validator: (value) => requiredValidator(context, value),
+                  onEditingComplete: () => FocusScope.of(context).nextFocus(),
                 ),
-                validator: (value) => requiredValidator(context, value),
-                onEditingComplete: () => FocusScope.of(context).nextFocus(),
-              ),
-              const Spacer(),
-              TVFilledButton(
-                child: Text(AppLocalizations.of(context)!.buttonConfirm),
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    final resp = await showNotification(
-                        context,
-                        Api.serverInsert({
-                          'type': _type,
-                          'host': _serverAddress.text.trim(),
-                          'username': _username.text.trim(),
-                          'userPassword': _userPassword.text.trim(),
-                        }));
-                    if (resp?.error == null && context.mounted) {
-                      Navigator.of(context).pop(true);
+                const Spacer(),
+                TVFilledButton(
+                  child: Text(AppLocalizations.of(context)!.buttonConfirm),
+                  onPressed: () async {
+                    if (_formKey.currentState!.validate()) {
+                      final resp = await showNotification(
+                          context,
+                          Api.serverInsert({
+                            'type': _type,
+                            'host': _serverAddress.text.trim(),
+                            'username': _username.text.trim(),
+                            'userPassword': _userPassword.text.trim(),
+                          }));
+                      if (resp?.error == null && context.mounted) {
+                        Navigator.of(context).pop(true);
+                      }
                     }
-                  }
-                },
-              ),
-            ],
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),

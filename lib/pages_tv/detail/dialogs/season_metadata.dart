@@ -4,6 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../components/gap.dart';
 import '../../components/filled_button.dart';
+import '../../components/keyboard_reopen.dart';
 import '../../components/setting.dart';
 import '../../components/text_button.dart';
 
@@ -34,44 +35,46 @@ class _SeasonMetadataState extends State<SeasonMetadata> {
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
         child: Form(
           key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              TextFormField(
-                autofocus: true,
-                controller: _controller,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.numbers),
-                  isDense: true,
-                  labelText: AppLocalizations.of(context)!.formLabelSeason,
-                ),
-                validator: (value) {
-                  if (value != null && value.isNotEmpty) {
-                    final season = int.tryParse(value);
-                    if (season == null || season < 0 || season > 100) {
-                      return AppLocalizations.of(context)!.formValidatorSeason;
+          child: KeyboardReopen(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                TextFormField(
+                  autofocus: true,
+                  controller: _controller,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.numbers),
+                    isDense: true,
+                    labelText: AppLocalizations.of(context)!.formLabelSeason,
+                  ),
+                  validator: (value) {
+                    if (value != null && value.isNotEmpty) {
+                      final season = int.tryParse(value);
+                      if (season == null || season < 0 || season > 100) {
+                        return AppLocalizations.of(context)!.formValidatorSeason;
+                      }
                     }
-                  }
-                  return null;
-                },
-                onEditingComplete: () => FocusScope.of(context).nextFocus(),
-              ),
-              const Spacer(),
-              TVFilledButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    Navigator.pop(context, int.tryParse(_controller.text));
-                  }
-                },
-                child: Text(AppLocalizations.of(context)!.buttonConfirm),
-              ),
-              Gap.vSM,
-              TVTextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(AppLocalizations.of(context)!.buttonCancel),
-              ),
-            ],
+                    return null;
+                  },
+                  onEditingComplete: () => FocusScope.of(context).nextFocus(),
+                ),
+                const Spacer(),
+                TVFilledButton(
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      Navigator.pop(context, int.tryParse(_controller.text));
+                    }
+                  },
+                  child: Text(AppLocalizations.of(context)!.buttonConfirm),
+                ),
+                Gap.vSM,
+                TVTextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(AppLocalizations.of(context)!.buttonCancel),
+                ),
+              ],
+            ),
           ),
         ),
       ),
