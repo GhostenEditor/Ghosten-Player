@@ -12,6 +12,7 @@ class TVListTile extends StatefulWidget {
     this.focusNode,
     this.onFocusChange,
     this.selected = false,
+    this.dense,
   });
 
   final Widget? leading;
@@ -23,6 +24,7 @@ class TVListTile extends StatefulWidget {
   final FocusNode? focusNode;
   final ValueChanged<bool>? onFocusChange;
   final bool selected;
+  final bool? dense;
 
   @override
   State<TVListTile> createState() => _TVListTileState();
@@ -34,6 +36,7 @@ class _TVListTileState extends State<TVListTile> {
   @override
   Widget build(BuildContext context) {
     return ListTile(
+      dense: widget.dense,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(6))),
       autofocus: widget.autofocus ?? false,
       selected: widget.selected,

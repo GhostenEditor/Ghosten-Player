@@ -36,6 +36,7 @@ class Api {
   static final serverInsert = ApiPlatform.instance.serverInsert;
   static final serverActiveById = ApiPlatform.instance.serverActiveById;
   static final serverDeleteById = ApiPlatform.instance.serverDeleteById;
+  static final searchFuzzy = ApiPlatform.instance.searchFuzzy;
   static final playlistQueryAll = ApiPlatform.instance.playlistQueryAll;
   static final playlistQueryById = ApiPlatform.instance.playlistQueryById;
   static final playlistInsert = ApiPlatform.instance.playlistInsert;
@@ -43,6 +44,7 @@ class Api {
   static final playlistDeleteById = ApiPlatform.instance.playlistDeleteById;
   static final playlistRefreshById = ApiPlatform.instance.playlistRefreshById;
   static final playlistChannelsQueryById = ApiPlatform.instance.playlistChannelsQueryById;
+  static final epgQueryByChannelName = ApiPlatform.instance.epgQueryByChannelName;
   static final driverQueryAll = ApiPlatform.instance.driverQueryAll;
   static final driverInsert = ApiPlatform.instance.driverInsert;
   static final driverSettingQueryById = ApiPlatform.instance.driverSettingQueryById;

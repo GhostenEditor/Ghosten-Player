@@ -89,6 +89,8 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin, SearchableM
                     text: TextSpan(
                       style: Theme.of(context).textTheme.labelSmall!.copyWith(fontWeight: FontWeight.bold),
                       children: [
+                        const WidgetSpan(child: Icon(Icons.calendar_month_rounded, size: 14)),
+                        const WidgetSpan(child: SizedBox(width: 4)),
                         TextSpan(text: item.airDate?.format() ?? AppLocalizations.of(context)!.tagUnknown),
                         const WidgetSpan(child: SizedBox(width: 20)),
                         const WidgetSpan(child: Icon(Icons.star, color: Colors.amber, size: 14)),
@@ -163,6 +165,10 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin, SearchableM
                           if (item.fileSize != null) TextSpan(text: item.fileSize!.toSizeDisplay(), style: Theme.of(context).textTheme.labelSmall),
                           if (item.fileSize != null) const WidgetSpan(child: Gap.hSM),
                           TextSpan(text: '${item.filename}.${item.ext}', style: Theme.of(context).textTheme.labelSmall),
+                          if (item.duration != null) const WidgetSpan(child: Gap.hSM),
+                          if (item.duration != null) const WidgetSpan(child: Icon(Icons.access_time_rounded, size: 14)),
+                          if (item.duration != null) const WidgetSpan(child: SizedBox(width: 4)),
+                          if (item.duration != null) TextSpan(text: item.duration!.toDisplay(), style: Theme.of(context).textTheme.labelSmall)
                         ],
                       ),
                     ),

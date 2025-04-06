@@ -89,6 +89,10 @@ abstract class PlayerPlatform extends PlatformInterface {
     throw UnimplementedError('setPlayerOption() has not been implemented.');
   }
 
+  Future<void> setSubtitleStyle(List<int> style) {
+    throw UnimplementedError('setSubtitleStyle() has not been implemented.');
+  }
+
   void setMethodCallHandler(Future<dynamic> Function(MethodCall call)? handler) {
     throw UnimplementedError('setMethodCallHandler() has not been implemented.');
   }

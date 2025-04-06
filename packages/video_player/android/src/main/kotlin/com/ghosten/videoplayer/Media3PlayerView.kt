@@ -35,6 +35,7 @@ import androidx.media3.exoplayer.upstream.Loader
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaStyleNotificationHelper
 import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.CaptionStyleCompat
 import androidx.media3.ui.DefaultTrackNameProvider
 import androidx.media3.ui.TrackNameProvider
 import com.google.common.util.concurrent.MoreExecutors
@@ -54,6 +55,7 @@ class Media3PlayerView(
     private var extensionRendererMode: Int?,
     private var enableDecoderFallback: Boolean?,
     private var language: String?,
+    private var subtitleStyle: List<Int>?,
     private val width: Int?,
     private val height: Int?,
     private val top: Int?,
@@ -78,6 +80,9 @@ class Media3PlayerView(
         thumbnailThread.start()
         createNotificationChannel()
         player = initPlayer()
+        if (subtitleStyle?.size == 4) {
+            setSubtitleStyle(subtitleStyle!!)
+        }
         fullscreen(false)
         mediaSession = MediaSession.Builder(context, player).build()
         checkPlaybackPosition(1000)
@@ -719,6 +724,22 @@ class Media3PlayerView(
                 resetPlayer()
             }
         }
+    }
+
+    override fun setSubtitleStyle(style: List<Int>) {
+        if (style.size != 4) return
+        val playerView = mNativeView.findViewById<androidx.media3.ui.PlayerView>(R.id.video_view);
+        val subtitle = playerView.findViewById<androidx.media3.ui.SubtitleView>(androidx.media3.ui.R.id.exo_subtitles)
+        subtitle.setStyle(
+            CaptionStyleCompat(
+                style[0],
+                style[1],
+                style[2],
+                CaptionStyleCompat.EDGE_TYPE_OUTLINE,
+                style[3],
+                null
+            )
+        )
     }
 
     override fun getVideoThumbnail(result: MethodChannel.Result, timeMs: Long) {

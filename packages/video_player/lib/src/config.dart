@@ -40,4 +40,21 @@ class PlayerConfig {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('playerConfig.showThumbnails', showThumbnails);
   }
+
+  static Future<List<int>> getSubtitleSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('playerConfig.subtitleSettings')?.split(',').map(int.parse).toList() ??
+        [
+          0xFFFFFFFF,
+          0xFF000000,
+          0,
+          0,
+          0xFFFFFFFF,
+        ];
+  }
+
+  static setSubtitleSettings(List<int> settings) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('playerConfig.subtitleSettings', settings.join(','));
+  }
 }

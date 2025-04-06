@@ -1,6 +1,12 @@
+import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-// import 'package:speech_to_text/speech_to_text.dart' as stt;
+
+import '../../components/no_data.dart';
+import '../../utils/utils.dart';
+import '../components/image_card.dart';
+import '../detail/movie.dart';
+import '../detail/series.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -16,6 +22,8 @@ class _SearchPageState extends State<SearchPage> {
   String get _filter => _searchController.value.text;
   final _focusNode = FocusNode();
   final _clearFocusNode = FocusNode();
+
+  SearchFuzzyResult? _searchFuzzyResult;
 
   @override
   void initState() {
@@ -56,53 +64,164 @@ class _SearchPageState extends State<SearchPage> {
               ),
               isDense: true,
               filled: true,
-              hintText: AppLocalizations.of(context)!.search,
+              hintText: AppLocalizations.of(context)!.searchHint,
+              hintStyle: Theme.of(context).textTheme.labelMedium,
               contentPadding: EdgeInsets.zero,
               prefixIcon: const Icon(Icons.search),
               prefixIconConstraints: const BoxConstraints(maxHeight: 32, minWidth: 32),
-              suffix: _filter.isEmpty
-                  ? null
+              suffixIconConstraints: const BoxConstraints(minHeight: 36, minWidth: 36),
+              suffixIcon: _filter.isEmpty
+                  ? const Icon(null)
                   : IconButton(
                       focusNode: _clearFocusNode,
                       onPressed: () {
-                        if (_filter.isNotEmpty) {
-                          // widget.onSearch(null);
-                        }
                         _searchController.clear();
                         setState(() {});
                       },
                       icon: const Icon(Icons.clear)),
-              suffixIconConstraints: const BoxConstraints(minHeight: 36, minWidth: 36),
-              suffixIcon: IconButton(
-                  onPressed: () async {
-                    // final stt.SpeechToText speech = stt.SpeechToText();
-                    // final bool available = await speech.initialize();
-                    // if (available) {
-                    //   speech.listen(onResult: (_) {});
-                    // } else {
-                    // print('The user has denied the use of speech recognition.');
-                    // }
-                    // speech.cancel();
-                  },
-                  icon: const Icon(Icons.mic_rounded)),
             ),
             onTap: () {},
             onChanged: (_) {},
             onTapOutside: (_) => _focusNode.unfocus(),
             onSubmitted: (res) {
-              // setState(() {});
-              // _clearFocusNode.requestFocus();
+              _search();
             },
           ),
         ),
         actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.search_rounded)),
+          TextButton(onPressed: _search, child: Text(AppLocalizations.of(context)!.search)),
         ],
       ),
-      body: Center(
-        child: Text(AppLocalizations.of(context)!.tipsStayTuned),
-      ),
+      body: _searchFuzzyResult != null
+          ? CustomScrollView(
+              slivers: [
+                if (_searchFuzzyResult!.movies.isNotEmpty)
+                  SliverPadding(
+                    padding: const EdgeInsets.all(16),
+                    sliver: SliverMainAxisGroup(
+                      slivers: [
+                        SliverToBoxAdapter(child: Text(AppLocalizations.of(context)!.homeTabMovie, style: const TextStyle(height: 3))),
+                        SliverGrid.builder(
+                            addAutomaticKeepAlives: false,
+                            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: 120,
+                              childAspectRatio: 0.5,
+                              mainAxisSpacing: 16,
+                              crossAxisSpacing: 16,
+                            ),
+                            itemCount: _searchFuzzyResult!.movies.length,
+                            itemBuilder: (context, index) {
+                              final item = _searchFuzzyResult!.movies[index];
+                              return ImageCard(
+                                item.poster,
+                                title: Text(item.displayRecentTitle()),
+                                subtitle: Text(item.airDate?.format() ?? ''),
+                                onTap: () {
+                                  navigateTo(context, MovieDetail(item.id, initialData: item));
+                                },
+                              );
+                            })
+                      ],
+                    ),
+                  ),
+                if (_searchFuzzyResult!.series.isNotEmpty)
+                  SliverPadding(
+                    padding: const EdgeInsets.all(16),
+                    sliver: SliverMainAxisGroup(
+                      slivers: [
+                        SliverToBoxAdapter(child: Text(AppLocalizations.of(context)!.homeTabTV, style: const TextStyle(height: 3))),
+                        SliverGrid.builder(
+                            addAutomaticKeepAlives: false,
+                            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: 120,
+                              childAspectRatio: 0.5,
+                              mainAxisSpacing: 16,
+                              crossAxisSpacing: 16,
+                            ),
+                            itemCount: _searchFuzzyResult!.series.length,
+                            itemBuilder: (context, index) {
+                              final item = _searchFuzzyResult!.series[index];
+                              return ImageCard(
+                                item.poster,
+                                title: Text(item.displayRecentTitle()),
+                                subtitle: Text(item.airDate?.format() ?? ''),
+                                onTap: () {
+                                  navigateTo<bool>(context, TVDetail(item.id, initialData: item));
+                                },
+                              );
+                            })
+                      ],
+                    ),
+                  ),
+                if (_searchFuzzyResult!.episodes.isNotEmpty)
+                  SliverPadding(
+                    padding: const EdgeInsets.all(16),
+                    sliver: SliverMainAxisGroup(
+                      slivers: [
+                        SliverToBoxAdapter(child: Text(AppLocalizations.of(context)!.formLabelEpisode, style: const TextStyle(height: 3))),
+                        SliverGrid.builder(
+                            addAutomaticKeepAlives: false,
+                            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: 180,
+                              childAspectRatio: 1.3,
+                              mainAxisSpacing: 16,
+                              crossAxisSpacing: 16,
+                            ),
+                            itemCount: _searchFuzzyResult!.episodes.length,
+                            itemBuilder: (context, index) {
+                              final item = _searchFuzzyResult!.episodes[index];
+                              return ImageCard(
+                                item.poster,
+                                title: Text(item.displayRecentTitle()),
+                                subtitle: Text(item.airDate?.format() ?? ''),
+                                onTap: () async {
+                                  final series = await Api.tvSeriesQueryById(item.seriesId);
+                                  if (context.mounted) await navigateTo(context, TVDetail(series.id, initialData: series));
+                                },
+                              );
+                            })
+                      ],
+                    ),
+                  ),
+                if (_searchFuzzyResult!.actors.isNotEmpty)
+                  SliverPadding(
+                    padding: const EdgeInsets.all(16),
+                    sliver: SliverMainAxisGroup(
+                      slivers: [
+                        SliverToBoxAdapter(child: Text(AppLocalizations.of(context)!.titleCast, style: const TextStyle(height: 3))),
+                        SliverGrid.builder(
+                            addAutomaticKeepAlives: false,
+                            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: 100,
+                              childAspectRatio: 0.5,
+                              mainAxisSpacing: 16,
+                              crossAxisSpacing: 16,
+                            ),
+                            itemCount: _searchFuzzyResult!.actors.length,
+                            itemBuilder: (context, index) {
+                              final item = _searchFuzzyResult!.actors[index];
+                              return ImageCard(
+                                item.profile,
+                                title: Text(item.name),
+                                onTap: () {},
+                              );
+                            })
+                      ],
+                    ),
+                  ),
+              ],
+            )
+          : const Center(child: NoData()),
     );
+  }
+
+  Future<void> _search() async {
+    if (_filter.isEmpty) {
+      _searchFuzzyResult = null;
+    } else {
+      _searchFuzzyResult = await Api.searchFuzzy(_filter);
+    }
+    setState(() {});
   }
 
   void _updateState() {

@@ -18,7 +18,7 @@ import 'utils/tmdb_uri.dart';
 class EpisodeDetail extends StatefulWidget {
   const EpisodeDetail({super.key, required this.tvEpisodeId, required this.scrapper, this.initialData});
 
-  final int tvEpisodeId;
+  final dynamic tvEpisodeId;
   final Scrapper scrapper;
   final TVEpisode? initialData;
 
@@ -164,7 +164,8 @@ class _EpisodeDetailState extends State<EpisodeDetail> with ActionMixin<EpisodeD
                                                 text: TextSpan(children: [
                                               TextSpan(text: '${item.filename}.${item.ext}', style: Theme.of(context).textTheme.labelSmall),
                                               const WidgetSpan(child: Gap.hSM),
-                                              TextSpan(text: item.fileSize.toSizeDisplay(), style: Theme.of(context).textTheme.labelSmall),
+                                              if (item.fileSize != null)
+                                                TextSpan(text: item.fileSize!.toSizeDisplay(), style: Theme.of(context).textTheme.labelSmall),
                                             ])),
                                             OverviewSection(text: item.overview, trimLines: 4),
                                           ],
@@ -194,7 +195,7 @@ class TVEpisodeCubit extends MediaCubit<TVEpisode> {
     update();
   }
 
-  final int id;
+  final dynamic id;
 
   @override
   Future<void> update() async {

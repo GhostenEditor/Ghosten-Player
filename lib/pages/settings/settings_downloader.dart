@@ -289,7 +289,7 @@ class _SystemSettingsDownloaderState extends State<SystemSettingsDownloader> {
     );
   }
 
-  Future<void> _play(BuildContext context, MediaType mediaType, int id) async {
+  Future<void> _play(BuildContext context, MediaType mediaType, dynamic id) async {
     switch (mediaType) {
       case MediaType.movie:
         final movie = await Api.movieQueryById(id);

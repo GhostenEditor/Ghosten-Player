@@ -13,6 +13,7 @@ import '../../components/async_image.dart';
 import '../../components/player_i18n_adaptor.dart';
 import '../../components/playing_icon.dart';
 import '../../platform_api.dart';
+import '../../theme.dart';
 import '../../utils/utils.dart';
 import '../components/image_card.dart';
 import '../utils/utils.dart';
@@ -33,6 +34,7 @@ class PlayerControlsFull<T> extends StatefulWidget {
 
 class _PlayerControlsFullState<T> extends State<PlayerControlsFull<T>> with PlayerActionsMixin {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final _navigatorKey = GlobalKey<NavigatorState>();
   late final _controller = widget.controller;
   late final _progressController = widget.progressController;
   final _isShowControls = ValueNotifier(false);
@@ -127,16 +129,20 @@ class _PlayerControlsFullState<T> extends State<PlayerControlsFull<T>> with Play
           await setPreferredOrientations(false);
           await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.top]);
           await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-          if (context.mounted) Navigator.pop(context);
+
+          if (!context.mounted) return;
+          if (_navigatorKey.currentState?.canPop() ?? false) {
+            return _navigatorKey.currentState!.pop();
+          }
+          Navigator.pop(context);
         }
       },
       child: Theme(
-        data: ThemeData(
+        data: darkTheme.copyWith(
           colorScheme: ColorScheme.fromSeed(
             seedColor: widget.theme != null ? Color(widget.theme!) : Colors.blue,
             brightness: Brightness.dark,
           ),
-          drawerTheme: const DrawerThemeData(endShape: ContinuousRectangleBorder()),
         ),
         child: Builder(builder: (context) {
           return PlayerI18nAdaptor(
@@ -154,9 +160,18 @@ class _PlayerControlsFullState<T> extends State<PlayerControlsFull<T>> with Play
               extendBodyBehindAppBar: true,
               backgroundColor: kIsWeb ? Colors.black : Colors.transparent,
               endDrawer: Drawer(
-                child: PlayerSettings(
-                  controller: _controller,
-                  actions: (context) => actions(context, _controller),
+                child: Container(
+                  width: 360,
+                  color: const Color(0xff202124),
+                  child: Navigator(
+                    key: _navigatorKey,
+                    onGenerateRoute: (settings) => MaterialPageRoute(
+                        builder: (context) => PlayerSettings(
+                              controller: _controller,
+                              actions: (context) => actions(context, _controller),
+                            ),
+                        settings: settings),
+                  ),
                 ),
               ),
               body: GestureDetector(

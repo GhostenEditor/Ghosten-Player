@@ -89,6 +89,8 @@ class _TVDetailState extends State<TVDetail> with ActionMixin, SearchableMixin {
                     text: TextSpan(
                       style: Theme.of(context).textTheme.labelSmall!.copyWith(fontWeight: FontWeight.bold),
                       children: [
+                        const WidgetSpan(child: Icon(Icons.calendar_month_rounded, size: 14)),
+                        const WidgetSpan(child: SizedBox(width: 4)),
                         TextSpan(text: item.airDate?.format() ?? AppLocalizations.of(context)!.tagUnknown),
                         const WidgetSpan(child: SizedBox(width: 20)),
                         const WidgetSpan(child: Icon(Icons.star, color: Colors.amber, size: 14)),

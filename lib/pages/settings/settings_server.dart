@@ -166,7 +166,7 @@ class _SystemSettingsAddState extends State<_SystemSettingsAdd> {
                 ),
                 items: const [
                   DropdownMenuItem(value: 'emby', child: Text('Emby')),
-                  // DropdownMenuItem(value: 'jellyfin', child: Text('Jellyfin')),
+                  DropdownMenuItem(value: 'jellyfin', child: Text('Jellyfin')),
                 ],
                 onChanged: (ty) => _type = ty!,
               ),

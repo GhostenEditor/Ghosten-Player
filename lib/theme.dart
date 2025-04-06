@@ -14,6 +14,7 @@ final lightTheme = ThemeData(
   cardTheme: const CardTheme(elevation: 0.75),
   appBarTheme: const AppBarTheme(scrolledUnderElevation: 0.75, shadowColor: Color(0xFFE2E5E8), backgroundColor: Color(0xFFF8F6FD)),
   navigationBarTheme: const NavigationBarThemeData(elevation: 0.75, shadowColor: Color(0xFFE2E5E8)),
+  drawerTheme: const DrawerThemeData(endShape: ContinuousRectangleBorder()),
   scaffoldBackgroundColor: const Color(0xFFF5F5FA),
 );
 
@@ -25,6 +26,7 @@ final darkTheme = ThemeData(
   cardTheme: const CardTheme(elevation: 4, shadowColor: Colors.transparent),
   appBarTheme: const AppBarTheme(scrolledUnderElevation: 0.75),
   navigationBarTheme: const NavigationBarThemeData(elevation: 0.75, backgroundColor: Color(0xFF111318)),
+  drawerTheme: const DrawerThemeData(endShape: ContinuousRectangleBorder()),
 );
 
 final tvTheme = ThemeData(

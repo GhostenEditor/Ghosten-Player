@@ -13,6 +13,7 @@ class MediaGridItem extends StatefulWidget {
     this.imageWidth,
     this.imageHeight,
     this.autofocus,
+    this.placeholderIcon = Icons.image_not_supported_outlined,
   });
 
   final String? imageUrl;
@@ -22,6 +23,7 @@ class MediaGridItem extends StatefulWidget {
   final double? imageHeight;
   final bool? autofocus;
   final GestureTapCallback? onTap;
+  final IconData placeholderIcon;
 
   @override
   State<MediaGridItem> createState() => MediaGridItemState();
@@ -43,6 +45,7 @@ class MediaGridItemState extends State<MediaGridItem> {
             height: widget.imageHeight,
             poster: widget.imageUrl,
             onTap: widget.onTap,
+            placeholderIcon: widget.placeholderIcon,
             onFocusChange: (f) {
               if (_focused != f) {
                 setState(() => _focused = f);

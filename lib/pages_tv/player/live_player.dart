@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:animations/animations.dart';
 import 'package:api/api.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -9,6 +10,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:video_player/player.dart';
 
 import '../../components/async_image.dart';
+import '../../components/playing_icon.dart';
 import '../../theme.dart';
 import '../components/focusable_image.dart';
 import '../components/loading.dart';
@@ -70,33 +72,16 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
         key: _scaffoldKey,
         backgroundColor: Colors.transparent,
         drawerScrimColor: Colors.transparent,
-        drawer: SizedBox(
-          width: 360,
-          child: Drawer(
-            child: ListenableBuilder(
-                listenable: Listenable.merge([_controller.index, _drawerUpdateStream]),
-                builder: (context, _) {
-                  return GridView.builder(
-                      controller: _scrollController,
-                      itemCount: widget.playlist.length,
-                      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                        maxCrossAxisExtent: 198,
-                        mainAxisSpacing: 16,
-                        crossAxisSpacing: 16,
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 32),
-                      itemBuilder: (context, index) {
-                        final item = widget.playlist[index];
-                        return _ChannelGridItem(
-                            key: ValueKey(item.url),
-                            item: item,
-                            autofocus: index == _controller.index.value,
-                            selected: index == _controller.index.value,
-                            onTap: () {
-                              _controller.next(index);
-                            });
-                      });
-                }),
+        drawer: Container(
+          height: MediaQuery.of(context).size.height,
+          decoration: const BoxDecoration(
+              gradient: LinearGradient(
+            colors: [Colors.black87, Colors.transparent],
+            stops: [0.2, 0.8],
+          )),
+          child: _ChannelListGrouped(
+            controller: _controller,
+            onTap: (index) => _controller.next(index),
           ),
         ),
         endDrawer: SizedBox(
@@ -141,6 +126,12 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
               onPopInvokedWithResult: (didPop, _) {
                 if (didPop) {
                   return;
+                }
+                if (_scaffoldKey.currentState!.isDrawerOpen) {
+                  return _scaffoldKey.currentState!.closeDrawer();
+                }
+                if (_scaffoldKey.currentState!.isEndDrawerOpen) {
+                  return _scaffoldKey.currentState!.closeEndDrawer();
                 }
                 if (_isShowControls.value) {
                   _hideControls();
@@ -373,5 +364,101 @@ class _ChannelGridItem extends StatelessWidget {
         )
       ],
     );
+  }
+}
+
+class _ChannelListGrouped extends StatefulWidget {
+  const _ChannelListGrouped({required this.controller, required this.onTap});
+
+  final PlayerController<Channel> controller;
+  final Function(int) onTap;
+
+  @override
+  State<_ChannelListGrouped> createState() => _ChannelListGroupedState();
+}
+
+class _ChannelListGroupedState extends State<_ChannelListGrouped> {
+  late final _groupedPlaylist = widget.controller.playlist.value.groupListsBy((channel) => channel.source.category);
+  late final _groupName = ValueNotifier<String?>(null);
+  late final _playlist = ValueNotifier<List<PlaylistItem<Channel>>>([]);
+
+  @override
+  void initState() {
+    super.initState();
+    final index = widget.controller.index.value;
+    if (index != null) {
+      _groupName.value = widget.controller.playlist.value[index].source.category;
+      _playlist.value = _groupedPlaylist[_groupName.value]!;
+    }
+  }
+
+  @override
+  void dispose() {
+    _groupName.dispose();
+    _playlist.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FocusScope(
+        child: Row(
+      children: [
+        SizedBox(
+          width: 200,
+          child: ListenableBuilder(
+              listenable: _groupName,
+              builder: (context, _) {
+                return ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _groupedPlaylist.keys.length,
+                  itemBuilder: (context, index) {
+                    final name = _groupedPlaylist.keys.elementAt(index) ?? AppLocalizations.of(context)!.tagUnknown;
+                    return Material(
+                      type: MaterialType.transparency,
+                      child: ButtonSettingItem(
+                        dense: true,
+                        selected: _groupName.value == name,
+                        title: Text(name),
+                        onTap: () {
+                          _groupName.value = name;
+                          _playlist.value = _groupedPlaylist[name]!;
+                        },
+                      ),
+                    );
+                  },
+                  separatorBuilder: (context, _) => const SizedBox(height: 2),
+                );
+              }),
+        ),
+        const VerticalDivider(),
+        SizedBox(
+            width: 320,
+            child: ListenableBuilder(
+                listenable: Listenable.merge([_playlist, widget.controller.index]),
+                builder: (context, _) {
+                  return ListView.separated(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: _playlist.value.length,
+                    itemBuilder: (context, index) {
+                      final item = _playlist.value.elementAt(index);
+                      return Material(
+                        type: MaterialType.transparency,
+                        child: ButtonSettingItem(
+                          dense: true,
+                          leading: item.poster != null ? AsyncImage(item.poster!, width: 40, showErrorWidget: false) : null,
+                          trailing: item == widget.controller.currentItem ? PlayingIcon(color: Theme.of(context).colorScheme.inversePrimary) : null,
+                          selected: item == widget.controller.currentItem,
+                          title: Text(item.title ?? ''),
+                          onTap: () => widget.onTap(widget.controller.playlist.value.indexOf(item)),
+                        ),
+                      );
+                    },
+                    separatorBuilder: (context, _) => const SizedBox(height: 2),
+                  );
+                })),
+        const Expanded(child: SizedBox.expand()),
+      ],
+    ));
   }
 }

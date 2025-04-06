@@ -212,7 +212,7 @@ class _LibraryItem extends StatelessWidget {
     );
   }
 
-  Future<void> refreshMedia(BuildContext context, int id, {required bool incremental}) async {
+  Future<void> refreshMedia(BuildContext context, dynamic id, {required bool incremental}) async {
     await Api.libraryRefreshById(
       id,
       incremental,

@@ -197,7 +197,7 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
 class _SeasonPage extends StatefulWidget {
   const _SeasonPage({super.key, required this.seasonId, required this.scrapper, required this.needUpdate});
 
-  final int seasonId;
+  final dynamic seasonId;
   final Scrapper scrapper;
   final VoidCallback needUpdate;
 
@@ -374,14 +374,21 @@ class _EpisodeListTile extends StatelessWidget {
                         data: IconTheme.of(context).copyWith(size: 12),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
+                          spacing: 4,
                           children: [
                             if (episode.watched) const Badge(label: Icon(Icons.check)),
-                            if (episode.favorite) const SizedBox(width: 4),
                             if (episode.favorite) const Badge(label: Icon(Icons.favorite_rounded)),
-                            if (episode.downloaded) const SizedBox(width: 4),
                             if (episode.downloaded) const Badge(label: Icon(Icons.download_rounded)),
-                            if (episode.duration != null) const SizedBox(width: 4),
-                            if (episode.duration != null) Badge(label: Text(episode.duration!.toDisplay())),
+                            if (episode.duration != null)
+                              Badge(
+                                  label: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                spacing: 2,
+                                children: [
+                                  const Icon(Icons.access_time_rounded),
+                                  Text(episode.duration!.toDisplay()),
+                                ],
+                              )),
                           ],
                         ),
                       ),

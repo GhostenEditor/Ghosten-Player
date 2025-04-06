@@ -1,7 +1,7 @@
 name: ghosten_player
 description: "Ghosten Player: A Video Player"
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-version: 1.7.1
+version: 1.8.0
 environment:
   sdk: ^3.6.1
 dependencies:
@@ -33,9 +33,9 @@ dependencies:
   readmore: ^3.0.0
   rxdart: ^0.28.0
   scaled_app: ^2.3.0
+  screen_brightness: ^2.1.0
   shared_preferences: ^2.5.0
   shimmer: ^3.0.0
-  screen_brightness: ^2.1.0
   smooth_page_indicator: ^1.2.0
   url_launcher: ^6.3.0
   video_player:

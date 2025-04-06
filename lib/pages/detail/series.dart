@@ -33,7 +33,7 @@ import 'utils/tmdb_uri.dart';
 class TVDetail extends StatefulWidget {
   const TVDetail(this.id, {super.key, this.initialData});
 
-  final int id;
+  final dynamic id;
   final TVSeries? initialData;
 
   @override
@@ -410,7 +410,7 @@ class TVSeriesCubit extends MediaCubit<TVSeries> {
     update();
   }
 
-  final int id;
+  final dynamic id;
 
   @override
   Future<void> update() async {

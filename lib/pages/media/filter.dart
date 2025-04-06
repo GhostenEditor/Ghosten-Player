@@ -16,7 +16,7 @@ class FilterPage extends StatefulWidget {
   const FilterPage({super.key, this.queryType = QueryType.genre, this.id});
 
   final QueryType queryType;
-  final int? id;
+  final dynamic id;
 
   @override
   State<FilterPage> createState() => _FilterPageState();
@@ -29,10 +29,10 @@ class _FilterPageState extends State<FilterPage> {
   late final Future<List<Studio>> _studios = Api.studioQueryAll();
   late final Future<List<Keyword>> _keywords = Api.keywordQueryAll();
   late final Future<List<Actor>> _actors = Api.actorQueryAll();
-  int? _selectedGenre;
-  int? _selectedStudio;
-  int? _selectedKeyword;
-  int? _selectedActor;
+  dynamic _selectedGenre;
+  dynamic _selectedStudio;
+  dynamic _selectedKeyword;
+  dynamic _selectedActor;
   List<TVSeries> _tvSeries = [];
   List<Movie> _movies = [];
 
@@ -271,23 +271,23 @@ class _FilterPageState extends State<FilterPage> {
     switch (_queryType) {
       case QueryType.genre:
         if (_selectedGenre != null) {
-          _tvSeries = await Api.tvSeriesQueryByFilter(_queryType, _selectedGenre!);
-          _movies = await Api.movieQueryByFilter(_queryType, _selectedGenre!);
+          _tvSeries = await Api.tvSeriesQueryByFilter(_queryType, _selectedGenre);
+          _movies = await Api.movieQueryByFilter(_queryType, _selectedGenre);
         }
       case QueryType.studio:
         if (_selectedStudio != null) {
-          _tvSeries = await Api.tvSeriesQueryByFilter(_queryType, _selectedStudio!);
-          _movies = await Api.movieQueryByFilter(_queryType, _selectedStudio!);
+          _tvSeries = await Api.tvSeriesQueryByFilter(_queryType, _selectedStudio);
+          _movies = await Api.movieQueryByFilter(_queryType, _selectedStudio);
         }
       case QueryType.keyword:
         if (_selectedKeyword != null) {
-          _tvSeries = await Api.tvSeriesQueryByFilter(_queryType, _selectedKeyword!);
-          _movies = await Api.movieQueryByFilter(_queryType, _selectedKeyword!);
+          _tvSeries = await Api.tvSeriesQueryByFilter(_queryType, _selectedKeyword);
+          _movies = await Api.movieQueryByFilter(_queryType, _selectedKeyword);
         }
       case QueryType.actor:
         if (_selectedActor != null) {
-          _tvSeries = await Api.tvSeriesQueryByFilter(_queryType, _selectedActor!);
-          _movies = await Api.movieQueryByFilter(_queryType, _selectedActor!);
+          _tvSeries = await Api.tvSeriesQueryByFilter(_queryType, _selectedActor);
+          _movies = await Api.movieQueryByFilter(_queryType, _selectedActor);
         }
     }
     setState(() {});

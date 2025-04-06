@@ -14,6 +14,7 @@ class ButtonSettingItem extends StatelessWidget {
     this.leading,
     this.trailing,
     this.onTap,
+    this.dense,
     this.selected = false,
   });
 
@@ -23,6 +24,7 @@ class ButtonSettingItem extends StatelessWidget {
   final Widget? subtitle;
   final Widget? leading;
   final Widget? trailing;
+  final bool? dense;
   final GestureTapCallback? onTap;
 
   @override
@@ -35,6 +37,7 @@ class ButtonSettingItem extends StatelessWidget {
       trailing: trailing,
       onTap: onTap,
       selected: selected,
+      dense: dense,
     );
   }
 }
@@ -101,15 +104,15 @@ class _SlidableSettingItemState extends State<SlidableSettingItem> with SingleTi
           startActionPane: widget.actionSide == ActionSide.start
               ? ActionPane(
                   motion: const BehindMotion(),
-                  extentRatio: (52 * widget.actions.length) / constraints.maxWidth,
-                  children: widget.actions.map((action) => Padding(padding: const EdgeInsets.only(right: 4), child: action)).toList(),
+                  extentRatio: (56 * widget.actions.length) / constraints.maxWidth,
+                  children: widget.actions.map((action) => Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: action)).toList(),
                 )
               : null,
           endActionPane: widget.actionSide == ActionSide.end
               ? ActionPane(
-                  extentRatio: (52 * widget.actions.length) / constraints.maxWidth,
+                  extentRatio: (56 * widget.actions.length) / constraints.maxWidth,
                   motion: const BehindMotion(),
-                  children: widget.actions.map((action) => Padding(padding: const EdgeInsets.only(left: 4), child: action)).toList(),
+                  children: widget.actions.map((action) => Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: action)).toList(),
                 )
               : null,
           child: Material(

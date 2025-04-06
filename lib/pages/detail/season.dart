@@ -23,7 +23,7 @@ class SeasonDetail extends StatefulWidget {
     required this.scrapper,
   });
 
-  final int id;
+  final dynamic id;
   final Scrapper scrapper;
   final int? themeColor;
   final PlayerController<TVEpisode> controller;
@@ -341,7 +341,7 @@ class TVSeasonCubit extends MediaCubit<TVSeason> {
     update();
   }
 
-  final int id;
+  final dynamic id;
 
   @override
   Future<void> update() async {

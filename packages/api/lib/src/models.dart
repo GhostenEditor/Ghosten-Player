@@ -43,7 +43,7 @@ class MediaSearchQuery {
 }
 
 class MediaBase extends Equatable {
-  final int id;
+  final dynamic id;
   final String? title;
   final String? poster;
   final String? logo;
@@ -69,7 +69,7 @@ class MediaBase extends Equatable {
         updateAt = json['updateAt'];
 
   @override
-  List<Object?> get props => [updateAt];
+  List<Object?> get props => [id, updateAt];
 }
 
 class Media extends MediaBase {
@@ -99,7 +99,7 @@ class Media extends MediaBase {
 }
 
 class MediaRecommendation {
-  final int id;
+  final dynamic id;
   final String? title;
   final String? originalTitle;
   final String filename;
@@ -230,8 +230,8 @@ class TVSeason extends MediaBase {
 class TVEpisode extends Media {
   final int episode;
   final int season;
-  final int seasonId;
-  final int seriesId;
+  final dynamic seasonId;
+  final dynamic seriesId;
   final String? seriesTitle;
   final String? seasonTitle;
   final Duration skipIntro;
@@ -240,7 +240,7 @@ class TVEpisode extends Media {
   final bool downloaded;
   final String ext;
   final Uri? url;
-  final int fileSize;
+  final int? fileSize;
   final Duration? duration;
   final List<SubtitleData> subtitles;
 
@@ -277,7 +277,7 @@ class Scrapper {
 }
 
 class Actor {
-  final int id;
+  final dynamic id;
   final String name;
   final String originalName;
   final bool? adult;
@@ -300,7 +300,7 @@ class Actor {
 
 class Genre {
   final String name;
-  final int id;
+  final dynamic id;
   final Scrapper scrapper;
 
   Genre.fromJson(Json json)
@@ -312,7 +312,7 @@ class Genre {
 
 class Keyword {
   final String name;
-  final int id;
+  final dynamic id;
   final Scrapper scrapper;
 
   Keyword.fromJson(Json json)
@@ -323,7 +323,7 @@ class Keyword {
 }
 
 class Studio {
-  final int id;
+  final dynamic id;
   final String name;
   final String? country;
   final String? logo;
@@ -361,7 +361,7 @@ class SubtitleData {
 }
 
 class Library {
-  final int id;
+  final dynamic id;
   final int driverId;
   final String filename;
   final String driverName;
@@ -444,6 +444,19 @@ class Channel {
         category = json['category'];
 }
 
+class ChannelEpgItem {
+  String? start;
+  String? desc;
+  String? end;
+  String? title;
+
+  ChannelEpgItem.fromJson(Json json)
+      : start = json['start'],
+        desc = json['desc'],
+        end = json['end'],
+        title = json['title'];
+}
+
 class SearchResult {
   final int id;
   final String title;
@@ -459,6 +472,19 @@ class SearchResult {
         overview = json['overview'],
         poster = json['poster'],
         airDate = (json['airDate'] as String?)?.toDateTime();
+}
+
+class SearchFuzzyResult {
+  final List<Movie> movies;
+  final List<TVSeries> series;
+  final List<TVEpisode> episodes;
+  final List<Actor> actors;
+
+  SearchFuzzyResult.fromJson(Json json)
+      : movies = (json['movies'] as JsonList).map((e) => Movie.fromJson(e)).toList(),
+        series = (json['series'] as JsonList).map((e) => TVSeries.fromJson(e)).toList(),
+        episodes = (json['episodes'] as JsonList).map((e) => TVEpisode.fromJson(e)).toList(),
+        actors = (json['actors'] as JsonList).map((e) => Actor.fromJson(e)).toList();
 }
 
 class Session<T> {
@@ -514,7 +540,7 @@ class DriverFile {
 }
 
 class PlayerHistory {
-  final int id;
+  final dynamic id;
   final MediaType mediaType;
   final String title;
   final String? poster;
@@ -534,7 +560,7 @@ class PlayerHistory {
 
 class DownloadTask {
   final int id;
-  final int mediaId;
+  final dynamic mediaId;
   final String? poster;
   final int size;
   final double? progress;

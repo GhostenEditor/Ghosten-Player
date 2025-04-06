@@ -5,7 +5,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../components/async_image.dart';
 import '../../components/no_data.dart';
-import '../../const.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
 import '../components/focusable_image.dart';
@@ -39,7 +38,7 @@ class _LiveListPageState extends State<LiveListPage> with WidgetsBindingObserver
   @override
   Widget build(BuildContext context) {
     return FutureBuilderHandler<List<Playlist>>(
-        future: _getPlaylists(),
+        future: Api.playlistQueryAll(),
         builder: (context, snapshot) {
           _selectedPlaylistId.value = snapshot.requireData.firstOrNull?.id;
           return Row(
@@ -66,12 +65,8 @@ class _LiveListPageState extends State<LiveListPage> with WidgetsBindingObserver
                                     return SlidableSettingItem(
                                       selected: _selectedPlaylistId.value == item.id,
                                       autofocus: index == 0,
-                                      title: item.url != defaultIPTVUrl
-                                          ? item.title == null
-                                              ? null
-                                              : Text(item.title!, overflow: TextOverflow.ellipsis)
-                                          : Text(AppLocalizations.of(context)!.iptvDefaultSource, overflow: TextOverflow.ellipsis),
-                                      subtitle: item.url != defaultIPTVUrl ? Text(item.url, overflow: TextOverflow.ellipsis) : null,
+                                      title: item.title == null ? null : Text(item.title!, overflow: TextOverflow.ellipsis),
+                                      subtitle: Text(item.url, overflow: TextOverflow.ellipsis),
                                       onTap: () async {
                                         if (_selectedPlaylistId.value == item.id) return;
                                         _selectedPlaylistId.value = item.id;
@@ -83,24 +78,22 @@ class _LiveListPageState extends State<LiveListPage> with WidgetsBindingObserver
                                       },
                                       actionSide: ActionSide.start,
                                       actions: [
-                                        if (item.url != defaultIPTVUrl)
-                                          TVIconButton(
-                                              icon: const Icon(Icons.delete_outline_rounded),
-                                              onPressed: () async {
-                                                final confirm = await showConfirm(
-                                                    context, AppLocalizations.of(context)!.deleteConfirmText, AppLocalizations.of(context)!.deletePlaylistTip);
-                                                if (confirm != true) return;
-                                                if (!context.mounted) return;
-                                                await showNotification(context, Api.playlistDeleteById(item.id));
-                                                if (context.mounted) setState(() {});
-                                              }),
-                                        if (item.url != defaultIPTVUrl)
-                                          TVIconButton(
-                                              icon: const Icon(Icons.edit),
-                                              onPressed: () async {
-                                                final flag = await navigateTo<bool>(context, LiveEdit(item: item));
-                                                if ((flag ?? false) && context.mounted) setState(() {});
-                                              }),
+                                        TVIconButton(
+                                            icon: const Icon(Icons.delete_outline_rounded),
+                                            onPressed: () async {
+                                              final confirm = await showConfirm(
+                                                  context, AppLocalizations.of(context)!.deleteConfirmText, AppLocalizations.of(context)!.deletePlaylistTip);
+                                              if (confirm != true) return;
+                                              if (!context.mounted) return;
+                                              await showNotification(context, Api.playlistDeleteById(item.id));
+                                              if (context.mounted) setState(() {});
+                                            }),
+                                        TVIconButton(
+                                            icon: const Icon(Icons.edit),
+                                            onPressed: () async {
+                                              final flag = await navigateTo<bool>(context, LiveEdit(item: item));
+                                              if ((flag ?? false) && context.mounted) setState(() {});
+                                            }),
                                         TVIconButton(
                                             icon: const Icon(Icons.sync),
                                             onPressed: () async {
@@ -165,28 +158,6 @@ class _LiveListPageState extends State<LiveListPage> with WidgetsBindingObserver
   Future<void> _addPlaylist() async {
     final resp = await navigateTo<bool>(context, const LiveEdit());
     if ((resp ?? false) && context.mounted) setState(() {});
-  }
-
-  Future<List<Playlist>> _getPlaylists() async {
-    List<Playlist> playlists = [];
-    playlists = await Api.playlistQueryAll();
-    final defaultId = playlists.firstWhereOrNull((playlist) => playlist.url == defaultIPTVUrl)?.id;
-    if (defaultId == null) {
-      try {
-        await Api.playlistInsert({
-          'title': 'DEFAULT',
-          'url': defaultIPTVUrl,
-        });
-        playlists = await Api.playlistQueryAll();
-      } catch (e) {
-        ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(SnackBar(
-          backgroundColor: Colors.black87,
-          content: Text(AppLocalizations.of(navigatorKey.currentContext!)!.iptvSourceFetchFailed),
-          behavior: SnackBarBehavior.floating,
-        ));
-      }
-    }
-    return playlists;
   }
 }
 
