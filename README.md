@@ -24,8 +24,8 @@ Ghosten Player 是一款同时适配📱 Android Phone 和 📺 Android TV 的�
     - Macos (开发中)
 - 网盘支持
     - 支持阿里云盘、夸克网盘、Webdav和本地媒体文件
-  - 支持Emby和Jellyfin(Beta)
-  - 清晰度切换(阿里云盘)
+    - 支持Emby和Jellyfin(Beta)
+    - 清晰度切换(阿里云盘)
     - 多账号登录
     - 网盘文件查看和管理
     - 文件下载和边下边播
@@ -33,25 +33,25 @@ Ghosten Player 是一款同时适配📱 Android Phone 和 📺 Android TV 的�
 - IPTV
     - 线路切换
     - 自动分组
-  - 节目时间表EPG
+    - 节目时间表EPG
 - 播放器
-  - 手势操作(双击播放/暂停/快进/快退，音量/亮度调节，画面缩放，拖动快进，长按倍速等)
+    - 手势操作(双击播放/暂停/快进/快退，音量/亮度调节，画面缩放，拖动快进，长按倍速等)
     - 跳过片头/片尾
     - 播放内嵌字幕和外置字幕[^2]
     - 倍速播放
     - 视频轨道选择
     - DLNA投屏
-  - 自定义字幕样式
+    - 自定义字幕样式
 - UI
     - 中英双语
     - 浅色和深色模式
     - 支持手机端辅助TV端输入
-  - 自定义界面大小
+    - 自定义界面大小
 - 其他
     - 纯本地运行，无需后端服务支持 [^1]
     - 软件体积小 (≈ 15 MB)
     - 设备间的数据同步
-  - 站内搜索
+    - 站内搜索
     - 自动更新
 
 [^1]: 网盘由网盘供应商提供服务支持，与本项目无关
@@ -124,7 +124,7 @@ Demo仅作展示用，部分功能受Web限制，并非完整版。Demo可能更
 使用说明和常见问题解决方案详见 [Wiki](https://github.com/GhostenEditor/Ghosten-Player/wiki)
 ，如果遇到Bug或者有应用优化建议，欢迎提 [Issue](https://github.com/GhostenEditor/Ghosten-Player/issues)，我会在第一时间回复😊
 
-### 目录
+### Wiki目录
 
 - 使用说明
   - [添加账号](https://github.com/GhostenEditor/Ghosten-Player/wiki/%E6%B7%BB%E5%8A%A0%E8%B4%A6%E5%8F%B7)
