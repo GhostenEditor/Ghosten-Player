@@ -40,14 +40,16 @@ class UserConfig extends ChangeNotifier {
         autoUpdateFrequency = AutoUpdateFrequency.fromString(prefs.getString('system.autoUpdateFrequency')),
         lastCheckUpdateTime = DateTime.tryParse(prefs.getString('system.lastCheckUpdateTime') ?? ''),
         autoPlay = prefs.getBool('playerConfig.autoPlay') ?? false,
+        autoForceLandscape = prefs.getBool('playerConfig.autoForceLandscape') ?? false,
         displayScale = prefs.getDouble('system.displayScale') ?? 1,
-        scraperBehavior = prefs.getString('scraper.behavior') ?? 'skip';
+        scraperBehavior = prefs.getString('scraper.behavior') ?? 'exact';
   final SharedPreferences prefs;
   SystemLanguage language;
   ThemeMode themeMode;
   AutoUpdateFrequency autoUpdateFrequency;
   DateTime? lastCheckUpdateTime;
   bool autoPlay;
+  bool autoForceLandscape;
   double displayScale;
   String scraperBehavior;
 
@@ -65,6 +67,12 @@ class UserConfig extends ChangeNotifier {
     autoPlay = a;
     notifyListeners();
     prefs.setBool('playerConfig.autoPlay', autoPlay);
+  }
+
+  void setAutoForceLandscape(bool a) {
+    autoForceLandscape = a;
+    notifyListeners();
+    prefs.setBool('playerConfig.autoForceLandscape', autoForceLandscape);
   }
 
   void setTheme(ThemeMode themeMode) {

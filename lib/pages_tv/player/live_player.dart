@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:animations/animations.dart';
 import 'package:api/api.dart';
+import 'package:collection/collection.dart';
+import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -9,8 +11,9 @@ import 'package:rxdart/rxdart.dart';
 import 'package:video_player/player.dart';
 
 import '../../components/async_image.dart';
+import '../../components/playing_icon.dart';
 import '../../theme.dart';
-import '../components/focusable_image.dart';
+import '../../utils/utils.dart';
 import '../components/loading.dart';
 import '../components/setting.dart';
 
@@ -70,33 +73,16 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
         key: _scaffoldKey,
         backgroundColor: Colors.transparent,
         drawerScrimColor: Colors.transparent,
-        drawer: SizedBox(
-          width: 360,
-          child: Drawer(
-            child: ListenableBuilder(
-                listenable: Listenable.merge([_controller.index, _drawerUpdateStream]),
-                builder: (context, _) {
-                  return GridView.builder(
-                      controller: _scrollController,
-                      itemCount: widget.playlist.length,
-                      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                        maxCrossAxisExtent: 198,
-                        mainAxisSpacing: 16,
-                        crossAxisSpacing: 16,
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 32),
-                      itemBuilder: (context, index) {
-                        final item = widget.playlist[index];
-                        return _ChannelGridItem(
-                            key: ValueKey(item.url),
-                            item: item,
-                            autofocus: index == _controller.index.value,
-                            selected: index == _controller.index.value,
-                            onTap: () {
-                              _controller.next(index);
-                            });
-                      });
-                }),
+        drawer: Container(
+          height: MediaQuery.of(context).size.height,
+          decoration: const BoxDecoration(
+              gradient: LinearGradient(
+            colors: [Colors.black87, Colors.transparent],
+            stops: [0.2, 0.8],
+          )),
+          child: _ChannelListGrouped(
+            controller: _controller,
+            onTap: (index) => _controller.next(index),
           ),
         ),
         endDrawer: SizedBox(
@@ -141,6 +127,12 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
               onPopInvokedWithResult: (didPop, _) {
                 if (didPop) {
                   return;
+                }
+                if (_scaffoldKey.currentState!.isDrawerOpen) {
+                  return _scaffoldKey.currentState!.closeDrawer();
+                }
+                if (_scaffoldKey.currentState!.isEndDrawerOpen) {
+                  return _scaffoldKey.currentState!.closeEndDrawer();
                 }
                 if (_isShowControls.value) {
                   _hideControls();
@@ -338,40 +330,202 @@ class _PlayerInfo extends StatelessWidget {
   }
 }
 
-class _ChannelGridItem extends StatelessWidget {
-  const _ChannelGridItem({super.key, required this.item, this.onTap, this.autofocus, this.selected});
+class _ChannelListGrouped extends StatefulWidget {
+  const _ChannelListGrouped({required this.controller, required this.onTap});
 
-  final PlaylistItem<dynamic> item;
-  final GestureTapCallback? onTap;
-  final bool? autofocus;
-  final bool? selected;
+  final PlayerController<Channel> controller;
+  final Function(int) onTap;
+
+  @override
+  State<_ChannelListGrouped> createState() => _ChannelListGroupedState();
+}
+
+class _ChannelListGroupedState extends State<_ChannelListGrouped> {
+  late final _groupedPlaylist = widget.controller.playlist.value.groupListsBy((channel) => channel.source.category);
+  late final _groupName = ValueNotifier<String?>(null);
+  late final _playlist = ValueNotifier<List<PlaylistItem<Channel>>>([]);
+  late final _epg = ValueNotifier<List<ChannelEpgItem>?>([]);
+
+  @override
+  void initState() {
+    super.initState();
+    final index = widget.controller.index.value;
+    if (index != null) {
+      _groupName.value = widget.controller.playlist.value[index].source.category;
+      _playlist.value = _groupedPlaylist[_groupName.value]!;
+      _updateEpg(widget.controller.currentItem!.source.id);
+    }
+  }
+
+  @override
+  void dispose() {
+    _groupName.dispose();
+    _playlist.dispose();
+    _epg.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        FocusableImage(
-          autofocus: autofocus,
-          poster: item.poster,
-          fit: BoxFit.contain,
-          padding: const EdgeInsets.all(36),
-          selected: selected,
-          httpHeaders: const {},
-          onTap: onTap,
-        ),
-        Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              if (item.title != null) Text(item.title!, style: Theme.of(context).textTheme.titleMedium, overflow: TextOverflow.ellipsis),
-              if (item.description != null) Text(item.description!, style: Theme.of(context).textTheme.labelSmall, overflow: TextOverflow.ellipsis),
-            ],
+    return Actions(
+      actions: {
+        DirectionalFocusIntent: CallbackAction<DirectionalFocusIntent>(onInvoke: (indent) {
+          final currentNode = FocusManager.instance.primaryFocus;
+          if (currentNode != null) {
+            final nearestScope = currentNode.nearestScope!;
+            final focusedChild = nearestScope.focusedChild;
+            switch (indent.direction) {
+              case TraversalDirection.left:
+              case TraversalDirection.right:
+                if (focusedChild == null || !focusedChild.focusInDirection(indent.direction)) {
+                  FocusTraversalGroup.of(context).inDirection(nearestScope.parent!, indent.direction);
+                }
+              case TraversalDirection.up:
+              case TraversalDirection.down:
+                focusedChild?.focusInDirection(indent.direction);
+            }
+          }
+          return null;
+        }),
+      },
+      child: Row(
+        children: [
+          SizedBox(
+            width: 200,
+            child: ListenableBuilder(
+                listenable: _groupName,
+                builder: (context, _) {
+                  return _ChannelListView(
+                    itemCount: _groupedPlaylist.keys.length,
+                    itemBuilder: (context, index) {
+                      final name = _groupedPlaylist.keys.elementAt(index) ?? AppLocalizations.of(context)!.tagUnknown;
+                      return Material(
+                        type: MaterialType.transparency,
+                        child: ButtonSettingItem(
+                          dense: true,
+                          autofocus: _groupName.value == name,
+                          selected: _groupName.value == name,
+                          title: Text(name),
+                          onTap: () {
+                            _groupName.value = name;
+                            _playlist.value = _groupedPlaylist[name]!;
+                          },
+                        ),
+                      );
+                    },
+                  );
+                }),
           ),
-        )
-      ],
+          const VerticalDivider(),
+          SizedBox(
+              width: 320,
+              child: ListenableBuilder(
+                  listenable: Listenable.merge([_playlist, widget.controller.index]),
+                  builder: (context, _) {
+                    return _ChannelListView(
+                      itemCount: _playlist.value.length,
+                      itemBuilder: (context, index) {
+                        final item = _playlist.value.elementAt(index);
+                        return Material(
+                          type: MaterialType.transparency,
+                          child: ButtonSettingItem(
+                            dense: true,
+                            leading: item.poster != null ? AsyncImage(item.poster!, width: 40, showErrorWidget: false) : null,
+                            trailing: item == widget.controller.currentItem ? PlayingIcon(color: Theme.of(context).colorScheme.inversePrimary) : null,
+                            selected: item == widget.controller.currentItem,
+                            autofocus: item == widget.controller.currentItem,
+                            title: Text(item.title ?? ''),
+                            onTap: () {
+                              widget.onTap(widget.controller.playlist.value.indexOf(item));
+                              _updateEpg(item.source.id);
+                            },
+                          ),
+                        );
+                      },
+                    );
+                  })),
+          const VerticalDivider(),
+          Expanded(
+              child: ListenableBuilder(
+            listenable: _epg,
+            builder: (context, child) {
+              return _epg.value == null
+                  ? child!
+                  : _ChannelListView(
+                      itemCount: _epg.value!.length,
+                      itemBuilder: (context, index) {
+                        final item = _epg.value![index];
+                        final isPlaying = _isPlaying(item);
+                        return Material(
+                          type: MaterialType.transparency,
+                          child: ButtonSettingItem(
+                            dense: true,
+                            selected: isPlaying,
+                            title: Text(item.title),
+                            subtitle: Text(_epgTimeFormat(item)),
+                            onTap: () {},
+                          ),
+                        );
+                      });
+            },
+            child: const Loading(),
+          )),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _updateEpg(int id) async {
+    _epg.value = null;
+    _epg.value = await Api.epgQueryByChannelId(id);
+  }
+
+  bool _isPlaying(ChannelEpgItem item) {
+    final now = DateTime.now();
+    return item.start != null && item.stop != null && now >= item.start! && now <= item.stop!;
+  }
+
+  String _epgTimeFormat(ChannelEpgItem item) {
+    if (item.start != null && item.stop != null) {
+      return '${formatDate(item.start!, [HH, ':', nn])}-${formatDate(item.stop!, [HH, ':', nn])}';
+    } else {
+      return '';
+    }
+  }
+}
+
+class _ChannelListView extends StatefulWidget {
+  const _ChannelListView({required this.itemBuilder, required this.itemCount});
+
+  final int itemCount;
+  final NullableIndexedWidgetBuilder itemBuilder;
+
+  @override
+  State<_ChannelListView> createState() => _ChannelListViewState();
+}
+
+class _ChannelListViewState extends State<_ChannelListView> {
+  final _controller = ScrollController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FocusScope(
+      skipTraversal: true,
+      child: ListView.separated(
+        padding: const EdgeInsets.all(16),
+        itemCount: widget.itemCount,
+        itemBuilder: (context, index) => Material(
+          type: MaterialType.transparency,
+          child: widget.itemBuilder(context, index),
+        ),
+        separatorBuilder: (context, _) => const SizedBox(height: 2),
+      ),
     );
   }
 }

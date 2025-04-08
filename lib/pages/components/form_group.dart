@@ -71,6 +71,7 @@ class _FormGroupState extends State<FormGroup> {
         itemBuilder: (context, index) {
           final item = widget.controller.items[index];
           return TextFormField(
+            autofocus: index == 0,
             controller: item.controller,
             decoration: InputDecoration(
               isDense: true,

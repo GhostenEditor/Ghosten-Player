@@ -63,8 +63,11 @@ void main(List<String> args) async {
 @pragma('vm:entry-point')
 // ignore: avoid_void_async
 void player(List<String> args) async {
+  ScaledWidgetsFlutterBinding.ensureInitialized();
   PlatformApi.deviceType = DeviceType.fromString(args[0]);
-  runApp(PlayerApp(url: args[1]));
+  final userConfig = await UserConfig.init();
+  ScaledWidgetsFlutterBinding.instance.scaleFactor = (deviceSize) => max(1, deviceSize.width / 1140) * userConfig.displayScale;
+  runApp(ChangeNotifierProvider(create: (_) => userConfig, child: PlayerApp(url: args[1])));
 }
 
 class MainApp extends StatelessWidget {

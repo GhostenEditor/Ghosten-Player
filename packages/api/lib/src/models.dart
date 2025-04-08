@@ -43,7 +43,7 @@ class MediaSearchQuery {
 }
 
 class MediaBase extends Equatable {
-  final int id;
+  final dynamic id;
   final String? title;
   final String? poster;
   final String? logo;
@@ -69,7 +69,7 @@ class MediaBase extends Equatable {
         updateAt = json['updateAt'];
 
   @override
-  List<Object?> get props => [updateAt];
+  List<Object?> get props => [id, updateAt];
 }
 
 class Media extends MediaBase {
@@ -99,7 +99,7 @@ class Media extends MediaBase {
 }
 
 class MediaRecommendation {
-  final int id;
+  final dynamic id;
   final String? title;
   final String? originalTitle;
   final String filename;
@@ -230,8 +230,8 @@ class TVSeason extends MediaBase {
 class TVEpisode extends Media {
   final int episode;
   final int season;
-  final int seasonId;
-  final int seriesId;
+  final dynamic seasonId;
+  final dynamic seriesId;
   final String? seriesTitle;
   final String? seasonTitle;
   final Duration skipIntro;
@@ -240,7 +240,7 @@ class TVEpisode extends Media {
   final bool downloaded;
   final String ext;
   final Uri? url;
-  final int fileSize;
+  final int? fileSize;
   final Duration? duration;
   final List<SubtitleData> subtitles;
 
@@ -277,7 +277,7 @@ class Scrapper {
 }
 
 class Actor {
-  final int id;
+  final dynamic id;
   final String name;
   final String originalName;
   final bool? adult;
@@ -300,7 +300,7 @@ class Actor {
 
 class Genre {
   final String name;
-  final int id;
+  final dynamic id;
   final Scrapper scrapper;
 
   Genre.fromJson(Json json)
@@ -312,7 +312,7 @@ class Genre {
 
 class Keyword {
   final String name;
-  final int id;
+  final dynamic id;
   final Scrapper scrapper;
 
   Keyword.fromJson(Json json)
@@ -323,7 +323,7 @@ class Keyword {
 }
 
 class Studio {
-  final int id;
+  final dynamic id;
   final String name;
   final String? country;
   final String? logo;
@@ -361,7 +361,7 @@ class SubtitleData {
 }
 
 class Library {
-  final int id;
+  final dynamic id;
   final int driverId;
   final String filename;
   final String driverName;
@@ -432,16 +432,29 @@ class Playlist {
 }
 
 class Channel {
+  final int id;
   final List<Uri> links;
   final String? title;
   final String? image;
   final String? category;
 
   Channel.fromJson(Json json)
-      : links = (json['links'] as List<dynamic>).map((l) => Uri.tryParse(l)).nonNulls.toList(),
+      : id = json['id'],
+        links = (json['links'] as List<dynamic>).map((l) => Uri.tryParse(l)).nonNulls.toList(),
         title = json['title'],
         image = json['image'],
         category = json['category'];
+}
+
+class ChannelEpgItem {
+  DateTime? start;
+  DateTime? stop;
+  String title;
+
+  ChannelEpgItem.fromJson(Json json)
+      : start = epgTimeToDateTime(json['start']),
+        stop = epgTimeToDateTime(json['stop']),
+        title = json['title'];
 }
 
 class SearchResult {
@@ -459,6 +472,19 @@ class SearchResult {
         overview = json['overview'],
         poster = json['poster'],
         airDate = (json['airDate'] as String?)?.toDateTime();
+}
+
+class SearchFuzzyResult {
+  final List<Movie> movies;
+  final List<TVSeries> series;
+  final List<TVEpisode> episodes;
+  final List<Actor> actors;
+
+  SearchFuzzyResult.fromJson(Json json)
+      : movies = (json['movies'] as JsonList).map((e) => Movie.fromJson(e)).toList(),
+        series = (json['series'] as JsonList).map((e) => TVSeries.fromJson(e)).toList(),
+        episodes = (json['episodes'] as JsonList).map((e) => TVEpisode.fromJson(e)).toList(),
+        actors = (json['actors'] as JsonList).map((e) => Actor.fromJson(e)).toList();
 }
 
 class Session<T> {
@@ -514,7 +540,7 @@ class DriverFile {
 }
 
 class PlayerHistory {
-  final int id;
+  final dynamic id;
   final MediaType mediaType;
   final String title;
   final String? poster;
@@ -534,7 +560,7 @@ class PlayerHistory {
 
 class DownloadTask {
   final int id;
-  final int mediaId;
+  final dynamic mediaId;
   final String? poster;
   final int size;
   final double? progress;
@@ -885,6 +911,15 @@ extension on int? {
 extension on String {
   DateTime? toDateTime() {
     return DateTime.tryParse(this);
+  }
+}
+
+DateTime? epgTimeToDateTime(String? s) {
+  if (s == null) {
+    return null;
+  } else {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month, now.day, int.parse(s.substring(0, 2)), int.parse(s.substring(3, 5)));
   }
 }
 

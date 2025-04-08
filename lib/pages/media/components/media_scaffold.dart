@@ -78,7 +78,7 @@ class _MediaScaffoldState extends State<MediaScaffold> {
             systemOverlayStyle: getSystemUiOverlayStyle(context),
             bottom: const AppbarProgressIndicator(),
             actions: [
-              IconButton(onPressed: () => navigateTo(context, const SearchPage()), icon: const Icon(Icons.mic_rounded)),
+              IconButton(onPressed: () => navigateTo(context, const SearchPage()), icon: const Icon(Icons.search_rounded)),
             ],
           ),
           ...widget.slivers,

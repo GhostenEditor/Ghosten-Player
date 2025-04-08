@@ -194,6 +194,10 @@ class PlayerController<T> implements PlayerBaseController {
     return PlayerPlatform.instance.exitFullscreen();
   }
 
+  Future<void> setSubtitleStyle(List<int> style) {
+    return PlayerPlatform.instance.setSubtitleStyle(style);
+  }
+
   static Future<void> setPlayerOption(String optionName, dynamic optionValue) {
     return PlayerPlatform.instance.setPlayerOption(optionName, optionValue);
   }

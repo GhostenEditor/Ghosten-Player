@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
 enum PlayerStatus {
@@ -236,4 +237,32 @@ class Subtitle {
       'language': language,
     };
   }
+}
+
+class SubtitleSettings extends Equatable {
+  final Color foregroundColor;
+  final Color backgroundColor;
+  final Color windowColor;
+  final Color edgeColor;
+
+  const SubtitleSettings({
+    required this.foregroundColor,
+    required this.backgroundColor,
+    required this.windowColor,
+    required this.edgeColor,
+  });
+
+  List<int> toJson() {
+    // ignore: deprecated_member_use
+    return [foregroundColor, backgroundColor, windowColor, edgeColor].map((c) => c.value).toList();
+  }
+
+  SubtitleSettings.fromJson(List<int> json)
+      : foregroundColor = Color(json[0]),
+        backgroundColor = Color(json[1]),
+        windowColor = Color(json[2]),
+        edgeColor = Color(json[3]);
+
+  @override
+  List<Object?> get props => [foregroundColor, backgroundColor, windowColor, edgeColor];
 }

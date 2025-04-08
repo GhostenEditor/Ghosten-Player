@@ -172,13 +172,21 @@ abstract class ApiPlatform extends PlatformInterface {
 
   /// Server End
 
+  /// Search Start
+  Future<SearchFuzzyResult> searchFuzzy(String filter) async {
+    final data = await client.get<Json>('/search/fuzzy', queryParameters: {'filter': filter});
+    return SearchFuzzyResult.fromJson(data!);
+  }
+
+  /// Search End
+
   /// Playlist Start
   Future<List<Playlist>> playlistQueryAll() async {
     final data = await client.get<JsonList>('/playlist/query/all');
     return data!.map((e) => Playlist.fromJson(e)).toList();
   }
 
-  Future<Playlist> playlistQueryById(int id) async {
+  Future<Playlist> playlistQueryById(dynamic id) async {
     final data = await client.get<Json>('/playlist/query/id', queryParameters: {'id': id});
     return Playlist.fromJson(data!);
   }
@@ -202,6 +210,11 @@ abstract class ApiPlatform extends PlatformInterface {
   Future<List<Channel>> playlistChannelsQueryById(int id) async {
     final data = await client.get<JsonList>('/playlist/channels/query/id', queryParameters: {'id': id});
     return data!.map((e) => Channel.fromJson(e)).toList();
+  }
+
+  Future<List<ChannelEpgItem>> epgQueryByChannelId(int id) async {
+    final data = await client.get<JsonList>('/playlist/channel/epg', queryParameters: {'id': id});
+    return data!.map((e) => ChannelEpgItem.fromJson(e)).toList();
   }
 
   /// Playlist End
@@ -241,12 +254,12 @@ abstract class ApiPlatform extends PlatformInterface {
     return data!.map((e) => Movie.fromJson(e)).toList();
   }
 
-  Future<List<Movie>> movieQueryByFilter(QueryType type, int id) async {
+  Future<List<Movie>> movieQueryByFilter(QueryType type, dynamic id) async {
     final data = await client.get<JsonList>('/movie/query/filter', queryParameters: {'id': id, 'type': type.name});
     return data!.map((e) => Movie.fromJson(e)).toList();
   }
 
-  Future<Movie> movieQueryById(int id) async {
+  Future<Movie> movieQueryById(dynamic id) async {
     final data = await client.get<Map<String, dynamic>>('/movie/query/id', queryParameters: {'id': id});
     return Movie.fromJson(data!);
   }
@@ -256,11 +269,11 @@ abstract class ApiPlatform extends PlatformInterface {
     return data!.map((e) => Movie.fromJson(e)).toList();
   }
 
-  Future<void> movieMetadataUpdateById({required int id, required String title, DateTime? airDate}) {
+  Future<void> movieMetadataUpdateById({required dynamic id, required String title, DateTime? airDate}) {
     return client.post('/movie/metadata/update/id', data: {'id': id, 'title': title, 'airDate': airDate?.format()});
   }
 
-  Future<void> movieSubtitleUpdateById({required int id, required SubtitleData subtitle}) {
+  Future<void> movieSubtitleUpdateById({required dynamic id, required SubtitleData subtitle}) {
     return client.post('/movie/subtitle/update/id', data: {
       'id': id,
       'url': subtitle.url?.toString(),
@@ -270,15 +283,15 @@ abstract class ApiPlatform extends PlatformInterface {
     });
   }
 
-  Future<void> movieUpdateById(int id, String title, String language, {String? year, int? index}) {
+  Future<void> movieUpdateById(dynamic id, String title, String language, {String? year, int? index}) {
     return client.post('/movie/update/id', data: {'id': id, 'title': title, 'year': year, 'language': language, 'index': index});
   }
 
-  Future<void> movieRenameById(int id) {
+  Future<void> movieRenameById(dynamic id) {
     return client.post('/movie/rename/id', data: {'id': id});
   }
 
-  Future<void> movieDeleteById(int id) {
+  Future<void> movieDeleteById(dynamic id) {
     return client.delete('/movie/delete/id', data: {'id': id});
   }
 
@@ -296,12 +309,12 @@ abstract class ApiPlatform extends PlatformInterface {
     return data!.map((e) => TVSeries.fromJson(e)).toList();
   }
 
-  Future<List<TVSeries>> tvSeriesQueryByFilter(QueryType type, int id) async {
+  Future<List<TVSeries>> tvSeriesQueryByFilter(QueryType type, dynamic id) async {
     final data = await client.get<JsonList>('/tv/series/query/filter', queryParameters: {'id': id, 'type': type.name});
     return data!.map((e) => TVSeries.fromJson(e)).toList();
   }
 
-  Future<TVSeries> tvSeriesQueryById(int id) async {
+  Future<TVSeries> tvSeriesQueryById(dynamic id) async {
     final data = await client.get<Map<String, dynamic>>('/tv/series/query/id', queryParameters: {'id': id});
     return TVSeries.fromJson(data!);
   }
@@ -311,30 +324,30 @@ abstract class ApiPlatform extends PlatformInterface {
     return data!.map((e) => TVEpisode.fromJson(e)).toList();
   }
 
-  Future<void> tvSeriesUpdateById(int id, String title, String language, {String? year, int? index}) {
+  Future<void> tvSeriesUpdateById(dynamic id, String title, String language, {String? year, int? index}) {
     return client.post('/tv/series/update/id', data: {'id': id, 'title': title, 'year': year, 'language': language, 'index': index});
   }
 
-  Future<void> tvSeriesSyncById(int id) {
+  Future<void> tvSeriesSyncById(dynamic id) {
     return client.post('/tv/series/sync/id', data: {'id': id});
   }
 
-  Future<void> tvSeriesMetadataUpdateById({required int id, required String title, DateTime? airDate}) {
+  Future<void> tvSeriesMetadataUpdateById({required dynamic id, required String title, DateTime? airDate}) {
     return client.post('/tv/series/metadata/update/id', data: {'id': id, 'title': title, 'airDate': airDate?.format()});
   }
 
-  Future<void> tvSeriesRenameById(int id) {
+  Future<void> tvSeriesRenameById(dynamic id) {
     return client.post('/tv/series/rename/id', data: {'id': id});
   }
 
-  Future<void> tvSeriesDeleteById(int id) {
+  Future<void> tvSeriesDeleteById(dynamic id) {
     return client.delete('/tv/series/delete/id', data: {'id': id});
   }
 
   /// TV Series End
 
   /// TV Season Start
-  Future<TVSeason> tvSeasonQueryById(int id) async {
+  Future<TVSeason> tvSeasonQueryById(dynamic id) async {
     final data = await client.get<Map<String, dynamic>>('/tv/season/query/id', queryParameters: {'id': id});
     return TVSeason.fromJson(data!);
   }
@@ -344,23 +357,23 @@ abstract class ApiPlatform extends PlatformInterface {
     return data['id'];
   }
 
-  Future<void> tvSeasonDeleteById(int id) {
+  Future<void> tvSeasonDeleteById(dynamic id) {
     return client.post('/tv/season/delete/id', data: {'id': id});
   }
 
   /// TV Season End
 
   /// TV Episode Start
-  Future<TVEpisode> tvEpisodeQueryById(int id) async {
+  Future<TVEpisode> tvEpisodeQueryById(dynamic id) async {
     final data = await client.get<Map<String, dynamic>>('/tv/episode/query/id', queryParameters: {'id': id});
     return TVEpisode.fromJson(data!);
   }
 
-  Future<void> tvEpisodeMetadataUpdateById({required int id, required String title, required int episode}) {
+  Future<void> tvEpisodeMetadataUpdateById({required dynamic id, required String title, required int episode}) {
     return client.post('/tv/episode/metadata/update/id', data: {'id': id, 'title': title, 'episode': episode});
   }
 
-  Future<void> tvEpisodeSubtitleUpdateById({required int id, required SubtitleData subtitle}) {
+  Future<void> tvEpisodeSubtitleUpdateById({required dynamic id, required SubtitleData subtitle}) {
     return client.post('/tv/episode/subtitle/update/id', data: {
       'id': id,
       'url': subtitle.url?.toString(),
@@ -370,7 +383,7 @@ abstract class ApiPlatform extends PlatformInterface {
     });
   }
 
-  Future<void> tvEpisodeDeleteById(int id) {
+  Future<void> tvEpisodeDeleteById(dynamic id) {
     return client.delete('/tv/episode/delete/id', data: {'id': id});
   }
 
@@ -383,7 +396,7 @@ abstract class ApiPlatform extends PlatformInterface {
     return data!.map((e) => Library.fromJson(e)).toList();
   }
 
-  Future<int> libraryInsert({
+  Future<dynamic> libraryInsert({
     required LibraryType type,
     required int driverId,
     required String id,
@@ -396,14 +409,14 @@ abstract class ApiPlatform extends PlatformInterface {
       'id': id,
       'parentId': parentId,
       'filename': filename,
-    }).then((value) => value['id'] as int);
+    }).then((value) => value['id'] as dynamic);
   }
 
-  Future<void> libraryRefreshById(int id, bool incremental, String behavior) {
+  Future<void> libraryRefreshById(dynamic id, bool incremental, String behavior) {
     throw UnimplementedError('libraryRefreshById() has not been implemented.');
   }
 
-  Future<void> libraryDeleteById(int id) {
+  Future<void> libraryDeleteById(dynamic id) {
     return client.delete('/library/delete/id', data: {'id': id});
   }
 
@@ -430,15 +443,15 @@ abstract class ApiPlatform extends PlatformInterface {
     return data!.map((e) => Actor.fromJson(e)).toList();
   }
 
-  Future<void> markWatched(MediaType type, int id, bool watched) {
+  Future<void> markWatched(MediaType type, dynamic id, bool watched) {
     return client.post('/markWatched/update', data: {'id': id, 'marked': watched, 'type': type.name});
   }
 
-  Future<void> markFavorite(MediaType type, int id, bool favorite) {
+  Future<void> markFavorite(MediaType type, dynamic id, bool favorite) {
     return client.post('/markFavorite/update', data: {'id': id, 'marked': favorite, 'type': type.name});
   }
 
-  Future<void> updatePlayedStatus(LibraryType type, int id, {required Duration position, required Duration duration}) {
+  Future<void> updatePlayedStatus(LibraryType type, dynamic id, {required Duration position, required Duration duration}) {
     return client.post('/playedStatus/update', data: {
       'type': type.name,
       'id': id,
@@ -447,7 +460,7 @@ abstract class ApiPlatform extends PlatformInterface {
     });
   }
 
-  Future<void> setSkipTime(SkipTimeType type, MediaType mediaType, int id, Duration time) {
+  Future<void> setSkipTime(SkipTimeType type, MediaType mediaType, dynamic id, Duration time) {
     return client.post('/skipTime/update', data: {
       'type': type.name,
       'mediaType': mediaType.name,

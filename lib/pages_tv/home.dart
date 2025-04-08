@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../utils/utils.dart';
 import 'components/clock.dart';
 import 'components/icon_button.dart';
 import 'media/live_list.dart';
 import 'media/movie_list.dart';
+import 'media/search.dart';
 import 'media/tv_list.dart';
 import 'settings/settings.dart';
 import 'utils/utils.dart';
@@ -76,7 +78,7 @@ class _HomeState extends State<TVHomePage> {
               alignment: Alignment.centerLeft,
               child: TextButton.icon(
                 label: Text(AppLocalizations.of(context)!.search),
-                onPressed: null,
+                onPressed: () => navigateTo(context, const SearchPage()),
                 style: TextButton.styleFrom(
                   backgroundColor: Colors.transparent,
                   iconColor: Colors.white,

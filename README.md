@@ -24,30 +24,34 @@ Ghosten Player 是一款同时适配📱 Android Phone 和 📺 Android TV 的�
     - Macos (开发中)
 - 网盘支持
     - 支持阿里云盘、夸克网盘、Webdav和本地媒体文件
+  - 支持Emby和Jellyfin(Beta)
+  - 清晰度切换(阿里云盘)
     - 多账号登录
     - 网盘文件查看和管理
     - 文件下载和边下边播
     - 多线程网络加速
 - IPTV
-    - 内置IPTV源，不定时更新
     - 线路切换
     - 自动分组
-    - 节目时间表 (开发中)
+  - 节目时间表EPG
 - 播放器
-    - 手势操作(双击播放/暂停，音量/亮度调节，画面缩放，拖动快进等)
+  - 手势操作(双击播放/暂停/快进/快退，音量/亮度调节，画面缩放，拖动快进，长按倍速等)
     - 跳过片头/片尾
     - 播放内嵌字幕和外置字幕[^2]
     - 倍速播放
     - 视频轨道选择
     - DLNA投屏
+  - 自定义字幕样式
 - UI
     - 中英双语
     - 浅色和深色模式
     - 支持手机端辅助TV端输入
+  - 自定义界面大小
 - 其他
     - 纯本地运行，无需后端服务支持 [^1]
     - 软件体积小 (≈ 15 MB)
     - 设备间的数据同步
+  - 站内搜索
     - 自动更新
 
 [^1]: 网盘由网盘供应商提供服务支持，与本项目无关
@@ -72,7 +76,8 @@ Android 6+
 ## Demo
 [https://ghosteneditor.github.io](https://ghosteneditor.github.io)
 
-Demo仅作展示用，部分功能受Web限制，并非完整版，详情以 [Releases](https://github.com/GhostenEditor/Ghosten-Player/releases/latest) 最新版为准
+Demo仅作展示用，部分功能受Web限制，并非完整版。Demo可能更新不及时，详情以 [Releases](https://github.com/GhostenEditor/Ghosten-Player/releases/latest)
+最新版为准
 
 > 注: 请使用桌面端的Chrome或Edge浏览器查看demo，移动端可能存在兼容问题
 
@@ -117,23 +122,46 @@ Demo仅作展示用，部分功能受Web限制，并非完整版，详情以 [Re
 ## 其他说明
 
 使用说明和常见问题解决方案详见 [Wiki](https://github.com/GhostenEditor/Ghosten-Player/wiki)
-，如果遇到Bug或者有应用优化建议，欢迎提 [Issue](https://github.com/GhostenEditor/Ghosten-Player/issues)，我会在第一时间回复
-😊
+，如果遇到Bug或者有应用优化建议，欢迎提 [Issue](https://github.com/GhostenEditor/Ghosten-Player/issues)，我会在第一时间回复😊
+
+### 目录
+
+- 使用说明
+  - [添加账号](https://github.com/GhostenEditor/Ghosten-Player/wiki/%E6%B7%BB%E5%8A%A0%E8%B4%A6%E5%8F%B7)
+  - [添加资源](https://github.com/GhostenEditor/Ghosten-Player/wiki/%E6%B7%BB%E5%8A%A0%E8%B5%84%E6%BA%90)
+  - [TV端操作方式](https://github.com/GhostenEditor/Ghosten-Player/wiki/TV%E7%AB%AF%E6%93%8D%E4%BD%9C%E6%96%B9%E5%BC%8F)
+  - [DLNA投屏](https://github.com/GhostenEditor/Ghosten-Player/wiki/DLNA%E6%8A%95%E5%B1%8F)
+  - [多线程网络加速](https://github.com/GhostenEditor/Ghosten-Player/wiki/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%8A%A0%E9%80%9F)
+  - [数据同步](https://github.com/GhostenEditor/Ghosten-Player/wiki/%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5)
+  - [整理文件信息](https://github.com/GhostenEditor/Ghosten-Player/wiki/%E6%95%B4%E7%90%86%E6%96%87%E4%BB%B6%E4%BF%A1%E6%81%AF)
+  - [文件下载](https://github.com/GhostenEditor/Ghosten-Player/wiki/%E6%96%87%E4%BB%B6%E4%B8%8B%E8%BD%BD)
+  - [添加直播源](https://github.com/GhostenEditor/Ghosten-Player/wiki/%E6%B7%BB%E5%8A%A0%E7%9B%B4%E6%92%AD%E6%BA%90)
+  - [跳过片头片尾](https://github.com/GhostenEditor/Ghosten-Player/wiki/%E8%B7%B3%E8%BF%87%E7%89%87%E5%A4%B4%E7%89%87%E5%B0%BE)
+- 常见问题
+  - [Webdav报错](https://github.com/GhostenEditor/Ghosten-Player/wiki/Webdav%E6%8A%A5%E9%94%99)
+  - [刮削媒体信息超时](https://github.com/GhostenEditor/Ghosten-Player/wiki/%E5%88%AE%E5%89%8A%E5%AA%92%E4%BD%93%E4%BF%A1%E6%81%AF%E8%B6%85%E6%97%B6)
+  - [应用闪退](https://github.com/GhostenEditor/Ghosten-Player/wiki/%E5%BA%94%E7%94%A8%E9%97%AA%E9%80%80)
+  - [播放卡顿](https://github.com/GhostenEditor/Ghosten-Player/wiki/%E6%92%AD%E6%94%BE%E5%8D%A1%E9%A1%BF)
+  - [数据错误](https://github.com/GhostenEditor/Ghosten-Player/wiki/%E6%95%B0%E6%8D%AE%E9%94%99%E8%AF%AF)
+  - [画面或声音缺失](https://github.com/GhostenEditor/Ghosten-Player/wiki/%E7%94%BB%E9%9D%A2%E6%88%96%E5%A3%B0%E9%9F%B3%E7%BC%BA%E5%A4%B1)
+- [权限说明](https://github.com/GhostenEditor/Ghosten-Player/wiki/%E5%BA%94%E7%94%A8%E6%9D%83%E9%99%90)
+- [数据安全](https://github.com/GhostenEditor/Ghosten-Player/wiki/%E6%95%B0%E6%8D%AE%E5%AE%89%E5%85%A8)
+- [格式支持](https://github.com/GhostenEditor/Ghosten-Player/wiki/%E6%A0%BC%E5%BC%8F%E6%94%AF%E6%8C%81)
 
 ## Roadmap
 
 按照以下顺序进行开发
 
 - [x] 移动端UI以及播放器UI调整
-- [ ] 增加搜索功能，包括语音搜索
-- [ ] IPTV增加节目列表
+- [x] 增加搜索功能
+- [x] IPTV增加节目列表
+- [ ] 保存媒体信息至文件(nfo)
 - [ ] 增加弹幕功能
 - [ ] 整合MPV播放器，兼容老旧的音视频格式
 - [ ] 应用上架Google Play
-- [ ] 增加ftp和smb协议和emby的支持
-- [ ] 保存媒体信息至文件(nfo)
+- [ ] 增加ftp和smb协议的支持
 - [ ] 桌面端(Developing)
-- [ ] DLNA投屏的兼容问题
+- [x] DLNA投屏的兼容问题
 - [ ] 客户端串联
 
 ## 赞助

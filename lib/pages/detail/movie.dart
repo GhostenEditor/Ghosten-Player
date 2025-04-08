@@ -31,7 +31,7 @@ import 'mixins/searchable.dart';
 class MovieDetail extends StatefulWidget {
   const MovieDetail(this.id, {super.key, this.initialData});
 
-  final int id;
+  final dynamic id;
   final Movie? initialData;
 
   @override
@@ -367,7 +367,7 @@ class MovieCubit extends MediaCubit<Movie> {
     update();
   }
 
-  final int id;
+  final dynamic id;
 
   @override
   Future<void> update() async {

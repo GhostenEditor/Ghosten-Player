@@ -22,6 +22,7 @@ interface BasePlayerView {
     fun getPictureInPictureParams(): PictureInPictureParams?
     fun canEnterPictureInPicture(): Boolean
     fun setPlayerOption(name: String, value: Any)
+    fun setSubtitleStyle(style: List<Int>)
 }
 
 internal class Video(

@@ -42,6 +42,7 @@ class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activit
                                 call.argument("extensionRendererMode"),
                                 call.argument("enableDecoderFallback"),
                                 call.argument("language"),
+                                call.argument("subtitleStyle"),
                                 call.argument("width"),
                                 call.argument("height"),
                                 call.argument("top"),
@@ -93,6 +94,8 @@ class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activit
                                 call.argument("name")!!,
                                 call.argument("value")!!
                             )
+
+                            "setSubtitleStyle" -> mPlayerView?.setSubtitleStyle(call.argument("style")!!)
 
                             else -> return result.notImplemented()
                         }

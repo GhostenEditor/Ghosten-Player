@@ -98,6 +98,11 @@ class MethodChannelPlayer extends PlayerPlatform {
   }
 
   @override
+  Future<void> setSubtitleStyle(List<int> style) {
+    return _channel.invokeMethod('setSubtitleStyle', {'style': style});
+  }
+
+  @override
   void setMethodCallHandler(Future<dynamic> Function(MethodCall call)? handler) {
     _channel.setMethodCallHandler(handler);
   }

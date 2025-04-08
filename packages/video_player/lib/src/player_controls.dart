@@ -5,10 +5,9 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:video_player/src/config.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
-import 'models.dart';
-import 'player.dart';
+import '../player.dart';
 import 'player_platform_interface.dart';
 
 class PlayerSpeed {
@@ -224,6 +223,12 @@ class PlayerLocalizations extends InheritedWidget {
   final String Function(String) extensionRendererMode;
   final String extensionRendererModeLabel;
   final String playerShowThumbnails;
+  final String subtitleSetting;
+  final String subtitleSettingExample;
+  final String subtitleSettingForegroundColor;
+  final String subtitleSettingBackgroundColor;
+  final String subtitleSettingEdgeColor;
+  final String subtitleSettingWindowColor;
 
   const PlayerLocalizations({
     super.key,
@@ -240,6 +245,12 @@ class PlayerLocalizations extends InheritedWidget {
     required this.extensionRendererMode,
     required this.extensionRendererModeLabel,
     required this.playerShowThumbnails,
+    required this.subtitleSetting,
+    required this.subtitleSettingExample,
+    required this.subtitleSettingForegroundColor,
+    required this.subtitleSettingBackgroundColor,
+    required this.subtitleSettingEdgeColor,
+    required this.subtitleSettingWindowColor,
     required super.child,
   });
 
@@ -345,6 +356,23 @@ class PlayerSettings extends StatelessWidget {
                   ),
                 );
               }),
+          SliverToBoxAdapter(
+            child: ListTile(
+              title: Text(localizations.subtitleSetting),
+              leading: const Icon(Icons.subtitles_outlined),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () async {
+                final initialStyle = SubtitleSettings.fromJson(await PlayerConfig.getSubtitleSettings());
+                if (!context.mounted) return;
+
+                final style = await Navigator.of(context).push(MaterialPageRoute(builder: (context) => PlayerSubtitleSettings(subtitleSettings: initialStyle)));
+                if (style != null) {
+                  PlayerConfig.setSubtitleSettings(style);
+                  controller.setSubtitleStyle(style);
+                }
+              },
+            ),
+          ),
           SliverToBoxAdapter(child: const Divider()),
           StatefulBuilder(builder: (context, setState) {
             return FutureBuilder(
@@ -516,6 +544,7 @@ class _PlayerPlatformViewState extends State<PlayerPlatformView> {
         'left': (offset.dx * -1 * devicePixelRatio).round(),
         'extensionRendererMode': await PlayerConfig.getExtensionRendererMode(),
         'enableDecoderFallback': await PlayerConfig.getEnableDecoderFallback(),
+        'subtitleStyle': await PlayerConfig.getSubtitleSettings(),
       });
       widget.initialized?.call();
     });
@@ -961,6 +990,178 @@ class _PlayerProgressLabelState extends State<PlayerProgressLabel> {
 
   update() {
     setState(() {});
+  }
+}
+
+class PlayerSubtitleSettings extends StatefulWidget {
+  const PlayerSubtitleSettings({super.key, required this.subtitleSettings});
+
+  final SubtitleSettings subtitleSettings;
+
+  @override
+  State<PlayerSubtitleSettings> createState() => _PlayerSubtitleSettingsState();
+}
+
+class _PlayerSubtitleSettingsState extends State<PlayerSubtitleSettings> {
+  late Color _foregroundColor = widget.subtitleSettings.foregroundColor;
+  late Color _backgroundColor = widget.subtitleSettings.backgroundColor;
+  late Color _windowColor = widget.subtitleSettings.windowColor;
+  late Color _edgeColor = widget.subtitleSettings.edgeColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final localizations = PlayerLocalizations.of(context);
+
+    return ListTileTheme(
+      dense: true,
+      child: CustomScrollView(
+        slivers: [
+          SliverSafeArea(
+            sliver: SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: Text(localizations.settingsTitle, style: Theme.of(context).textTheme.titleLarge),
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Container(
+              height: 160,
+              decoration: BoxDecoration(
+                  color: Colors.blue,
+                  borderRadius: BorderRadius.circular(8),
+                  image: DecorationImage(image: AssetImage('assets/common/images/subtitle_bg.jpg'), fit: BoxFit.cover)),
+              margin: EdgeInsets.all(16),
+              child: Align(
+                alignment: Alignment(0, 0.9),
+                child: Stack(
+                  children: [
+                    Text(
+                      localizations.subtitleSettingExample,
+                      style: TextStyle(
+                        fontSize: 24,
+                        backgroundColor: _backgroundColor,
+                        foreground: Paint()
+                          ..style = PaintingStyle.stroke
+                          ..strokeWidth = 2
+                          ..color = _edgeColor,
+                      ),
+                    ),
+                    Text(
+                      localizations.subtitleSettingExample,
+                      style: TextStyle(
+                        fontSize: 24,
+                        color: _foregroundColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: ListTile(
+              title: Text(localizations.subtitleSettingForegroundColor),
+              trailing: _buildTrailing(_foregroundColor),
+              onTap: () async {
+                final color = await _showColorPicker(context, _foregroundColor);
+                if (color != null && context.mounted) setState(() => _foregroundColor = color);
+              },
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: ListTile(
+              title: Text(localizations.subtitleSettingBackgroundColor),
+              trailing: _buildTrailing(_backgroundColor),
+              onTap: () async {
+                final color = await _showColorPicker(context, _backgroundColor);
+                if (color != null && context.mounted) setState(() => _backgroundColor = color);
+              },
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: ListTile(
+              title: Text(localizations.subtitleSettingEdgeColor),
+              trailing: _buildTrailing(_edgeColor),
+              onTap: () async {
+                final color = await _showColorPicker(context, _edgeColor);
+                if (color != null && context.mounted) setState(() => _edgeColor = color);
+              },
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: ListTile(
+              title: Text(localizations.subtitleSettingWindowColor),
+              trailing: _buildTrailing(_windowColor),
+              onTap: () async {
+                final color = await _showColorPicker(context, _windowColor);
+                if (color != null && context.mounted) setState(() => _windowColor = color);
+              },
+            ),
+          ),
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: SafeArea(
+              child: Align(
+                alignment: Alignment.bottomRight,
+                child: IconButton.filledTonal(
+                  icon: Icon(Icons.check_rounded),
+                  onPressed: () {
+                    final style = SubtitleSettings(
+                      foregroundColor: _foregroundColor,
+                      backgroundColor: _backgroundColor,
+                      windowColor: _windowColor,
+                      edgeColor: _edgeColor,
+                    );
+                    Navigator.of(context).pop(style.toJson());
+                  },
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTrailing(Color color) {
+    return ColorIndicator(
+      HSVColor.fromColor(color),
+      width: 16,
+      height: 16,
+    );
+  }
+
+  Future<Color?> _showColorPicker(BuildContext context, Color color) async {
+    return showDialog<Color>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Pick a color!'),
+          titleTextStyle: Theme.of(context).textTheme.titleMedium,
+          titlePadding: EdgeInsets.all(16),
+          content: SingleChildScrollView(
+            child: ColorPicker(
+              pickerColor: color,
+              paletteType: PaletteType.hsl,
+              onColorChanged: (c) => color = c,
+              // ignore: deprecated_member_use
+              labelTextStyle: Theme.of(context).textTheme.labelMedium,
+            ),
+          ),
+          contentPadding: EdgeInsets.zero,
+          actionsPadding: EdgeInsets.only(right: 12, bottom: 12),
+          actions: <Widget>[
+            IconButton.filledTonal(
+              icon: Icon(Icons.check_rounded),
+              onPressed: () {
+                Navigator.of(context).pop(color);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 

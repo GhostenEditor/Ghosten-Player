@@ -9,7 +9,6 @@ import 'package:video_player/player.dart';
 import '../../components/async_image.dart';
 import '../../components/no_data.dart';
 import '../../components/playing_icon.dart';
-import '../../const.dart';
 import '../../models/models.dart';
 import '../components/image_card.dart';
 import '../player/player_controls_lite.dart';
@@ -57,85 +56,76 @@ class _LiveListPageState extends State<LiveListPage> {
                           IconButton(onPressed: () => _addPlaylist(context), icon: const Icon(Icons.add)),
                         ],
                       ),
-                      body: BlocProvider(
-                        create: (_) => IptvCubit(),
-                        child: BlocBuilder<IptvCubit, List<Playlist>?>(builder: (context, items) {
-                          return items == null
-                              ? const Center(child: CircularProgressIndicator())
-                              : items.isEmpty
-                                  ? const NoData()
-                                  : LayoutBuilder(builder: (context, constraints) {
-                                      return ListView.builder(
-                                          itemCount: items.length,
-                                          itemBuilder: (context, index) {
-                                            final item = items[index];
-                                            return Material(
-                                              clipBehavior: Clip.hardEdge,
-                                              child: Slidable(
-                                                endActionPane: ActionPane(
-                                                  extentRatio: (48 * (item.url == defaultIPTVUrl ? 1 : 3)) / constraints.maxWidth,
-                                                  motion: const BehindMotion(),
-                                                  children: [
-                                                    IconButton(
-                                                        onPressed: () async {
-                                                          final resp = await showNotification(context, Api.playlistRefreshById(item.id));
-                                                          if (resp?.error == null && context.mounted) context.read<IptvCubit>().update();
-                                                        },
-                                                        icon: const Icon(Icons.refresh)),
-                                                    if (item.url != defaultIPTVUrl)
-                                                      IconButton(
-                                                          onPressed: () async {
-                                                            final flag = await showDialog(context: context, builder: (context) => LiveEditPage(item: item));
-                                                            if (flag == true && context.mounted) {
-                                                              context.read<IptvCubit>().update();
-                                                            }
-                                                          },
-                                                          icon: const Icon(Icons.edit)),
-                                                    if (item.url != defaultIPTVUrl)
-                                                      IconButton(
-                                                          onPressed: () async {
-                                                            final confirm = await showConfirm(context, AppLocalizations.of(context)!.deleteConfirmText);
-                                                            if (confirm != true) return;
-                                                            if (!context.mounted) return;
-                                                            final resp = await showNotification(context, Api.playlistDeleteById(item.id));
-                                                            if (resp?.error != null) return;
-                                                            if (!context.mounted) return;
-                                                            context.read<IptvCubit>().update();
-                                                          },
-                                                          icon: const Icon(Icons.delete_outline)),
-                                                  ],
-                                                ),
-                                                child: ListTile(
-                                                  title: item.url != defaultIPTVUrl
-                                                      ? item.title == null
-                                                          ? null
-                                                          : Text(item.title!, overflow: TextOverflow.ellipsis)
-                                                      : Text(AppLocalizations.of(context)!.iptvDefaultSource, overflow: TextOverflow.ellipsis),
-                                                  subtitle: item.url != defaultIPTVUrl ? Text(item.url, overflow: TextOverflow.ellipsis) : null,
-                                                  trailing: const Icon(Icons.chevron_right),
-                                                  onTap: () async {
-                                                    if (MediaQuery.of(context).size.aspectRatio <= 1) {
-                                                      final playlist = await Api.playlistChannelsQueryById(item.id);
-                                                      await _controller.setSources(playlist.map(FromMedia.fromChannel).toList(), 0);
-                                                      _controller.play();
-                                                      if (context.mounted) {
-                                                        _showBottomSheet(
-                                                            context: context,
-                                                            builder: (context) => _ChannelListGrouped(
-                                                                  controller: _controller,
-                                                                  activeIndex: _controller.index.value,
-                                                                  onTap: (index) => _controller.next(index),
-                                                                ));
-                                                      }
-                                                    }
-                                                  },
-                                                ),
+                      body: BlocBuilder<IptvCubit, List<Playlist>?>(builder: (context, items) {
+                        return items == null
+                            ? const Center(child: CircularProgressIndicator())
+                            : items.isEmpty
+                                ? const NoData()
+                                : LayoutBuilder(builder: (context, constraints) {
+                                    return ListView.builder(
+                                        itemCount: items.length,
+                                        itemBuilder: (context, index) {
+                                          final item = items[index];
+                                          return Material(
+                                            clipBehavior: Clip.hardEdge,
+                                            child: Slidable(
+                                              endActionPane: ActionPane(
+                                                extentRatio: (48 * 3) / constraints.maxWidth,
+                                                motion: const BehindMotion(),
+                                                children: [
+                                                  IconButton(
+                                                      onPressed: () async {
+                                                        final resp = await showNotification(context, Api.playlistRefreshById(item.id));
+                                                        if (resp?.error == null && context.mounted) context.read<IptvCubit>().update();
+                                                      },
+                                                      icon: const Icon(Icons.refresh)),
+                                                  IconButton(
+                                                      onPressed: () async {
+                                                        final flag = await showDialog(context: context, builder: (context) => LiveEditPage(item: item));
+                                                        if (flag == true && context.mounted) {
+                                                          context.read<IptvCubit>().update();
+                                                        }
+                                                      },
+                                                      icon: const Icon(Icons.edit)),
+                                                  IconButton(
+                                                      onPressed: () async {
+                                                        final confirm = await showConfirm(context, AppLocalizations.of(context)!.deleteConfirmText);
+                                                        if (confirm != true) return;
+                                                        if (!context.mounted) return;
+                                                        final resp = await showNotification(context, Api.playlistDeleteById(item.id));
+                                                        if (resp?.error != null) return;
+                                                        if (!context.mounted) return;
+                                                        context.read<IptvCubit>().update();
+                                                      },
+                                                      icon: const Icon(Icons.delete_outline)),
+                                                ],
                                               ),
-                                            );
-                                          });
-                                    });
-                        }),
-                      ),
+                                              child: ListTile(
+                                                title: item.title == null ? null : Text(item.title!, overflow: TextOverflow.ellipsis),
+                                                subtitle: Text(item.url, overflow: TextOverflow.ellipsis),
+                                                trailing: const Icon(Icons.chevron_right),
+                                                onTap: () async {
+                                                  if (MediaQuery.of(context).size.aspectRatio <= 1) {
+                                                    final playlist = await Api.playlistChannelsQueryById(item.id);
+                                                    await _controller.setSources(playlist.map(FromMedia.fromChannel).toList(), 0);
+                                                    _controller.play();
+                                                    if (context.mounted) {
+                                                      _showBottomSheet(
+                                                          context: context,
+                                                          builder: (context) => _ChannelListGrouped(
+                                                                controller: _controller,
+                                                                activeIndex: _controller.index.value,
+                                                                onTap: (index) => _controller.next(index),
+                                                              ));
+                                                    }
+                                                  }
+                                                },
+                                              ),
+                                            ),
+                                          );
+                                        });
+                                  });
+                      }),
                     ),
                   )
                 ],
@@ -350,23 +340,7 @@ class IptvCubit extends Cubit<List<Playlist>?> {
   static bool refreshed = false;
 
   Future<void> update() async {
-    List<Playlist> playlists = [];
-    playlists = await Api.playlistQueryAll();
-    final defaultId = playlists.firstWhereOrNull((playlist) => playlist.url == defaultIPTVUrl)?.id;
-    if (defaultId == null) {
-      try {
-        await Api.playlistInsert({
-          'title': 'DEFAULT',
-          'url': defaultIPTVUrl,
-        });
-        playlists = await Api.playlistQueryAll();
-      } catch (e) {
-        ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(SnackBar(
-          content: Text(AppLocalizations.of(navigatorKey.currentContext!)!.iptvSourceFetchFailed),
-          behavior: SnackBarBehavior.floating,
-        ));
-      }
-    }
+    final playlists = await Api.playlistQueryAll();
     emit(playlists);
   }
 }

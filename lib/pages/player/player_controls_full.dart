@@ -2,9 +2,12 @@ import 'dart:async';
 
 import 'package:animations/animations.dart';
 import 'package:api/api.dart';
+import 'package:collection/collection.dart';
+import 'package:date_format/date_format.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:video_player/player.dart';
@@ -13,6 +16,8 @@ import '../../components/async_image.dart';
 import '../../components/player_i18n_adaptor.dart';
 import '../../components/playing_icon.dart';
 import '../../platform_api.dart';
+import '../../providers/user_config.dart';
+import '../../theme.dart';
 import '../../utils/utils.dart';
 import '../components/image_card.dart';
 import '../utils/utils.dart';
@@ -33,6 +38,7 @@ class PlayerControlsFull<T> extends StatefulWidget {
 
 class _PlayerControlsFullState<T> extends State<PlayerControlsFull<T>> with PlayerActionsMixin {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final _navigatorKey = GlobalKey<NavigatorState>();
   late final _controller = widget.controller;
   late final _progressController = widget.progressController;
   final _isShowControls = ValueNotifier(false);
@@ -63,6 +69,13 @@ class _PlayerControlsFullState<T> extends State<PlayerControlsFull<T>> with Play
     _controlsStream.add(ControlsStreamStatus.show);
     setPreferredOrientations(true);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    final autoForceLandscape = context.read<UserConfig>().autoForceLandscape;
+    if (autoForceLandscape) {
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+    }
     widget.controller.enterFullscreen();
     _controller.willSkip.addListener(() {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -127,16 +140,20 @@ class _PlayerControlsFullState<T> extends State<PlayerControlsFull<T>> with Play
           await setPreferredOrientations(false);
           await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.top]);
           await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-          if (context.mounted) Navigator.pop(context);
+
+          if (!context.mounted) return;
+          if (_navigatorKey.currentState?.canPop() ?? false) {
+            return _navigatorKey.currentState!.pop();
+          }
+          Navigator.pop(context);
         }
       },
       child: Theme(
-        data: ThemeData(
+        data: darkTheme.copyWith(
           colorScheme: ColorScheme.fromSeed(
             seedColor: widget.theme != null ? Color(widget.theme!) : Colors.blue,
             brightness: Brightness.dark,
           ),
-          drawerTheme: const DrawerThemeData(endShape: ContinuousRectangleBorder()),
         ),
         child: Builder(builder: (context) {
           return PlayerI18nAdaptor(
@@ -146,6 +163,13 @@ class _PlayerControlsFullState<T> extends State<PlayerControlsFull<T>> with Play
                 show: _isShowControls,
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                 actions: [
+                  if (_controller.currentItem?.source is Channel && MediaQuery.of(context).size.aspectRatio > 1)
+                    IconButton(
+                        onPressed: () => showDialog(
+                            context: context,
+                            builder: (context) =>
+                                _ChannelListGrouped(controller: _controller as PlayerController<Channel>, onTap: (index) => _controller.next(index))),
+                        icon: const Icon(Icons.list)),
                   SwitchLinkButton(_controller),
                   IconButton(onPressed: () => _controller.requestPip(), icon: const Icon(Icons.picture_in_picture_rounded)),
                   IconButton(onPressed: () => _scaffoldKey.currentState!.openEndDrawer(), icon: const Icon(Icons.more_vert_rounded)),
@@ -154,9 +178,18 @@ class _PlayerControlsFullState<T> extends State<PlayerControlsFull<T>> with Play
               extendBodyBehindAppBar: true,
               backgroundColor: kIsWeb ? Colors.black : Colors.transparent,
               endDrawer: Drawer(
-                child: PlayerSettings(
-                  controller: _controller,
-                  actions: (context) => actions(context, _controller),
+                child: Container(
+                  width: 360,
+                  color: const Color(0xff202124),
+                  child: Navigator(
+                    key: _navigatorKey,
+                    onGenerateRoute: (settings) => MaterialPageRoute(
+                        builder: (context) => PlayerSettings(
+                              controller: _controller,
+                              actions: (context) => actions(context, _controller),
+                            ),
+                        settings: settings),
+                  ),
                 ),
               ),
               body: GestureDetector(
@@ -590,5 +623,150 @@ class _SwitchLinkButtonState<T> extends State<SwitchLinkButton<T>> {
                 ),
               )
             : const SizedBox());
+  }
+}
+
+class _ChannelListGrouped extends StatefulWidget {
+  const _ChannelListGrouped({required this.controller, required this.onTap});
+
+  final PlayerController<Channel> controller;
+  final Function(int) onTap;
+
+  @override
+  State<_ChannelListGrouped> createState() => _ChannelListGroupedState();
+}
+
+class _ChannelListGroupedState extends State<_ChannelListGrouped> {
+  late final _groupedPlaylist = widget.controller.playlist.value.groupListsBy((channel) => channel.source.category);
+  late final _groupName = ValueNotifier<String?>(null);
+  late final _playlist = ValueNotifier<List<PlaylistItem<Channel>>>([]);
+  late final _epg = ValueNotifier<List<ChannelEpgItem>?>([]);
+
+  @override
+  void initState() {
+    super.initState();
+    final index = widget.controller.index.value;
+    if (index != null) {
+      _groupName.value = widget.controller.playlist.value[index].source.category;
+      _playlist.value = _groupedPlaylist[_groupName.value]!;
+      _updateEpg(widget.controller.currentItem!.source.id);
+    }
+  }
+
+  @override
+  void dispose() {
+    _groupName.dispose();
+    _playlist.dispose();
+    _epg.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Flexible(
+          child: ListenableBuilder(
+              listenable: _groupName,
+              builder: (context, _) {
+                return ListView.builder(
+                  itemCount: _groupedPlaylist.keys.length,
+                  itemBuilder: (context, index) {
+                    final name = _groupedPlaylist.keys.elementAt(index) ?? AppLocalizations.of(context)!.tagUnknown;
+                    return Material(
+                      type: MaterialType.transparency,
+                      child: ListTile(
+                        dense: true,
+                        selected: _groupName.value == name,
+                        selectedTileColor: Colors.white38,
+                        title: Text(name),
+                        onTap: () {
+                          _groupName.value = name;
+                          _playlist.value = _groupedPlaylist[name]!;
+                        },
+                      ),
+                    );
+                  },
+                );
+              }),
+        ),
+        const VerticalDivider(),
+        Flexible(
+            flex: 2,
+            child: ListenableBuilder(
+                listenable: Listenable.merge([_playlist, widget.controller.index]),
+                builder: (context, _) {
+                  return ListView.builder(
+                    itemCount: _playlist.value.length,
+                    itemBuilder: (context, index) {
+                      final item = _playlist.value.elementAt(index);
+                      return Material(
+                        type: MaterialType.transparency,
+                        child: ListTile(
+                          dense: true,
+                          leading: item.poster != null ? AsyncImage(item.poster!, width: 40, showErrorWidget: false) : null,
+                          trailing: item == widget.controller.currentItem ? PlayingIcon(color: Theme.of(context).colorScheme.inversePrimary) : null,
+                          selected: item == widget.controller.currentItem,
+                          selectedTileColor: Colors.white38,
+                          title: Text(item.title ?? ''),
+                          onTap: () {
+                            widget.onTap(widget.controller.playlist.value.indexOf(item));
+                            _updateEpg(item.source.id);
+                          },
+                        ),
+                      );
+                    },
+                  );
+                })),
+        const VerticalDivider(),
+        Flexible(
+            flex: 3,
+            child: GestureDetector(
+              onTap: () => Navigator.of(context).pop(),
+              child: ListenableBuilder(
+                listenable: _epg,
+                builder: (context, child) {
+                  return _epg.value == null
+                      ? child!
+                      : ListView.builder(
+                          itemCount: _epg.value!.length,
+                          itemBuilder: (context, index) {
+                            final item = _epg.value![index];
+                            final isPlaying = _isPlaying(item);
+                            return Material(
+                              type: MaterialType.transparency,
+                              child: ListTile(
+                                dense: true,
+                                selected: isPlaying,
+                                selectedTileColor: Colors.white38,
+                                title: Text(item.title),
+                                subtitle: Text(_epgTimeFormat(item)),
+                              ),
+                            );
+                          });
+                },
+                child: const Center(child: CircularProgressIndicator()),
+              ),
+            )),
+      ],
+    );
+  }
+
+  Future<void> _updateEpg(int id) async {
+    _epg.value = null;
+    _epg.value = await Api.epgQueryByChannelId(id);
+  }
+
+  bool _isPlaying(ChannelEpgItem item) {
+    final now = DateTime.now();
+    return item.start != null && item.stop != null && now >= item.start! && now <= item.stop!;
+  }
+
+  String _epgTimeFormat(ChannelEpgItem item) {
+    if (item.start != null && item.stop != null) {
+      return '${formatDate(item.start!, [HH, ':', nn])}-${formatDate(item.stop!, [HH, ':', nn])}';
+    } else {
+      return '';
+    }
   }
 }

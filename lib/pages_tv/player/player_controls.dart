@@ -12,6 +12,7 @@ import 'package:video_player/player.dart';
 import '../../components/async_image.dart';
 import '../../components/future_builder_handler.dart';
 import '../../components/playing_icon.dart';
+import '../components/focusable.dart';
 import '../components/focusable_image.dart';
 import '../components/loading.dart';
 import '../components/setting.dart';
@@ -100,6 +101,9 @@ class _PlayerControlsState extends State<PlayerControls> {
         case PlayerStatus.paused:
         case PlayerStatus.ended:
         case PlayerStatus.buffering:
+          if (_panelType.value != _PlayerPanelType.none) {
+            _controlsStream.add(ControlsStreamStatus.show);
+          }
       }
     });
 
@@ -609,6 +613,72 @@ class PlayerSettings extends StatelessWidget {
                           },
                         );
                       }),
+                  ButtonSettingItem(
+                    title: Text(localizations.subtitleSetting),
+                    leading: const Icon(Icons.subtitles_outlined),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: () async {
+                      final initialStyle = SubtitleSettings.fromJson(await PlayerConfig.getSubtitleSettings());
+                      if (!context.mounted) return;
+
+                      final style =
+                          await Navigator.of(context).push(FadeInPageRoute(builder: (context) => PlayerSubtitleSettings(subtitleSettings: initialStyle)));
+                      if (style != null) {
+                        PlayerConfig.setSubtitleSettings(style);
+                        controller.setSubtitleStyle(style);
+                      }
+                    },
+                  ),
+                  const Divider(),
+                  StatefulBuilder(builder: (context, setState) {
+                    return FutureBuilder(
+                        future: PlayerConfig.getExtensionRendererMode(),
+                        builder: (context, snapshot) {
+                          return ButtonSettingItem(
+                            title: Text(localizations.extensionRendererModeLabel),
+                            trailing:
+                                Text(localizations.extensionRendererMode(snapshot.data.toString()), textAlign: TextAlign.end, overflow: TextOverflow.ellipsis),
+                            onTap: () async {
+                              await Navigator.of(context).push(FadeInPageRoute(
+                                  builder: (context) => PlayerSubSettings(
+                                        title: localizations.extensionRendererModeLabel,
+                                        items: [0, 1, 2]
+                                            .map((i) => RadioSettingItem(
+                                                  value: i,
+                                                  groupValue: snapshot.data,
+                                                  autofocus: snapshot.data == i,
+                                                  title: Text(localizations.extensionRendererMode(i.toString())),
+                                                  onChanged: (value) async {
+                                                    if (value == null) return;
+                                                    await PlayerConfig.setExtensionRendererMode(value);
+                                                    await PlayerController.setPlayerOption('extensionRendererMode', value);
+                                                    if (context.mounted) {
+                                                      setState(() {});
+                                                      Navigator.of(context).pop();
+                                                    }
+                                                  },
+                                                ))
+                                            .toList(),
+                                      )));
+                              setState(() {});
+                            },
+                          );
+                        });
+                  }),
+                  StatefulBuilder(builder: (context, setState) {
+                    return FutureBuilder(
+                        future: PlayerConfig.getEnableDecoderFallback(),
+                        builder: (context, snapshot) {
+                          return SwitchSettingItem(
+                              title: Text(localizations.playerEnableDecoderFallback),
+                              value: snapshot.data ?? false,
+                              onChanged: (value) async {
+                                await PlayerConfig.setEnableDecoderFallback(value);
+                                await PlayerController.setPlayerOption('enableDecoderFallback', value);
+                                setState(() {});
+                              });
+                        });
+                  }),
                   const Divider(),
                   FutureBuilderHandler(
                     future: SharedPreferences.getInstance(),
@@ -875,6 +945,110 @@ class PlayerInfoView extends StatelessWidget {
                 ],
               ),
             ));
+  }
+}
+
+class PlayerSubtitleSettings extends StatefulWidget {
+  const PlayerSubtitleSettings({super.key, required this.subtitleSettings});
+
+  final SubtitleSettings subtitleSettings;
+
+  @override
+  State<PlayerSubtitleSettings> createState() => _PlayerSubtitleSettingsState();
+}
+
+class _PlayerSubtitleSettingsState extends State<PlayerSubtitleSettings> {
+  final subtitleStyles = const [
+    SubtitleSettings(
+      foregroundColor: Colors.white,
+      backgroundColor: Colors.black,
+      windowColor: Colors.transparent,
+      edgeColor: Colors.transparent,
+    ),
+    SubtitleSettings(
+      foregroundColor: Colors.black,
+      backgroundColor: Colors.white,
+      windowColor: Colors.transparent,
+      edgeColor: Colors.transparent,
+    ),
+    SubtitleSettings(
+      foregroundColor: Colors.black,
+      backgroundColor: Colors.transparent,
+      windowColor: Colors.transparent,
+      edgeColor: Colors.white,
+    ),
+    SubtitleSettings(
+      foregroundColor: Colors.white,
+      backgroundColor: Colors.transparent,
+      windowColor: Colors.transparent,
+      edgeColor: Colors.black,
+    ),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final localizations = PlayerLocalizations.of(context);
+    return PlayerSubSettings(
+        title: localizations.subtitleSetting,
+        items: subtitleStyles
+            .map((style) => Container(
+                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  child: Focusable(
+                    height: 140,
+                    onTap: () {
+                      Navigator.of(context).pop(style.toJson());
+                    },
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Ink(
+                          decoration: BoxDecoration(
+                              color: Colors.blue,
+                              borderRadius: BorderRadius.circular(8),
+                              image: const DecorationImage(image: AssetImage('assets/common/images/subtitle_bg.jpg'), fit: BoxFit.cover)),
+                        ),
+                        Align(
+                          alignment: const Alignment(0, 0.9),
+                          child: Stack(
+                            children: [
+                              Text(
+                                localizations.subtitleSettingExample,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  backgroundColor: style.backgroundColor,
+                                  foreground: Paint()
+                                    ..style = PaintingStyle.stroke
+                                    ..strokeWidth = 2
+                                    ..color = style.edgeColor,
+                                ),
+                              ),
+                              Text(
+                                localizations.subtitleSettingExample,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: style.foregroundColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (widget.subtitleSettings == style)
+                          Align(
+                            alignment: const Alignment(0.9, -0.9),
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                color: Colors.black87,
+                                shape: BoxShape.circle,
+                              ),
+                              padding: const EdgeInsets.all(4),
+                              child: const Icon(Icons.check_rounded),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ))
+            .toList());
   }
 }
 

@@ -145,7 +145,11 @@ class _EpisodeDetailState extends State<EpisodeDetail> with ActionMixin {
                           text: TextSpan(children: [
                         TextSpan(text: '${item.filename}.${item.ext}', style: Theme.of(context).textTheme.labelSmall),
                         const WidgetSpan(child: Gap.hSM),
-                        TextSpan(text: item.fileSize.toSizeDisplay(), style: Theme.of(context).textTheme.labelSmall),
+                        if (item.fileSize != null) TextSpan(text: item.fileSize!.toSizeDisplay(), style: Theme.of(context).textTheme.labelSmall),
+                        if (item.duration != null) const WidgetSpan(child: Gap.hSM),
+                        if (item.duration != null) const WidgetSpan(child: Icon(Icons.access_time_rounded, size: 14)),
+                        if (item.duration != null) const WidgetSpan(child: SizedBox(width: 4)),
+                        if (item.duration != null) TextSpan(text: item.duration!.toDisplay(), style: Theme.of(context).textTheme.labelSmall)
                       ])),
                       onTap: () => _showSide.value = true,
                     ),

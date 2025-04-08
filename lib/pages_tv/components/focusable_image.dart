@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../components/async_image.dart';
+import 'focusable.dart';
 
-class FocusableImage extends StatefulWidget {
+class FocusableImage extends StatelessWidget {
   const FocusableImage({
     super.key,
     this.poster,
@@ -31,45 +32,26 @@ class FocusableImage extends StatefulWidget {
   final Map<String, String>? httpHeaders;
 
   @override
-  State<FocusableImage> createState() => _FocusableImageState();
-}
-
-class _FocusableImageState extends State<FocusableImage> {
-  bool _focused = false;
-
-  @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: widget.width,
-      height: widget.height,
-      child: Material(
-        color: widget.selected ?? false ? Theme.of(context).colorScheme.surfaceContainerHighest : Theme.of(context).colorScheme.surfaceContainerLow,
-        shape: RoundedRectangleBorder(
-          side: _focused ? BorderSide(width: 4, color: Theme.of(context).colorScheme.inverseSurface, strokeAlign: 2) : BorderSide.none,
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: InkWell(
-          autofocus: widget.autofocus ?? false,
-          onFocusChange: (f) {
-            if (_focused != f) setState(() => _focused = f);
-            if (widget.onFocusChange != null) widget.onFocusChange!(f);
-          },
-          customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-          onTap: widget.onTap,
-          child: widget.poster != null
-              ? AsyncImage(
-                  widget.poster!,
-                  width: widget.width,
-                  height: widget.height,
-                  fit: widget.fit,
-                  padding: widget.padding,
-                  httpHeaders: widget.httpHeaders,
-                  ink: true,
-                  radius: BorderRadius.circular(6),
-                )
-              : Center(child: Icon(widget.placeholderIcon, size: 50, color: Theme.of(context).colorScheme.surfaceContainerHigh)),
-        ),
-      ),
+    return Focusable(
+      width: width,
+      height: height,
+      selected: selected,
+      autofocus: autofocus,
+      onTap: onTap,
+      onFocusChange: onFocusChange,
+      child: poster != null
+          ? AsyncImage(
+              poster!,
+              width: width,
+              height: height,
+              fit: fit,
+              padding: padding,
+              httpHeaders: httpHeaders,
+              ink: true,
+              radius: BorderRadius.circular(6),
+            )
+          : Center(child: Icon(placeholderIcon, size: 50, color: Theme.of(context).colorScheme.surfaceContainerHigh)),
     );
   }
 }

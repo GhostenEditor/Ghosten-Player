@@ -60,7 +60,7 @@ class ApiWeb extends ApiPlatform {
   /// Library Start
 
   @override
-  Future<void> libraryRefreshById(int id, bool incremental, String behavior) async {
+  Future<void> libraryRefreshById(dynamic id, bool incremental, String behavior) async {
     final data = await client.post('/library/refresh/id/cb', data: {
       'id': id,
       'incremental': incremental,

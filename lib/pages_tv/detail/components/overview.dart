@@ -120,7 +120,7 @@ class _OverviewState<T extends MediaBase> extends State<Overview<T>> {
               return KeyEventResult.handled;
             case LogicalKeyboardKey.arrowDown:
               _scrollController.animateTo(
-                _scrollController.offset + 200,
+                min(_scrollController.offset + 200, _scrollController.position.maxScrollExtent),
                 duration: const Duration(milliseconds: 400),
                 curve: Curves.easeOut,
               );
