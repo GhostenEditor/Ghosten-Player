@@ -34,7 +34,7 @@ class _LiveEditPageState extends State<LiveEditPage> {
       suffixIcon: IconButton(
         icon: const Icon(Icons.folder_open_rounded),
         onPressed: () async {
-          final res = await showDriverFilePicker(context, AppLocalizations.of(context)!.titleEditSubtitle, selectableType: FileType.file);
+          final res = await showDriverFilePicker(context, AppLocalizations.of(context)!.titleEditM3U, selectableType: FileType.file);
           if (res != null) {
             final file = res.$2;
             _controller.text = 'driver://${res.$1}/${file.id}';

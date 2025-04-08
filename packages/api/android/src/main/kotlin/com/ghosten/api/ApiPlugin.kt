@@ -296,6 +296,7 @@ class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnec
             if (activity.checkSelfPermission(Manifest.permission.READ_MEDIA_VIDEO) != PackageManager.PERMISSION_GRANTED) {
                 val permissions = arrayOf(
                     Manifest.permission.READ_MEDIA_VIDEO,
+                    Manifest.permission.READ_MEDIA_AUDIO,
                 )
                 methodCallResult = result
                 return activity.requestPermissions(permissions, REQUEST_STORAGE_PERMISSION)

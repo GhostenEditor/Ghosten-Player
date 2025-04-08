@@ -679,7 +679,7 @@ class Media3PlayerView(
                             .build()
                     }).build()
                 }
-                ProgressiveMediaSource.Factory(httpDataSourceFactory).createMediaSource(mediaItem)
+                ProgressiveMediaSource.Factory(DefaultDataSource.Factory(context)).createMediaSource(mediaItem)
             }
 
             else -> throw IllegalStateException("Unsupported type: ${video.type}")

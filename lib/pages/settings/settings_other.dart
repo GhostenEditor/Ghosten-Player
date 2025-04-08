@@ -33,6 +33,11 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
             title: Text(AppLocalizations.of(context)!.settingsItemAutoPlay),
             onChanged: userConfig.setAutoPlay,
           ),
+          SwitchListTile(
+            value: userConfig.autoForceLandscape,
+            title: Text(AppLocalizations.of(context)!.settingsItemAutoForceLandscape),
+            onChanged: userConfig.setAutoForceLandscape,
+          ),
           const Divider(),
           ListTile(title: Text(AppLocalizations.of(context)!.settingsItemDisplaySettings), dense: true),
           ListTile(

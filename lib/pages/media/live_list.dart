@@ -56,79 +56,76 @@ class _LiveListPageState extends State<LiveListPage> {
                           IconButton(onPressed: () => _addPlaylist(context), icon: const Icon(Icons.add)),
                         ],
                       ),
-                      body: BlocProvider(
-                        create: (_) => IptvCubit(),
-                        child: BlocBuilder<IptvCubit, List<Playlist>?>(builder: (context, items) {
-                          return items == null
-                              ? const Center(child: CircularProgressIndicator())
-                              : items.isEmpty
-                                  ? const NoData()
-                                  : LayoutBuilder(builder: (context, constraints) {
-                                      return ListView.builder(
-                                          itemCount: items.length,
-                                          itemBuilder: (context, index) {
-                                            final item = items[index];
-                                            return Material(
-                                              clipBehavior: Clip.hardEdge,
-                                              child: Slidable(
-                                                endActionPane: ActionPane(
-                                                  extentRatio: (48 * 3) / constraints.maxWidth,
-                                                  motion: const BehindMotion(),
-                                                  children: [
-                                                    IconButton(
-                                                        onPressed: () async {
-                                                          final resp = await showNotification(context, Api.playlistRefreshById(item.id));
-                                                          if (resp?.error == null && context.mounted) context.read<IptvCubit>().update();
-                                                        },
-                                                        icon: const Icon(Icons.refresh)),
-                                                    IconButton(
-                                                        onPressed: () async {
-                                                          final flag = await showDialog(context: context, builder: (context) => LiveEditPage(item: item));
-                                                          if (flag == true && context.mounted) {
-                                                            context.read<IptvCubit>().update();
-                                                          }
-                                                        },
-                                                        icon: const Icon(Icons.edit)),
-                                                    IconButton(
-                                                        onPressed: () async {
-                                                          final confirm = await showConfirm(context, AppLocalizations.of(context)!.deleteConfirmText);
-                                                          if (confirm != true) return;
-                                                          if (!context.mounted) return;
-                                                          final resp = await showNotification(context, Api.playlistDeleteById(item.id));
-                                                          if (resp?.error != null) return;
-                                                          if (!context.mounted) return;
+                      body: BlocBuilder<IptvCubit, List<Playlist>?>(builder: (context, items) {
+                        return items == null
+                            ? const Center(child: CircularProgressIndicator())
+                            : items.isEmpty
+                                ? const NoData()
+                                : LayoutBuilder(builder: (context, constraints) {
+                                    return ListView.builder(
+                                        itemCount: items.length,
+                                        itemBuilder: (context, index) {
+                                          final item = items[index];
+                                          return Material(
+                                            clipBehavior: Clip.hardEdge,
+                                            child: Slidable(
+                                              endActionPane: ActionPane(
+                                                extentRatio: (48 * 3) / constraints.maxWidth,
+                                                motion: const BehindMotion(),
+                                                children: [
+                                                  IconButton(
+                                                      onPressed: () async {
+                                                        final resp = await showNotification(context, Api.playlistRefreshById(item.id));
+                                                        if (resp?.error == null && context.mounted) context.read<IptvCubit>().update();
+                                                      },
+                                                      icon: const Icon(Icons.refresh)),
+                                                  IconButton(
+                                                      onPressed: () async {
+                                                        final flag = await showDialog(context: context, builder: (context) => LiveEditPage(item: item));
+                                                        if (flag == true && context.mounted) {
                                                           context.read<IptvCubit>().update();
-                                                        },
-                                                        icon: const Icon(Icons.delete_outline)),
-                                                  ],
-                                                ),
-                                                child: ListTile(
-                                                  title: item.title == null ? null : Text(item.title!, overflow: TextOverflow.ellipsis),
-                                                  subtitle: Text(item.url, overflow: TextOverflow.ellipsis),
-                                                  trailing: const Icon(Icons.chevron_right),
-                                                  onTap: () async {
-                                                    if (MediaQuery.of(context).size.aspectRatio <= 1) {
-                                                      final playlist = await Api.playlistChannelsQueryById(item.id);
-                                                      await _controller.setSources(playlist.map(FromMedia.fromChannel).toList(), 0);
-                                                      _controller.play();
-                                                      if (context.mounted) {
-                                                        _showBottomSheet(
-                                                            context: context,
-                                                            builder: (context) => _ChannelListGrouped(
-                                                                  controller: _controller,
-                                                                  activeIndex: _controller.index.value,
-                                                                  onTap: (index) => _controller.next(index),
-                                                                ));
-                                                      }
-                                                    }
-                                                  },
-                                                ),
+                                                        }
+                                                      },
+                                                      icon: const Icon(Icons.edit)),
+                                                  IconButton(
+                                                      onPressed: () async {
+                                                        final confirm = await showConfirm(context, AppLocalizations.of(context)!.deleteConfirmText);
+                                                        if (confirm != true) return;
+                                                        if (!context.mounted) return;
+                                                        final resp = await showNotification(context, Api.playlistDeleteById(item.id));
+                                                        if (resp?.error != null) return;
+                                                        if (!context.mounted) return;
+                                                        context.read<IptvCubit>().update();
+                                                      },
+                                                      icon: const Icon(Icons.delete_outline)),
+                                                ],
                                               ),
-                                            );
-                                          });
-                                    });
-                        }),
-                      ),
+                                              child: ListTile(
+                                                title: item.title == null ? null : Text(item.title!, overflow: TextOverflow.ellipsis),
+                                                subtitle: Text(item.url, overflow: TextOverflow.ellipsis),
+                                                trailing: const Icon(Icons.chevron_right),
+                                                onTap: () async {
+                                                  if (MediaQuery.of(context).size.aspectRatio <= 1) {
+                                                    final playlist = await Api.playlistChannelsQueryById(item.id);
+                                                    await _controller.setSources(playlist.map(FromMedia.fromChannel).toList(), 0);
+                                                    _controller.play();
+                                                    if (context.mounted) {
+                                                      _showBottomSheet(
+                                                          context: context,
+                                                          builder: (context) => _ChannelListGrouped(
+                                                                controller: _controller,
+                                                                activeIndex: _controller.index.value,
+                                                                onTap: (index) => _controller.next(index),
+                                                              ));
+                                                    }
+                                                  }
+                                                },
+                                              ),
+                                            ),
+                                          );
+                                        });
+                                  });
+                      }),
                     ),
                   )
                 ],

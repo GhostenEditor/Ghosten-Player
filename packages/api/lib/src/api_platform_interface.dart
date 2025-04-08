@@ -212,8 +212,8 @@ abstract class ApiPlatform extends PlatformInterface {
     return data!.map((e) => Channel.fromJson(e)).toList();
   }
 
-  Future<List<ChannelEpgItem>> epgQueryByChannelName(String name) async {
-    final data = await client.get<JsonList>('/playlist/channel/epg', queryParameters: {'name': name});
+  Future<List<ChannelEpgItem>> epgQueryByChannelId(int id) async {
+    final data = await client.get<JsonList>('/playlist/channel/epg', queryParameters: {'id': id});
     return data!.map((e) => ChannelEpgItem.fromJson(e)).toList();
   }
 

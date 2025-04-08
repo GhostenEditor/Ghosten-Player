@@ -176,7 +176,7 @@ class _SearchPageState extends State<SearchPage> {
                                 subtitle: Text(item.airDate?.format() ?? ''),
                                 onTap: () async {
                                   final series = await Api.tvSeriesQueryById(item.seriesId);
-                                  if (context.mounted) await navigateTo(context, TVDetail(series.id, initialData: series));
+                                  if (context.mounted) await navigateTo(context, TVDetail(series.id, initialData: series, playingId: item.id));
                                 },
                               );
                             })

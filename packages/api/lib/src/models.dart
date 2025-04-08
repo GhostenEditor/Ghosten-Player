@@ -432,28 +432,28 @@ class Playlist {
 }
 
 class Channel {
+  final int id;
   final List<Uri> links;
   final String? title;
   final String? image;
   final String? category;
 
   Channel.fromJson(Json json)
-      : links = (json['links'] as List<dynamic>).map((l) => Uri.tryParse(l)).nonNulls.toList(),
+      : id = json['id'],
+        links = (json['links'] as List<dynamic>).map((l) => Uri.tryParse(l)).nonNulls.toList(),
         title = json['title'],
         image = json['image'],
         category = json['category'];
 }
 
 class ChannelEpgItem {
-  String? start;
-  String? desc;
-  String? end;
-  String? title;
+  DateTime? start;
+  DateTime? stop;
+  String title;
 
   ChannelEpgItem.fromJson(Json json)
-      : start = json['start'],
-        desc = json['desc'],
-        end = json['end'],
+      : start = epgTimeToDateTime(json['start']),
+        stop = epgTimeToDateTime(json['stop']),
         title = json['title'];
 }
 
@@ -911,6 +911,15 @@ extension on int? {
 extension on String {
   DateTime? toDateTime() {
     return DateTime.tryParse(this);
+  }
+}
+
+DateTime? epgTimeToDateTime(String? s) {
+  if (s == null) {
+    return null;
+  } else {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month, now.day, int.parse(s.substring(0, 2)), int.parse(s.substring(3, 5)));
   }
 }
 

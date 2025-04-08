@@ -31,9 +31,10 @@ import 'season.dart';
 import 'utils/tmdb_uri.dart';
 
 class TVDetail extends StatefulWidget {
-  const TVDetail(this.id, {super.key, this.initialData});
+  const TVDetail(this.id, {super.key, this.initialData, this.playingId});
 
   final dynamic id;
+  final dynamic playingId;
   final TVSeries? initialData;
 
   @override
@@ -315,13 +316,21 @@ class _TVDetailState extends State<TVDetail> with ActionMixin<TVDetail>, Searcha
   }
 
   Future<void> _updatePlaylist(BuildContext context) async {
-    final item = await Api.tvSeriesQueryById(widget.id);
-    final res = item.nextToPlay;
-    if (res != null) {
-      final season = await Api.tvSeasonQueryById(res.seasonId);
+    if (widget.playingId != null) {
+      final episode = await Api.tvEpisodeQueryById(widget.playingId);
+      final season = await Api.tvSeasonQueryById(episode.seasonId);
       final playlist = season.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList();
-      _controller.setSources(playlist, playlist.indexWhere((el) => el.source.id == res.id));
+      _controller.setSources(playlist, playlist.indexWhere((el) => el.source.id == widget.playingId));
       if (_autoPlay) _controller.play();
+    } else {
+      final item = await Api.tvSeriesQueryById(widget.id);
+      final res = item.nextToPlay;
+      if (res != null) {
+        final season = await Api.tvSeasonQueryById(res.seasonId);
+        final playlist = season.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList();
+        _controller.setSources(playlist, playlist.indexWhere((el) => el.source.id == res.id));
+        if (_autoPlay) _controller.play();
+      }
     }
   }
 }

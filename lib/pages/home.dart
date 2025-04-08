@@ -22,7 +22,7 @@ class _HomeViewState extends State<HomeView> {
   Widget get child => switch (index) {
         0 => BlocProvider(create: (_) => TVListCubit(const AsyncSnapshot.waiting()), child: const TVListPage()),
         1 => BlocProvider(create: (_) => MovieListCubit(const AsyncSnapshot.waiting()), child: const MovieListPage()),
-        2 => const LiveListPage(),
+        2 => BlocProvider(create: (_) => IptvCubit(), child: const LiveListPage()),
         3 => const SettingsPage(),
         _ => const Placeholder(),
       };
