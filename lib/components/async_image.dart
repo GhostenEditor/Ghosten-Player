@@ -56,6 +56,7 @@ class AsyncImage extends StatelessWidget {
         errorWidget: (context, url, error) => showErrorWidget
             ? Center(child: Icon(Icons.broken_image, size: errorIconSize, color: Theme.of(context).colorScheme.error.withAlpha(0x33)))
             : const SizedBox(),
+        errorListener: (_) {},
         placeholder: (context, _) => needLoading ? const _AnimatedLoading() : const SizedBox(),
         imageBuilder: ink
             ? (context, imageProvider) {

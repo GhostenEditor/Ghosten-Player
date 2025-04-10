@@ -4,7 +4,6 @@ import 'package:animations/animations.dart';
 import 'package:api/api.dart';
 import 'package:collection/collection.dart';
 import 'package:date_format/date_format.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -176,7 +175,7 @@ class _PlayerControlsFullState<T> extends State<PlayerControlsFull<T>> with Play
                 ],
               ),
               extendBodyBehindAppBar: true,
-              backgroundColor: kIsWeb ? Colors.black : Colors.transparent,
+              backgroundColor: Colors.transparent,
               endDrawer: Drawer(
                 child: Container(
                   width: 360,

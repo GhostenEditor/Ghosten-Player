@@ -1,5 +1,5 @@
-import 'dart:js';
 import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
@@ -86,22 +86,23 @@ class PlayerWeb extends PlayerPlatform {
   }
 
   Future<T>? invoke<T>(String method, [dynamic arg]) {
-    final ar = arg is Map ? JsObject.jsify(arg) : arg;
-    return context['__TAURI__']?.callMethod('invoke', [method, ar].nonNulls.toList()) as Future<T>?;
+    final ar = arg is Map ? arg.jsify() : arg;
+    final core = globalContext.getProperty<JSObject?>('__TAURI__'.toJS)?.getProperty<JSObject?>('core'.toJS);
+    if (ar == null) {
+      return core?.callMethod<JSPromise>('invoke'.toJS, method.jsify()).toDart.then((data) => data?.dartify() as T);
+    } else {
+      return core?.callMethod<JSPromise>('invoke'.toJS, method.jsify(), ar).toDart.then((data) => data?.dartify() as T);
+    }
   }
 
   listen(String event, void Function(dynamic data) callback) {
-    context['__TAURI__']?['event']?.callMethod('listen', [
-      event,
-      (JsObject data) {
-        final payload = data['payload'];
-        if (payload is JsObject) {
-          callback(payload.toJSBox.toDart);
-        } else {
-          callback(payload);
-        }
-      }
-    ]);
+    globalContext.getProperty<JSObject?>('__TAURI__'.toJS)?.getProperty<JSObject?>('event'.toJS)?.callMethod(
+        'listen'.toJS,
+        event.toJS,
+        (JSObject data) {
+          final payload = data.getProperty('payload'.toJS);
+          callback(payload?.dartify());
+        }.toJS);
   }
 
   updateStatus(bool coreIdle, bool pause, bool seeking, bool pausedForCache) {
@@ -171,10 +172,14 @@ class PlayerWeb extends PlayerPlatform {
   }
 
   @override
-  Future<void> enterFullscreen() async {}
+  Future<void> enterFullscreen() async {
+    invoke('player_fullscreen', {'fullscreen': true});
+  }
 
   @override
-  Future<void> exitFullscreen() async {}
+  Future<void> exitFullscreen() async {
+    invoke('player_fullscreen', {'fullscreen': false});
+  }
 
   @override
   void setMethodCallHandler(Future<dynamic> Function(MethodCall call)? handler) {

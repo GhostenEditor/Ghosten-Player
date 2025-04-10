@@ -62,8 +62,8 @@ class MediaChange {
   final Duration position;
 
   MediaChange.fromJson(dynamic json)
-      : index = json['index'],
-        position = Duration(milliseconds: json['position']);
+      : index = (json['index'] as num).toInt(),
+        position = Duration(milliseconds: (json['position'] as num).toInt());
 }
 
 class MediaInfo {

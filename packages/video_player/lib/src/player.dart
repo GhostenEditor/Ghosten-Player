@@ -55,9 +55,9 @@ class PlayerController<T> implements PlayerBaseController {
     PlayerPlatform.instance.setMethodCallHandler((call) async {
       switch (call.method) {
         case 'position':
-          position.value = Duration(milliseconds: call.arguments);
+          position.value = Duration(milliseconds: (call.arguments as num).toInt());
         case 'duration':
-          duration.value = Duration(milliseconds: call.arguments);
+          duration.value = Duration(milliseconds: (call.arguments as num).toInt());
         case 'networkSpeed':
           networkSpeed.value = call.arguments;
         case 'updateStatus':
@@ -67,7 +67,7 @@ class PlayerController<T> implements PlayerBaseController {
             error.value = null;
           }
         case 'bufferingUpdate':
-          bufferedPosition.value = Duration(milliseconds: call.arguments);
+          bufferedPosition.value = Duration(milliseconds: (call.arguments as num).toInt());
         case 'tracksChanged':
           final tracks = (call.arguments as List<dynamic>).map(MediaTrack.fromJson).toList();
           trackGroup.value = MediaTrackGroup.fromTracks(tracks);
