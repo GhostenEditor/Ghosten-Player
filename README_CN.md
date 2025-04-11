@@ -5,6 +5,8 @@
 [![GitHub Release](https://img.shields.io/github/v/release/GhostenEditor/Ghosten-Player)](https://github.com/GhostenEditor/Ghosten-Player/releases/latest)
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/GhostenEditor/Ghosten-Player/total)
 
+中文 | [English](./README.md)
+
 Ghosten Player 是一款同时适配📱 Android Phone 和 📺 Android TV 的视频播放器。整合影视资源，自动刮削媒体信息，支持IPTV播放，优雅打造私人影视库。
 界面简洁，功能丰富，开箱即用。
 
@@ -167,6 +169,8 @@ Demo仅作展示用，部分功能受Web限制，并非完整版。Demo可能更
 ## 赞助
 
 如果觉得此项目有用，可以考虑赞助我喝杯 ~~奶茶~~ 咖啡 ☕
+
+[赞赏列表](./sponsor_list.txt)
 
 <img src="https://github.com/user-attachments/assets/1aa84d31-095f-4529-b531-77d242d07a3c" alt="Sponsor" width="240"/>
 
