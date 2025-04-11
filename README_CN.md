@@ -25,8 +25,8 @@ Ghosten Player 是一款同时适配📱 Android Phone 和 📺 Android TV 的�
     - Windows (开发中)
     - Macos (开发中)
 - 网盘支持
-    - 支持阿里云盘、夸克网盘、Webdav和本地媒体文件
-    - 支持Emby和Jellyfin(Beta)
+    - 支持[阿里云盘](https://www.alipan.com)、[夸克网盘](https://pan.quark.cn)、Webdav和本地媒体文件
+    - 支持[Emby](https://emby.media)和[Jellyfin](https://jellyfin.org)(Beta)
     - 清晰度切换(阿里云盘)
     - 多账号登录
     - 网盘文件查看和管理
