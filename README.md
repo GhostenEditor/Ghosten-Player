@@ -5,7 +5,7 @@
 [![GitHub Release](https://img.shields.io/github/v/release/GhostenEditor/Ghosten-Player)](https://github.com/GhostenEditor/Ghosten-Player/releases/latest)
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/GhostenEditor/Ghosten-Player/total)
 
-English | [中文](./README_cn.md)
+English | [中文](./README_CN.md)
 
 **Ghosten Player** is a video player compatible with both 📱 **Android Phone** and 📺 **Android TV**. It integrates media resources, automatically scrapes metadata, supports IPTV playback, and elegantly builds your personal media library. With a clean interface and rich features, it works out of the box.
 
