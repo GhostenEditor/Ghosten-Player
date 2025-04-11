@@ -1,25 +1,34 @@
 name: Feature request
-description: 请通过这里反馈对新功能的需求
+description: |
+  Please submit your feedback on new features here
+  请通过这里反馈对新功能的需求
 labels: [enhancement]
 body:
   - type: markdown
     attributes:
       value: |
+        **Before raising a request, please search for duplicate issues, especially those with the `enhancement` label.**
         **在此提出需求前，请先搜索是否存在重复的issues，尤其是带有`enhancement`标签的**
 
   - type: textarea
     attributes:
-      label: 需求
-      description: 请描述您的需求，使用场景，为什么需要该功能等
+      label: Description of the feature / 需求描述
+      description: |
+        Please describe your feature, usage scenarios, why you need this feature, etc. Please be as detailed as possible and don't be stingy with words.
+        请描述您的需求，使用场景，为什么需要该功能等。请尽可能详细的描述，不要惜字如金。
     validations:
       required: true
 
   - type: textarea
     attributes:
-      label: 解决方案
-      description: 如果您有相关的解决方案，或市面上已有成型的解决方案，请提供
+      label: Solution / 解决方案
+      description: |
+        If you have a relevant solution, or if there is a mature solution on the market, please provide
+        如果您有相关的解决方案，或市面上已有成型的解决方案，请提供
 
   - type: textarea
     attributes:
-      label: 关注点
-      description: 请描述您的重点关注点，比如希望在**场景下能够正常运行
+      label: Focus / 关注点
+      description: |
+        Please describe your focus, such as you hope to be able to operate normally in ** scenario
+        请描述您的重点关注点，比如希望在**场景下能够正常运行
