@@ -24,8 +24,8 @@ The project is currently maintained with passion. Consider [sponsoring](#sponsor
     - Windows (Under Development)
     - macOS (Under Development)
 - **Cloud Storage Support**
-    - Aliyun Drive, Quark Cloud Drive, WebDAV, and local media files
-    - Emby & Jellyfin (Beta)
+    - [Aliyun Drive](https://www.alipan.com), [Quark Cloud Drive](https://pan.quark.cn), WebDAV, and local media files
+    - [Emby](https://emby.media) & [Jellyfin](https://jellyfin.org) (Beta)
     - Resolution switching (Aliyun Drive)
     - Multi-account login
     - File management for cloud storage
