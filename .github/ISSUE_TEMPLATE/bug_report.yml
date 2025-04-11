@@ -41,14 +41,16 @@ body:
   - type: textarea
     attributes:
       label: 问题描述
-      description: 请简要描述您遇到的问题，如果是播放器或者UI相关问题，最好能提供截图
+      description: 请简要描述您遇到的问题，如果是UI相关问题，最好能提供截图
     validations:
       required: true
 
   - type: textarea
     attributes:
       label: 问题复现
-      description: 请提供复现该问题的步骤，方便定位问题所在
+      description: |
+        请提供复现该问题的步骤，方便定位问题所在。
+        如果是播放器相关问题，此为必填项。需说明媒体文件的来源，编码信息等，以及能否稳定复现。
       placeholder: |
         1.
         2.
