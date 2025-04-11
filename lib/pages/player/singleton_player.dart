@@ -36,6 +36,7 @@ class _SingletonPlayerState<T> extends State<SingletonPlayer<T>> {
     return Stack(
       children: [
         PlayerPlatformView(initialized: () {
+          _controller.enterFullscreen();
           _controller.setSources(widget.playlist, widget.index);
           _controller.play();
         }),
