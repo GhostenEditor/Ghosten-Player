@@ -15,7 +15,7 @@ body:
       label: Version / 版本
       placeholder: |
         Please provide the specific version number of this repository, such as 1.0.0
-        请提供本项目具体版本号如 1.0.0
+        您使用的是哪个版本的软件？请不要使用最新版/latest作为答案。
     validations:
       required: true
 
