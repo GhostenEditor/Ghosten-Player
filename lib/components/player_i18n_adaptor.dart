@@ -29,6 +29,7 @@ class PlayerI18nAdaptor extends StatelessWidget {
       subtitleSettingBackgroundColor: AppLocalizations.of(context)!.subtitleSettingBackgroundColor,
       subtitleSettingEdgeColor: AppLocalizations.of(context)!.subtitleSettingEdgeColor,
       subtitleSettingWindowColor: AppLocalizations.of(context)!.subtitleSettingWindowColor,
+      buttonReset: AppLocalizations.of(context)!.buttonReset,
       child: child,
     );
   }

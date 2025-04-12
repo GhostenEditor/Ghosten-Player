@@ -4,8 +4,10 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:vector_math/vector_math_64.dart' as vm;
 
 import '../player.dart';
 import 'player_platform_interface.dart';
@@ -34,8 +36,16 @@ enum ControlsStreamStatus { show, showInfinite, hide }
 class PlayerZoomWrapper extends StatefulWidget {
   final PlayerController<dynamic> controller;
   final Widget child;
+  final double minScale;
+  final double maxScale;
 
-  const PlayerZoomWrapper({super.key, required this.controller, required this.child});
+  const PlayerZoomWrapper({
+    super.key,
+    required this.controller,
+    required this.child,
+    this.minScale = 0.3,
+    this.maxScale = 3,
+  });
 
   @override
   State<PlayerZoomWrapper> createState() => _PlayerZoomWrapperState();
@@ -43,41 +53,49 @@ class PlayerZoomWrapper extends StatefulWidget {
 
 class _PlayerZoomWrapperState extends State<PlayerZoomWrapper> {
   late final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
-  final _transformationController = TransformationController();
+  final _controller = TransformationController();
   final _showResetButton = ValueNotifier(false);
+  late Matrix4 _initialMatrix;
+  late Offset _initialFocalPoint;
+  late double _initialScale;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.value = Matrix4.identity();
+    _initialMatrix = Matrix4.identity();
+    _initialFocalPoint = Offset.zero;
+    _initialScale = 1.0;
+  }
 
   @override
   void dispose() {
     _showResetButton.dispose();
-    _transformationController.dispose();
+    _controller.dispose();
     widget.controller.setTransform([1, 0, 0, 0, 1, 0, 0, 0, 1]);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final localizations = PlayerLocalizations.of(context);
     return Stack(
       children: [
-        InteractiveViewer(
-          panEnabled: false,
-          transformationController: _transformationController,
-          boundaryMargin: const EdgeInsets.all(300),
-          onInteractionUpdate: (details) {
-            final matrix = _transformationController.value;
-            widget.controller.setTransform([
-              matrix.storage[0],
-              0,
-              matrix.storage[12] * devicePixelRatio,
-              0,
-              matrix.storage[5],
-              matrix.storage[13] * devicePixelRatio,
-              0,
-              0,
-              1,
-            ]);
-            _showResetButton.value = true;
+        RawGestureDetector(
+          gestures: {
+            ScaleGestureRecognizer: GestureRecognizerFactoryWithHandlers<ScaleGestureRecognizer>(
+              () => ScaleGestureRecognizer(),
+              (instance) => instance
+                ..onStart = _handleScaleStart
+                ..onUpdate = _handleScaleUpdate,
+            ),
           },
-          child: widget.child,
+          behavior: HitTestBehavior.opaque,
+          child: Transform(
+            transform: _controller.value,
+            alignment: Alignment.center,
+            child: widget.child,
+          ),
         ),
         ListenableBuilder(
           listenable: _showResetButton,
@@ -87,13 +105,60 @@ class _PlayerZoomWrapperState extends State<PlayerZoomWrapper> {
             child: FilledButton(
                 onPressed: () {
                   widget.controller.setTransform([1, 0, 0, 0, 1, 0, 0, 0, 1]);
+                  _controller.value = Matrix4.identity();
                   _showResetButton.value = false;
                 },
-                child: Text('还原')),
+                child: Text(localizations.buttonReset)),
           ),
         )
       ],
     );
+  }
+
+  void _handleScaleStart(ScaleStartDetails details) {
+    if (details.pointerCount != 2) return;
+    _initialMatrix = _controller.value.clone();
+    _initialFocalPoint = details.localFocalPoint;
+    _initialScale = _controller.value.getMaxScaleOnAxis();
+  }
+
+  void _handleScaleUpdate(ScaleUpdateDetails details) {
+    if (details.pointerCount != 2) return;
+    final newScale = (_initialScale * details.scale).clamp(
+      widget.minScale,
+      widget.maxScale,
+    );
+
+    final scaleFactor = newScale / _initialScale;
+
+    final focalPointVector = vm.Vector3(
+      _initialFocalPoint.dx,
+      _initialFocalPoint.dy,
+      0,
+    );
+
+    final transformedFocalPoint = _initialMatrix.perspectiveTransform(focalPointVector);
+    final focalOffset = Offset(transformedFocalPoint.x, transformedFocalPoint.y);
+
+    final matrix = Matrix4.identity()
+      ..translate(focalOffset.dx, focalOffset.dy)
+      ..scale(scaleFactor)
+      ..translate(-focalOffset.dx, -focalOffset.dy)
+      ..multiply(_initialMatrix);
+
+    widget.controller.setTransform([
+      matrix.storage[0],
+      0,
+      matrix.storage[12] * devicePixelRatio,
+      0,
+      matrix.storage[5],
+      matrix.storage[13] * devicePixelRatio,
+      0,
+      0,
+      1,
+    ]);
+    _showResetButton.value = true;
+    _controller.value = matrix;
   }
 }
 
@@ -229,6 +294,7 @@ class PlayerLocalizations extends InheritedWidget {
   final String subtitleSettingBackgroundColor;
   final String subtitleSettingEdgeColor;
   final String subtitleSettingWindowColor;
+  final String buttonReset;
 
   const PlayerLocalizations({
     super.key,
@@ -251,6 +317,7 @@ class PlayerLocalizations extends InheritedWidget {
     required this.subtitleSettingBackgroundColor,
     required this.subtitleSettingEdgeColor,
     required this.subtitleSettingWindowColor,
+    required this.buttonReset,
     required super.child,
   });
 
@@ -887,7 +954,7 @@ class _PlayerProgressViewState extends State<PlayerProgressView> {
               }
             },
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
+              padding: EdgeInsets.symmetric(vertical: widget.showLabel ? 6 : 12),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 height: _controller.seeking ? widget.thickness / 3 * 4 : widget.thickness,
@@ -931,7 +998,7 @@ class _PlayerProgressViewState extends State<PlayerProgressView> {
       ),
     );
     return SizedBox(
-      height: 52,
+      height: widget.showLabel ? 52 : 42,
       child: Center(
         child: widget.scalable
             ? AnimatedScale(
@@ -977,12 +1044,18 @@ class _PlayerProgressLabelState extends State<PlayerProgressLabel> {
       style: Theme.of(context).textTheme.labelMedium!,
       child: Row(
         children: [
-          Text(widget.controller.seeking ? widget.controller.cachedPosition.toDisplay() : widget.controller.position.toDisplay()),
+          ConstrainedBox(
+            constraints: BoxConstraints(minWidth: 36),
+            child: Text(widget.controller.seeking ? widget.controller.cachedPosition.toDisplay() : widget.controller.position.toDisplay()),
+          ),
           Text('-', style: TextStyle(color: Colors.transparent)),
           Text('/'),
           Text('-', style: widget.controller.seeking ? null : TextStyle(color: Colors.transparent)),
-          if (!widget.controller.seeking) Text(widget.controller.duration.toDisplay()),
-          if (widget.controller.seeking) Text((widget.controller.duration - widget.controller.cachedPosition).toDisplay()),
+          ConstrainedBox(
+            constraints: BoxConstraints(minWidth: 36),
+            child: Text((widget.controller.seeking ? widget.controller.duration - widget.controller.cachedPosition : widget.controller.duration).toDisplay(),
+                textAlign: TextAlign.end),
+          ),
         ],
       ),
     );

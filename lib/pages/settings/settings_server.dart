@@ -203,7 +203,6 @@ class _SystemSettingsAddState extends State<_SystemSettingsAdd> {
                   labelText: AppLocalizations.of(context)!.loginFormItemLabelPwd,
                   isDense: true,
                 ),
-                validator: (value) => requiredValidator(context, value),
                 onEditingComplete: () => FocusScope.of(context).nextFocus(),
               ),
             ],

@@ -204,18 +204,19 @@ class _PlayerControlsFullState<T> extends State<PlayerControlsFull<T>> with Play
                 child: Stack(
                   alignment: const Alignment(0.9, 0),
                   children: [
+                    PlayerZoomWrapper(
+                      controller: _controller,
+                      child: const SizedBox.expand(),
+                    ),
                     ListenableBuilder(
                         listenable: _isLocked,
                         builder: (context, _) {
                           return _isLocked.value
                               ? const SizedBox.expand()
                               : PlayerControlsGesture(
-                                  controller: _controller,
-                                  child: PlayerZoomWrapper(
-                                    controller: _controller,
-                                    child: const SizedBox.expand(),
-                                  ),
-                                );
+                                controller: _controller,
+                                child: const SizedBox.expand(),
+                              );
                         }),
                     ListenableBuilder(
                         listenable: _isShowControls,
@@ -298,7 +299,7 @@ class _PlayerControlsFullState<T> extends State<PlayerControlsFull<T>> with Play
             ],
           ),
         ),
-        padding: EdgeInsets.all(aspectRatio > 1 ? 32 : 16),
+        padding: aspectRatio > 1 ? const EdgeInsets.symmetric(horizontal: 32, vertical: 16) : const EdgeInsets.all(16),
         child: SafeArea(
           top: false,
           child: Column(
@@ -392,9 +393,9 @@ class _PlayerInfoView<T> extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               if (_controller.title.value != null)
-                                Text(_controller.title.value!, style: Theme.of(context).textTheme.displaySmall, overflow: TextOverflow.ellipsis, maxLines: 2),
+                                Text(_controller.title.value!, style: Theme.of(context).textTheme.titleLarge, overflow: TextOverflow.ellipsis, maxLines: 2),
                               const SizedBox(height: 10),
-                              Text(_controller.subTitle.value, style: Theme.of(context).textTheme.bodyLarge, overflow: TextOverflow.ellipsis),
+                              Text(_controller.subTitle.value, style: Theme.of(context).textTheme.bodyMedium, overflow: TextOverflow.ellipsis),
                               ListenableBuilder(
                                   listenable: _controller.status,
                                   builder: (context, _) {
