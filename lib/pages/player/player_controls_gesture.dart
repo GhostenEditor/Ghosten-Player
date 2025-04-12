@@ -1,4 +1,5 @@
 import 'package:animations/animations.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:shimmer/shimmer.dart';
@@ -44,128 +45,140 @@ class _PlayerControlsGestureState extends State<PlayerControlsGesture> {
     return Stack(
       fit: StackFit.expand,
       children: [
-        GestureDetector(
+        RawGestureDetector(
           behavior: HitTestBehavior.translucent,
-          onDoubleTapDown: (details) {
-            final offset = details.localPosition;
-            final box = context.findRenderObject()! as RenderBox;
-            final width = box.paintBounds.width;
-            final px = offset.dx / width;
-            if (px < 0.33) {
-              Future.microtask(() async {
-                _gestureMode.value = _GestureMode.fastRewind;
-                await Future.delayed(const Duration(seconds: 1));
-                _gestureMode.value = _GestureMode.none;
-              });
-              _controller.seekTo(_controller.position.value - const Duration(seconds: 15));
-            } else if (px > 0.67) {
-              Future.microtask(() async {
-                _gestureMode.value = _GestureMode.fastForward;
-                await Future.delayed(const Duration(seconds: 1));
-                _gestureMode.value = _GestureMode.none;
-              });
-              _controller.seekTo(_controller.position.value + const Duration(seconds: 15));
-            } else {
-              switch (_controller.status.value) {
-                case PlayerStatus.playing:
-                case PlayerStatus.buffering:
-                  _controller.pause();
-                case PlayerStatus.paused:
-                  _controller.play();
-                default:
-              }
-            }
-          },
-          onLongPressStart: (details) {
-            if (_controller.playbackSpeed.value < 3) {
-              _gestureMode.value = _GestureMode.speedUp;
-              _gestureValue.value = _controller.playbackSpeed.value;
-              _controller.setPlaybackSpeed(3);
-            }
-          },
-          onLongPressCancel: () {
-            if (_gestureMode.value == _GestureMode.speedUp) {
-              _controller.setPlaybackSpeed(_gestureValue.value!);
-              _gestureValue.value = null;
-              _gestureMode.value = _GestureMode.none;
-            }
-          },
-          onLongPressEnd: (details) {
-            if (_gestureMode.value == _GestureMode.speedUp) {
-              _controller.setPlaybackSpeed(_gestureValue.value!);
-              _gestureValue.value = null;
-              _gestureMode.value = _GestureMode.none;
-            }
-          },
-          onHorizontalDragStart: (details) {
-            final offset = details.localPosition;
-            final box = context.findRenderObject()! as RenderBox;
-            final validRect = box.paintBounds.deflate(30);
-            if ((_controller.status.value == PlayerStatus.playing ||
-                    _controller.status.value == PlayerStatus.buffering ||
-                    _controller.status.value == PlayerStatus.paused) &&
-                _controller.duration.value.inSeconds > 15 &&
-                validRect.contains(offset)) {
-              _gestureMode.value = _GestureMode.seek;
-              _gestureValue.value = _controller.position.value.inSeconds.toDouble();
-            }
-          },
-          onHorizontalDragUpdate: (details) {
-            if (_gestureMode.value == _GestureMode.seek) {
-              _gestureValue.value = (_gestureValue.value ?? 0) + details.delta.dx;
-              _gestureValue.value = _gestureValue.value!.clamp(0, _controller.duration.value.inSeconds.toDouble());
-            }
-          },
-          onHorizontalDragEnd: (details) {
-            if (_gestureMode.value == _GestureMode.seek && _gestureValue.value != null) {
-              _controller.seekTo(Duration(seconds: _gestureValue.value!.toInt()));
-            }
-            if (_gestureMode.value == _GestureMode.seek) {
-              _gestureMode.value = _GestureMode.none;
-            }
-          },
-          onHorizontalDragCancel: () {
-            if (_gestureMode.value == _GestureMode.seek) {
-              _gestureMode.value = _GestureMode.none;
-            }
-          },
-          onVerticalDragStart: (details) async {
-            final offset = details.localPosition;
-            final box = context.findRenderObject()! as RenderBox;
-            final validRect = box.paintBounds.deflate(30);
-            final halfWidth = box.size.width / 2;
-            if (validRect.contains(offset)) {
-              if (offset.dx < halfWidth) {
-                _gestureMode.value = _GestureMode.brightness;
-                _gestureValue.value = await ScreenBrightness.instance.application;
-              } else {
-                _gestureMode.value = _GestureMode.volume;
-                _gestureValue.value = await VolumeController.instance.getVolume();
-              }
-            }
-          },
-          onVerticalDragUpdate: (details) {
-            switch (_gestureMode.value) {
-              case _GestureMode.volume:
-                _gestureValue.value = (_gestureValue.value ?? 0) - details.delta.dy / 300;
-                _gestureValue.value = _gestureValue.value!.clamp(0, 1);
-                VolumeController.instance.setVolume(_gestureValue.value!);
-              case _GestureMode.brightness:
-                _gestureValue.value = (_gestureValue.value ?? 0) - details.delta.dy / 300;
-                _gestureValue.value = _gestureValue.value!.clamp(0, 1);
-                ScreenBrightness.instance.setApplicationScreenBrightness(_gestureValue.value!);
-              default:
-            }
-          },
-          onVerticalDragEnd: (details) {
-            if (_gestureMode.value == _GestureMode.volume || _gestureMode.value == _GestureMode.brightness) {
-              _gestureMode.value = _GestureMode.none;
-            }
-          },
-          onVerticalDragCancel: () {
-            if (_gestureMode.value == _GestureMode.volume || _gestureMode.value == _GestureMode.brightness) {
-              _gestureMode.value = _GestureMode.none;
-            }
+          gestures: {
+            HorizontalDragGestureRecognizer:
+                GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(() => HorizontalDragGestureRecognizer(), (instance) {
+              instance.onStart = (details) {
+                final offset = details.localPosition;
+                final box = context.findRenderObject()! as RenderBox;
+                final validRect = box.paintBounds.deflate(30);
+                if ((_controller.status.value == PlayerStatus.playing ||
+                        _controller.status.value == PlayerStatus.buffering ||
+                        _controller.status.value == PlayerStatus.paused) &&
+                    _controller.duration.value.inSeconds > 15 &&
+                    validRect.contains(offset)) {
+                  _gestureMode.value = _GestureMode.seek;
+                  _gestureValue.value = _controller.position.value.inSeconds.toDouble();
+                }
+              };
+              instance.onUpdate = (details) {
+                if (_gestureMode.value == _GestureMode.seek) {
+                  _gestureValue.value = (_gestureValue.value ?? 0) + details.delta.dx;
+                  _gestureValue.value = _gestureValue.value!.clamp(0, _controller.duration.value.inSeconds.toDouble());
+                }
+              };
+              instance.onEnd = (details) {
+                if (_gestureMode.value == _GestureMode.seek && _gestureValue.value != null) {
+                  _controller.seekTo(Duration(seconds: _gestureValue.value!.toInt()));
+                }
+                if (_gestureMode.value == _GestureMode.seek) {
+                  _gestureMode.value = _GestureMode.none;
+                }
+              };
+              instance.onCancel = () {
+                if (_gestureMode.value == _GestureMode.seek) {
+                  _gestureMode.value = _GestureMode.none;
+                }
+              };
+            }),
+            VerticalDragGestureRecognizer:
+                GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(() => VerticalDragGestureRecognizer(), (instance) {
+              instance.onStart = (details) async {
+                final offset = details.localPosition;
+                final box = context.findRenderObject()! as RenderBox;
+                final validRect = box.paintBounds.deflate(30);
+                final halfWidth = box.size.width / 2;
+                if (validRect.contains(offset)) {
+                  if (offset.dx < halfWidth) {
+                    _gestureMode.value = _GestureMode.brightness;
+                    _gestureValue.value = await ScreenBrightness.instance.application;
+                  } else {
+                    _gestureMode.value = _GestureMode.volume;
+                    _gestureValue.value = await VolumeController.instance.getVolume();
+                  }
+                }
+              };
+              instance.onUpdate = (details) {
+                switch (_gestureMode.value) {
+                  case _GestureMode.volume:
+                    _gestureValue.value = (_gestureValue.value ?? 0) - details.delta.dy / 300;
+                    _gestureValue.value = _gestureValue.value!.clamp(0, 1);
+                    VolumeController.instance.setVolume(_gestureValue.value!);
+                  case _GestureMode.brightness:
+                    _gestureValue.value = (_gestureValue.value ?? 0) - details.delta.dy / 300;
+                    _gestureValue.value = _gestureValue.value!.clamp(0, 1);
+                    ScreenBrightness.instance.setApplicationScreenBrightness(_gestureValue.value!);
+                  default:
+                }
+              };
+              instance.onEnd = (details) {
+                if (_gestureMode.value == _GestureMode.volume || _gestureMode.value == _GestureMode.brightness) {
+                  _gestureMode.value = _GestureMode.none;
+                }
+              };
+              instance.onCancel = () {
+                if (_gestureMode.value == _GestureMode.volume || _gestureMode.value == _GestureMode.brightness) {
+                  _gestureMode.value = _GestureMode.none;
+                }
+              };
+            }),
+            LongPressGestureRecognizer: GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(() => LongPressGestureRecognizer(), (instance) {
+              instance.onLongPressStart = (details) {
+                if (_controller.playbackSpeed.value < 3) {
+                  _gestureMode.value = _GestureMode.speedUp;
+                  _gestureValue.value = _controller.playbackSpeed.value;
+                  _controller.setPlaybackSpeed(3);
+                }
+              };
+              instance.onLongPressCancel = () {
+                if (_gestureMode.value == _GestureMode.speedUp) {
+                  _controller.setPlaybackSpeed(_gestureValue.value!);
+                  _gestureValue.value = null;
+                  _gestureMode.value = _GestureMode.none;
+                }
+              };
+              instance.onLongPressEnd = (details) {
+                if (_gestureMode.value == _GestureMode.speedUp) {
+                  _controller.setPlaybackSpeed(_gestureValue.value!);
+                  _gestureValue.value = null;
+                  _gestureMode.value = _GestureMode.none;
+                }
+              };
+            }),
+            DoubleTapGestureRecognizer: GestureRecognizerFactoryWithHandlers<DoubleTapGestureRecognizer>(() => DoubleTapGestureRecognizer(), (instance) {
+              instance.onDoubleTapDown = (details) {
+                final offset = details.localPosition;
+                final box = context.findRenderObject()! as RenderBox;
+                final width = box.paintBounds.width;
+                final px = offset.dx / width;
+                if (px < 0.33) {
+                  Future.microtask(() async {
+                    _gestureMode.value = _GestureMode.fastRewind;
+                    await Future.delayed(const Duration(seconds: 1));
+                    _gestureMode.value = _GestureMode.none;
+                  });
+                  _controller.seekTo(_controller.position.value - const Duration(seconds: 15));
+                } else if (px > 0.67) {
+                  Future.microtask(() async {
+                    _gestureMode.value = _GestureMode.fastForward;
+                    await Future.delayed(const Duration(seconds: 1));
+                    _gestureMode.value = _GestureMode.none;
+                  });
+                  _controller.seekTo(_controller.position.value + const Duration(seconds: 15));
+                } else {
+                  switch (_controller.status.value) {
+                    case PlayerStatus.playing:
+                    case PlayerStatus.buffering:
+                      _controller.pause();
+                    case PlayerStatus.paused:
+                      _controller.play();
+                    default:
+                  }
+                }
+              };
+            }),
           },
           child: widget.child,
         ),
