@@ -118,6 +118,10 @@ class _LiveListPageState extends State<LiveListPage> {
                                                                 onTap: (index) => _controller.next(index),
                                                               ));
                                                     }
+                                                  } else {
+                                                    final playlist = await Api.playlistChannelsQueryById(item.id);
+                                                    await _controller.setSources(playlist.map(FromMedia.fromChannel).toList(), 0);
+                                                    _controller.play();
                                                   }
                                                 },
                                               ),
