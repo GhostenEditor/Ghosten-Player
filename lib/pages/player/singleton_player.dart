@@ -1,7 +1,9 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:video_player/player.dart';
 
+import '../../providers/user_config.dart';
 import 'player_controls_full.dart';
 
 class SingletonPlayer<T> extends StatefulWidget {
@@ -35,11 +37,13 @@ class _SingletonPlayerState<T> extends State<SingletonPlayer<T>> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        PlayerPlatformView(initialized: () {
-          _controller.enterFullscreen();
-          _controller.setSources(widget.playlist, widget.index);
-          _controller.play();
-        }),
+        PlayerPlatformView(
+            autoPip: context.read<UserConfig>().autoPip,
+            initialized: () {
+              _controller.enterFullscreen();
+              _controller.setSources(widget.playlist, widget.index);
+              _controller.play();
+            }),
         PlayerControlsFull(_controller, _progressController, theme: widget.theme),
       ],
     );

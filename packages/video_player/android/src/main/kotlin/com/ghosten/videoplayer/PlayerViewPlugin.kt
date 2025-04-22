@@ -47,6 +47,7 @@ class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activit
                                 call.argument("height"),
                                 call.argument("top"),
                                 call.argument("left"),
+                                call.argument("autoPip") ?: true,
                             )
                     }
 

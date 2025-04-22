@@ -4,12 +4,14 @@ import 'package:animations/animations.dart';
 import 'package:api/api.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:video_player/player.dart';
 
 import '../../components/error_message.dart';
+import '../../providers/user_config.dart';
 import '../../utils/utils.dart';
 import '../player/player_controls_full.dart';
 import '../utils/utils.dart';
@@ -262,7 +264,7 @@ class _PlayerControlsLiteState<T> extends State<PlayerControlsLite<T>> {
                           child: Stack(
                             fit: StackFit.expand,
                             children: [
-                              PlayerPlatformView(initialized: widget.initialized),
+                              PlayerPlatformView(initialized: widget.initialized, autoPip: context.read<UserConfig>().autoPip),
                               ListenableBuilder(
                                   listenable: _isShowControls,
                                   builder: (context, _) => PageTransitionSwitcher(

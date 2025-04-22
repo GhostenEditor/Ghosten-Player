@@ -60,6 +60,7 @@ class Media3PlayerView(
     private val height: Int?,
     private val top: Int?,
     private val left: Int?,
+    private val autoPip: Boolean,
 ) : Player.Listener, BasePlayerView {
     private val mRootView: FrameLayout = activity.findViewById<FrameLayout>(android.R.id.content)
     private val mNativeView: View = View.inflate(context, R.layout.player_view, null)
@@ -646,6 +647,7 @@ class Media3PlayerView(
     }
 
     private fun setPictureInPictureParams() {
+        if (!autoPip) return
         val params = getPictureInPictureParams()
         if (params != null) activity.setPictureInPictureParams(params)
     }

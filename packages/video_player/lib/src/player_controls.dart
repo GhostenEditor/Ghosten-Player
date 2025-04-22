@@ -586,8 +586,9 @@ class PlayerSettings extends StatelessWidget {
 
 class PlayerPlatformView extends StatefulWidget {
   final VoidCallback? initialized;
+  final bool autoPip;
 
-  const PlayerPlatformView({super.key, this.initialized});
+  const PlayerPlatformView({super.key, this.initialized, this.autoPip = false});
 
   @override
   State<PlayerPlatformView> createState() => _PlayerPlatformViewState();
@@ -609,6 +610,7 @@ class _PlayerPlatformViewState extends State<PlayerPlatformView> {
         'height': (box.size.height * devicePixelRatio).round(),
         'top': (offset.dy * -1 * devicePixelRatio).round(),
         'left': (offset.dx * -1 * devicePixelRatio).round(),
+        'autoPip': widget.autoPip,
         'extensionRendererMode': await PlayerConfig.getExtensionRendererMode(),
         'enableDecoderFallback': await PlayerConfig.getEnableDecoderFallback(),
         'subtitleStyle': await PlayerConfig.getSubtitleSettings(),
