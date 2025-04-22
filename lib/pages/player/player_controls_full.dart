@@ -39,12 +39,14 @@ class PlayerControlsFull<T> extends StatefulWidget {
 class _PlayerControlsFullState<T> extends State<PlayerControlsFull<T>> with PlayerActionsMixin {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _navigatorKey = GlobalKey<NavigatorState>();
+  final _zoomKey = GlobalKey<PlayerZoomWrapperState>();
   late final _controller = widget.controller;
   late final _progressController = widget.progressController;
   final _isShowControls = ValueNotifier(false);
   final _isLocked = ValueNotifier(false);
   final _isShowLockButton = ValueNotifier(false);
   final _forceLandScape = ValueNotifier(false);
+  final _isZoomed = ValueNotifier(false);
   final _controlsStream = StreamController<ControlsStreamStatus>();
   StreamSubscription<bool>? _subscription;
   StreamSubscription<bool>? _pipSubscription;
@@ -121,6 +123,7 @@ class _PlayerControlsFullState<T> extends State<PlayerControlsFull<T>> with Play
     _isShowLockButton.dispose();
     _isLocked.dispose();
     _forceLandScape.dispose();
+    _isZoomed.dispose();
     _subscription?.cancel();
     _pipSubscription?.cancel();
     super.dispose();
@@ -205,8 +208,10 @@ class _PlayerControlsFullState<T> extends State<PlayerControlsFull<T>> with Play
                   alignment: const Alignment(0.9, 0),
                   children: [
                     PlayerZoomWrapper(
+                      key: _zoomKey,
                       controller: _controller,
                       child: const SizedBox.expand(),
+                      onZoomChanged: (zoom) => _isZoomed.value = zoom,
                     ),
                     ListenableBuilder(
                         listenable: _isLocked,
@@ -305,6 +310,11 @@ class _PlayerControlsFullState<T> extends State<PlayerControlsFull<T>> with Play
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              ListenableBuilder(
+                listenable: _isZoomed,
+                builder: (context, child) => _isZoomed.value ? child! : const SizedBox(),
+                child: FilledButton(onPressed: () => _zoomKey.currentState?.reset(), child: Text(AppLocalizations.of(context)!.buttonReset)),
+              ),
               _PlayerInfoView(_controller),
               if (aspectRatio <= 1)
                 Padding(

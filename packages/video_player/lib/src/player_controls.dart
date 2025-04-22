@@ -38,6 +38,7 @@ class PlayerZoomWrapper extends StatefulWidget {
   final Widget child;
   final double minScale;
   final double maxScale;
+  final ValueChanged<bool> onZoomChanged;
 
   const PlayerZoomWrapper({
     super.key,
@@ -45,16 +46,16 @@ class PlayerZoomWrapper extends StatefulWidget {
     required this.child,
     this.minScale = 0.3,
     this.maxScale = 3,
+    required this.onZoomChanged,
   });
 
   @override
-  State<PlayerZoomWrapper> createState() => _PlayerZoomWrapperState();
+  State<PlayerZoomWrapper> createState() => PlayerZoomWrapperState();
 }
 
-class _PlayerZoomWrapperState extends State<PlayerZoomWrapper> {
+class PlayerZoomWrapperState extends State<PlayerZoomWrapper> {
   late final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
   final _controller = TransformationController();
-  final _showResetButton = ValueNotifier(false);
   late Matrix4 _initialMatrix;
   late Offset _initialFocalPoint;
   late double _initialScale;
@@ -70,7 +71,6 @@ class _PlayerZoomWrapperState extends State<PlayerZoomWrapper> {
 
   @override
   void dispose() {
-    _showResetButton.dispose();
     _controller.dispose();
     widget.controller.setTransform([1, 0, 0, 0, 1, 0, 0, 0, 1]);
     super.dispose();
@@ -78,41 +78,30 @@ class _PlayerZoomWrapperState extends State<PlayerZoomWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = PlayerLocalizations.of(context);
-    return Stack(
-      children: [
-        RawGestureDetector(
-          gestures: {
-            ScaleGestureRecognizer: GestureRecognizerFactoryWithHandlers<ScaleGestureRecognizer>(
-              () => ScaleGestureRecognizer(),
-              (instance) => instance
-                ..onStart = _handleScaleStart
-                ..onUpdate = _handleScaleUpdate,
-            ),
-          },
-          behavior: HitTestBehavior.opaque,
-          child: Transform(
-            transform: _controller.value,
-            alignment: Alignment.center,
-            child: widget.child,
-          ),
-        ),
-        ListenableBuilder(
-          listenable: _showResetButton,
-          builder: (context, child) => _showResetButton.value ? child! : SizedBox(),
-          child: Align(
-            alignment: Alignment(0, 0.8),
-            child: FilledButton(
-                onPressed: () {
-                  widget.controller.setTransform([1, 0, 0, 0, 1, 0, 0, 0, 1]);
-                  _controller.value = Matrix4.identity();
-                  _showResetButton.value = false;
-                },
-                child: Text(localizations.buttonReset)),
-          ),
+    return RawGestureDetector(
+      gestures: {
+        ScaleGestureRecognizer: GestureRecognizerFactoryWithHandlers<ScaleGestureRecognizer>(
+          () => ScaleGestureRecognizer(),
+          (instance) => instance
+            ..onStart = _handleScaleStart
+            ..onUpdate = _handleScaleUpdate,
         )
-      ],
+      },
+      behavior: HitTestBehavior.opaque,
+      child: Transform(
+        transform: _controller.value,
+        alignment: Alignment.center,
+        child: widget.child,
+      ),
     );
+  }
+
+  void reset() {
+    if (_controller.value != Matrix4.identity()) {
+      widget.controller.setTransform([1, 0, 0, 0, 1, 0, 0, 0, 1]);
+      _controller.value = Matrix4.identity();
+      widget.onZoomChanged(false);
+    }
   }
 
   void _handleScaleStart(ScaleStartDetails details) {
@@ -157,7 +146,7 @@ class _PlayerZoomWrapperState extends State<PlayerZoomWrapper> {
       0,
       1,
     ]);
-    _showResetButton.value = true;
+    widget.onZoomChanged(true);
     _controller.value = matrix;
   }
 }
