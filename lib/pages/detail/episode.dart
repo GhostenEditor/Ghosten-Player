@@ -8,7 +8,8 @@ import '../../components/gap.dart';
 import '../../utils/utils.dart';
 import '../components/theme_builder.dart';
 import '../utils/notification.dart';
-import 'components/actors.dart';
+import 'components/cast.dart';
+import 'components/crew.dart';
 import 'components/overview.dart';
 import 'dialogs/episode_metadata.dart';
 import 'dialogs/subtitle.dart';
@@ -117,7 +118,7 @@ class _EpisodeDetailState extends State<EpisodeDetail> with ActionMixin<EpisodeD
                                           padding: EdgeInsets.zero,
                                           onTap: item.downloaded
                                               ? null
-                                              : () => showNotification(context, Api.downloadTaskCreate(item.url!.queryParameters['id']!),
+                                              : () => showNotification(context, Api.downloadTaskCreate(item.fileId),
                                                   successText: AppLocalizations.of(context)!.tipsForDownload),
                                           child: ListTile(
                                             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
@@ -162,10 +163,10 @@ class _EpisodeDetailState extends State<EpisodeDetail> with ActionMixin<EpisodeD
                                                   style: Theme.of(context).textTheme.labelSmall!.copyWith(height: 2, fontWeight: FontWeight.bold)),
                                             RichText(
                                                 text: TextSpan(children: [
-                                              TextSpan(text: '${item.filename}.${item.ext}', style: Theme.of(context).textTheme.labelSmall),
+                                              TextSpan(text: '.', style: Theme.of(context).textTheme.labelSmall),
                                               const WidgetSpan(child: Gap.hSM),
-                                              if (item.fileSize != null)
-                                                TextSpan(text: item.fileSize!.toSizeDisplay(), style: Theme.of(context).textTheme.labelSmall),
+                                              // if (item.fileSize != null)
+                                              //   TextSpan(text: item.fileSize!.toSizeDisplay(), style: Theme.of(context).textTheme.labelSmall),
                                             ])),
                                             OverviewSection(text: item.overview, trimLines: 4),
                                           ],
@@ -176,9 +177,18 @@ class _EpisodeDetailState extends State<EpisodeDetail> with ActionMixin<EpisodeD
                             ],
                           ),
                         ),
-                        BlocSelector<TVEpisodeCubit, TVEpisode?, List<Actor>?>(
-                            selector: (episode) => episode?.actors ?? [],
-                            builder: (context, actors) => (actors != null && actors.isNotEmpty) ? ActorsSection(actors: actors) : const SizedBox()),
+                        BlocSelector<TVEpisodeCubit, TVEpisode?, List<MediaCast>?>(
+                            selector: (episode) => episode?.mediaCast ?? [],
+                            builder: (context, cast) =>
+                                (cast != null && cast.isNotEmpty) ? CastSection(type: MediaType.episode, cast: cast) : const SizedBox()),
+                        BlocSelector<TVEpisodeCubit, TVEpisode?, List<MediaCast>?>(
+                            selector: (episode) => episode?.guestStars ?? [],
+                            builder: (context, cast) =>
+                                (cast != null && cast.isNotEmpty) ? CastSection(type: MediaType.episode, cast: cast) : const SizedBox()),
+                        BlocSelector<TVEpisodeCubit, TVEpisode?, List<MediaCrew>?>(
+                            selector: (episode) => episode?.mediaCrew ?? [],
+                            builder: (context, crew) =>
+                                (crew != null && crew.isNotEmpty) ? CrewSection(type: MediaType.episode, crew: crew) : const SizedBox()),
                       ]),
                     ),
                   ],

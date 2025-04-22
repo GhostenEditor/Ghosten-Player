@@ -73,7 +73,6 @@ class FileViewer extends StatelessWidget {
                                     [
                                       PlaylistItem(
                                         url: item.url!.normalize(),
-                                        sourceType: PlaylistItemSourceType.other,
                                         title: item.name,
                                         description: item.updatedAt?.format(),
                                         source: null,

@@ -13,6 +13,7 @@ import '../library.dart';
 import 'components/carousel.dart';
 import 'components/channel.dart';
 import 'components/media_scaffold.dart';
+import 'search.dart';
 
 class MovieListPage extends StatefulWidget {
   const MovieListPage({super.key});
@@ -82,6 +83,17 @@ class _MovieListPageState extends State<MovieListPage> {
           height: 230,
           selector: (state) => state?.data?.watchNow.length ?? 0,
           builder: _buildRecentMediaCard,
+        ),
+        MediaChannel<MovieListCubit, AsyncSnapshot<MovieListModel>>(
+          label: '收藏夹',
+          more: IconButton(
+              onPressed: () {
+                navigateTo(context, const SearchPage(filterType: [FilterType.favorite], activeTab: 1));
+              },
+              icon: const Icon(Icons.chevron_right)),
+          selector: (state) => state?.data?.favorite.length ?? 0,
+          height: 230,
+          builder: (context, index) => _buildMediaCard(context, (state) => state.requireData.favorite[index], width: 120, height: 180),
         ),
         MediaChannel<MovieListCubit, AsyncSnapshot<MovieListModel>>(
           label: AppLocalizations.of(context)!.tagNewAdd,
@@ -156,7 +168,7 @@ class _MovieListPageState extends State<MovieListPage> {
             width: width,
             height: height,
             title: Text(item.displayRecentTitle()),
-            subtitle: Text(item.airDate?.format() ?? ''),
+            subtitle: Text(item.releaseDate?.format() ?? ''),
             floating: MediaBadges(item: item),
             onTap: () => _onMediaTap(context, item),
           );
@@ -173,6 +185,7 @@ class MovieListModel {
   const MovieListModel({
     required this.carousels,
     required this.watchNow,
+    required this.favorite,
     required this.newAdd,
     required this.newRelease,
     required this.all,
@@ -181,6 +194,7 @@ class MovieListModel {
   final List<MediaRecommendation> carousels;
   final List<Movie> watchNow;
   final List<Movie> newAdd;
+  final List<Movie> favorite;
   final List<Movie> newRelease;
   final List<Movie> all;
 }
@@ -198,15 +212,18 @@ class MovieListCubit extends Cubit<AsyncSnapshot<MovieListModel>> {
       final items = await Future.wait([
         Api.movieRecommendation(),
         Api.movieNextToPlayQueryAll(),
-        Api.movieQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.createAt, direction: SortDirection.desc, filter: FilterType.all), limit: 8)),
-        Api.movieQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.airDate, direction: SortDirection.desc, filter: FilterType.all), limit: 8)),
-        Api.movieQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.title, direction: SortDirection.asc, filter: FilterType.all)))
+        Api.movieQueryAll(
+            const MediaSearchQuery(sort: SortConfig(type: SortType.createAt, direction: SortDirection.desc, filter: FilterType.favorite), limit: 8)),
+        Api.movieQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.createAt, direction: SortDirection.desc), limit: 8)),
+        Api.movieQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.airDate, direction: SortDirection.desc), limit: 8)),
+        Api.movieQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.title, direction: SortDirection.asc)))
       ]);
       emit(AsyncSnapshot.withData(
           ConnectionState.done,
           MovieListModel(
             carousels: items[0] as List<MediaRecommendation>,
             watchNow: items[1] as List<Movie>,
+            favorite: items[2] as List<Movie>,
             newAdd: items[2] as List<Movie>,
             newRelease: items[3] as List<Movie>,
             all: items[4] as List<Movie>,

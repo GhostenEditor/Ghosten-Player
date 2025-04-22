@@ -13,6 +13,7 @@ class ImageCard extends StatelessWidget {
     this.width,
     this.height,
     this.padding = EdgeInsets.zero,
+    this.noImageIcon = Icons.image_not_supported_outlined,
     this.floating,
   });
 
@@ -24,6 +25,7 @@ class ImageCard extends StatelessWidget {
   final Widget? subtitle;
   final EdgeInsets padding;
   final Widget? floating;
+  final IconData noImageIcon;
   final GestureTapCallback? onTap;
 
   @override
@@ -59,7 +61,7 @@ class ImageCard extends StatelessWidget {
                                   radius: BorderRadius.circular(6),
                                   ink: true,
                                 )
-                              : Icon(Icons.image_not_supported_outlined, size: 50, color: Theme.of(context).colorScheme.surfaceContainerLow)),
+                              : Icon(noImageIcon, size: 50, color: Theme.of(context).colorScheme.surfaceContainerLow)),
                       if (floating != null) floating!,
                     ],
                   ),

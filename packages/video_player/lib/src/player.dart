@@ -40,11 +40,13 @@ class PlayerController<T> implements PlayerBaseController {
   final ValueNotifier<bool> canPip = ValueNotifier(false);
   final ValueNotifier<bool> pipMode = ValueNotifier(false);
   final ValueNotifier<bool> isCasting = ValueNotifier(false);
-  final ValueNotifier<(MediaChange, Duration)?> mediaChange = ValueNotifier(null);
+  final ValueNotifier<int?> onMediaIndexChanged = ValueNotifier(null);
+  final ValueNotifier<(MediaChange, Duration)?> beforeMediaChanged = ValueNotifier(null);
+  final Future<PlaylistItem<T>> Function(int)? onGetPlayBackInfo;
 
   PlaylistItem<T>? get currentItem => index.value == null ? null : playlist.value.elementAtOrNull(index.value!);
 
-  PlayerController([Function(int, String)? onLog]) {
+  PlayerController(Function(int, String)? onLog, {this.onGetPlayBackInfo}) {
     this.index.addListener(() {
       title.value = currentItem?.title;
       subTitle.value = currentItem?.description ?? '';
@@ -78,13 +80,14 @@ class PlayerController<T> implements PlayerBaseController {
         case 'beforeMediaChange':
           if (duration.value > Duration.zero) {
             final data = MediaChange.fromJson(call.arguments);
-            mediaChange.value = (data, duration.value);
+            beforeMediaChanged.value = (data, duration.value);
           }
         case 'mediaChanged':
           final mediaChange = MediaChange.fromJson(call.arguments);
-          this.index.value = mediaChange.index;
           position.value = mediaChange.position;
           error.value = null;
+        case 'mediaIndexChanged':
+          this.index.value = call.arguments;
         case 'volumeChanged':
           volume.value = call.arguments;
         case 'mediaInfo':
@@ -114,7 +117,7 @@ class PlayerController<T> implements PlayerBaseController {
     status.dispose();
     trackGroup.dispose();
     mediaInfo.dispose();
-    mediaChange.dispose();
+    beforeMediaChanged.dispose();
     pipMode.dispose();
   }
 
@@ -129,11 +132,14 @@ class PlayerController<T> implements PlayerBaseController {
   Future<void> next(int index) async {
     if (index < 0 || index >= playlist.value.length) return;
     if (index != this.index.value) {
-      PlayerPlatform.instance.next(index);
+      this.index.value = index;
+      final item = await onGetPlayBackInfo!(index);
+      await setSource(item);
+      // PlayerPlatform.instance.next(index);
     }
-    if (status.value == PlayerStatus.paused || status.value == PlayerStatus.idle) {
-      play();
-    }
+    // if (status.value == PlayerStatus.paused || status.value == PlayerStatus.idle) {
+    //   play();
+    // }
   }
 
   Future<void> seekTo(Duration position) async {
@@ -177,13 +183,19 @@ class PlayerController<T> implements PlayerBaseController {
     return PlayerPlatform.instance.updateSource(source.toSource(), index);
   }
 
+  Future<void> setSource(PlaylistItem<T> playItem) async {
+    return PlayerPlatform.instance.setSource(playItem.toSource());
+  }
+
   Future<void> setSources(List<PlaylistItem<T>> playlist, int index) async {
     if (playlist.length == this.playlist.value.length &&
         List.generate(playlist.length, (i) => i).every((index) => playlist[index] == this.playlist.value[index])) {
       return;
     }
     this.playlist.value = playlist;
-    return PlayerPlatform.instance.setSources(playlist.map((item) => item.toSource()).toList(), index);
+    await next(index);
+
+    // return PlayerPlatform.instance.setSources(playlist.map((item) => item.toSource()).toList(), index);
   }
 
   Future<void> enterFullscreen() {

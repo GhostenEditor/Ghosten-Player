@@ -115,56 +115,25 @@ enum AspectRatioType {
   }
 }
 
-enum PlaylistItemSourceType {
-  local,
-  hls,
-  rtsp,
-  other;
-
-  static PlaylistItemSourceType fromBroadcastUri(Uri uri) {
-    return switch (uri.scheme.toLowerCase()) {
-      'http' || 'https' => PlaylistItemSourceType.hls,
-      'rtsp' => PlaylistItemSourceType.rtsp,
-      'file' => PlaylistItemSourceType.local,
-      _ => PlaylistItemSourceType.other,
-    };
-  }
-
-  static PlaylistItemSourceType fromUri(Uri uri) {
-    if (uri.scheme == 'file') {
-      return PlaylistItemSourceType.local;
-    }
-    final path = uri.path.split('.');
-    String? ext;
-    if (path.length > 1) {
-      ext = path.last;
-    }
-    return switch (ext) {
-      'm3u8' => PlaylistItemSourceType.hls,
-      _ => PlaylistItemSourceType.other,
-    };
-  }
-}
-
-class PlaylistItem<T> {
+class PlaylistItem<T> extends Equatable {
   final String? poster;
   final String? title;
   final String? description;
   final Uri url;
   final Duration start;
   final Duration end;
-  final PlaylistItemSourceType sourceType;
+  final Duration? duration;
   final List<Subtitle>? subtitles;
   final T source;
 
   const PlaylistItem({
     required this.url,
-    required this.sourceType,
     required this.source,
     this.title,
     this.description,
     this.poster,
     this.subtitles,
+    this.duration,
     this.start = Duration.zero,
     this.end = Duration.zero,
   });
@@ -176,7 +145,7 @@ class PlaylistItem<T> {
     Uri? url,
     Duration? start,
     Duration? end,
-    PlaylistItemSourceType? sourceType,
+    Duration? duration,
     List<Subtitle>? subtitles,
   }) {
     return PlaylistItem(
@@ -186,7 +155,7 @@ class PlaylistItem<T> {
       url: url ?? this.url,
       start: start ?? this.start,
       end: end ?? this.end,
-      sourceType: sourceType ?? this.sourceType,
+      duration: duration ?? this.duration,
       subtitles: subtitles ?? this.subtitles,
       source: source,
     );
@@ -194,7 +163,6 @@ class PlaylistItem<T> {
 
   Map<String, dynamic> toSource() {
     return {
-      'type': sourceType.name,
       'url': url.toString(),
       'title': title,
       'description': description,
@@ -206,10 +174,7 @@ class PlaylistItem<T> {
   }
 
   @override
-  int get hashCode => url.hashCode;
-
-  @override
-  bool operator ==(Object other) => other is PlaylistItem && url == other.url && title == other.title && url == other.url;
+  List<Object?> get props => [url, title, poster];
 }
 
 enum SubtitleMimeType {

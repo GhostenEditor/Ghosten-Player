@@ -292,18 +292,19 @@ class _TVDetailState extends State<TVDetail> with ActionMixin, SearchableMixin {
     }
   }
 
-  Future<bool> _refreshTVSeries(BuildContext context, TVSeries item) {
-    return search(
-      context,
-      ({required String title, int? year, int? index}) => Api.tvSeriesUpdateById(
-        item.id,
-        title,
-        Localizations.localeOf(context).languageCode,
-        year: year.toString(),
-        index: index,
-      ),
-      title: item.title ?? item.originalTitle ?? item.filename,
-      year: item.airDate?.year,
-    );
+  Future<bool> _refreshTVSeries(BuildContext context, TVSeries item) async {
+    return true;
+    // return search(
+    //   context,
+    //   ({required String title, int? year, int? index}) => Api.tvSeriesScraperById(
+    //     item.id,
+    //     title,
+    //     Localizations.localeOf(context).languageCode,
+    //     year: year.toString(),
+    //     index: index,
+    //   ),
+    //   title: item.title ?? item.originalTitle ?? '',
+    //   year: item.airDate?.year,
+    // );
   }
 }

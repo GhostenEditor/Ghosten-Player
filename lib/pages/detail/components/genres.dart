@@ -3,12 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../utils/utils.dart';
-import '../../media/filter.dart';
+import '../../media/search.dart';
 
 class GenresSection extends StatelessWidget {
-  const GenresSection({super.key, required this.genres});
+  const GenresSection({
+    super.key,
+    required this.genres,
+    required this.type,
+  });
 
   final List<Genre> genres;
+  final MediaType type;
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +22,7 @@ class GenresSection extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.all(16),
-          child: Text(AppLocalizations.of(context)!.titleType, style: Theme.of(context).textTheme.titleMedium),
+          child: Text(AppLocalizations.of(context)!.titleGenre, style: Theme.of(context).textTheme.titleMedium),
         ),
         SizedBox(
           height: 30,
@@ -29,7 +34,7 @@ class GenresSection extends StatelessWidget {
               itemBuilder: (BuildContext context, int index) => FilledButton.tonal(
                   style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 12), minimumSize: Size.zero, textStyle: Theme.of(context).textTheme.labelMedium),
-                  onPressed: () => navigateTo(context, FilterPage(id: genres[index].id)),
+                  onPressed: () => navigateTo(context, SearchPage(activeTab: type == MediaType.movie ? 1 : 0, selectedGenre: [genres[index]])),
                   child: Text(genres[index].name))),
         ),
       ],

@@ -83,6 +83,11 @@ abstract class ApiPlatform extends PlatformInterface {
     return client.put('/file/mkdir', data: {'driverId': driverId, 'parentFileId': parentFileId, 'name': name});
   }
 
+  Future<PlaybackInfo> playbackInfo(dynamic id) async {
+    final data = await client.get<Json>('/playback/info', queryParameters: {'id': id});
+    return PlaybackInfo.fromJson(data!);
+  }
+
   /// File End
 
   /// Player Start
@@ -173,8 +178,32 @@ abstract class ApiPlatform extends PlatformInterface {
   /// Server End
 
   /// Search Start
-  Future<SearchFuzzyResult> searchFuzzy(String filter) async {
-    final data = await client.get<Json>('/search/fuzzy', queryParameters: {'filter': filter});
+  Future<SearchFuzzyResult> searchFuzzy(
+    String type, {
+    String? filter,
+    List<dynamic>? genres,
+    List<dynamic>? studios,
+    List<dynamic>? keywords,
+    List<dynamic>? mediaCast,
+    List<dynamic>? mediaCrew,
+    bool? watched,
+    bool? favorite,
+    required int offset,
+    required int limit,
+  }) async {
+    final data = await client.post<Json>('/search/fuzzy', data: {
+      'type': type,
+      'filter': filter,
+      'genres': genres,
+      'studios': studios,
+      'keywords': keywords,
+      'mediaCast': mediaCast,
+      'mediaCrew': mediaCrew,
+      'watched': watched,
+      'favorite': favorite,
+      'limit': limit,
+      'offset': offset,
+    });
     return SearchFuzzyResult.fromJson(data!);
   }
 
@@ -283,8 +312,13 @@ abstract class ApiPlatform extends PlatformInterface {
     });
   }
 
-  Future<void> movieUpdateById(dynamic id, String title, String language, {String? year, int? index}) {
-    return client.post('/movie/update/id', data: {'id': id, 'title': title, 'year': year, 'language': language, 'index': index});
+  Future<void> movieScraperById(dynamic id, String scraperId, String scraperType, String? language) {
+    return client.post('/movie/scraper/id', data: {'id': id, 'scraperId': scraperId, 'scraperType': scraperType, 'language': language});
+  }
+
+  Future<List<SearchResult>> movieScraperSearch(dynamic id, String title, {String? language, String? year}) async {
+    final data = await client.get<JsonList>('/movie/scraper/search', queryParameters: {'id': id, 'title': title, 'year': year, 'language': language});
+    return data!.map((e) => SearchResult.fromJson(e)).toList();
   }
 
   Future<void> movieRenameById(dynamic id) {
@@ -324,8 +358,13 @@ abstract class ApiPlatform extends PlatformInterface {
     return data!.map((e) => TVEpisode.fromJson(e)).toList();
   }
 
-  Future<void> tvSeriesUpdateById(dynamic id, String title, String language, {String? year, int? index}) {
-    return client.post('/tv/series/update/id', data: {'id': id, 'title': title, 'year': year, 'language': language, 'index': index});
+  Future<void> tvSeriesScraperById(dynamic id, String scraperId, String scraperType, String? language) {
+    return client.post('/tv/series/scraper/id', data: {'id': id, 'scraperId': scraperId, 'scraperType': scraperType, 'language': language});
+  }
+
+  Future<List<SearchResult>> tvSeriesScraperSearch(dynamic id, String title, {String? language, String? year}) async {
+    final data = await client.get<JsonList>('/tv/series/scraper/search', queryParameters: {'id': id, 'title': title, 'year': year, 'language': language});
+    return data!.map((e) => SearchResult.fromJson(e)).toList();
   }
 
   Future<void> tvSeriesSyncById(dynamic id) {
@@ -441,6 +480,16 @@ abstract class ApiPlatform extends PlatformInterface {
   Future<List<Actor>> actorQueryAll() async {
     final data = await client.get<JsonList>('/actor/query/all');
     return data!.map((e) => Actor.fromJson(e)).toList();
+  }
+
+  Future<List<MediaCast>> castQueryAll() async {
+    final data = await client.get<JsonList>('/cast/query/all');
+    return data!.map((e) => MediaCast.fromJson(e)).toList();
+  }
+
+  Future<List<MediaCrew>> crewQueryAll() async {
+    final data = await client.get<JsonList>('/crew/query/all');
+    return data!.map((e) => MediaCrew.fromJson(e)).toList();
   }
 
   Future<void> markWatched(MediaType type, dynamic id, bool watched) {

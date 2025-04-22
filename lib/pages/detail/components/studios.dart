@@ -5,12 +5,13 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../../components/async_image.dart';
 import '../../../components/gap.dart';
 import '../../../utils/utils.dart';
-import '../../media/filter.dart';
+import '../../media/search.dart';
 
 class StudiosSection extends StatelessWidget {
-  const StudiosSection({super.key, required this.studios});
+  const StudiosSection({super.key, required this.studios, required this.type});
 
   final List<Studio> studios;
+  final MediaType type;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +30,7 @@ class StudiosSection extends StatelessWidget {
               separatorBuilder: (BuildContext context, int index) => Gap.hSM,
               itemCount: studios.length,
               itemBuilder: (BuildContext context, int index) => FilledButton.tonal(
-                  onPressed: () => navigateTo(context, FilterPage(queryType: QueryType.studio, id: studios[index].id)),
+                  onPressed: () => navigateTo(context, SearchPage(activeTab: type == MediaType.movie ? 1 : 0, selectedStudio: [studios[index]])),
                   style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 12)),
                   child: studios[index].logo != null
                       ? Padding(

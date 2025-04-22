@@ -115,7 +115,7 @@ class CarouselItem extends StatelessWidget {
                           style: Theme.of(context).textTheme.labelSmall!,
                           overflow: TextOverflow.ellipsis,
                           child: Text.rich(TextSpan(
-                            children: item.genres.map((genre) => TextSpan(text: genre.name, style: Theme.of(context).textTheme.labelSmall)).toList(),
+                            children: item.genres.map((genre) => TextSpan(text: '${genre.name} ', style: Theme.of(context).textTheme.labelSmall)).toList(),
                           ))),
                       DefaultTextStyle(
                         style: Theme.of(context).textTheme.titleMedium!,

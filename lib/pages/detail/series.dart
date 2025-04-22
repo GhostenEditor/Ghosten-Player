@@ -15,7 +15,8 @@ import '../components/image_card.dart';
 import '../components/theme_builder.dart';
 import '../player/player_controls_lite.dart';
 import '../utils/notification.dart';
-import 'components/actors.dart';
+import 'components/cast.dart';
+import 'components/crew.dart';
 import 'components/genres.dart';
 import 'components/keywords.dart';
 import 'components/overview.dart';
@@ -24,6 +25,7 @@ import 'components/player_scaffold.dart';
 import 'components/playlist.dart';
 import 'components/seasons.dart';
 import 'components/studios.dart';
+import 'dialogs/scraper.dart';
 import 'dialogs/series_metadata.dart';
 import 'mixins/action.dart';
 import 'mixins/searchable.dart';
@@ -42,11 +44,17 @@ class TVDetail extends StatefulWidget {
 }
 
 class _TVDetailState extends State<TVDetail> with ActionMixin<TVDetail>, SearchableMixin {
-  final _controller = PlayerController<TVEpisode>(Api.log);
+  late final _controller = PlayerController<TVEpisode>(Api.log, onGetPlayBackInfo: onGetPlayBackInfo);
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _navigatorKey = GlobalKey<NavigatorState>();
   final _modalBottomSheetHistory = <BuildContext>[];
   late final _autoPlay = Provider.of<UserConfig>(context, listen: false).autoPlay;
+
+  Future<PlaylistItem<TVEpisode>> onGetPlayBackInfo(int index) async {
+    final data = await Api.playbackInfo(_controller.currentItem!.source.fileId);
+    return PlaylistItem(
+        url: Uri.parse(data.url).normalize(), source: _controller.currentItem!.source, subtitles: data.subtitles.map((d) => d.toSubtitle()).toList());
+  }
 
   @override
   void dispose() {
@@ -69,10 +77,16 @@ class _TVDetailState extends State<TVDetail> with ActionMixin<TVDetail>, Searcha
                     artwork: BlocSelector<TVSeriesCubit, TVSeries?, (String?, String?)>(
                         selector: (movie) => (movie?.backdrop, movie?.logo), builder: (context, item) => PlayerBackdrop(backdrop: item.$1, logo: item.$2)),
                     initialized: () => _updatePlaylist(context),
-                    onMediaChange: (index, position, duration) {
+                    beforeMediaChanged: (index, position, duration) {
                       final item = _controller.playlist.value[index];
                       Api.updatePlayedStatus(LibraryType.tv, item.source.id, position: position, duration: duration);
                     },
+                    // onMediaIndexChanged: (mediaChange) async {
+                    //   final id = _controller.currentItem?.url.queryParameters['id'];
+                    //   final subtitles = await Api.playbackSubtitle(id);
+                    //   _controller.updateSource(
+                    //       _controller.currentItem!.copyWith(subtitles: subtitles.map((e) => e.toSubtitle()).toList()), _controller.index.value!);
+                    // },
                   ),
                   sidebar: Navigator(
                     key: _navigatorKey,
@@ -106,8 +120,9 @@ class _TVDetailState extends State<TVDetail> with ActionMixin<TVDetail>, Searcha
                                 children: [
                                   BlocSelector<TVSeriesCubit, TVSeries?, String?>(
                                       selector: (movie) => movie?.poster,
-                                      builder: (context, poster) =>
-                                          poster != null ? AsyncImage(poster, width: 100, radius: BorderRadius.circular(4), viewable: true) : const SizedBox()),
+                                      builder: (context, poster) => poster != null
+                                          ? AsyncImage(poster, width: 100, height: 150, radius: BorderRadius.circular(4), viewable: true)
+                                          : const SizedBox()),
                                   BlocSelector<TVSeriesCubit, TVSeries?, String?>(
                                     selector: (movie) => movie?.overview,
                                     builder: (context, overview) => Expanded(child: OverviewSection(text: overview, trimLines: 7)),
@@ -129,14 +144,16 @@ class _TVDetailState extends State<TVDetail> with ActionMixin<TVDetail>, Searcha
                                       )),
                             BlocSelector<TVSeriesCubit, TVSeries?, List<Studio>?>(
                                 selector: (movie) => movie?.studios ?? [],
-                                builder: (context, studios) => (studios != null && studios.isNotEmpty) ? StudiosSection(studios: studios) : const SizedBox()),
+                                builder: (context, studios) =>
+                                    (studios != null && studios.isNotEmpty) ? StudiosSection(type: MediaType.series, studios: studios) : const SizedBox()),
                             BlocSelector<TVSeriesCubit, TVSeries?, List<Genre>?>(
                                 selector: (movie) => movie?.genres ?? [],
-                                builder: (context, genres) => (genres != null && genres.isNotEmpty) ? GenresSection(genres: genres) : const SizedBox()),
+                                builder: (context, genres) =>
+                                    (genres != null && genres.isNotEmpty) ? GenresSection(type: MediaType.series, genres: genres) : const SizedBox()),
                             BlocSelector<TVSeriesCubit, TVSeries?, List<Keyword>?>(
                                 selector: (movie) => movie?.keywords ?? [],
                                 builder: (context, keywords) =>
-                                    (keywords != null && keywords.isNotEmpty) ? KeywordsSection(keywords: keywords) : const SizedBox()),
+                                    (keywords != null && keywords.isNotEmpty) ? KeywordsSection(type: MediaType.series, keywords: keywords) : const SizedBox()),
                             BlocBuilder<TVSeriesCubit, TVSeries?>(builder: (context, item) {
                               return (item != null && item.seasons.isNotEmpty)
                                   ? SeasonsSection(
@@ -156,9 +173,14 @@ class _TVDetailState extends State<TVDetail> with ActionMixin<TVDetail>, Searcha
                                     )
                                   : const SizedBox();
                             }),
-                            BlocSelector<TVSeriesCubit, TVSeries?, List<Actor>?>(
-                                selector: (tvSeries) => tvSeries?.actors ?? [],
-                                builder: (context, actors) => (actors != null && actors.isNotEmpty) ? ActorsSection(actors: actors) : const SizedBox()),
+                            BlocSelector<TVSeriesCubit, TVSeries?, List<MediaCast>?>(
+                                selector: (tvSeries) => tvSeries?.mediaCast ?? [],
+                                builder: (context, cast) =>
+                                    (cast != null && cast.isNotEmpty) ? CastSection(type: MediaType.series, cast: cast) : const SizedBox()),
+                            BlocSelector<TVSeriesCubit, TVSeries?, List<MediaCrew>?>(
+                                selector: (tvSeries) => tvSeries?.mediaCrew ?? [],
+                                builder: (context, crew) =>
+                                    (crew != null && crew.isNotEmpty) ? CrewSection(type: MediaType.series, crew: crew) : const SizedBox()),
                           ]),
                         ),
                       ],
@@ -189,7 +211,7 @@ class _TVDetailState extends State<TVDetail> with ActionMixin<TVDetail>, Searcha
                       child: Text.rich(
                         TextSpan(
                           children: [
-                            TextSpan(text: item.airDate?.format() ?? AppLocalizations.of(context)!.tagUnknown),
+                            TextSpan(text: item.firstAirDate?.format() ?? AppLocalizations.of(context)!.tagUnknown),
                             const WidgetSpan(child: SizedBox(width: 20)),
                             const WidgetSpan(child: Icon(Icons.star, color: Colors.orangeAccent, size: 14)),
                             TextSpan(text: item.voteAverage?.toStringAsFixed(1) ?? AppLocalizations.of(context)!.tagUnknown),
@@ -249,7 +271,7 @@ class _TVDetailState extends State<TVDetail> with ActionMixin<TVDetail>, Searcha
                       ),
                     ),
                     const PopupMenuDivider(),
-                    buildRefreshInfoAction<TVSeriesCubit, TVSeries>(context, () => _refreshTVSeries(context, item)),
+                    buildScraperAction<TVSeriesCubit, TVSeries>(context, () => _scraperSeries(context, item)),
                     const PopupMenuDivider(),
                     buildSkipFromStartAction<TVSeriesCubit, TVSeries>(context, item, MediaType.series, item.skipIntro),
                     buildSkipFromEndAction<TVSeriesCubit, TVSeries>(context, item, MediaType.series, item.skipEnding),
@@ -273,21 +295,15 @@ class _TVDetailState extends State<TVDetail> with ActionMixin<TVDetail>, Searcha
     ];
   }
 
-  Future<bool> _refreshTVSeries(BuildContext context, TVSeries item) async {
-    final done = await search(
-      context,
-      ({required String title, int? year, int? index}) => Api.tvSeriesUpdateById(
-        item.id,
-        title,
-        Localizations.localeOf(context).languageCode,
-        year: year.toString(),
-        index: index,
-      ),
-      title: item.title ?? item.originalTitle ?? item.filename,
-      year: item.airDate?.year,
-    );
-    if (done && context.mounted) await _updatePlaylist(context);
-    return done;
+  Future<bool> _scraperSeries(BuildContext context, TVSeries item) async {
+    final data = await showDialog<(String, String, String?)>(context: context, builder: (context) => ScraperDialog(item: item));
+    if (data != null && context.mounted) {
+      final resp = await showNotification(context, Api.tvSeriesScraperById(item.id, data.$1, data.$2, data.$3));
+      if (resp?.error == null) {
+        return true;
+      }
+    }
+    return false;
   }
 
   Future<T?> _showModalBottomSheet<T>({

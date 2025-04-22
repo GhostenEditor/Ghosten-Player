@@ -4,18 +4,22 @@ typedef Json = Map<String, dynamic>;
 typedef JsonList = List<dynamic>;
 
 class SortConfig {
-  final FilterType filter;
+  final FilterType? filter;
   final SortType type;
   final SortDirection direction;
 
-  const SortConfig({required this.filter, required this.type, required this.direction});
+  const SortConfig({this.filter, required this.type, required this.direction});
 
   SortConfig.fromJson(dynamic json)
       : type = SortType.fromString(json?['type']),
         direction = SortDirection.fromString(json?['direction']),
         filter = FilterType.fromString(json?['filter']);
 
-  Json toMap() => {'type': type.name, 'direction': direction.name, 'filter': filter.name};
+  Json toMap() => {
+        'type': type.name,
+        'direction': direction.name,
+        if (filter?.name != null) 'filter': filter?.name,
+      };
 
   SortConfig copyWith({
     SortType? type,
@@ -75,21 +79,25 @@ class MediaBase extends Equatable {
 class Media extends MediaBase {
   final String? originalTitle;
   final DateTime? lastPlayedTime;
-  final String filename;
   final List<Actor> actors;
+  final List<MediaCast> mediaCast;
+  final List<MediaCrew> mediaCrew;
+  final double? voteAverage;
 
   Media.fromJson(super.json)
       : originalTitle = json['originalTitle'],
         lastPlayedTime = (json['lastPlayedTime'] as String?)?.toDateTime(),
-        actors = (json['actors'] as JsonList).toActors(),
-        filename = json['filename'],
+        voteAverage = json['voteAverage'],
+        actors = (json['actors'] as JsonList?)?.toActors() ?? [],
+        mediaCast = (json['mediaCast'] as JsonList?)?.toCast() ?? [],
+        mediaCrew = (json['mediaCrew'] as JsonList?)?.toCrew() ?? [],
         super.fromJson();
 
   String displayTitle() {
     if (title != null && originalTitle != null) {
       return title == originalTitle ? title! : '$title ($originalTitle)';
     } else {
-      return title ?? originalTitle ?? filename;
+      return title ?? originalTitle ?? '';
     }
   }
 
@@ -102,7 +110,6 @@ class MediaRecommendation {
   final dynamic id;
   final String? title;
   final String? originalTitle;
-  final String filename;
   final DateTime? airDate;
   final String? poster;
   final String? logo;
@@ -118,7 +125,6 @@ class MediaRecommendation {
       : id = json['id'],
         title = json['title'],
         originalTitle = json['originalTitle'],
-        filename = json['filename'],
         airDate = (json['airDate'] as String?)?.toDateTime(),
         poster = json['poster'],
         themeColor = json['themeColor'],
@@ -134,13 +140,12 @@ class MediaRecommendation {
     if (title != null && originalTitle != null) {
       return title == originalTitle ? title! : '$title ($originalTitle)';
     } else {
-      return title ?? originalTitle ?? filename;
+      return title ?? originalTitle ?? '';
     }
   }
 }
 
 class Movie extends Media {
-  final double? voteAverage;
   final int voteCount;
   final String? country;
   final String? trailer;
@@ -150,16 +155,14 @@ class Movie extends Media {
   final List<Keyword> keywords;
   final Duration? lastPlayedPosition;
   final bool downloaded;
-  final String ext;
   final Uri? url;
-  final int? fileSize;
   final List<SubtitleData> subtitles;
+  final DateTime? releaseDate;
   final Duration? duration;
   final Scrapper scrapper;
 
   Movie.fromJson(super.json)
-      : voteAverage = json['voteAverage'],
-        voteCount = json['voteCount'],
+      : voteCount = json['voteCount'],
         country = json['country'],
         trailer = json['trailer'],
         status = MediaStatus.fromString(json['status']),
@@ -168,17 +171,15 @@ class Movie extends Media {
         genres = (json['genres'] as JsonList).toGenres(),
         studios = (json['studios'] as JsonList).toStudios(),
         downloaded = json['downloaded'] ?? false,
-        ext = json['ext'],
         url = json['url'] != null ? Uri.parse(json['url']) : null,
-        fileSize = json['fileSize'],
         duration = (json['duration'] as int?)?.toDuration(),
+        releaseDate = (json['releaseDate'] as String?)?.toDateTime(),
         subtitles = (json['subtitles'] as JsonList).toSubtitles(),
         scrapper = Scrapper.fromJson(json['scrapper']),
         super.fromJson();
 }
 
 class TVSeries extends Media {
-  final double? voteAverage;
   final int? voteCount;
   final String? country;
   final String? trailer;
@@ -190,11 +191,12 @@ class TVSeries extends Media {
   final List<Keyword> keywords;
   final List<TVSeason> seasons;
   final TVEpisode? nextToPlay;
+  final DateTime? firstAirDate;
+  final DateTime? lastAirDate;
   final Scrapper scrapper;
 
   TVSeries.fromJson(super.json)
-      : voteAverage = json['voteAverage'],
-        voteCount = json['voteCount'],
+      : voteCount = json['voteCount'],
         country = json['country'],
         trailer = json['trailer'],
         status = MediaStatus.fromString(json['status']),
@@ -204,12 +206,14 @@ class TVSeries extends Media {
         genres = (json['genres'] as JsonList).toGenres(),
         studios = (json['studios'] as JsonList).toStudios(),
         seasons = (json['seasons'] as JsonList).toSeasons(),
+        firstAirDate = (json['firstAirDate'] as String?)?.toDateTime(),
+        lastAirDate = (json['lastAirDate'] as String?)?.toDateTime(),
         nextToPlay = json['nextToPlay'] == null ? null : TVEpisode.fromJson(json['nextToPlay']),
         scrapper = Scrapper.fromJson(json['scrapper']),
         super.fromJson();
 }
 
-class TVSeason extends MediaBase {
+class TVSeason extends Media {
   final int season;
   final String? seriesTitle;
   final Duration skipIntro;
@@ -238,9 +242,11 @@ class TVEpisode extends Media {
   final Duration skipEnding;
   final Duration? lastPlayedPosition;
   final bool downloaded;
-  final String ext;
-  final Uri? url;
-  final int? fileSize;
+  final List<MediaCast> guestStars;
+  final dynamic fileId;
+
+  // final Uri? url;
+  // final int? fileSize;
   final Duration? duration;
   final List<SubtitleData> subtitles;
 
@@ -251,14 +257,16 @@ class TVEpisode extends Media {
         seasonTitle = json['seasonTitle'],
         seriesId = json['seriesId'],
         seriesTitle = json['seriesTitle'],
+        fileId = json['fileId'],
         skipIntro = (json['skipIntro'] as int?).toDuration(),
         skipEnding = (json['skipEnding'] as int?).toDuration(),
         duration = (json['duration'] as int?)?.toDuration(),
         lastPlayedPosition = (json['lastPlayedPosition'] as int?).toDuration(),
         downloaded = json['downloaded'] ?? false,
-        ext = json['ext'],
-        url = json['url'] != null ? Uri.parse(json['url']) : null,
-        fileSize = json['fileSize'],
+        guestStars = (json['guestStars'] as JsonList?)?.toCast() ?? [],
+        // ext = json['ext'],
+        // url = json['url'] != null ? Uri.parse(json['url']) : null,
+        // fileSize = json['fileSize'],
         subtitles = (json['subtitles'] as JsonList).toSubtitles(),
         super.fromJson();
 
@@ -274,6 +282,62 @@ class Scrapper {
       : id = json['id'],
         type = json['type'],
         super();
+}
+
+class MediaCast {
+  final dynamic id;
+  final String name;
+  final String? originalName;
+  final String? knownForDepartment;
+  final bool? adult;
+  final int? gender;
+  final String? role;
+  final String? profile;
+  final double? popularity;
+  final int? episodeCount;
+  final Scrapper scrapper;
+
+  MediaCast.fromJson(Json json)
+      : id = json['id'],
+        name = json['name'],
+        originalName = json['originalName'],
+        knownForDepartment = json['knownForDepartment'],
+        gender = json['gender'],
+        profile = json['profile'],
+        role = json['role'],
+        episodeCount = json['episodeCount'],
+        popularity = json['popularity'],
+        adult = json['adult'],
+        scrapper = Scrapper.fromJson(json['scrapper']);
+}
+
+class MediaCrew {
+  final dynamic id;
+  final String name;
+  final String originalName;
+  final String? knownForDepartment;
+  final String? department;
+  final bool? adult;
+  final int? gender;
+  final String? job;
+  final String? profile;
+  final double? popularity;
+  final int? episodeCount;
+  final Scrapper scrapper;
+
+  MediaCrew.fromJson(Json json)
+      : id = json['id'],
+        name = json['name'],
+        originalName = json['originalName'],
+        knownForDepartment = json['knownForDepartment'],
+        department = json['department'],
+        gender = json['gender'],
+        profile = json['profile'],
+        job = json['job'],
+        episodeCount = json['episodeCount'],
+        popularity = json['popularity'],
+        adult = json['adult'],
+        scrapper = Scrapper.fromJson(json['scrapper']);
 }
 
 class Actor {
@@ -298,7 +362,7 @@ class Actor {
         super();
 }
 
-class Genre {
+class Genre extends Equatable {
   final String name;
   final dynamic id;
   final Scrapper scrapper;
@@ -308,9 +372,12 @@ class Genre {
         name = json['name'],
         scrapper = Scrapper.fromJson(json['scrapper']),
         super();
+
+  @override
+  List<Object?> get props => [id];
 }
 
-class Keyword {
+class Keyword extends Equatable {
   final String name;
   final dynamic id;
   final Scrapper scrapper;
@@ -320,9 +387,12 @@ class Keyword {
         name = json['name'],
         scrapper = Scrapper.fromJson(json['scrapper']),
         super();
+
+  @override
+  List<Object?> get props => [id];
 }
 
-class Studio {
+class Studio extends Equatable {
   final dynamic id;
   final String name;
   final String? country;
@@ -336,6 +406,9 @@ class Studio {
         country = json['country'],
         scrapper = Scrapper.fromJson(json['scrapper']),
         super();
+
+  @override
+  List<Object?> get props => [id];
 }
 
 class SubtitleData {
@@ -458,8 +531,9 @@ class ChannelEpgItem {
 }
 
 class SearchResult {
-  final int id;
+  final String id;
   final String title;
+  final String type;
   final String? originalTitle;
   final String? overview;
   final String? poster;
@@ -469,22 +543,25 @@ class SearchResult {
       : id = json['id'],
         title = json['title'],
         originalTitle = json['originalTitle'],
+        type = json['type'],
         overview = json['overview'],
         poster = json['poster'],
         airDate = (json['airDate'] as String?)?.toDateTime();
 }
 
 class SearchFuzzyResult {
-  final List<Movie> movies;
-  final List<TVSeries> series;
-  final List<TVEpisode> episodes;
-  final List<Actor> actors;
+  final PageData<Movie> movies;
+  final PageData<TVSeries> series;
+  final PageData<TVEpisode> episodes;
+  final PageData<MediaCast> mediaCast;
+  final PageData<MediaCrew> mediaCrew;
 
   SearchFuzzyResult.fromJson(Json json)
-      : movies = (json['movies'] as JsonList).map((e) => Movie.fromJson(e)).toList(),
-        series = (json['series'] as JsonList).map((e) => TVSeries.fromJson(e)).toList(),
-        episodes = (json['episodes'] as JsonList).map((e) => TVEpisode.fromJson(e)).toList(),
-        actors = (json['actors'] as JsonList).map((e) => Actor.fromJson(e)).toList();
+      : movies = PageData.fromJson(json['movies'], (json['movies']['data'] as JsonList).map((e) => Movie.fromJson(e))),
+        series = PageData.fromJson(json['series'], (json['series']['data'] as JsonList).map((e) => TVSeries.fromJson(e))),
+        episodes = PageData.fromJson(json['episodes'], (json['episodes']['data'] as JsonList).map((e) => TVEpisode.fromJson(e))),
+        mediaCast = PageData.fromJson(json['mediaCast'], (json['mediaCast']['data'] as JsonList).map((e) => MediaCast.fromJson(e))),
+        mediaCrew = PageData.fromJson(json['mediaCrew'], (json['mediaCrew']['data'] as JsonList).map((e) => MediaCrew.fromJson(e)));
 }
 
 class Session<T> {
@@ -556,6 +633,17 @@ class PlayerHistory {
         duration = (json['duration'] as int?).toDuration(),
         lastPlayedTime = ((json['lastPlayedTime'] as String?)?.toDateTime())!,
         lastPlayedPosition = (json['lastPlayedPosition'] as int?).toDuration();
+}
+
+class PlaybackInfo {
+  final String url;
+  final String? container;
+  final List<SubtitleData> subtitles;
+
+  PlaybackInfo.fromJson(Json json)
+      : url = json['url'],
+        container = json['container'],
+        subtitles = (json['subtitles'] as JsonList).toSubtitles();
 }
 
 class DownloadTask {
@@ -873,14 +961,13 @@ enum SortDirection {
 }
 
 enum FilterType {
-  all,
   favorite,
   exceptFavorite,
   watched,
   unwatched;
 
   static FilterType fromString(String? str) {
-    return FilterType.values.firstWhere((element) => element.name == str, orElse: () => FilterType.all);
+    return FilterType.values.firstWhere((element) => element.name == str);
   }
 }
 
@@ -925,6 +1012,10 @@ DateTime? epgTimeToDateTime(String? s) {
 
 extension on JsonList {
   List<Actor> toActors() => List.generate(length, (index) => Actor.fromJson(this[index]));
+
+  List<MediaCast> toCast() => List.generate(length, (index) => MediaCast.fromJson(this[index]));
+
+  List<MediaCrew> toCrew() => List.generate(length, (index) => MediaCrew.fromJson(this[index]));
 
   List<Genre> toGenres() => List.generate(length, (index) => Genre.fromJson(this[index]));
 

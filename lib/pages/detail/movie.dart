@@ -19,11 +19,13 @@ import '../components/image_card.dart';
 import '../components/theme_builder.dart';
 import '../player/player_controls_lite.dart';
 import '../utils/notification.dart';
-import 'components/actors.dart';
+import 'components/cast.dart';
+import 'components/crew.dart';
 import 'components/overview.dart';
 import 'components/player_backdrop.dart';
 import 'components/player_scaffold.dart';
 import 'components/playlist.dart';
+import 'dialogs/scraper.dart';
 import 'dialogs/subtitle.dart';
 import 'mixins/action.dart';
 import 'mixins/searchable.dart';
@@ -70,7 +72,7 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
                     _controller.setSources([FromMedia.fromMovie(item)], 0);
                     if (_autoPlay) _controller.play();
                   },
-                  onMediaChange: (index, position, duration) {
+                  beforeMediaChanged: (index, position, duration) {
                     final item = _controller.playlist.value[index];
                     Api.updatePlayedStatus(LibraryType.movie, item.source.id, position: position, duration: duration);
                   },
@@ -128,17 +130,24 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
                                     )),
                           BlocSelector<MovieCubit, Movie?, List<Studio>?>(
                               selector: (movie) => movie?.studios ?? [],
-                              builder: (context, studios) => (studios != null && studios.isNotEmpty) ? StudiosSection(studios: studios) : const SizedBox()),
+                              builder: (context, studios) =>
+                                  (studios != null && studios.isNotEmpty) ? StudiosSection(type: MediaType.movie, studios: studios) : const SizedBox()),
                           BlocSelector<MovieCubit, Movie?, List<Genre>?>(
                               selector: (movie) => movie?.genres ?? [],
-                              builder: (context, genres) => (genres != null && genres.isNotEmpty) ? GenresSection(genres: genres) : const SizedBox()),
+                              builder: (context, genres) =>
+                                  (genres != null && genres.isNotEmpty) ? GenresSection(type: MediaType.movie, genres: genres) : const SizedBox()),
                           BlocSelector<MovieCubit, Movie?, List<Keyword>?>(
                               selector: (movie) => movie?.keywords ?? [],
                               builder: (context, keywords) =>
-                                  (keywords != null && keywords.isNotEmpty) ? KeywordsSection(keywords: keywords) : const SizedBox()),
-                          BlocSelector<MovieCubit, Movie?, List<Actor>?>(
-                              selector: (movie) => movie?.actors ?? [],
-                              builder: (context, actors) => (actors != null && actors.isNotEmpty) ? ActorsSection(actors: actors) : const SizedBox()),
+                                  (keywords != null && keywords.isNotEmpty) ? KeywordsSection(type: MediaType.movie, keywords: keywords) : const SizedBox()),
+                          BlocSelector<MovieCubit, Movie?, List<MediaCast>?>(
+                              selector: (tvSeries) => tvSeries?.mediaCast ?? [],
+                              builder: (context, cast) =>
+                                  (cast != null && cast.isNotEmpty) ? CastSection(type: MediaType.movie, cast: cast) : const SizedBox()),
+                          BlocSelector<MovieCubit, Movie?, List<MediaCrew>?>(
+                              selector: (tvSeries) => tvSeries?.mediaCrew ?? [],
+                              builder: (context, crew) =>
+                                  (crew != null && crew.isNotEmpty) ? CrewSection(type: MediaType.movie, crew: crew) : const SizedBox()),
                         ]),
                       ),
                     ],
@@ -208,7 +217,7 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
                         ),
                       ),
                       const PopupMenuDivider(),
-                      buildRefreshInfoAction<MovieCubit, Movie>(context, () => _refreshMovie(context)),
+                      buildScraperAction<MovieCubit, Movie>(context, () => _refreshMovie(context, item)),
                       const PopupMenuDivider(),
                       buildEditMetadataAction(context, () async {
                         final item = context.read<MovieCubit>().state!;
@@ -263,25 +272,17 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
     ];
   }
 
-  Future<bool> _refreshMovie(BuildContext context) async {
-    final item = context.read<MovieCubit>().state!;
-    final done = await search(
-      context,
-      ({required String title, int? year, int? index}) => Api.movieUpdateById(
-        item.id,
-        title,
-        Localizations.localeOf(context).languageCode,
-        year: year.toString(),
-        index: index,
-      ),
-      title: item.title ?? item.originalTitle ?? item.filename,
-      year: item.airDate?.year,
-    );
-    if (done) {
-      final movie = await Api.movieQueryById(item.id);
-      _controller.setSources([FromMedia.fromMovie(movie)], 0);
+  Future<bool> _refreshMovie(BuildContext context, Movie item) async {
+    final data = await showDialog<(String, String, String?)>(context: context, builder: (context) => ScraperDialog(item: item));
+    if (data != null && context.mounted) {
+      final resp = await showNotification(context, Api.movieScraperById(item.id, data.$1, data.$2, data.$3));
+      if (resp?.error == null) {
+        final movie = await Api.movieQueryById(item.id);
+        _controller.setSources([FromMedia.fromMovie(movie)], 0);
+        return true;
+      }
     }
-    return done;
+    return false;
   }
 }
 

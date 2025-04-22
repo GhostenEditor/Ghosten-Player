@@ -12,7 +12,6 @@ import '../components/setting.dart';
 import '../utils/notification.dart';
 import '../utils/player.dart';
 import '../utils/utils.dart';
-import 'components/actors.dart';
 import 'components/overview.dart';
 import 'components/scaffold.dart';
 import 'dialogs/movie_metadata.dart';
@@ -162,9 +161,9 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin, SearchableM
                           const WidgetSpan(child: SizedBox(width: 20)),
                           TextSpan(text: AppLocalizations.of(context)!.seriesStatus(item.status.name)),
                           const WidgetSpan(child: Gap.hSM),
-                          if (item.fileSize != null) TextSpan(text: item.fileSize!.toSizeDisplay(), style: Theme.of(context).textTheme.labelSmall),
-                          if (item.fileSize != null) const WidgetSpan(child: Gap.hSM),
-                          TextSpan(text: '${item.filename}.${item.ext}', style: Theme.of(context).textTheme.labelSmall),
+                          // if (item.fileSize != null) TextSpan(text: item.fileSize!.toSizeDisplay(), style: Theme.of(context).textTheme.labelSmall),
+                          // if (item.fileSize != null) const WidgetSpan(child: Gap.hSM),
+                          // TextSpan(text: '.${item.ext}', style: Theme.of(context).textTheme.labelSmall),
                           if (item.duration != null) const WidgetSpan(child: Gap.hSM),
                           if (item.duration != null) const WidgetSpan(child: Icon(Icons.access_time_rounded, size: 14)),
                           if (item.duration != null) const WidgetSpan(child: SizedBox(width: 4)),
@@ -193,15 +192,15 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin, SearchableM
                     title: Text(AppLocalizations.of(context)!.titleCast),
                     onTap: () {
                       _showSide.value = true;
-                      navigateToSlideLeft(
-                          _navigatorKey.currentContext!,
-                          Align(
-                            alignment: Alignment.topRight,
-                            child: FractionallySizedBox(
-                              widthFactor: 0.5,
-                              child: ActorSection(actors: item.actors),
-                            ),
-                          ));
+                      // navigateToSlideLeft(
+                      //     _navigatorKey.currentContext!,
+                      //     Align(
+                      //       alignment: Alignment.topRight,
+                      //       child: FractionallySizedBox(
+                      //         widthFactor: 0.5,
+                      //         child: ActorSection(actors: item.actors),
+                      //       ),
+                      //     ));
                     },
                   ),
                   const Spacer(),
@@ -282,17 +281,18 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin, SearchableM
   }
 
   Future<bool> _refreshMovie(BuildContext context, Movie item) async {
-    return search(
-      context,
-      ({required String title, int? year, int? index}) => Api.movieUpdateById(
-        item.id,
-        title,
-        Localizations.localeOf(context).languageCode,
-        year: year.toString(),
-        index: index,
-      ),
-      title: item.title ?? item.originalTitle ?? item.filename,
-      year: item.airDate?.year,
-    );
+    // return search(
+    //   context,
+    //   ({required String title, int? year, int? index}) => Api.movieScraperById(
+    //     item.id,
+    //     title,
+    //     Localizations.localeOf(context).languageCode,
+    //     year: year.toString(),
+    //     index: index,
+    //   ),
+    //   title: item.title ?? item.originalTitle ?? '',
+    //   year: item.airDate?.year,
+    // );
+    return true;
   }
 }

@@ -104,8 +104,7 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
                               title: Text('${AppLocalizations.of(context)!.playerBroadcastLine} ${index + 1}'),
                               onChanged: (_) {
                                 final currentItem = _controller.currentItem!;
-                                final item = PlaylistItem(
-                                    url: url, sourceType: PlaylistItemSourceType.fromBroadcastUri(url), source: currentItem.source, poster: currentItem.poster);
+                                final item = PlaylistItem(url: url, source: currentItem.source, poster: currentItem.poster);
                                 _controller.playlist.value[_controller.index.value!] = item;
                                 _controller.updateSource(item, _controller.index.value!);
                                 setState(() {});

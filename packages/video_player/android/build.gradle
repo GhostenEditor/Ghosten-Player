@@ -65,7 +65,7 @@ android {
     }
 }
 
-def media3_version = "1.5.1"
+def media3_version = "1.6.1"
 dependencies {
     implementation "androidx.media3:media3-ui:${media3_version}"
     implementation "androidx.media3:media3-datasource:${media3_version}"

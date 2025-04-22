@@ -18,13 +18,22 @@ import 'player_appbar.dart';
 import 'player_controls_gesture.dart';
 
 class PlayerControlsLite<T> extends StatefulWidget {
-  const PlayerControlsLite(this.controller, {super.key, this.theme, this.artwork, this.onMediaChange, this.initialized});
+  const PlayerControlsLite(
+    this.controller, {
+    super.key,
+    this.theme,
+    this.artwork,
+    this.beforeMediaChanged,
+    this.initialized,
+    this.onMediaIndexChanged,
+  });
 
   final PlayerController<T> controller;
   final VoidCallback? initialized;
   final int? theme;
   final Widget? artwork;
-  final void Function(int, Duration, Duration)? onMediaChange;
+  final void Function(int)? onMediaIndexChanged;
+  final void Function(int, Duration, Duration)? beforeMediaChanged;
 
   @override
   State<PlayerControlsLite<T>> createState() => _PlayerControlsLiteState<T>();
@@ -53,10 +62,15 @@ class _PlayerControlsLiteState<T> extends State<PlayerControlsLite<T>> {
       _isShowControls.value = show;
     });
     _controlsStream.add(ControlsStreamStatus.show);
-    if (widget.onMediaChange != null) {
-      _controller.mediaChange.addListener(() {
-        final data = _controller.mediaChange.value!;
-        widget.onMediaChange!(data.$1.index, data.$1.position, data.$2);
+    if (widget.beforeMediaChanged != null) {
+      _controller.beforeMediaChanged.addListener(() {
+        final data = _controller.beforeMediaChanged.value!;
+        widget.beforeMediaChanged!(data.$1.index, data.$1.position, data.$2);
+      });
+    }
+    if (widget.onMediaIndexChanged != null) {
+      _controller.index.addListener(() {
+        widget.onMediaIndexChanged!(_controller.index.value!);
       });
     }
     _controller.status.addListener(() {
@@ -121,8 +135,8 @@ class _PlayerControlsLiteState<T> extends State<PlayerControlsLite<T>> {
         if (didPop) {
           return;
         }
-        if (widget.onMediaChange != null && _controller.duration.value > Duration.zero) {
-          widget.onMediaChange!(_controller.index.value!, _controller.position.value, _controller.duration.value);
+        if (widget.beforeMediaChanged != null && _controller.duration.value > Duration.zero) {
+          widget.beforeMediaChanged!(_controller.index.value!, _controller.position.value, _controller.duration.value);
         }
 
         if (context.mounted && Navigator.of(context).canPop()) Navigator.pop(context);

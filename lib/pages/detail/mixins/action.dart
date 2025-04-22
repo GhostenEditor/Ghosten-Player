@@ -50,12 +50,12 @@ mixin ActionMixin<S extends StatefulWidget> on State<S> {
     );
   }
 
-  PopupMenuEntry<Never> buildRefreshInfoAction<B extends MediaCubit<T>, T extends MediaBase>(BuildContext context, Future<bool> Function() future) {
+  PopupMenuEntry<Never> buildScraperAction<B extends MediaCubit<T>, T extends MediaBase>(BuildContext context, Future<bool?> Function() future) {
     return PopupMenuItem(
       padding: EdgeInsets.zero,
       onTap: () async {
-        final resp = await showNotification(context, future());
-        if (context.mounted && (resp?.data ?? false)) {
+        final flag = await future();
+        if (context.mounted && (flag ?? false)) {
           final state = context.read<B>();
           state.update();
         }

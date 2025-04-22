@@ -203,8 +203,7 @@ class _TVListPageState extends State<TVListPage> with NeedUpdateMixin, ChannelMi
             buildChannel(
               context,
               label: AppLocalizations.of(context)!.tagNewAdd,
-              future: Api.tvSeriesQueryAll(
-                  const MediaSearchQuery(sort: SortConfig(type: SortType.createAt, direction: SortDirection.desc, filter: FilterType.all), limit: 8)),
+              future: Api.tvSeriesQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.createAt, direction: SortDirection.desc), limit: 8)),
               height: 340,
               builder: (context, item) => MediaGridItem(
                   imageWidth: 160,
@@ -217,8 +216,7 @@ class _TVListPageState extends State<TVListPage> with NeedUpdateMixin, ChannelMi
             buildChannel(
               context,
               label: AppLocalizations.of(context)!.tagNewRelease,
-              future: Api.tvSeriesQueryAll(
-                  const MediaSearchQuery(sort: SortConfig(type: SortType.airDate, direction: SortDirection.desc, filter: FilterType.all), limit: 8)),
+              future: Api.tvSeriesQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.airDate, direction: SortDirection.desc), limit: 8)),
               height: 340,
               builder: (context, item) => MediaGridItem(
                   imageWidth: 160,
@@ -231,8 +229,7 @@ class _TVListPageState extends State<TVListPage> with NeedUpdateMixin, ChannelMi
             buildGridChannel(
               context,
               label: AppLocalizations.of(context)!.tagAll,
-              future:
-                  Api.tvSeriesQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.title, direction: SortDirection.asc, filter: FilterType.all))),
+              future: Api.tvSeriesQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.title, direction: SortDirection.asc))),
               builder: (context, item) => MediaGridItem(
                 imageWidth: 160,
                 imageHeight: 160 / 0.67,

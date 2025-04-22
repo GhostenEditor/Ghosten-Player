@@ -3,6 +3,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:video_player/player.dart';
 
 import '../../../components/playing_icon.dart';
+import '../../../utils/utils.dart';
 import '../../components/image_card.dart';
 
 class PlaylistSection extends StatefulWidget {
@@ -72,16 +73,43 @@ class _PlaylistSectionState extends State<PlaylistSection> {
                 title: Text(item.title!),
                 subtitle: item.description != null ? Text(item.description!) : null,
                 floating: widget.activeIndex == index
-                    ? Container(
+                    ? Material(
+                        shape: RoundedRectangleBorder(
+                          side: widget.activeIndex == index
+                              ? BorderSide(width: 6, color: Theme.of(context).colorScheme.primary, strokeAlign: BorderSide.strokeAlignCenter)
+                              : BorderSide.none,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
                         color: Theme.of(context).scaffoldBackgroundColor.withAlpha(0x66),
-                        width: widget.imageWidth,
-                        height: widget.imageHeight,
-                        child: Align(
-                          alignment: Alignment.topRight,
-                          child: PlayingIcon(color: Theme.of(context).colorScheme.primary),
+                        child: SizedBox(
+                          width: widget.imageWidth,
+                          height: widget.imageHeight,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              PlayingIcon(color: Theme.of(context).colorScheme.primary),
+                              if (item.duration != null)
+                                Padding(
+                                  padding: const EdgeInsets.all(4),
+                                  child: Badge(label: Text(item.duration!.toDisplay()), backgroundColor: Theme.of(context).colorScheme.primary),
+                                ),
+                            ],
+                          ),
                         ),
                       )
-                    : null,
+                    : item.duration != null
+                        ? SizedBox(
+                            width: widget.imageWidth,
+                            height: widget.imageHeight,
+                            child: Align(
+                                alignment: Alignment.bottomRight,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4),
+                                  child: Badge(label: Text(item.duration!.toDisplay()), backgroundColor: Theme.of(context).colorScheme.primary),
+                                )),
+                          )
+                        : null,
                 onTap: widget.onTap == null ? null : () => widget.onTap!(index),
               );
             },

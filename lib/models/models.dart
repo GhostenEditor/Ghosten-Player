@@ -13,33 +13,33 @@ extension FromMedia<T> on PlaylistItem<T> {
     }
 
     return PlaylistItem(
-      sourceType: PlaylistItemSourceType.fromUri(episode.url!),
       title: episode.displayTitle(),
       description: '${episode.seriesTitle} S${episode.season} E${episode.episode}${episode.airDate == null ? '' : ' - ${episode.airDate?.format()}'}',
-      url: episode.url!.normalize(),
+      url: Uri(),
       poster: episode.poster,
       subtitles: episode.subtitles.map((e) => e.toSubtitle()).toList(),
       start: start,
       end: episode.skipEnding,
+      duration: episode.duration,
       source: episode,
     );
   }
 
   static PlaylistItem<Movie> fromMovie(Movie movie) {
     return PlaylistItem(
-        sourceType: PlaylistItemSourceType.fromUri(movie.url!),
-        title: movie.displayTitle(),
-        description: movie.airDate?.format(),
-        url: movie.url!.normalize(),
-        poster: movie.poster,
-        subtitles: movie.subtitles.map((e) => e.toSubtitle()).toList(),
-        start: movie.lastPlayedPosition ?? Duration.zero,
-        source: movie);
+      title: movie.displayTitle(),
+      description: movie.airDate?.format(),
+      url: movie.url!.normalize(),
+      poster: movie.poster,
+      subtitles: movie.subtitles.map((e) => e.toSubtitle()).toList(),
+      start: movie.lastPlayedPosition ?? Duration.zero,
+      duration: movie.duration,
+      source: movie,
+    );
   }
 
   static PlaylistItem<Channel> fromChannel(Channel channel) {
     return PlaylistItem(
-      sourceType: PlaylistItemSourceType.fromBroadcastUri(channel.links.first),
       title: channel.title,
       description: channel.category,
       url: channel.links.first,
@@ -49,7 +49,7 @@ extension FromMedia<T> on PlaylistItem<T> {
   }
 }
 
-extension on SubtitleData {
+extension ConvertSubtitle on SubtitleData {
   Subtitle toSubtitle() {
     return Subtitle(
       url: url!.host.isEmpty ? url!.replace(host: Api.baseUrl.host, port: Api.baseUrl.port, scheme: Api.baseUrl.scheme) : url!,

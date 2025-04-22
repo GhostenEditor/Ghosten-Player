@@ -8,6 +8,8 @@ import '../../components/async_image.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
 import '../components/theme_builder.dart';
+import 'components/cast.dart';
+import 'components/crew.dart';
 import 'components/overview.dart';
 import 'dialogs/season_metadata.dart';
 import 'episode.dart';
@@ -198,7 +200,18 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin<SeasonDeta
                               });
                         }),
                       ),
-                    )
+                    ),
+                    SliverToBoxAdapter(
+                      child: BlocSelector<TVSeasonCubit, TVSeason?, List<MediaCast>?>(
+                          selector: (season) => season?.mediaCast ?? [],
+                          builder: (context, cast) => (cast != null && cast.isNotEmpty) ? CastSection(type: MediaType.season, cast: cast) : const SizedBox()),
+                    ),
+                    SliverToBoxAdapter(
+                      child: BlocSelector<TVSeasonCubit, TVSeason?, List<MediaCrew>?>(
+                          selector: (season) => season?.mediaCrew ?? [],
+                          builder: (context, crew) => (crew != null && crew.isNotEmpty) ? CrewSection(type: MediaType.season, crew: crew) : const SizedBox()),
+                    ),
+                    const SliverToBoxAdapter(child: SafeArea(child: SizedBox())),
                   ],
                 ),
               );

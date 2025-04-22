@@ -214,9 +214,9 @@ class _PlayerControlsFullState<T> extends State<PlayerControlsFull<T>> with Play
                           return _isLocked.value
                               ? const SizedBox.expand()
                               : PlayerControlsGesture(
-                                controller: _controller,
-                                child: const SizedBox.expand(),
-                              );
+                                  controller: _controller,
+                                  child: const SizedBox.expand(),
+                                );
                         }),
                     ListenableBuilder(
                         listenable: _isShowControls,
@@ -603,7 +603,7 @@ class _SwitchLinkButtonState<T> extends State<SwitchLinkButton<T>> {
             ? PopupMenuButton(
                 onSelected: (url) {
                   final currentItem = widget.controller.currentItem!;
-                  final item = currentItem.copyWith(url: url, sourceType: PlaylistItemSourceType.fromBroadcastUri(url));
+                  final item = currentItem.copyWith(url: url);
                   widget.controller.playlist.value[widget.controller.index.value!] = item;
                   widget.controller.updateSource(item, widget.controller.index.value!);
                   setState(() {});

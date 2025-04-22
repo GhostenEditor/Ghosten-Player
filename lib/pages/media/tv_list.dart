@@ -13,6 +13,7 @@ import '../library.dart';
 import 'components/carousel.dart';
 import 'components/channel.dart';
 import 'components/media_scaffold.dart';
+import 'search.dart';
 
 class TVListPage extends StatefulWidget {
   const TVListPage({super.key});
@@ -86,6 +87,17 @@ class _TVListPageState extends State<TVListPage> {
             builder: _buildRecentMediaCard,
           ),
           MediaChannel<TVListCubit, AsyncSnapshot<TVListModel>>(
+            label: '收藏夹',
+            more: IconButton(
+                onPressed: () {
+                  navigateTo(context, const SearchPage(filterType: [FilterType.favorite]));
+                },
+                icon: const Icon(Icons.chevron_right)),
+            selector: (state) => state?.data?.favorite.length ?? 0,
+            height: 230,
+            builder: (context, index) => _buildMediaCard(context, (state) => state.requireData.favorite[index], width: 120, height: 180),
+          ),
+          MediaChannel<TVListCubit, AsyncSnapshot<TVListModel>>(
             label: AppLocalizations.of(context)!.tagNewAdd,
             selector: (state) => state?.data?.newAdd.length ?? 0,
             height: 230,
@@ -155,14 +167,18 @@ class _TVListPageState extends State<TVListPage> {
     return BlocSelector<TVListCubit, AsyncSnapshot<TVListModel>, TVSeries>(
         selector: selector,
         builder: (context, item) {
-          return ImageCard(
-            item.poster,
-            width: width,
-            height: height,
-            title: Text(item.displayRecentTitle()),
-            subtitle: Text(item.airDate?.format() ?? ''),
-            floating: MediaBadges(item: item),
-            onTap: () => _onMediaTap(context, item),
+          return Stack(
+            children: [
+              ImageCard(
+                item.poster,
+                width: width,
+                height: height,
+                title: Text(item.displayRecentTitle()),
+                subtitle: Text(item.firstAirDate?.format() ?? ''),
+                floating: MediaBadges(item: item),
+                onTap: () => _onMediaTap(context, item),
+              ),
+            ],
           );
         });
   }
@@ -177,6 +193,7 @@ class TVListModel {
   const TVListModel({
     required this.carousels,
     required this.watchNow,
+    required this.favorite,
     required this.newAdd,
     required this.newRelease,
     required this.all,
@@ -184,6 +201,7 @@ class TVListModel {
 
   final List<MediaRecommendation> carousels;
   final List<TVEpisode> watchNow;
+  final List<TVSeries> favorite;
   final List<TVSeries> newAdd;
   final List<TVSeries> newRelease;
   final List<TVSeries> all;
@@ -203,18 +221,20 @@ class TVListCubit extends Cubit<AsyncSnapshot<TVListModel>> {
         Api.tvRecommendation(),
         Api.tvSeriesNextToPlayQueryAll(),
         Api.tvSeriesQueryAll(
-            const MediaSearchQuery(sort: SortConfig(type: SortType.createAt, direction: SortDirection.desc, filter: FilterType.all), limit: 8)),
-        Api.tvSeriesQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.airDate, direction: SortDirection.desc, filter: FilterType.all), limit: 8)),
-        Api.tvSeriesQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.title, direction: SortDirection.asc, filter: FilterType.all)))
+            const MediaSearchQuery(sort: SortConfig(type: SortType.createAt, direction: SortDirection.desc, filter: FilterType.favorite), limit: 8)),
+        Api.tvSeriesQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.airDate, direction: SortDirection.desc), limit: 8)),
+        Api.tvSeriesQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.airDate, direction: SortDirection.desc), limit: 8)),
+        Api.tvSeriesQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.title, direction: SortDirection.asc)))
       ]);
       emit(AsyncSnapshot.withData(
           ConnectionState.done,
           TVListModel(
             carousels: items[0] as List<MediaRecommendation>,
             watchNow: items[1] as List<TVEpisode>,
-            newAdd: items[2] as List<TVSeries>,
-            newRelease: items[3] as List<TVSeries>,
-            all: items[4] as List<TVSeries>,
+            favorite: items[2] as List<TVSeries>,
+            newAdd: items[3] as List<TVSeries>,
+            newRelease: items[4] as List<TVSeries>,
+            all: items[5] as List<TVSeries>,
           )));
     } catch (e) {
       emit(AsyncSnapshot.withError(ConnectionState.done, e));

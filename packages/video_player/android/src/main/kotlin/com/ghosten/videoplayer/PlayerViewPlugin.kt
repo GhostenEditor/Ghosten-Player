@@ -61,11 +61,7 @@ class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activit
                                 call.argument("index")!!
                             )
 
-                            "setSources" -> mPlayerView?.setSources(
-                                call.argument("playlist")!!,
-                                call.argument("index")!!
-                            )
-
+                            "setSource" -> mPlayerView?.setSource(call.arguments as HashMap<String, Any>)
                             "setTransform" -> mPlayerView?.setTransform(call.argument("matrix")!!)
                             "setAspectRatio" -> mPlayerView?.setAspectRatio((call.arguments as Double?)?.toFloat())
                             "fullscreen" -> mPlayerView?.fullscreen(call.arguments as Boolean)
