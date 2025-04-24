@@ -24,7 +24,7 @@ class CrewSection extends StatelessWidget {
                   spacing: 4,
                   children: [
                     Text(AppLocalizations.of(context)!.titleCrew, style: Theme.of(context).textTheme.titleMedium),
-                    Text('(${crew.length})', style: Theme.of(context).textTheme.labelMedium!.copyWith(color: Theme.of(context).colorScheme.secondary)),
+                    Text('(${crew.length})', style: Theme.of(context).textTheme.labelMedium),
                   ],
                 ),
               ),

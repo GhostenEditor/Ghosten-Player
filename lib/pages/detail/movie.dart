@@ -21,6 +21,7 @@ import '../player/player_controls_lite.dart';
 import '../utils/notification.dart';
 import 'components/cast.dart';
 import 'components/crew.dart';
+import 'components/file_info.dart';
 import 'components/overview.dart';
 import 'components/player_backdrop.dart';
 import 'components/player_scaffold.dart';
@@ -105,12 +106,15 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
                             padding: const EdgeInsets.all(16),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              spacing: 16,
                               children: [
                                 BlocSelector<MovieCubit, Movie?, String?>(
                                     selector: (movie) => movie?.poster,
-                                    builder: (context, poster) =>
-                                        poster != null ? AsyncImage(poster, width: 100, radius: BorderRadius.circular(4), viewable: true) : const SizedBox()),
+                                    builder: (context, poster) => poster != null
+                                        ? Padding(
+                                            padding: const EdgeInsets.only(right: 16),
+                                            child: AsyncImage(poster, width: 100, height: 150, radius: BorderRadius.circular(4), viewable: true),
+                                          )
+                                        : const SizedBox()),
                                 BlocSelector<MovieCubit, Movie?, String?>(
                                   selector: (movie) => movie?.overview,
                                   builder: (context, overview) => Expanded(child: OverviewSection(text: overview, trimLines: 7)),
@@ -141,13 +145,18 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
                               builder: (context, keywords) =>
                                   (keywords != null && keywords.isNotEmpty) ? KeywordsSection(type: MediaType.movie, keywords: keywords) : const SizedBox()),
                           BlocSelector<MovieCubit, Movie?, List<MediaCast>?>(
-                              selector: (tvSeries) => tvSeries?.mediaCast ?? [],
+                              selector: (movie) => movie?.mediaCast ?? [],
                               builder: (context, cast) =>
                                   (cast != null && cast.isNotEmpty) ? CastSection(type: MediaType.movie, cast: cast) : const SizedBox()),
                           BlocSelector<MovieCubit, Movie?, List<MediaCrew>?>(
-                              selector: (tvSeries) => tvSeries?.mediaCrew ?? [],
+                              selector: (movie) => movie?.mediaCrew ?? [],
                               builder: (context, crew) =>
                                   (crew != null && crew.isNotEmpty) ? CrewSection(type: MediaType.movie, crew: crew) : const SizedBox()),
+                          BlocSelector<MovieCubit, Movie?, String?>(
+                              selector: (movie) => movie?.fileId,
+                              builder: (context, fileId) {
+                                return fileId != null ? FileInfoSection(fileId: fileId) : const SizedBox();
+                              }),
                         ]),
                       ),
                     ],
@@ -177,7 +186,7 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
                       text: TextSpan(
                         style: Theme.of(context).textTheme.labelSmall,
                         children: [
-                          TextSpan(text: item.airDate?.format() ?? AppLocalizations.of(context)!.tagUnknown),
+                          TextSpan(text: item.releaseDate?.format() ?? AppLocalizations.of(context)!.tagUnknown),
                           const WidgetSpan(child: SizedBox(width: 20)),
                           const WidgetSpan(child: Icon(Icons.star, color: Colors.orangeAccent, size: 14)),
                           TextSpan(text: item.voteAverage?.toStringAsFixed(1) ?? AppLocalizations.of(context)!.tagUnknown),
@@ -231,9 +240,7 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
                       PopupMenuItem(
                         padding: EdgeInsets.zero,
                         onTap: () async {
-                          final item = context.read<MovieCubit>().state!;
-                          final subtitle =
-                              await showDialog<SubtitleData>(context: context, builder: (context) => SubtitleDialog(subtitle: item.subtitles.firstOrNull));
+                          final subtitle = await showDialog<SubtitleData>(context: context, builder: (context) => const SubtitleDialog());
                           if (subtitle != null && context.mounted) {
                             final resp = await showNotification(context, Api.movieSubtitleUpdateById(id: widget.id, subtitle: subtitle));
                             if (resp?.error == null && context.mounted) context.read<MovieCubit>().update();
@@ -247,16 +254,17 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
                       ),
                       PopupMenuItem(
                         padding: EdgeInsets.zero,
+                        enabled: !item.downloaded,
                         onTap: item.downloaded
                             ? null
                             : () async {
-                                final resp = await showNotification(context, Api.downloadTaskCreate(item.url!.queryParameters['id']!),
+                                final resp = await showNotification(context, Api.downloadTaskCreate(item.fileId),
                                     successText: AppLocalizations.of(context)!.tipsForDownload);
                                 if (resp?.error == null && context.mounted) context.read<MovieCubit>().update();
                               },
                         child: ListTile(
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                          title: Text(AppLocalizations.of(context)!.buttonDownload),
+                          title: Text(item.downloaded ? AppLocalizations.of(context)!.downloaderLabelDownloaded : AppLocalizations.of(context)!.buttonDownload),
                           leading: const Icon(Icons.download_outlined),
                         ),
                       ),

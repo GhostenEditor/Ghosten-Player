@@ -81,12 +81,6 @@ class _TVDetailState extends State<TVDetail> with ActionMixin<TVDetail>, Searcha
                       final item = _controller.playlist.value[index];
                       Api.updatePlayedStatus(LibraryType.tv, item.source.id, position: position, duration: duration);
                     },
-                    // onMediaIndexChanged: (mediaChange) async {
-                    //   final id = _controller.currentItem?.url.queryParameters['id'];
-                    //   final subtitles = await Api.playbackSubtitle(id);
-                    //   _controller.updateSource(
-                    //       _controller.currentItem!.copyWith(subtitles: subtitles.map((e) => e.toSubtitle()).toList()), _controller.index.value!);
-                    // },
                   ),
                   sidebar: Navigator(
                     key: _navigatorKey,
@@ -116,12 +110,14 @@ class _TVDetailState extends State<TVDetail> with ActionMixin<TVDetail>, Searcha
                               padding: const EdgeInsets.all(16),
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                spacing: 16,
                                 children: [
                                   BlocSelector<TVSeriesCubit, TVSeries?, String?>(
                                       selector: (movie) => movie?.poster,
                                       builder: (context, poster) => poster != null
-                                          ? AsyncImage(poster, width: 100, height: 150, radius: BorderRadius.circular(4), viewable: true)
+                                          ? Padding(
+                                              padding: const EdgeInsets.only(right: 16),
+                                              child: AsyncImage(poster, width: 100, height: 150, radius: BorderRadius.circular(4), viewable: true),
+                                            )
                                           : const SizedBox()),
                                   BlocSelector<TVSeriesCubit, TVSeries?, String?>(
                                     selector: (movie) => movie?.overview,

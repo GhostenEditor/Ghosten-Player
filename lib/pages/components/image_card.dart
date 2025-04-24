@@ -85,7 +85,7 @@ class ImageCard extends StatelessWidget {
                       ),
                     if (subtitle != null)
                       DefaultTextStyle(
-                        style: Theme.of(context).textTheme.labelSmall!.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                        style: Theme.of(context).textTheme.labelSmall!.copyWith(color: Theme.of(context).colorScheme.onSurface),
                         overflow: TextOverflow.ellipsis,
                         child: subtitle!,
                       ),

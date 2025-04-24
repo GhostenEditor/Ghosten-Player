@@ -70,8 +70,10 @@ class _PlaylistSectionState extends State<PlaylistSection> {
                 item.poster,
                 width: widget.imageWidth,
                 height: widget.imageHeight,
-                title: Text(item.title!),
-                subtitle: item.description != null ? Text(item.description!) : null,
+                title: Text(item.title!, style: widget.activeIndex == index ? TextStyle(color: Theme.of(context).colorScheme.primary) : null),
+                subtitle: item.description != null
+                    ? Text(item.description!, style: widget.activeIndex == index ? TextStyle(color: Theme.of(context).colorScheme.primary) : null)
+                    : null,
                 floating: widget.activeIndex == index
                     ? Material(
                         shape: RoundedRectangleBorder(
@@ -106,7 +108,10 @@ class _PlaylistSectionState extends State<PlaylistSection> {
                                 alignment: Alignment.bottomRight,
                                 child: Padding(
                                   padding: const EdgeInsets.all(4),
-                                  child: Badge(label: Text(item.duration!.toDisplay()), backgroundColor: Theme.of(context).colorScheme.primary),
+                                  child: Badge(
+                                      label: Text(item.duration!.toDisplay()),
+                                      backgroundColor:
+                                          widget.activeIndex == index ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.secondary),
                                 )),
                           )
                         : null,

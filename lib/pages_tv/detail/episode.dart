@@ -211,10 +211,7 @@ class _EpisodeDetailState extends State<EpisodeDetail> with ActionMixin {
             title: Text(AppLocalizations.of(context)!.buttonSubtitle),
             leading: const Icon(Icons.subtitles_outlined),
             onTap: () async {
-              final subtitle = await Navigator.of(context).push<SubtitleData>(FadeInPageRoute(
-                  builder: (context) => SubtitleDialog(
-                        subtitle: item.subtitles.firstOrNull,
-                      )));
+              final subtitle = await Navigator.of(context).push<SubtitleData>(FadeInPageRoute(builder: (context) => const SubtitleDialog()));
               if (subtitle != null && context.mounted) {
                 final resp = await showNotification(context, Api.tvEpisodeSubtitleUpdateById(id: item.id, subtitle: subtitle));
                 if (resp?.error == null) setState(() => refresh = true);

@@ -61,6 +61,12 @@ abstract class ApiPlatform extends PlatformInterface {
   Future<void> requestStoragePermission() async {}
 
   /// File Start
+  Future<DriverFileInfo> fileInfo(String id) async {
+    final data = await client.get<Json>('/file/info', queryParameters: {'id': id});
+    final a = DriverFileInfo.fromJson(data!);
+    return a;
+  }
+
   Future<List<DriverFile>> fileList(int driverId, String parentFileId, {FileType? type, String? category}) async {
     final data = await client.post<JsonList>('/file/list', data: {
       'driverId': driverId,
@@ -98,8 +104,20 @@ abstract class ApiPlatform extends PlatformInterface {
 
   /// Player End
 
+  /// Setting Start
+  Future<SettingScraper> settingScraperQuery() async {
+    final data = await client.get<Json>('/setting/scraper/query');
+    return SettingScraper.fromJson(data!);
+  }
+
+  Future<void> settingScraperUpdate(SettingScraper data) {
+    return client.post('/setting/scraper/update', data: data.toJson());
+  }
+
+  /// Setting End
+
   /// DownloadTask Start
-  Future<void> downloadTaskCreate(String id) async {
+  Future<void> downloadTaskCreate(dynamic id) async {
     await requestStoragePermission();
     return client.put('/download/task/create', data: {'id': id});
   }

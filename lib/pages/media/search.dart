@@ -76,11 +76,6 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void dispose() {
     _searchController.dispose();
     _pageController.dispose();
@@ -93,93 +88,94 @@ class _SearchPageState extends State<SearchPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: IconButtonTheme(
-            data: IconButtonThemeData(
-              style: IconButton.styleFrom(
-                padding: EdgeInsets.zero,
-                iconSize: 16,
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-            ),
-            child: TextField(
-              autofocus: true,
-              focusNode: _focusNode,
-              controller: _searchController,
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(50)),
-                  borderSide: BorderSide.none,
-                ),
-                isDense: true,
-                filled: true,
-                hintText: AppLocalizations.of(context)!.searchHint,
-                hintStyle: Theme.of(context).textTheme.labelMedium,
-                contentPadding: EdgeInsets.zero,
-                prefixIcon: const Icon(Icons.search),
-                prefixIconConstraints: const BoxConstraints(maxHeight: 32, minWidth: 32),
-                suffixIconConstraints: const BoxConstraints(minHeight: 36, minWidth: 36),
-                suffixIcon: _filter.isEmpty
-                    ? const Icon(null)
-                    : IconButton(
-                        focusNode: _clearFocusNode,
-                        onPressed: () {
-                          _searchController.clear();
-                          setState(() {});
-                        },
-                        icon: const Icon(Icons.clear)),
-              ),
-              onTap: () {},
-              onChanged: (_) {},
-              onTapOutside: (_) => _focusNode.unfocus(),
-              onSubmitted: (res) {
-                setState(() {});
-              },
+        title: IconButtonTheme(
+          data: IconButtonThemeData(
+            style: IconButton.styleFrom(
+              padding: EdgeInsets.zero,
+              iconSize: 16,
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
           ),
-          actions: [
-            TextButton(
-                onPressed: () {
-                  setState(() {});
-                },
-                child: Text(AppLocalizations.of(context)!.search)),
-          ],
-          bottom: _HomeTabs(
-            activeIndex: _activeIndex,
-            tabs: const [
-              _TabItem(title: '剧集', canFilter: true),
-              _TabItem(title: '电影', canFilter: true),
-              _TabItem(title: '集'),
-              _TabItem(title: '演员'),
-              _TabItem(title: '工作人员'),
-            ],
-            onTabChange: (index) {
-              _activeIndex = index;
-              _pageController.jumpToPage(index);
+          child: TextField(
+            autofocus: true,
+            focusNode: _focusNode,
+            controller: _searchController,
+            decoration: InputDecoration(
+              border: const OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(50)),
+                borderSide: BorderSide.none,
+              ),
+              isDense: true,
+              filled: true,
+              hintText: AppLocalizations.of(context)!.searchHint,
+              hintStyle: Theme.of(context).textTheme.labelMedium,
+              contentPadding: EdgeInsets.zero,
+              prefixIcon: const Icon(Icons.search),
+              prefixIconConstraints: const BoxConstraints(maxHeight: 32, minWidth: 32),
+              suffixIconConstraints: const BoxConstraints(minHeight: 36, minWidth: 36),
+              suffixIcon: _filter.isEmpty
+                  ? const Icon(null)
+                  : IconButton(
+                      focusNode: _clearFocusNode,
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() {});
+                      },
+                      icon: const Icon(Icons.clear)),
+            ),
+            onTap: () {},
+            onChanged: (_) {},
+            onTapOutside: (_) => _focusNode.unfocus(),
+            onSubmitted: (res) {
               setState(() {});
             },
-            onFilterTap: () {
-              showModalBottomSheet(
-                  context: context,
-                  builder: (context) => _SearchFilter(
-                        selectedFilterType: _filterType,
-                        selectedGenre: _selectedGenre,
-                        selectedStudio: _selectedStudio,
-                        selectedKeyword: _selectedKeyword,
-                        selectedCast: _selectedCast,
-                        selectedCrew: _selectedCrew,
-                        onChanged: (value) {
-                          _filterType = value.$1;
-                          _selectedGenre = value.$2;
-                          _selectedStudio = value.$3;
-                          _selectedKeyword = value.$4;
-                          _selectedCast = value.$5;
-                          _selectedCrew = value.$6;
-                          setState(() {});
-                        },
-                      ));
-            },
-          )),
+          ),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () {
+                setState(() {});
+              },
+              child: Text(AppLocalizations.of(context)!.search)),
+        ],
+        bottom: _HomeTabs(
+          activeIndex: _activeIndex,
+          tabs: [
+            _TabItem(title: AppLocalizations.of(context)!.homeTabTV, canFilter: true),
+            _TabItem(title: AppLocalizations.of(context)!.homeTabMovie, canFilter: true),
+            _TabItem(title: AppLocalizations.of(context)!.formLabelEpisode),
+            _TabItem(title: AppLocalizations.of(context)!.titleCast),
+            _TabItem(title: AppLocalizations.of(context)!.titleCrew),
+          ],
+          onTabChange: (index) {
+            _activeIndex = index;
+            _pageController.jumpToPage(index);
+            setState(() {});
+          },
+          onFilterTap: () {
+            showModalBottomSheet(
+                context: context,
+                builder: (context) => _SearchFilter(
+                      selectedFilterType: _filterType,
+                      selectedGenre: _selectedGenre,
+                      selectedStudio: _selectedStudio,
+                      selectedKeyword: _selectedKeyword,
+                      selectedCast: _selectedCast,
+                      selectedCrew: _selectedCrew,
+                      onChanged: (value) {
+                        _filterType = value.$1;
+                        _selectedGenre = value.$2;
+                        _selectedStudio = value.$3;
+                        _selectedKeyword = value.$4;
+                        _selectedCast = value.$5;
+                        _selectedCrew = value.$6;
+                        setState(() {});
+                      },
+                    ));
+          },
+        ),
+      ),
       body: PageView(
         controller: _pageController,
         onPageChanged: (index) {

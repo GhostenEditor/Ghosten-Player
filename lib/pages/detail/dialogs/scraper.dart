@@ -151,7 +151,7 @@ class _SearchResultItem extends StatelessWidget {
         child: Column(
           children: [
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 4,
               children: [
                 Expanded(
                   child: Column(

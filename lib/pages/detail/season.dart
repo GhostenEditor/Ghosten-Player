@@ -134,12 +134,15 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin<SeasonDeta
                         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          spacing: 12,
                           children: [
                             BlocSelector<TVSeasonCubit, TVSeason?, String?>(
                                 selector: (season) => season?.poster,
-                                builder: (context, poster) =>
-                                    poster != null ? AsyncImage(poster, width: 100, radius: BorderRadius.circular(4), viewable: true) : const SizedBox()),
+                                builder: (context, poster) => poster != null
+                                    ? Padding(
+                                        padding: const EdgeInsets.only(right: 16),
+                                        child: AsyncImage(poster, width: 100, height: 150, radius: BorderRadius.circular(4), viewable: true),
+                                      )
+                                    : const SizedBox()),
                             BlocSelector<TVSeasonCubit, TVSeason?, String?>(
                               selector: (season) => season?.overview,
                               builder: (context, overview) => Expanded(child: OverviewSection(text: overview, trimLines: 7)),

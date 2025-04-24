@@ -224,9 +224,9 @@ class MovieListCubit extends Cubit<AsyncSnapshot<MovieListModel>> {
             carousels: items[0] as List<MediaRecommendation>,
             watchNow: items[1] as List<Movie>,
             favorite: items[2] as List<Movie>,
-            newAdd: items[2] as List<Movie>,
-            newRelease: items[3] as List<Movie>,
-            all: items[4] as List<Movie>,
+            newAdd: items[3] as List<Movie>,
+            newRelease: items[4] as List<Movie>,
+            all: items[5] as List<Movie>,
           )));
     } catch (e) {
       emit(AsyncSnapshot.withError(ConnectionState.done, e));

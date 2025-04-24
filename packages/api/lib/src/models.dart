@@ -155,8 +155,7 @@ class Movie extends Media {
   final List<Keyword> keywords;
   final Duration? lastPlayedPosition;
   final bool downloaded;
-  final Uri? url;
-  final List<SubtitleData> subtitles;
+  final String? fileId;
   final DateTime? releaseDate;
   final Duration? duration;
   final Scrapper scrapper;
@@ -171,10 +170,9 @@ class Movie extends Media {
         genres = (json['genres'] as JsonList).toGenres(),
         studios = (json['studios'] as JsonList).toStudios(),
         downloaded = json['downloaded'] ?? false,
-        url = json['url'] != null ? Uri.parse(json['url']) : null,
+        fileId = json['fileId'],
         duration = (json['duration'] as int?)?.toDuration(),
         releaseDate = (json['releaseDate'] as String?)?.toDateTime(),
-        subtitles = (json['subtitles'] as JsonList).toSubtitles(),
         scrapper = Scrapper.fromJson(json['scrapper']),
         super.fromJson();
 }
@@ -243,12 +241,9 @@ class TVEpisode extends Media {
   final Duration? lastPlayedPosition;
   final bool downloaded;
   final List<MediaCast> guestStars;
-  final dynamic fileId;
-
-  // final Uri? url;
-  // final int? fileSize;
+  final String? fileId;
+  final int? fileSize;
   final Duration? duration;
-  final List<SubtitleData> subtitles;
 
   TVEpisode.fromJson(super.json)
       : episode = json['episode'],
@@ -264,10 +259,7 @@ class TVEpisode extends Media {
         lastPlayedPosition = (json['lastPlayedPosition'] as int?).toDuration(),
         downloaded = json['downloaded'] ?? false,
         guestStars = (json['guestStars'] as JsonList?)?.toCast() ?? [],
-        // ext = json['ext'],
-        // url = json['url'] != null ? Uri.parse(json['url']) : null,
-        // fileSize = json['fileSize'],
-        subtitles = (json['subtitles'] as JsonList).toSubtitles(),
+        fileSize = json['fileSize'],
         super.fromJson();
 
   @override
@@ -314,7 +306,7 @@ class MediaCast {
 class MediaCrew {
   final dynamic id;
   final String name;
-  final String originalName;
+  final String? originalName;
   final String? knownForDepartment;
   final String? department;
   final bool? adult;
@@ -593,6 +585,19 @@ class DriverAccount {
         avatar = json['avatar'];
 }
 
+class DriverFileInfo {
+  final String filename;
+  final int size;
+  final DriverType driverType;
+  final DateTime createdAt;
+
+  DriverFileInfo.fromJson(Json json)
+      : filename = json['filename'],
+        driverType = DriverType.fromString(json['driverType']),
+        createdAt = (json['createAt'] as String).toDateTime()!,
+        size = json['size'];
+}
+
 class DriverFile {
   final String name;
   final String id;
@@ -687,6 +692,59 @@ enum DownloadTaskStatus {
       'failed' => DownloadTaskStatus.failed,
       _ => throw Exception('Wrong DownloadTaskStatus Type of "$name"'),
     };
+  }
+}
+
+enum ScraperBehavior {
+  skip,
+  chooseFirst,
+  exact;
+
+  static ScraperBehavior fromString(String s) {
+    return ScraperBehavior.values.firstWhere((e) => e.name == s);
+  }
+}
+
+class SettingScraper {
+  final bool nfoPrior;
+  final ScraperBehavior behavior;
+  final int tmdbMaxCast;
+  final int tmdbMaxCrew;
+
+  const SettingScraper({
+    required this.nfoPrior,
+    required this.behavior,
+    required this.tmdbMaxCast,
+    required this.tmdbMaxCrew,
+  });
+
+  SettingScraper.fromJson(Json json)
+      : behavior = ScraperBehavior.fromString(json['behavior']),
+        nfoPrior = json['nfoPrior'],
+        tmdbMaxCast = json['tmdbMaxCast'],
+        tmdbMaxCrew = json['tmdbMaxCrew'];
+
+  Json toJson() {
+    return {
+      'behavior': behavior.name,
+      'nfoPrior': nfoPrior,
+      'tmdbMaxCast': tmdbMaxCast,
+      'tmdbMaxCrew': tmdbMaxCrew,
+    };
+  }
+
+  SettingScraper copyWith({
+    bool? nfoPrior,
+    ScraperBehavior? behavior,
+    int? tmdbMaxCast,
+    int? tmdbMaxCrew,
+  }) {
+    return SettingScraper(
+      nfoPrior: nfoPrior ?? this.nfoPrior,
+      behavior: behavior ?? this.behavior,
+      tmdbMaxCast: tmdbMaxCast ?? this.tmdbMaxCast,
+      tmdbMaxCrew: tmdbMaxCrew ?? this.tmdbMaxCrew,
+    );
   }
 }
 
@@ -847,17 +905,11 @@ enum DriverType {
   quark,
   webdav,
   emby,
+  jellyfin,
   local;
 
   static DriverType fromString(String? name) {
-    return switch (name) {
-      'alipan' => DriverType.alipan,
-      'quark' => DriverType.quark,
-      'webdav' => DriverType.webdav,
-      'emby' => DriverType.emby,
-      'local' => DriverType.local,
-      _ => throw Exception('Wrong Driver Type of "$name"'),
-    };
+    return DriverType.values.firstWhere((s) => s.name == name);
   }
 }
 

@@ -16,12 +16,15 @@ class Api {
   static final resetData = ApiPlatform.instance.resetData;
   static final log = ApiPlatform.instance.log;
   static final requestStoragePermission = ApiPlatform.instance.requestStoragePermission;
+  static final fileInfo = ApiPlatform.instance.fileInfo;
   static final fileList = ApiPlatform.instance.fileList;
   static final fileRename = ApiPlatform.instance.fileRename;
   static final fileRemove = ApiPlatform.instance.fileRemove;
   static final fileMkdir = ApiPlatform.instance.fileMkdir;
   static final playbackInfo = ApiPlatform.instance.playbackInfo;
   static final playerHistory = ApiPlatform.instance.playerHistory;
+  static final settingScraperQuery = ApiPlatform.instance.settingScraperQuery;
+  static final settingScraperUpdate = ApiPlatform.instance.settingScraperUpdate;
   static final downloadTaskCreate = ApiPlatform.instance.downloadTaskCreate;
   static final downloadTaskPauseById = ApiPlatform.instance.downloadTaskPauseById;
   static final downloadTaskResumeById = ApiPlatform.instance.downloadTaskResumeById;

@@ -252,17 +252,14 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin, SearchableM
             title: Text(AppLocalizations.of(context)!.buttonSubtitle),
             leading: const Icon(Icons.subtitles_outlined),
             onTap: () async {
-              final subtitle = await Navigator.of(context).push<SubtitleData>(FadeInPageRoute(
-                  builder: (context) => SubtitleDialog(
-                        subtitle: item.subtitles.firstOrNull,
-                      )));
+              final subtitle = await Navigator.of(context).push<SubtitleData>(FadeInPageRoute(builder: (context) => const SubtitleDialog()));
               if (subtitle != null && context.mounted) {
                 final resp = await showNotification(context, Api.movieSubtitleUpdateById(id: item.id, subtitle: subtitle));
                 if (resp?.error == null) setState(() => refresh = true);
               }
             },
           ),
-          buildDownloadAction(context, item.url!),
+          buildDownloadAction(context, item.fileId),
           if (item.scrapper.id != null) buildHomeAction(context, ImdbUri(MediaType.movie, item.scrapper.id!).toUri()),
           const DividerSettingItem(),
           buildDeleteAction(context, () => Api.movieDeleteById(item.id)),
