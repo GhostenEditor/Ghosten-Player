@@ -1,3 +1,4 @@
+import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:video_player/player.dart';
@@ -21,7 +22,7 @@ class PlaylistSection extends StatefulWidget {
   final double imageHeight;
 
   final int? activeIndex;
-  final List<PlaylistItem<dynamic>> playlist;
+  final List<PlaylistItemDisplay<dynamic>> playlist;
 
   final ValueChanged<int>? onTap;
 
@@ -122,5 +123,17 @@ class _PlaylistSectionState extends State<PlaylistSection> {
         ),
       ],
     );
+  }
+}
+
+extension on PlaylistItemDisplay<dynamic> {
+  Duration? get duration {
+    if (source is Movie) {
+      return (source as Movie).duration;
+    } else if (source is TVEpisode) {
+      return (source as TVEpisode).duration;
+    } else {
+      return null;
+    }
   }
 }

@@ -42,10 +42,21 @@ class MovieDetail extends StatefulWidget {
 }
 
 class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>, SearchableMixin {
-  final _controller = PlayerController<Movie>(Api.log);
+  late final _controller = PlayerController<Movie>(Api.log, onGetPlayBackInfo: _onGetPlayBackInfo);
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _navigatorKey = GlobalKey<NavigatorState>();
   late final _autoPlay = Provider.of<UserConfig>(context, listen: false).autoPlay;
+
+  Future<PlaylistItem> _onGetPlayBackInfo(PlaylistItemDisplay<Movie> item) async {
+    final data = await Api.playbackInfo(item.fileId);
+    return PlaylistItem(
+      title: item.title,
+      description: item.description,
+      poster: item.poster,
+      url: Uri.parse(data.url).normalize(),
+      subtitles: data.subtitles.map((d) => d.toSubtitle()).toList(),
+    );
+  }
 
   @override
   void dispose() {
@@ -240,11 +251,12 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
                       PopupMenuItem(
                         padding: EdgeInsets.zero,
                         onTap: () async {
-                          final subtitle = await showDialog<SubtitleData>(context: context, builder: (context) => const SubtitleDialog());
-                          if (subtitle != null && context.mounted) {
-                            final resp = await showNotification(context, Api.movieSubtitleUpdateById(id: widget.id, subtitle: subtitle));
-                            if (resp?.error == null && context.mounted) context.read<MovieCubit>().update();
-                          }
+                          navigateTo(context, SubtitleManager(fileId: item.fileId!));
+                          // final subtitle = await showDialog<SubtitleData>(context: context, builder: (context) => const SubtitleDialog());
+                          // if (subtitle != null && context.mounted) {
+                          //   final resp = await showNotification(context, Api.movieSubtitleUpdateById(id: widget.id, subtitle: subtitle));
+                          //   if (resp?.error == null && context.mounted) context.read<MovieCubit>().update();
+                          // }
                         },
                         child: ListTile(
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
@@ -298,7 +310,7 @@ class _PlaylistSidebar extends StatefulWidget {
   const _PlaylistSidebar({this.activeIndex, required this.playlist, this.onTap, this.themeColor});
 
   final int? activeIndex;
-  final List<PlaylistItem<Movie>> playlist;
+  final List<PlaylistItemDisplay<Movie>> playlist;
   final int? themeColor;
 
   final ValueChanged<int>? onTap;

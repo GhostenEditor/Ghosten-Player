@@ -5,14 +5,14 @@ import '../../utils/utils.dart';
 import '../player/singleton_player.dart';
 import 'utils.dart';
 
-Future<void> toPlayer<T>(BuildContext context, List<PlaylistItem<T>> playlist, {int index = 0, int? theme}) async {
+Future<void> toPlayer<T>(BuildContext context, List<PlaylistItemDisplay<T>> playlist, {int index = 0, int? theme}) async {
   assert(index.clamp(0, playlist.length - 1) == index);
   setPreferredOrientations(true);
   await navigateTo(context, SingletonPlayer<T>(playlist: playlist, index: index, theme: theme));
   setPreferredOrientations(false);
 }
 
-Future<void> toPlayerCast(BuildContext context, CastDevice device, List<PlaylistItem<dynamic>> playlist, {int index = 0, int? theme}) async {
+Future<void> toPlayerCast(BuildContext context, CastDevice device, List<PlaylistItemDisplay<dynamic>> playlist, {int index = 0, int? theme}) async {
   assert(index.clamp(0, playlist.length - 1) == index);
   setPreferredOrientations(true);
   await navigateToSlideUp(context, PlayerCast(playlist: playlist, index: index, theme: theme, device: device));

@@ -70,7 +70,7 @@ mixin PlayerActionsMixin<S extends StatefulWidget> on State<S> {
   }
 }
 
-extension on PlaylistItem<dynamic> {
+extension on PlaylistItemDisplay<dynamic> {
   bool get downloadable {
     if (source is Movie) {
       return !(source as Movie).downloaded;

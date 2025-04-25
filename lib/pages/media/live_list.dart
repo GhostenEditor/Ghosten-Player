@@ -175,7 +175,7 @@ class _LiveListPageState extends State<LiveListPage> {
 class _ChannelList extends StatefulWidget {
   const _ChannelList({required this.playlist, required this.onTap, this.activeIndex});
 
-  final List<PlaylistItem<Channel>> playlist;
+  final List<PlaylistItemDisplay<Channel>> playlist;
   final int? activeIndex;
   final Function(int) onTap;
 
@@ -266,7 +266,7 @@ class _ChannelListGrouped extends StatefulWidget {
 
 class _ChannelListGroupedState extends State<_ChannelListGrouped> {
   late final _groupedPlaylist = widget.controller.playlist.value.groupListsBy((channel) => channel.source.category);
-  late final _playlist = ValueNotifier<List<PlaylistItem<Channel>>>([]);
+  late final _playlist = ValueNotifier<List<PlaylistItemDisplay<Channel>>>([]);
   final _groupName = ValueNotifier<String?>(null);
 
   @override

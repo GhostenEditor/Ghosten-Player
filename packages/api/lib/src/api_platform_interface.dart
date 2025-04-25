@@ -104,6 +104,28 @@ abstract class ApiPlatform extends PlatformInterface {
 
   /// Player End
 
+  /// Subtitle Start
+  Future<List<SubtitleData>> subtitleQueryById(String id) async {
+    final data = await client.get<JsonList>('/subtitle/query/id', queryParameters: {'id': id});
+    return data!.map((e) => SubtitleData.fromJson(e)).toList();
+  }
+
+  Future<void> subtitleInsert(String id, SubtitleData subtitle) {
+    return client.put('/subtitle/update/id', data: {
+      'id': id,
+      'url': subtitle.url?.toString(),
+      'title': subtitle.title,
+      'mimeType': subtitle.mimeType,
+      'language': subtitle.language,
+    });
+  }
+
+  Future<void> subtitleDeleteById(dynamic id) {
+    return client.delete('/subtitle/delete/id', data: {'id': id});
+  }
+
+  /// Subtitle End
+
   /// Setting Start
   Future<SettingScraper> settingScraperQuery() async {
     final data = await client.get<Json>('/setting/scraper/query');
@@ -320,15 +342,15 @@ abstract class ApiPlatform extends PlatformInterface {
     return client.post('/movie/metadata/update/id', data: {'id': id, 'title': title, 'airDate': airDate?.format()});
   }
 
-  Future<void> movieSubtitleUpdateById({required dynamic id, required SubtitleData subtitle}) {
-    return client.post('/movie/subtitle/update/id', data: {
-      'id': id,
-      'url': subtitle.url?.toString(),
-      'title': subtitle.title,
-      'mimeType': subtitle.mimeType,
-      'language': subtitle.language,
-    });
-  }
+  // Future<void> movieSubtitleUpdateById({required dynamic id, required SubtitleData subtitle}) {
+  //   return client.post('/movie/subtitle/update/id', data: {
+  //     'id': id,
+  //     'url': subtitle.url?.toString(),
+  //     'title': subtitle.title,
+  //     'mimeType': subtitle.mimeType,
+  //     'language': subtitle.language,
+  //   });
+  // }
 
   Future<void> movieScraperById(dynamic id, String scraperId, String scraperType, String? language) {
     return client.post('/movie/scraper/id', data: {'id': id, 'scraperId': scraperId, 'scraperType': scraperType, 'language': language});

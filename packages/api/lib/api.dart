@@ -23,6 +23,9 @@ class Api {
   static final fileMkdir = ApiPlatform.instance.fileMkdir;
   static final playbackInfo = ApiPlatform.instance.playbackInfo;
   static final playerHistory = ApiPlatform.instance.playerHistory;
+  static final subtitleQueryById = ApiPlatform.instance.subtitleQueryById;
+  static final subtitleInsert = ApiPlatform.instance.subtitleInsert;
+  static final subtitleDeleteById = ApiPlatform.instance.subtitleDeleteById;
   static final settingScraperQuery = ApiPlatform.instance.settingScraperQuery;
   static final settingScraperUpdate = ApiPlatform.instance.settingScraperUpdate;
   static final downloadTaskCreate = ApiPlatform.instance.downloadTaskCreate;
@@ -60,7 +63,6 @@ class Api {
   static final movieQueryById = ApiPlatform.instance.movieQueryById;
   static final movieNextToPlayQueryAll = ApiPlatform.instance.movieNextToPlayQueryAll;
   static final movieMetadataUpdateById = ApiPlatform.instance.movieMetadataUpdateById;
-  static final movieSubtitleUpdateById = ApiPlatform.instance.movieSubtitleUpdateById;
   static final movieScraperById = ApiPlatform.instance.movieScraperById;
   static final movieScraperSearch = ApiPlatform.instance.movieScraperSearch;
   static final movieRenameById = ApiPlatform.instance.movieRenameById;

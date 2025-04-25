@@ -14,7 +14,7 @@ abstract class PlayerBaseController {
 }
 
 class PlayerController<T> implements PlayerBaseController {
-  final ValueNotifier<List<PlaylistItem<T>>> playlist = ValueNotifier([]);
+  final ValueNotifier<List<PlaylistItemDisplay<T>>> playlist = ValueNotifier([]);
   final ValueNotifier<int?> index = ValueNotifier(null);
   final ValueNotifier<bool> isFirst = ValueNotifier(true);
   final ValueNotifier<bool> isLast = ValueNotifier(true);
@@ -42,9 +42,9 @@ class PlayerController<T> implements PlayerBaseController {
   final ValueNotifier<bool> isCasting = ValueNotifier(false);
   final ValueNotifier<int?> onMediaIndexChanged = ValueNotifier(null);
   final ValueNotifier<(MediaChange, Duration)?> beforeMediaChanged = ValueNotifier(null);
-  final Future<PlaylistItem<T>> Function(int)? onGetPlayBackInfo;
+  final Future<PlaylistItem> Function(PlaylistItemDisplay<T>)? onGetPlayBackInfo;
 
-  PlaylistItem<T>? get currentItem => index.value == null ? null : playlist.value.elementAtOrNull(index.value!);
+  PlaylistItemDisplay<T>? get currentItem => index.value == null ? null : playlist.value.elementAtOrNull(index.value!);
 
   PlayerController(Function(int, String)? onLog, {this.onGetPlayBackInfo}) {
     this.index.addListener(() {
@@ -133,8 +133,12 @@ class PlayerController<T> implements PlayerBaseController {
     if (index < 0 || index >= playlist.value.length) return;
     if (index != this.index.value) {
       this.index.value = index;
-      final item = await onGetPlayBackInfo!(index);
-      await setSource(item);
+      if (onGetPlayBackInfo == null) {
+        await setSource(currentItem!.toItem());
+      } else {
+        final item = await onGetPlayBackInfo!(currentItem!);
+        await setSource(item);
+      }
       // PlayerPlatform.instance.next(index);
     }
     // if (status.value == PlayerStatus.paused || status.value == PlayerStatus.idle) {
@@ -179,23 +183,21 @@ class PlayerController<T> implements PlayerBaseController {
     return PlayerPlatform.instance.setAspectRatio(aspectRatio);
   }
 
-  Future<void> updateSource(PlaylistItem<T> source, int index) {
+  Future<void> updateSource(PlaylistItem source, int index) {
     return PlayerPlatform.instance.updateSource(source.toSource(), index);
   }
 
-  Future<void> setSource(PlaylistItem<T> playItem) async {
+  Future<void> setSource(PlaylistItem playItem) async {
     return PlayerPlatform.instance.setSource(playItem.toSource());
   }
 
-  Future<void> setSources(List<PlaylistItem<T>> playlist, int index) async {
+  Future<void> setSources(List<PlaylistItemDisplay<T>> playlist, int index) async {
     if (playlist.length == this.playlist.value.length &&
         List.generate(playlist.length, (i) => i).every((index) => playlist[index] == this.playlist.value[index])) {
       return;
     }
     this.playlist.value = playlist;
     await next(index);
-
-    // return PlayerPlatform.instance.setSources(playlist.map((item) => item.toSource()).toList(), index);
   }
 
   Future<void> enterFullscreen() {

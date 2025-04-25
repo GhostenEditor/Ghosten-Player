@@ -3,13 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/player.dart';
 
+import '../../models/models.dart';
 import '../../providers/user_config.dart';
+import '../../utils/utils.dart';
 import 'player_controls_full.dart';
 
 class SingletonPlayer<T> extends StatefulWidget {
   const SingletonPlayer({super.key, required this.playlist, this.index = 0, this.theme});
 
-  final List<PlaylistItem<T>> playlist;
+  final List<PlaylistItemDisplay<T>> playlist;
   final int index;
   final int? theme;
 
@@ -18,8 +20,33 @@ class SingletonPlayer<T> extends StatefulWidget {
 }
 
 class _SingletonPlayerState<T> extends State<SingletonPlayer<T>> {
-  late final _controller = PlayerController<T>(Api.log);
+  late final _controller = PlayerController<T>(Api.log, onGetPlayBackInfo: onGetPlayBackInfo);
   late final _progressController = PlayerProgressController(_controller);
+
+  Future<PlaylistItem> onGetPlayBackInfo(PlaylistItemDisplay<T> item) async {
+    final fileId = _controller.currentItem!.fileId;
+    if (item.fileId == null) {
+      return PlaylistItem(
+        url: item.url,
+        title: item.title,
+        description: item.description,
+        poster: item.poster,
+        start: item.start,
+        end: item.end,
+      );
+    } else {
+      final data = await Api.playbackInfo(fileId);
+      return PlaylistItem(
+        url: Uri.parse(data.url).normalize(),
+        title: item.title,
+        description: item.description,
+        poster: item.poster,
+        start: item.start,
+        end: item.end,
+        subtitles: data.subtitles.map((d) => d.toSubtitle()).toList(),
+      );
+    }
+  }
 
   @override
   void initState() {

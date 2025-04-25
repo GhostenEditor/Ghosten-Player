@@ -521,7 +521,7 @@ class _Playlist extends StatefulWidget {
   final double imageHeight;
 
   final int? activeIndex;
-  final List<PlaylistItem<dynamic>> playlist;
+  final List<PlaylistItemDisplay<dynamic>> playlist;
 
   final ValueChanged<int>? onTap;
 
@@ -612,10 +612,10 @@ class _SwitchLinkButtonState<T> extends State<SwitchLinkButton<T>> {
         builder: (context, _) => (widget.controller.currentItem?.source is Channel && (widget.controller.currentItem!.source as Channel).links.length > 1)
             ? PopupMenuButton(
                 onSelected: (url) {
-                  final currentItem = widget.controller.currentItem!;
-                  final item = currentItem.copyWith(url: url);
-                  widget.controller.playlist.value[widget.controller.index.value!] = item;
-                  widget.controller.updateSource(item, widget.controller.index.value!);
+                  // final currentItem = widget.controller.currentItem!;
+                  // final item = currentItem.copyWith(url: url);
+                  // widget.controller.playlist.value[widget.controller.index.value!] = item;
+                  widget.controller.updateSource(widget.controller.currentItem!.toItem(url: url), widget.controller.index.value!);
                   setState(() {});
                 },
                 itemBuilder: (context) => (widget.controller.currentItem!.source as Channel)
@@ -630,7 +630,7 @@ class _SwitchLinkButtonState<T> extends State<SwitchLinkButton<T>> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Text(
-                      '${AppLocalizations.of(context)!.playerBroadcastLine} ${(widget.controller.currentItem!.source as Channel).links.indexOf(widget.controller.currentItem!.url) + 1}'),
+                      '${AppLocalizations.of(context)!.playerBroadcastLine} ${(widget.controller.currentItem!.source as Channel).links.indexOf(widget.controller.currentItem!.url!) + 1}'),
                 ),
               )
             : const SizedBox());
@@ -650,7 +650,7 @@ class _ChannelListGrouped extends StatefulWidget {
 class _ChannelListGroupedState extends State<_ChannelListGrouped> {
   late final _groupedPlaylist = widget.controller.playlist.value.groupListsBy((channel) => channel.source.category);
   late final _groupName = ValueNotifier<String?>(null);
-  late final _playlist = ValueNotifier<List<PlaylistItem<Channel>>>([]);
+  late final _playlist = ValueNotifier<List<PlaylistItemDisplay<Channel>>>([]);
   late final _epg = ValueNotifier<List<ChannelEpgItem>?>([]);
 
   @override

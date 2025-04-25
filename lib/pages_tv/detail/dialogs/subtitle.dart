@@ -114,7 +114,7 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
                   onPressed: () {
                     if (_formKey.currentState!.validate() && _mimeType != null) {
                       Navigator.of(context).pop(SubtitleData(
-                        url: Uri.parse(_controller.text),
+                        url: _controller.text,
                         mimeType: _mimeType,
                         language: _language,
                         title: _filename,

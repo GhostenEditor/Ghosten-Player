@@ -22,7 +22,7 @@ class CommonPlayerPage<T> extends StatefulWidget {
     this.isTV = false,
   });
 
-  final List<PlaylistItem<T>> playlist;
+  final List<PlaylistItemDisplay<T>> playlist;
   final int index;
   final int? theme;
   final bool isTV;
@@ -106,7 +106,7 @@ class _CommonPlayerPageState<T> extends State<CommonPlayerPage<T>> {
                     final item = _controller.currentItem!;
                     showNotification(
                       context,
-                      Api.downloadTaskCreate(item.url.queryParameters['id']!),
+                      Api.downloadTaskCreate(item.url!.queryParameters['id']),
                       successText: AppLocalizations.of(context)!.tipsForDownload,
                     );
                   },
@@ -164,7 +164,7 @@ class _CommonPlayerPageState<T> extends State<CommonPlayerPage<T>> {
   }
 }
 
-extension on PlaylistItem<dynamic> {
+extension on PlaylistItemDisplay<dynamic> {
   bool get downloadable {
     if (source is Movie) {
       return !(source as Movie).downloaded;

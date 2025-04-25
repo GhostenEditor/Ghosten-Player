@@ -15,7 +15,6 @@ import '../utils/utils.dart';
 import 'components/overview.dart';
 import 'components/scaffold.dart';
 import 'dialogs/movie_metadata.dart';
-import 'dialogs/subtitle.dart';
 import 'mixins/action.dart';
 import 'mixins/searchable.dart';
 
@@ -252,11 +251,11 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin, SearchableM
             title: Text(AppLocalizations.of(context)!.buttonSubtitle),
             leading: const Icon(Icons.subtitles_outlined),
             onTap: () async {
-              final subtitle = await Navigator.of(context).push<SubtitleData>(FadeInPageRoute(builder: (context) => const SubtitleDialog()));
-              if (subtitle != null && context.mounted) {
-                final resp = await showNotification(context, Api.movieSubtitleUpdateById(id: item.id, subtitle: subtitle));
-                if (resp?.error == null) setState(() => refresh = true);
-              }
+              // final subtitle = await Navigator.of(context).push<SubtitleData>(FadeInPageRoute(builder: (context) => const SubtitleDialog()));
+              // if (subtitle != null && context.mounted) {
+              //   final resp = await showNotification(context, Api.movieSubtitleUpdateById(id: item.id, subtitle: subtitle));
+              //   if (resp?.error == null) setState(() => refresh = true);
+              // }
             },
           ),
           buildDownloadAction(context, item.fileId),

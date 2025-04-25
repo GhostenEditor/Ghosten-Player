@@ -404,12 +404,14 @@ class Studio extends Equatable {
 }
 
 class SubtitleData {
-  final Uri? url;
+  final dynamic id;
+  final String? url;
   final String? title;
   final String? language;
   final String? mimeType;
 
   const SubtitleData({
+    this.id,
     this.url,
     this.mimeType,
     this.title,
@@ -419,7 +421,8 @@ class SubtitleData {
   static const SubtitleData empty = SubtitleData();
 
   SubtitleData.fromJson(Json json)
-      : url = Uri.parse(json['url']),
+      : id = json['id'],
+        url = json['url'],
         title = json['title'],
         language = json['language'],
         mimeType = json['mimeType'];
@@ -608,6 +611,7 @@ class DriverFile {
   final FileCategory? category;
   final int? size;
   final Uri? url;
+  final String? fileId;
 
   DriverFile.fromJson(Json json)
       : name = json['name'],
@@ -618,7 +622,8 @@ class DriverFile {
         createdAt = (json['createdAt'] as String?)?.toDateTime(),
         updatedAt = (json['updatedAt'] as String?)?.toDateTime(),
         size = json['size'],
-        url = json['url'] != null ? Uri.tryParse(json['url']) : null;
+        url = json['url'] != null ? Uri.tryParse(json['url']) : null,
+        fileId = json['fileId'];
 }
 
 class PlayerHistory {

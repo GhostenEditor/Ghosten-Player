@@ -50,10 +50,17 @@ class _TVDetailState extends State<TVDetail> with ActionMixin<TVDetail>, Searcha
   final _modalBottomSheetHistory = <BuildContext>[];
   late final _autoPlay = Provider.of<UserConfig>(context, listen: false).autoPlay;
 
-  Future<PlaylistItem<TVEpisode>> onGetPlayBackInfo(int index) async {
-    final data = await Api.playbackInfo(_controller.currentItem!.source.fileId);
+  Future<PlaylistItem> onGetPlayBackInfo(PlaylistItemDisplay<TVEpisode> item) async {
+    final data = await Api.playbackInfo(item.fileId);
     return PlaylistItem(
-        url: Uri.parse(data.url).normalize(), source: _controller.currentItem!.source, subtitles: data.subtitles.map((d) => d.toSubtitle()).toList());
+      title: item.title,
+      description: item.description,
+      poster: item.poster,
+      start: item.start,
+      end: item.end,
+      url: Uri.parse(data.url).normalize(),
+      subtitles: data.subtitles.map((d) => d.toSubtitle()).toList(),
+    );
   }
 
   @override
@@ -351,7 +358,7 @@ class _PlaylistSidebar extends StatefulWidget {
   const _PlaylistSidebar({this.activeIndex, required this.playlist, this.onTap, this.themeColor});
 
   final int? activeIndex;
-  final List<PlaylistItem<TVEpisode>> playlist;
+  final List<PlaylistItemDisplay<TVEpisode>> playlist;
   final int? themeColor;
 
   final ValueChanged<int>? onTap;

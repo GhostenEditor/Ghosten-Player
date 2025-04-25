@@ -16,7 +16,7 @@ class PlayerCast<T> extends StatefulWidget {
   final CastDevice device;
   final int index;
   final int? theme;
-  final List<PlaylistItem<T>> playlist;
+  final List<PlaylistItemDisplay<T>> playlist;
 
   const PlayerCast({
     super.key,
@@ -43,7 +43,7 @@ class _PlayerCastState<T> extends State<PlayerCast<T>> {
 
   bool get isLast => index.value == widget.playlist.length - 1;
 
-  PlaylistItem<T> get currentItem => widget.playlist.elementAt(index.value);
+  PlaylistItemDisplay<T> get currentItem => widget.playlist.elementAt(index.value);
 
   @override
   void initState() {
@@ -358,7 +358,7 @@ class _PlayerCastState<T> extends State<PlayerCast<T>> {
     if (!initial && fixedIndex == this.index.value) {
       return;
     }
-    final uri = widget.playlist[index].url;
+    final uri = widget.playlist[index].url!;
     if (uri.host == '127.0.0.1') {
       await device.setUrl(uri.replace(host: await PlayerPlatform.instance.getLocalIpAddress()), title: currentItem.title ?? '');
     } else {
@@ -371,7 +371,7 @@ class _PlayerCastState<T> extends State<PlayerCast<T>> {
   }
 }
 
-class _PlayerArtwork<T extends PlaylistItem<dynamic>> extends StatelessWidget {
+class _PlayerArtwork<T extends PlaylistItemDisplay<dynamic>> extends StatelessWidget {
   final T item;
   final ValueNotifier<bool> isPlaying;
 

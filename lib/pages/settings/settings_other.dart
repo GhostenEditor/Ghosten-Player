@@ -156,7 +156,7 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
 }
 
 class _ScraperSettingSection extends StatefulWidget {
-  const _ScraperSettingSection({super.key, required this.settingScraper, required this.onChanged});
+  const _ScraperSettingSection({required this.settingScraper, required this.onChanged});
 
   final ValueChanged<SettingScraper> onChanged;
 

@@ -115,30 +115,86 @@ enum AspectRatioType {
   }
 }
 
-class PlaylistItem<T> extends Equatable {
-  final String? poster;
+class PlaylistItemDisplay<T> extends Equatable {
   final String? title;
   final String? description;
-  final Uri url;
+  final String? poster;
+  final String? fileId;
+  final Uri? url;
+  final T source;
   final Duration start;
   final Duration end;
-  final Duration? duration;
-  final List<Subtitle>? subtitles;
-  final T source;
 
-  const PlaylistItem({
-    required this.url,
+  const PlaylistItemDisplay({
     required this.source,
+    this.fileId,
     this.title,
     this.description,
     this.poster,
-    this.subtitles,
-    this.duration,
+    this.url,
     this.start = Duration.zero,
     this.end = Duration.zero,
   });
 
-  PlaylistItem<T> copyWith({
+  PlaylistItemDisplay<T> copyWith({
+    String? poster,
+    String? title,
+    String? description,
+    Uri? url,
+    Duration? start,
+    Duration? end,
+    T? source,
+  }) {
+    return PlaylistItemDisplay(
+      poster: poster ?? this.poster,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      url: url ?? this.url,
+      start: start ?? this.start,
+      end: end ?? this.end,
+      source: source ?? this.source,
+    );
+  }
+
+  PlaylistItem toItem({
+    Uri? url,
+    List<Subtitle> subtitles = const [],
+  }) {
+    return PlaylistItem(
+      poster: poster,
+      title: title,
+      description: description,
+      url: url ?? this.url,
+      start: start,
+      end: end,
+      subtitles: subtitles,
+    );
+  }
+
+  @override
+  List<Object?> get props => [title, poster];
+}
+
+class PlaylistItem extends Equatable {
+  final String? poster;
+  final String? title;
+  final String? description;
+  final Uri? url;
+  final Duration start;
+  final Duration end;
+  final List<Subtitle>? subtitles;
+
+  const PlaylistItem({
+    this.url,
+    this.title,
+    this.description,
+    this.poster,
+    this.subtitles,
+    this.start = Duration.zero,
+    this.end = Duration.zero,
+  });
+
+  PlaylistItem copyWith({
     String? poster,
     String? title,
     String? description,
@@ -155,9 +211,7 @@ class PlaylistItem<T> extends Equatable {
       url: url ?? this.url,
       start: start ?? this.start,
       end: end ?? this.end,
-      duration: duration ?? this.duration,
       subtitles: subtitles ?? this.subtitles,
-      source: source,
     );
   }
 

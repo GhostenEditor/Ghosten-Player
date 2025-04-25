@@ -102,10 +102,11 @@ class _EpisodeDetailState extends State<EpisodeDetail> with ActionMixin<EpisodeD
                                         PopupMenuItem(
                                           padding: EdgeInsets.zero,
                                           onTap: () async {
-                                            final subtitle = await showDialog<SubtitleData>(context: context, builder: (context) => const SubtitleDialog());
-                                            if (subtitle != null && context.mounted) {
-                                              await showNotification(context, Api.tvEpisodeSubtitleUpdateById(id: item.id, subtitle: subtitle));
-                                            }
+                                            // final subtitle = await showDialog<SubtitleData>(context: context, builder: (context) => const SubtitleDialog());
+                                            // if (subtitle != null && context.mounted) {
+                                            //   await showNotification(context, Api.tvEpisodeSubtitleUpdateById(id: item.id, subtitle: subtitle));
+                                            // }
+                                            navigateTo(context, SubtitleManager(fileId: item.fileId!));
                                           },
                                           child: ListTile(
                                             contentPadding: const EdgeInsets.symmetric(horizontal: 16),

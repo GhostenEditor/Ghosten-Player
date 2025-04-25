@@ -3,8 +3,8 @@ import 'package:video_player/player.dart';
 
 import '../utils/utils.dart';
 
-extension FromMedia<T> on PlaylistItem<T> {
-  static PlaylistItem<TVEpisode> fromEpisode(TVEpisode episode) {
+extension FromMedia<T> on PlaylistItemDisplay<T> {
+  static PlaylistItemDisplay<TVEpisode> fromEpisode(TVEpisode episode) {
     Duration start = episode.skipIntro > (episode.lastPlayedPosition ?? Duration.zero) ? episode.skipIntro : (episode.lastPlayedPosition ?? Duration.zero);
     if (episode.duration != null) {
       if (start > episode.duration! * 0.95) {
@@ -12,36 +12,32 @@ extension FromMedia<T> on PlaylistItem<T> {
       }
     }
 
-    return PlaylistItem(
+    return PlaylistItemDisplay(
+      fileId: episode.fileId,
       title: episode.displayTitle(),
       description: '${episode.seriesTitle} S${episode.season} E${episode.episode}${episode.airDate == null ? '' : ' - ${episode.airDate?.format()}'}',
       url: Uri(),
       poster: episode.poster,
-      subtitles: const [],
-      // episode.subtitles.map((e) => e.toSubtitle()).toList(),
       start: start,
       end: episode.skipEnding,
-      duration: episode.duration,
       source: episode,
     );
   }
 
-  static PlaylistItem<Movie> fromMovie(Movie movie) {
-    return PlaylistItem(
+  static PlaylistItemDisplay<Movie> fromMovie(Movie movie) {
+    return PlaylistItemDisplay(
+      fileId: movie.fileId,
       title: movie.displayTitle(),
       description: movie.airDate?.format(),
       url: Uri(),
       poster: movie.poster,
-      subtitles: const [],
-      // movie.subtitles.map((e) => e.toSubtitle()).toList(),
       start: movie.lastPlayedPosition ?? Duration.zero,
-      duration: movie.duration,
       source: movie,
     );
   }
 
-  static PlaylistItem<Channel> fromChannel(Channel channel) {
-    return PlaylistItem(
+  static PlaylistItemDisplay<Channel> fromChannel(Channel channel) {
+    return PlaylistItemDisplay(
       title: channel.title,
       description: channel.category,
       url: channel.links.first,
@@ -53,8 +49,9 @@ extension FromMedia<T> on PlaylistItem<T> {
 
 extension ConvertSubtitle on SubtitleData {
   Subtitle toSubtitle() {
+    final uri = Uri.parse(url!);
     return Subtitle(
-      url: url!.host.isEmpty ? url!.replace(host: Api.baseUrl.host, port: Api.baseUrl.port, scheme: Api.baseUrl.scheme) : url!,
+      url: uri.host.isEmpty ? uri.replace(host: Api.baseUrl.host, port: Api.baseUrl.port, scheme: Api.baseUrl.scheme) : uri,
       mimeType: SubtitleMimeType.fromString(mimeType)!,
       language: language,
     );
