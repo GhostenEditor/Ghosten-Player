@@ -243,12 +243,8 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
                       const PopupMenuDivider(),
                       buildEditMetadataAction(context, () async {
                         final item = context.read<MovieCubit>().state!;
-                        final res = await showDialog<(String, int?)>(context: context, builder: (context) => MovieMetadata(movie: item));
-                        if (res != null) {
-                          final (title, year) = res;
-                          await Api.movieMetadataUpdateById(id: widget.id, title: title, airDate: year == null ? null : DateTime(year));
-                          if (context.mounted) context.read<MovieCubit>().update();
-                        }
+                        final res = await showDialog<bool>(context: context, builder: (context) => MovieMetadata(movie: item));
+                        if ((res ?? false) && context.mounted) context.read<MovieCubit>().update();
                       }),
                       PopupMenuItem(
                         padding: EdgeInsets.zero,

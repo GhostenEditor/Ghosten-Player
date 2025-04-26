@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:rxdart/rxdart.dart';
@@ -339,8 +338,8 @@ abstract class ApiPlatform extends PlatformInterface {
     return data!.map((e) => Movie.fromJson(e)).toList();
   }
 
-  Future<void> movieMetadataUpdateById({required dynamic id, required String title, DateTime? airDate}) {
-    return client.post('/movie/metadata/update/id', data: {'id': id, 'title': title, 'airDate': airDate?.format()});
+  Future<void> movieMetadataUpdateById(Json data) {
+    return client.post('/movie/metadata/update/id', data: data);
   }
 
   // Future<void> movieSubtitleUpdateById({required dynamic id, required SubtitleData subtitle}) {
@@ -412,8 +411,8 @@ abstract class ApiPlatform extends PlatformInterface {
     return client.post('/tv/series/sync/id', data: {'id': id});
   }
 
-  Future<void> tvSeriesMetadataUpdateById({required dynamic id, required String title, DateTime? airDate}) {
-    return client.post('/tv/series/metadata/update/id', data: {'id': id, 'title': title, 'airDate': airDate?.format()});
+  Future<void> tvSeriesMetadataUpdateById(Json data) {
+    return client.post('/tv/series/metadata/update/id', data: data);
   }
 
   Future<void> tvSeriesRenameById(dynamic id) {
@@ -449,8 +448,8 @@ abstract class ApiPlatform extends PlatformInterface {
     return TVEpisode.fromJson(data!);
   }
 
-  Future<void> tvEpisodeMetadataUpdateById({required dynamic id, required String title, required int episode}) {
-    return client.post('/tv/episode/metadata/update/id', data: {'id': id, 'title': title, 'episode': episode});
+  Future<void> tvEpisodeMetadataUpdateById(Json data) {
+    return client.post('/tv/episode/metadata/update/id', data: data);
   }
 
   Future<void> tvEpisodeDeleteById(dynamic id) {
@@ -664,10 +663,4 @@ abstract class ApiClient {
   Future<T?> put<T>(String path, {Object? data});
 
   Future<T?> delete<T>(String path, {Object? data});
-}
-
-extension on DateTime {
-  String format() {
-    return formatDate(this, [yyyy, '-', mm, '-', dd]);
-  }
 }

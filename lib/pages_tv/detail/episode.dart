@@ -10,10 +10,8 @@ import '../components/future_builder_handler.dart';
 import '../components/icon_button.dart';
 import '../components/setting.dart';
 import '../utils/player.dart';
-import '../utils/utils.dart';
 import 'components/overview.dart';
 import 'components/scaffold.dart';
-import 'dialogs/episode_metadata.dart';
 import 'mixins/action.dart';
 
 class EpisodeDetail extends StatefulWidget {
@@ -198,12 +196,12 @@ class _EpisodeDetailState extends State<EpisodeDetail> with ActionMixin {
           buildSkipEndingAction(context, item, MediaType.episode, item.skipEnding),
           const DividerSettingItem(),
           buildEditMetadataAction(context, () async {
-            final resp = await Navigator.of(context).push<(String, int)>(FadeInPageRoute(builder: (context) => EpisodeMetadata(episode: item)));
-            if (resp is (String, int)) {
-              final (title, episode) = resp;
-              await Api.tvEpisodeMetadataUpdateById(id: item.id, title: title, episode: episode);
-              setState(() => refresh = true);
-            }
+            // final resp = await Navigator.of(context).push<(String, int)>(FadeInPageRoute(builder: (context) => EpisodeMetadata(episode: item)));
+            // if (resp is (String, int)) {
+            //   final (title, episode) = resp;
+            //   await Api.tvEpisodeMetadataUpdateById(id: item.id, title: title, episode: episode);
+            //   setState(() => refresh = true);
+            // }
           }),
           ButtonSettingItem(
             title: Text(AppLocalizations.of(context)!.buttonSubtitle),

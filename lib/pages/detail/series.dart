@@ -297,12 +297,8 @@ class _TVDetailState extends State<TVDetail> with ActionMixin<TVDetail>, Searcha
                     buildSkipFromEndAction<TVSeriesCubit, TVSeries>(context, item, MediaType.series, item.skipEnding),
                     const PopupMenuDivider(),
                     buildEditMetadataAction(context, () async {
-                      final res = await showDialog<(String, int?)>(context: context, builder: (context) => SeriesMetadata(series: item));
-                      if (res != null) {
-                        final (title, year) = res;
-                        await Api.tvSeriesMetadataUpdateById(id: item.id, title: title, airDate: year == null ? null : DateTime(year));
-                        if (context.mounted) context.read<TVSeriesCubit>().update();
-                      }
+                      final res = await showDialog<bool>(context: context, builder: (context) => SeriesMetadata(series: item));
+                      if ((res ?? false) && context.mounted) context.read<TVSeriesCubit>().update();
                     }),
                     if (item.scrapper.id != null) buildHomeAction(context, ImdbUri(MediaType.series, item.scrapper.id!).toUri()),
                     const PopupMenuDivider(),

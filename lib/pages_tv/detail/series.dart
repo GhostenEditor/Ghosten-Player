@@ -15,7 +15,6 @@ import '../utils/utils.dart';
 import 'components/actors.dart';
 import 'components/overview.dart';
 import 'components/scaffold.dart';
-import 'dialogs/series_metadata.dart';
 import 'mixins/action.dart';
 import 'mixins/searchable.dart';
 import 'season.dart';
@@ -266,12 +265,12 @@ class _TVDetailState extends State<TVDetail> with ActionMixin, SearchableMixin {
           buildSkipEndingAction(context, item, MediaType.series, item.skipEnding),
           const Divider(),
           buildEditMetadataAction(context, () async {
-            final res = await Navigator.of(context).push<(String, int?)>(FadeInPageRoute(builder: (context) => SeriesMetadata(series: item)));
-            if (res != null) {
-              final (title, year) = res;
-              await Api.tvSeriesMetadataUpdateById(id: item.id, title: title, airDate: year == null ? null : DateTime(year));
-              if (context.mounted) setState(() => refresh = true);
-            }
+            // final res = await Navigator.of(context).push<(String, int?)>(FadeInPageRoute(builder: (context) => SeriesMetadata(series: item)));
+            // if (res != null) {
+            //   final (title, year) = res;
+            //   // await Api.tvSeriesMetadataUpdateById(id: item.id, title: title, airDate: year == null ? null : DateTime(year));
+            //   if (context.mounted) setState(() => refresh = true);
+            // }
           }),
           if (item.scrapper.id != null) buildHomeAction(context, ImdbUri(MediaType.series, item.scrapper.id!).toUri()),
           const Divider(),

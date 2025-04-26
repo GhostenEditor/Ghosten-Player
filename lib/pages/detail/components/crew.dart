@@ -47,7 +47,11 @@ class CrewSection extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (cr.department != null) Text(cr.department!),
-                          if (cr.job != null) Text('${cr.job} (${cr.episodeCount}集)'),
+                          Text.rich(TextSpan(children: [
+                            if (cr.job != null) TextSpan(text: '${cr.job}'),
+                            if (cr.episodeCount != null) const WidgetSpan(child: SizedBox(width: 4)),
+                            if (cr.episodeCount != null) TextSpan(text: '(${AppLocalizations.of(context)!.episodeCount(cr.episodeCount!)})'),
+                          ]))
                         ],
                       ),
                       onTap: () => navigateTo(context, SearchPage(activeTab: type == MediaType.movie ? 1 : 0, selectedCrew: [cr])),

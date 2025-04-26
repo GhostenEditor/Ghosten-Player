@@ -92,12 +92,8 @@ class _EpisodeDetailState extends State<EpisodeDetail> with ActionMixin<EpisodeD
                                         buildSkipFromEndAction<TVEpisodeCubit, TVEpisode>(context, item, MediaType.episode, item.skipEnding),
                                         const PopupMenuDivider(),
                                         buildEditMetadataAction(context, () async {
-                                          final res = await showDialog<(String, int)>(context: context, builder: (context) => EpisodeMetadata(episode: item));
-                                          if (res != null) {
-                                            final (title, episode) = res;
-                                            await Api.tvEpisodeMetadataUpdateById(id: item.id, title: title, episode: episode);
-                                            if (context.mounted) context.read<TVEpisodeCubit>().update();
-                                          }
+                                          final res = await showDialog<bool>(context: context, builder: (context) => EpisodeMetadata(episode: item));
+                                          if ((res ?? false) && context.mounted) context.read<TVEpisodeCubit>().update();
                                         }),
                                         PopupMenuItem(
                                           padding: EdgeInsets.zero,

@@ -11,10 +11,8 @@ import '../components/icon_button.dart';
 import '../components/setting.dart';
 import '../utils/notification.dart';
 import '../utils/player.dart';
-import '../utils/utils.dart';
 import 'components/overview.dart';
 import 'components/scaffold.dart';
-import 'dialogs/movie_metadata.dart';
 import 'mixins/action.dart';
 import 'mixins/searchable.dart';
 
@@ -240,12 +238,12 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin, SearchableM
           ),
           const DividerSettingItem(),
           buildEditMetadataAction(context, () async {
-            final res = await Navigator.of(context).push<(String, int?)>(FadeInPageRoute(builder: (context) => MovieMetadata(movie: item)));
-            if (res != null) {
-              final (title, year) = res;
-              await Api.movieMetadataUpdateById(id: item.id, title: title, airDate: year == null ? null : DateTime(year));
-              setState(() => refresh = true);
-            }
+            // final res = await Navigator.of(context).push<(String, int?)>(FadeInPageRoute(builder: (context) => MovieMetadata(movie: item)));
+            // if (res != null) {
+            //   final (title, year) = res;
+            //   await Api.movieMetadataUpdateById(id: item.id, title: title, airDate: year == null ? null : DateTime(year));
+            //   setState(() => refresh = true);
+            // }
           }),
           ButtonSettingItem(
             title: Text(AppLocalizations.of(context)!.buttonSubtitle),

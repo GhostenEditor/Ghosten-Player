@@ -117,7 +117,7 @@ class MediaRecommendation {
   final String? overview;
   final int? themeColor;
   final double? voteAverage;
-  final int voteCount;
+  final int? voteCount;
   final MediaStatus status;
   final List<Genre> genres;
 
@@ -146,7 +146,7 @@ class MediaRecommendation {
 }
 
 class Movie extends Media {
-  final int voteCount;
+  final int? voteCount;
   final String? country;
   final String? trailer;
   final MediaStatus status;
