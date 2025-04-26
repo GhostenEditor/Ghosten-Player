@@ -177,9 +177,9 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin<SeasonDeta
                                                   episode: episode,
                                                   onTap: () async {
                                                     final episodes = context.read<TVSeasonCubit>().state!.episodes;
-                                                    await widget.controller
-                                                        .setSources(episodes.map((episode) => FromMedia.fromEpisode(episode)).toList(), index);
+                                                    widget.controller.setPlaylist(episodes.map((episode) => FromMedia.fromEpisode(episode)).toList());
                                                     await widget.controller.next(index);
+                                                    await widget.controller.play();
                                                   },
                                                   onTapMore: () async {
                                                     final box = rootContext.findRenderObject()! as RenderBox;
@@ -313,11 +313,11 @@ class _EpisodeListTile extends StatelessWidget {
                     ),
                     IconButton(
                       onPressed: onTapMore,
-                      icon: const Icon(Icons.more_horiz_rounded),
+                      icon: const Icon(Icons.more_vert_rounded),
                       style: IconButton.styleFrom(
                         visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
                         padding: EdgeInsets.zero,
-                        iconSize: 12,
+                        iconSize: 16,
                         minimumSize: const Size.square(36),
                       ),
                     ),

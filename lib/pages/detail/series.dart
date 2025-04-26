@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:api/api.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -64,6 +66,12 @@ class _TVDetailState extends State<TVDetail> with ActionMixin<TVDetail>, Searcha
   }
 
   @override
+  void initState() {
+    _updatePlaylist(context);
+    super.initState();
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
@@ -83,7 +91,12 @@ class _TVDetailState extends State<TVDetail> with ActionMixin<TVDetail>, Searcha
                     theme: themeColor,
                     artwork: BlocSelector<TVSeriesCubit, TVSeries?, (String?, String?)>(
                         selector: (movie) => (movie?.backdrop, movie?.logo), builder: (context, item) => PlayerBackdrop(backdrop: item.$1, logo: item.$2)),
-                    initialized: () => _updatePlaylist(context),
+                    initialized: () {
+                      if (_controller.index.value == null) {
+                        final index = _controller.playlist.value.indexWhere((el) => el.source.id == widget.playingId);
+                        _controller.next(max(index, 0));
+                      }
+                    },
                     beforeMediaChanged: (index, position, duration) {
                       final item = _controller.playlist.value[index];
                       Api.updatePlayedStatus(LibraryType.tv, item.source.id, position: position, duration: duration);
@@ -143,7 +156,10 @@ class _TVDetailState extends State<TVDetail> with ActionMixin<TVDetail>, Searcha
                                         imageHeight: 90,
                                         playlist: _controller.playlist.value,
                                         activeIndex: _controller.index.value,
-                                        onTap: (it) => _controller.next(it),
+                                        onTap: (it) async {
+                                          await _controller.next(it);
+                                          await _controller.play();
+                                        },
                                       )),
                             BlocSelector<TVSeriesCubit, TVSeries?, List<Studio>?>(
                                 selector: (movie) => movie?.studios ?? [],
@@ -266,6 +282,7 @@ class _TVDetailState extends State<TVDetail> with ActionMixin<TVDetail>, Searcha
                     ),
                     PopupMenuItem(
                       padding: EdgeInsets.zero,
+                      enabled: false,
                       onTap: () => showNotification(context, Api.tvSeriesRenameById(item.id)),
                       child: ListTile(
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16),
@@ -339,7 +356,8 @@ class _TVDetailState extends State<TVDetail> with ActionMixin<TVDetail>, Searcha
       final episode = await Api.tvEpisodeQueryById(widget.playingId);
       final season = await Api.tvSeasonQueryById(episode.seasonId);
       final playlist = season.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList();
-      _controller.setSources(playlist, playlist.indexWhere((el) => el.source.id == widget.playingId));
+      _controller.setPlaylist(playlist);
+      await _controller.next(playlist.indexWhere((el) => el.source.id == widget.playingId));
       if (_autoPlay) _controller.play();
     } else {
       final item = await Api.tvSeriesQueryById(widget.id);
@@ -347,7 +365,8 @@ class _TVDetailState extends State<TVDetail> with ActionMixin<TVDetail>, Searcha
       if (res != null) {
         final season = await Api.tvSeasonQueryById(res.seasonId);
         final playlist = season.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList();
-        _controller.setSources(playlist, playlist.indexWhere((el) => el.source.id == res.id));
+        _controller.setPlaylist(playlist);
+        await _controller.next(playlist.indexWhere((el) => el.source.id == res.id));
         if (_autoPlay) _controller.play();
       }
     }

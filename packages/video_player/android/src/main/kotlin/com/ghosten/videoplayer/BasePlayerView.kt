@@ -42,4 +42,6 @@ internal class Subtitle(
     val url: String,
     val mimeType: String,
     val language: String?,
+    val selected: Boolean,
+    val label: String?,
 )

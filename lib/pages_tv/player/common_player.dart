@@ -46,7 +46,7 @@ class _CommonPlayerPageState<T> extends State<CommonPlayerPage<T>> {
       children: [
         PlayerPlatformView(
           initialized: () {
-            _controller.setSources(widget.playlist, widget.index);
+            _controller.setSources(widget.playlist);
             _controller.play();
           },
         ),

@@ -417,125 +417,135 @@ class _SearchFilterState extends State<_SearchFilter> {
                     },
                   ),
                 ),
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  sliver: FutureBuilderSliverHandler(
-                      initialData: const <Genre>[],
-                      future: Api.genreQueryAll(),
-                      builder: (context, snapshot) {
-                        return _MultiSelect(
-                          label: AppLocalizations.of(context)!.titleGenre,
-                          collapsedMax: 9,
-                          selected: _selectedGenre,
-                          items: snapshot.requireData,
-                          itemBuilder: (context, item) => Text(item.name, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, maxLines: 2),
-                          onChanged: (value) {
-                            _selectedGenre = value;
-                          },
-                        );
-                      }),
-                ),
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  sliver: FutureBuilderSliverHandler(
-                      initialData: const <Studio>[],
-                      future: Api.studioQueryAll(),
-                      builder: (context, snapshot) {
-                        return _MultiSelect(
-                          label: AppLocalizations.of(context)!.titleStudios,
-                          collapsedMax: 6,
-                          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                            maxCrossAxisExtent: 150,
-                            childAspectRatio: 3,
-                            mainAxisSpacing: 8,
-                            crossAxisSpacing: 8,
-                          ),
-                          selected: _selectedStudio,
-                          items: snapshot.requireData,
-                          itemBuilder: (context, item) => item.logo != null
-                              ? Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                                  child: AsyncImage(item.logo!, errorIconSize: 12),
-                                )
-                              : Text(item.name, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, maxLines: 2),
-                          onChanged: (value) {
-                            _selectedStudio = value;
-                          },
-                        );
-                      }),
-                ),
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  sliver: FutureBuilderSliverHandler(
-                      initialData: const <Keyword>[],
-                      future: Api.keywordQueryAll(),
-                      builder: (context, snapshot) {
-                        return _MultiSelect(
-                          label: AppLocalizations.of(context)!.titleKeyword,
-                          collapsedMax: 6,
-                          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                            maxCrossAxisExtent: 150,
-                            childAspectRatio: 3,
-                            mainAxisSpacing: 8,
-                            crossAxisSpacing: 8,
-                          ),
-                          selected: _selectedKeyword,
-                          items: snapshot.requireData,
-                          itemBuilder: (context, item) => Text(item.name, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, maxLines: 2),
-                          onChanged: (value) {
-                            _selectedKeyword = value;
-                          },
-                        );
-                      }),
-                ),
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  sliver: FutureBuilderSliverHandler(
-                      initialData: const <MediaCast>[],
-                      future: Api.castQueryAll(),
-                      builder: (context, snapshot) {
-                        return _MultiSelect(
-                          label: AppLocalizations.of(context)!.titleCast,
-                          collapsedMax: 6,
-                          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                            maxCrossAxisExtent: 150,
-                            childAspectRatio: 3,
-                            mainAxisSpacing: 8,
-                            crossAxisSpacing: 8,
-                          ),
-                          selected: _selectedCast,
-                          items: snapshot.requireData,
-                          itemBuilder: (context, item) => Text(item.name, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, maxLines: 2),
-                          onChanged: (value) {
-                            _selectedCast = value;
-                          },
-                        );
-                      }),
-                ),
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  sliver: FutureBuilderSliverHandler(
-                      initialData: const <MediaCrew>[],
-                      future: Api.crewQueryAll(),
-                      builder: (context, snapshot) {
-                        return _MultiSelect(
-                          label: AppLocalizations.of(context)!.titleCast,
-                          collapsedMax: 6,
-                          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                            maxCrossAxisExtent: 150,
-                            childAspectRatio: 3,
-                            mainAxisSpacing: 8,
-                            crossAxisSpacing: 8,
-                          ),
-                          selected: _selectedCrew,
-                          items: snapshot.requireData,
-                          itemBuilder: (context, item) => Text(item.name, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, maxLines: 2),
-                          onChanged: (value) {
-                            _selectedCrew = value;
-                          },
-                        );
-                      }),
-                ),
+                FutureBuilderSliverHandler(
+                    initialData: const <Genre>[],
+                    future: Api.genreQueryAll(),
+                    builder: (context, snapshot) {
+                      return SliverPadding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        sliver: snapshot.requireData.isNotEmpty
+                            ? _MultiSelect(
+                                label: AppLocalizations.of(context)!.titleGenre,
+                                collapsedMax: 9,
+                                selected: _selectedGenre,
+                                items: snapshot.requireData,
+                                itemBuilder: (context, item) => Text(item.name, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, maxLines: 2),
+                                onChanged: (value) {
+                                  _selectedGenre = value;
+                                },
+                              )
+                            : const SliverToBoxAdapter(),
+                      );
+                    }),
+                FutureBuilderSliverHandler(
+                    initialData: const <Studio>[],
+                    future: Api.studioQueryAll(),
+                    builder: (context, snapshot) {
+                      return snapshot.requireData.isNotEmpty
+                          ? SliverPadding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              sliver: _MultiSelect(
+                                label: AppLocalizations.of(context)!.titleStudios,
+                                collapsedMax: 6,
+                                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                                  maxCrossAxisExtent: 150,
+                                  childAspectRatio: 3,
+                                  mainAxisSpacing: 8,
+                                  crossAxisSpacing: 8,
+                                ),
+                                selected: _selectedStudio,
+                                items: snapshot.requireData,
+                                itemBuilder: (context, item) => item.logo != null
+                                    ? Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                        child: AsyncImage(item.logo!, errorIconSize: 12),
+                                      )
+                                    : Text(item.name, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, maxLines: 2),
+                                onChanged: (value) {
+                                  _selectedStudio = value;
+                                },
+                              ),
+                            )
+                          : const SliverToBoxAdapter();
+                    }),
+                FutureBuilderSliverHandler(
+                    initialData: const <Keyword>[],
+                    future: Api.keywordQueryAll(),
+                    builder: (context, snapshot) {
+                      return snapshot.requireData.isNotEmpty
+                          ? SliverPadding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              sliver: _MultiSelect(
+                                label: AppLocalizations.of(context)!.titleKeyword,
+                                collapsedMax: 6,
+                                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                                  maxCrossAxisExtent: 150,
+                                  childAspectRatio: 3,
+                                  mainAxisSpacing: 8,
+                                  crossAxisSpacing: 8,
+                                ),
+                                selected: _selectedKeyword,
+                                items: snapshot.requireData,
+                                itemBuilder: (context, item) => Text(item.name, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, maxLines: 2),
+                                onChanged: (value) {
+                                  _selectedKeyword = value;
+                                },
+                              ),
+                            )
+                          : const SliverToBoxAdapter();
+                    }),
+                FutureBuilderSliverHandler(
+                    initialData: const <MediaCast>[],
+                    future: Api.castQueryAll(),
+                    builder: (context, snapshot) {
+                      return snapshot.requireData.isNotEmpty
+                          ? SliverPadding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              sliver: _MultiSelect(
+                                label: AppLocalizations.of(context)!.titleCast,
+                                collapsedMax: 6,
+                                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                                  maxCrossAxisExtent: 150,
+                                  childAspectRatio: 3,
+                                  mainAxisSpacing: 8,
+                                  crossAxisSpacing: 8,
+                                ),
+                                selected: _selectedCast,
+                                items: snapshot.requireData,
+                                itemBuilder: (context, item) => Text(item.name, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, maxLines: 2),
+                                onChanged: (value) {
+                                  _selectedCast = value;
+                                },
+                              ),
+                            )
+                          : const SliverToBoxAdapter();
+                    }),
+                FutureBuilderSliverHandler(
+                    initialData: const <MediaCrew>[],
+                    future: Api.crewQueryAll(),
+                    builder: (context, snapshot) {
+                      return snapshot.requireData.isNotEmpty
+                          ? SliverPadding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              sliver: _MultiSelect(
+                                label: AppLocalizations.of(context)!.titleCrew,
+                                collapsedMax: 6,
+                                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                                  maxCrossAxisExtent: 150,
+                                  childAspectRatio: 3,
+                                  mainAxisSpacing: 8,
+                                  crossAxisSpacing: 8,
+                                ),
+                                selected: _selectedCrew,
+                                items: snapshot.requireData,
+                                itemBuilder: (context, item) => Text(item.name, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, maxLines: 2),
+                                onChanged: (value) {
+                                  _selectedCrew = value;
+                                },
+                              ),
+                            )
+                          : const SliverToBoxAdapter();
+                    }),
                 const SliverSafeArea(sliver: SliverToBoxAdapter()),
               ],
             ),

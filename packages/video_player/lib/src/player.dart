@@ -68,6 +68,9 @@ class PlayerController<T> implements PlayerBaseController {
             fatalError.value = null;
             error.value = null;
           }
+          if (status.value == PlayerStatus.ended && index.value != null) {
+            next(index.value! + 1);
+          }
         case 'bufferingUpdate':
           bufferedPosition.value = Duration(milliseconds: call.arguments);
         case 'tracksChanged':
@@ -191,13 +194,22 @@ class PlayerController<T> implements PlayerBaseController {
     return PlayerPlatform.instance.setSource(playItem.toSource());
   }
 
-  Future<void> setSources(List<PlaylistItemDisplay<T>> playlist, int index) async {
+  void setPlaylist(List<PlaylistItemDisplay<T>> playlist) {
     if (playlist.length == this.playlist.value.length &&
         List.generate(playlist.length, (i) => i).every((index) => playlist[index] == this.playlist.value[index])) {
       return;
     }
+    this.index.value = null;
     this.playlist.value = playlist;
-    await next(index);
+  }
+
+  Future<void> setSources(List<PlaylistItemDisplay<T>> playlist) async {
+    // if (playlist.length == this.playlist.value.length &&
+    //     List.generate(playlist.length, (i) => i).every((index) => playlist[index] == this.playlist.value[index])) {
+    //   return;
+    // }
+    // this.playlist.value = playlist;
+    // // await next(index);
   }
 
   Future<void> enterFullscreen() {

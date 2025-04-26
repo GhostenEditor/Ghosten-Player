@@ -200,10 +200,16 @@ class _ScraperSettingSectionState extends State<_ScraperSettingSection> {
               .toList(),
         ),
         SwitchListTile(
-            title: const Text('NFO 优先'),
-            value: widget.settingScraper.nfoPrior,
-            onChanged: (nfoPrior) {
-              widget.onChanged(widget.settingScraper.copyWith(nfoPrior: nfoPrior));
+            title: const Text('NFO 启用'),
+            value: widget.settingScraper.nfoEnabled,
+            onChanged: (nfoEnabled) {
+              widget.onChanged(widget.settingScraper.copyWith(nfoEnabled: nfoEnabled));
+            }),
+        SwitchListTile(
+            title: const Text('TMDB 启用'),
+            value: widget.settingScraper.tmdbEnabled,
+            onChanged: (tmdbEnabled) {
+              widget.onChanged(widget.settingScraper.copyWith(tmdbEnabled: tmdbEnabled));
             }),
         ListTile(
           title: const Text('TMDB Max Cast Members'),

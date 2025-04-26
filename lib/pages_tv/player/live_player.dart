@@ -118,7 +118,7 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
           fit: StackFit.expand,
           children: [
             PlayerPlatformView(initialized: () async {
-              await _controller.setSources(widget.playlist, widget.index);
+              await _controller.setSources(widget.playlist);
               await _controller.play();
             }),
             PopScope(

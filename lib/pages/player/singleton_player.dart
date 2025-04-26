@@ -68,7 +68,7 @@ class _SingletonPlayerState<T> extends State<SingletonPlayer<T>> {
             autoPip: context.read<UserConfig>().autoPip,
             initialized: () {
               _controller.enterFullscreen();
-              _controller.setSources(widget.playlist, widget.index);
+              _controller.setSources(widget.playlist);
               _controller.play();
             }),
         PlayerControlsFull(_controller, _progressController, theme: widget.theme),

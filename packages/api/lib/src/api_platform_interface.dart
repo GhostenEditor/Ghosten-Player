@@ -114,9 +114,10 @@ abstract class ApiPlatform extends PlatformInterface {
     return client.put('/subtitle/update/id', data: {
       'id': id,
       'url': subtitle.url?.toString(),
-      'title': subtitle.title,
+      'label': subtitle.label,
       'mimeType': subtitle.mimeType,
       'language': subtitle.language,
+      'selected': subtitle.selected,
     });
   }
 
@@ -450,16 +451,6 @@ abstract class ApiPlatform extends PlatformInterface {
 
   Future<void> tvEpisodeMetadataUpdateById({required dynamic id, required String title, required int episode}) {
     return client.post('/tv/episode/metadata/update/id', data: {'id': id, 'title': title, 'episode': episode});
-  }
-
-  Future<void> tvEpisodeSubtitleUpdateById({required dynamic id, required SubtitleData subtitle}) {
-    return client.post('/tv/episode/subtitle/update/id', data: {
-      'id': id,
-      'url': subtitle.url?.toString(),
-      'title': subtitle.title,
-      'mimeType': subtitle.mimeType,
-      'language': subtitle.language,
-    });
   }
 
   Future<void> tvEpisodeDeleteById(dynamic id) {

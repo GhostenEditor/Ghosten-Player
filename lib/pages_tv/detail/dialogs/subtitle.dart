@@ -66,7 +66,7 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
                         }
                       },
                     ),
-                    hintText: widget.subtitle?.title?.toString(),
+                    hintText: widget.subtitle?.label?.toString(),
                     isDense: true,
                     labelText: AppLocalizations.of(context)!.subtitleFormItemLabelUrl,
                   ),
@@ -117,7 +117,7 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
                         url: _controller.text,
                         mimeType: _mimeType,
                         language: _language,
-                        title: _filename,
+                        label: _filename,
                       ));
                     }
                   },

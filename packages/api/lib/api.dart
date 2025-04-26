@@ -83,7 +83,6 @@ class Api {
   static final tvSeasonDeleteById = ApiPlatform.instance.tvSeasonDeleteById;
   static final tvEpisodeQueryById = ApiPlatform.instance.tvEpisodeQueryById;
   static final tvEpisodeMetadataUpdateById = ApiPlatform.instance.tvEpisodeMetadataUpdateById;
-  static final tvEpisodeSubtitleUpdateById = ApiPlatform.instance.tvEpisodeSubtitleUpdateById;
   static final tvEpisodeDeleteById = ApiPlatform.instance.tvEpisodeDeleteById;
   static final libraryQueryAll = ApiPlatform.instance.libraryQueryAll;
   static final libraryInsert = ApiPlatform.instance.libraryInsert;

@@ -406,16 +406,18 @@ class Studio extends Equatable {
 class SubtitleData {
   final dynamic id;
   final String? url;
-  final String? title;
+  final String? label;
   final String? language;
   final String? mimeType;
+  final bool selected;
 
   const SubtitleData({
     this.id,
     this.url,
     this.mimeType,
-    this.title,
+    this.label,
     this.language,
+    this.selected = false,
   });
 
   static const SubtitleData empty = SubtitleData();
@@ -423,9 +425,10 @@ class SubtitleData {
   SubtitleData.fromJson(Json json)
       : id = json['id'],
         url = json['url'],
-        title = json['title'],
+        label = json['label'],
         language = json['language'],
-        mimeType = json['mimeType'];
+        mimeType = json['mimeType'],
+        selected = json['selected'];
 }
 
 class Library {
@@ -711,13 +714,15 @@ enum ScraperBehavior {
 }
 
 class SettingScraper {
-  final bool nfoPrior;
+  final bool nfoEnabled;
+  final bool tmdbEnabled;
   final ScraperBehavior behavior;
   final int tmdbMaxCast;
   final int tmdbMaxCrew;
 
   const SettingScraper({
-    required this.nfoPrior,
+    required this.nfoEnabled,
+    required this.tmdbEnabled,
     required this.behavior,
     required this.tmdbMaxCast,
     required this.tmdbMaxCrew,
@@ -725,27 +730,31 @@ class SettingScraper {
 
   SettingScraper.fromJson(Json json)
       : behavior = ScraperBehavior.fromString(json['behavior']),
-        nfoPrior = json['nfoPrior'],
+        nfoEnabled = json['nfoEnabled'],
+        tmdbEnabled = json['tmdbEnabled'],
         tmdbMaxCast = json['tmdbMaxCast'],
         tmdbMaxCrew = json['tmdbMaxCrew'];
 
   Json toJson() {
     return {
       'behavior': behavior.name,
-      'nfoPrior': nfoPrior,
+      'nfoEnabled': nfoEnabled,
+      'tmdbEnabled': tmdbEnabled,
       'tmdbMaxCast': tmdbMaxCast,
       'tmdbMaxCrew': tmdbMaxCrew,
     };
   }
 
   SettingScraper copyWith({
-    bool? nfoPrior,
+    bool? nfoEnabled,
+    bool? tmdbEnabled,
     ScraperBehavior? behavior,
     int? tmdbMaxCast,
     int? tmdbMaxCrew,
   }) {
     return SettingScraper(
-      nfoPrior: nfoPrior ?? this.nfoPrior,
+      nfoEnabled: nfoEnabled ?? this.nfoEnabled,
+      tmdbEnabled: tmdbEnabled ?? this.tmdbEnabled,
       behavior: behavior ?? this.behavior,
       tmdbMaxCast: tmdbMaxCast ?? this.tmdbMaxCast,
       tmdbMaxCrew: tmdbMaxCrew ?? this.tmdbMaxCrew,

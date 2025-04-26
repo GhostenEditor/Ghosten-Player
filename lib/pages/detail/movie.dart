@@ -81,8 +81,9 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
                   initialized: () async {
                     if (!mounted) return;
                     final item = await Api.movieQueryById(widget.id);
-                    _controller.setSources([FromMedia.fromMovie(item)], 0);
-                    if (_autoPlay) _controller.play();
+                    _controller.setPlaylist([FromMedia.fromMovie(item)]);
+                    await _controller.next(0);
+                    if (_autoPlay) await _controller.play();
                   },
                   beforeMediaChanged: (index, position, duration) {
                     final item = _controller.playlist.value[index];
@@ -229,6 +230,7 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
                       const PopupMenuDivider(),
                       PopupMenuItem(
                         padding: EdgeInsets.zero,
+                        enabled: false,
                         onTap: () => showNotification(context, Api.movieRenameById(widget.id)),
                         child: ListTile(
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
@@ -298,7 +300,7 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
       final resp = await showNotification(context, Api.movieScraperById(item.id, data.$1, data.$2, data.$3));
       if (resp?.error == null) {
         final movie = await Api.movieQueryById(item.id);
-        _controller.setSources([FromMedia.fromMovie(movie)], 0);
+        _controller.setPlaylist([FromMedia.fromMovie(movie)]);
         return true;
       }
     }

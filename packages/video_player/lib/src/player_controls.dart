@@ -185,7 +185,12 @@ class PlayerPreviousButton<T> extends StatelessWidget {
     return ListenableBuilder(
         listenable: controller.isFirst,
         builder: (context, child) => controller.isFirst.value ? const SizedBox() : child!,
-        child: IconButton(onPressed: () => controller.next(controller.index.value! - 1), icon: const Icon(Icons.skip_previous_rounded)));
+        child: IconButton(
+            onPressed: () async {
+              await controller.next(controller.index.value! - 1);
+              await controller.play();
+            },
+            icon: const Icon(Icons.skip_previous_rounded)));
   }
 }
 
@@ -199,7 +204,12 @@ class PlayerNextButton<T> extends StatelessWidget {
     return ListenableBuilder(
         listenable: controller.isLast,
         builder: (context, child) => controller.isLast.value ? const SizedBox() : child!,
-        child: IconButton(onPressed: () => controller.next(controller.index.value! + 1), icon: const Icon(Icons.skip_next_rounded)));
+        child: IconButton(
+            onPressed: () async {
+              await controller.next(controller.index.value! + 1);
+              await controller.play();
+            },
+            icon: const Icon(Icons.skip_next_rounded)));
   }
 }
 

@@ -641,6 +641,14 @@ class Media3PlayerView(
                             else -> throw Exception("Unknown Subtitle Mime Type")
                         }
                     )
+                    .setLabel(it.label)
+                    .setSelectionFlags(
+                        if (it.selected) {
+                            C.SELECTION_FLAG_AUTOSELECT
+                        } else {
+                            C.SELECTION_FLAG_DEFAULT
+                        }
+                    )
                     .build()
             })
             .build()
@@ -825,13 +833,19 @@ class Media3PlayerView(
             data[DESCRIPTION] as String?,
             data[POSTER] as String?,
             (data[SUBTITLE] as List<HashMap<String, Any>>?)?.map {
-                Subtitle(it[URL] as String, it[MIME_TYPE] as String, it[LANGUAGE] as String?)
+                Subtitle(
+                    it[URL] as String,
+                    it[MIME_TYPE] as String,
+                    it[LANGUAGE] as String?,
+                    it[SELECTED] as Boolean,
+                    it[LABEL] as String?
+                )
             },
             (data[START_POSITION] as Int? ?: 0).toLong(),
             (data[END_POSITION] as Int? ?: 0).toLong(),
         )
         mPlaylist = arrayOf(video)
-        player.setMediaItem(buildMediaItem(video))
+        player.setMediaItem(buildMediaItem(video), video.startPosition)
     }
 
     override fun updateSource(data: HashMap<String, Any>, index: Int) {
@@ -841,7 +855,13 @@ class Media3PlayerView(
             data[DESCRIPTION] as String?,
             data[POSTER] as String?,
             (data[SUBTITLE] as List<HashMap<String, Any>>?)?.map {
-                Subtitle(it[URL] as String, it[MIME_TYPE] as String, it[LANGUAGE] as String?)
+                Subtitle(
+                    it[URL] as String,
+                    it[MIME_TYPE] as String,
+                    it[LANGUAGE] as String?,
+                    it[SELECTED] as Boolean,
+                    it[LABEL] as String?
+                )
             },
             (data[START_POSITION] as Int? ?: 0).toLong(),
             (data[END_POSITION] as Int? ?: 0).toLong(),
@@ -902,6 +922,8 @@ class Media3PlayerView(
         const val END_POSITION: String = "end"
         const val LANGUAGE: String = "language"
         const val MIME_TYPE: String = "mimeType"
+        const val SELECTED: String = "selected"
+        const val LABEL: String = "label"
         const val NOTIFICATION_ID = 3423523
         const val USER_AGENT =
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.83 Safari/537.36"

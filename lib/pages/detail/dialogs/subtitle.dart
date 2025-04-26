@@ -65,7 +65,7 @@ class _SubtitleManagerState extends State<SubtitleManager> {
                         child: ListTile(
                           leading: Text(item.mimeType ?? ''),
                           trailing: Text(item.language ?? ''),
-                          title: Text(item.title ?? ''),
+                          title: Text(item.label ?? ''),
                         ),
                       );
                     })
@@ -86,10 +86,11 @@ class SubtitleDialog extends StatefulWidget {
 
 class _SubtitleDialogState extends State<SubtitleDialog> {
   final _controller = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
   String? _mimeType;
   String? _language;
   String? _filename;
-  final _formKey = GlobalKey<FormState>();
+  bool selected = false;
 
   @override
   void dispose() {
@@ -128,7 +129,7 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
                     }
                   },
                 ),
-                hintText: widget.subtitle?.title?.toString(),
+                hintText: widget.subtitle?.label?.toString(),
                 filled: true,
                 isDense: true,
                 labelText: AppLocalizations.of(context)!.subtitleFormItemLabelUrl,
@@ -173,6 +174,14 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
                   ...SystemLanguage.values.map((lang) => DropdownMenuItem(value: lang.name, child: Text(lang.name.toUpperCase())))
                 ],
                 onChanged: (v) => setState(() => _language = v)),
+            CheckboxListTile(
+              dense: true,
+              title: Text('默认选中'),
+              contentPadding: EdgeInsets.only(left: 8),
+              value: selected,
+              onChanged: (v) => setState(() => selected = v ?? false),
+              // trailing: Checkbox(),
+            ),
           ],
         ),
       ),
@@ -184,15 +193,11 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
                 url: _controller.text,
                 mimeType: _mimeType,
                 language: _language,
-                title: _filename,
+                label: _filename,
               ));
             }
           },
           child: Text(AppLocalizations.of(context)!.buttonConfirm),
-        ),
-        TextButton(
-          onPressed: () => Navigator.pop(context, SubtitleData.empty),
-          child: Text(AppLocalizations.of(context)!.buttonReset),
         ),
         TextButton(
           onPressed: () => Navigator.pop(context),

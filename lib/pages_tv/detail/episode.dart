@@ -9,13 +9,11 @@ import '../../utils/utils.dart';
 import '../components/future_builder_handler.dart';
 import '../components/icon_button.dart';
 import '../components/setting.dart';
-import '../utils/notification.dart';
 import '../utils/player.dart';
 import '../utils/utils.dart';
 import 'components/overview.dart';
 import 'components/scaffold.dart';
 import 'dialogs/episode_metadata.dart';
-import 'dialogs/subtitle.dart';
 import 'mixins/action.dart';
 
 class EpisodeDetail extends StatefulWidget {
@@ -211,11 +209,11 @@ class _EpisodeDetailState extends State<EpisodeDetail> with ActionMixin {
             title: Text(AppLocalizations.of(context)!.buttonSubtitle),
             leading: const Icon(Icons.subtitles_outlined),
             onTap: () async {
-              final subtitle = await Navigator.of(context).push<SubtitleData>(FadeInPageRoute(builder: (context) => const SubtitleDialog()));
-              if (subtitle != null && context.mounted) {
-                final resp = await showNotification(context, Api.tvEpisodeSubtitleUpdateById(id: item.id, subtitle: subtitle));
-                if (resp?.error == null) setState(() => refresh = true);
-              }
+              // final subtitle = await Navigator.of(context).push<SubtitleData>(FadeInPageRoute(builder: (context) => const SubtitleDialog()));
+              // if (subtitle != null && context.mounted) {
+              //   final resp = await showNotification(context, Api.tvEpisodeSubtitleUpdateById(id: item.id, subtitle: subtitle));
+              //   if (resp?.error == null) setState(() => refresh = true);
+              // }
             },
           ),
           // buildDownloadAction(context, item.url!),

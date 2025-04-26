@@ -172,7 +172,7 @@ class PlaylistItemDisplay<T> extends Equatable {
   }
 
   @override
-  List<Object?> get props => [title, poster];
+  List<Object?> get props => [title, description, poster];
 }
 
 class PlaylistItem extends Equatable {
@@ -246,14 +246,24 @@ class Subtitle {
   final Uri url;
   final SubtitleMimeType mimeType;
   final String? language;
+  final String? label;
+  final bool selected;
 
-  const Subtitle({required this.url, required this.mimeType, this.language});
+  const Subtitle({
+    required this.url,
+    required this.mimeType,
+    this.language,
+    this.label,
+    this.selected = false,
+  });
 
   Map<String, dynamic> toJson() {
     return {
       'url': url.toString(),
       'mimeType': mimeType.name,
       'language': language,
+      'label': label,
+      'selected': selected,
     };
   }
 }
