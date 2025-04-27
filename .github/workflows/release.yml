@@ -81,18 +81,18 @@ jobs:
           --dart-define=DEFAULT_IPTV_URL=${{ vars.DEFAULT_IPTV_URL }} \
           --flavor=mobile
 
-      - name: Build TV apk
-        run: |
-          flutter build apk \
-          --target=lib/main_tv.dart \
-          --split-per-abi \
-          --obfuscate \
-          --split-debug-info=./build/app/outputs/flutter-apk/ \
-          --build-number=${{ env.BUILD_NUMBER }} \
-          --dart-define=BUILD_DATE=$(date "+%F") \
-          --dart-define=BUILD_VERSION=${{ env.VERSION }} \
-          --dart-define=DEFAULT_IPTV_URL=${{ vars.DEFAULT_IPTV_URL }} \
-          --flavor=tv
+      #      - name: Build TV apk
+      #        run: |
+      #          flutter build apk \
+      #          --target=lib/main_tv.dart \
+      #          --split-per-abi \
+      #          --obfuscate \
+      #          --split-debug-info=./build/app/outputs/flutter-apk/ \
+      #          --build-number=${{ env.BUILD_NUMBER }} \
+      #          --dart-define=BUILD_DATE=$(date "+%F") \
+      #          --dart-define=BUILD_VERSION=${{ env.VERSION }} \
+      #          --dart-define=DEFAULT_IPTV_URL=${{ vars.DEFAULT_IPTV_URL }} \
+      #          --flavor=tv
 
       - name: Rename Android APK
         run: |

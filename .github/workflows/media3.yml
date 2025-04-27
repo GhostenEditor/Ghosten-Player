@@ -8,7 +8,7 @@ jobs:
       - run: git clone https://github.com/androidx/media.git
 
       - working-directory: media
-        run: git checkout tags/1.4.1
+        run: git checkout tags/1.6.1
 
       - working-directory: media/libraries/decoder_av1/src/main/jni
         run: git clone https://github.com/google/cpu_features
