@@ -844,6 +844,10 @@ class Version {
     return '$major.$minor.$patch';
   }
 
+  bool isPrerelease() {
+    return alpha != null || beta != null;
+  }
+
   double toDouble() {
     double d = patch + minor * 1000.0 + major * 1000000.0;
     if (alpha != null || beta != null) {
