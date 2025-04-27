@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -12,6 +14,8 @@ abstract class PlayerBaseController {
 
   Future<String?> getVideoThumbnail(int position);
 }
+
+enum PlaybackStatusEvent { start, progress, stop }
 
 class PlayerController<T> implements PlayerBaseController {
   final ValueNotifier<List<PlaylistItemDisplay<T>>> playlist = ValueNotifier([]);
@@ -43,10 +47,14 @@ class PlayerController<T> implements PlayerBaseController {
   final ValueNotifier<int?> onMediaIndexChanged = ValueNotifier(null);
   final ValueNotifier<(MediaChange, Duration)?> beforeMediaChanged = ValueNotifier(null);
   final Future<PlaylistItem> Function(PlaylistItemDisplay<T>)? onGetPlayBackInfo;
+  final Future<void> Function(PlaylistItem, PlaybackStatusEvent, Duration, Duration)? onPlaybackStatusUpdate;
+  final ValueNotifier<PlaylistItem?> _playlistItem = ValueNotifier(null);
+  final _timer = Stream.periodic(Duration(seconds: 10));
+  StreamSubscription<dynamic>? _subscription;
 
   PlaylistItemDisplay<T>? get currentItem => index.value == null ? null : playlist.value.elementAtOrNull(index.value!);
 
-  PlayerController(Function(int, String)? onLog, {this.onGetPlayBackInfo}) {
+  PlayerController(Function(int, String)? onLog, {this.onGetPlayBackInfo, this.onPlaybackStatusUpdate}) {
     this.index.addListener(() {
       title.value = currentItem?.title;
       subTitle.value = currentItem?.description ?? '';
@@ -70,6 +78,11 @@ class PlayerController<T> implements PlayerBaseController {
           }
           if (status.value == PlayerStatus.ended && index.value != null) {
             next(index.value! + 1);
+          }
+          if (status.value == PlayerStatus.playing) {
+            _subscription?.resume();
+          } else {
+            _subscription?.pause();
           }
         case 'bufferingUpdate':
           bufferedPosition.value = Duration(milliseconds: call.arguments);
@@ -103,9 +116,20 @@ class PlayerController<T> implements PlayerBaseController {
           }
       }
     });
+
+    if (onPlaybackStatusUpdate != null) {
+      _subscription = _timer.listen((_) {
+        if (status.value == PlayerStatus.playing) {
+          onPlaybackStatusUpdate!(_playlistItem.value!, PlaybackStatusEvent.progress, position.value, duration.value);
+        }
+      });
+    }
   }
 
   void dispose() async {
+    if (onPlaybackStatusUpdate != null && _playlistItem.value != null) {
+      onPlaybackStatusUpdate!(_playlistItem.value!, PlaybackStatusEvent.stop, position.value, duration.value);
+    }
     PlayerPlatform.instance.setMethodCallHandler(null);
     index.dispose();
     isFirst.dispose();
@@ -120,6 +144,8 @@ class PlayerController<T> implements PlayerBaseController {
     status.dispose();
     trackGroup.dispose();
     mediaInfo.dispose();
+    _playlistItem.dispose();
+    _subscription?.cancel();
     beforeMediaChanged.dispose();
     pipMode.dispose();
   }
@@ -136,11 +162,18 @@ class PlayerController<T> implements PlayerBaseController {
     if (index < 0 || index >= playlist.value.length) return;
     if (index != this.index.value) {
       this.index.value = index;
+      if (onPlaybackStatusUpdate != null && _playlistItem.value != null) {
+        onPlaybackStatusUpdate!(_playlistItem.value!, PlaybackStatusEvent.stop, position.value, duration.value);
+      }
       if (onGetPlayBackInfo == null) {
-        await setSource(currentItem!.toItem());
+        _playlistItem.value = currentItem!.toItem();
+        await setSource(_playlistItem.value!);
       } else {
-        final item = await onGetPlayBackInfo!(currentItem!);
-        await setSource(item);
+        _playlistItem.value = await onGetPlayBackInfo!(currentItem!);
+        await setSource(_playlistItem.value!);
+      }
+      if (onPlaybackStatusUpdate != null) {
+        onPlaybackStatusUpdate!(_playlistItem.value!, PlaybackStatusEvent.start, _playlistItem.value!.start, duration.value);
       }
       // PlayerPlatform.instance.next(index);
     }

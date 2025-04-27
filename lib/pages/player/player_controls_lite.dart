@@ -25,17 +25,13 @@ class PlayerControlsLite<T> extends StatefulWidget {
     super.key,
     this.theme,
     this.artwork,
-    this.beforeMediaChanged,
     this.initialized,
-    this.onMediaIndexChanged,
   });
 
   final PlayerController<T> controller;
   final VoidCallback? initialized;
   final int? theme;
   final Widget? artwork;
-  final void Function(int)? onMediaIndexChanged;
-  final void Function(int, Duration, Duration)? beforeMediaChanged;
 
   @override
   State<PlayerControlsLite<T>> createState() => _PlayerControlsLiteState<T>();
@@ -64,17 +60,6 @@ class _PlayerControlsLiteState<T> extends State<PlayerControlsLite<T>> {
       _isShowControls.value = show;
     });
     _controlsStream.add(ControlsStreamStatus.show);
-    if (widget.beforeMediaChanged != null) {
-      _controller.beforeMediaChanged.addListener(() {
-        final data = _controller.beforeMediaChanged.value!;
-        widget.beforeMediaChanged!(data.$1.index, data.$1.position, data.$2);
-      });
-    }
-    if (widget.onMediaIndexChanged != null) {
-      _controller.index.addListener(() {
-        widget.onMediaIndexChanged!(_controller.index.value!);
-      });
-    }
     _controller.status.addListener(() {
       switch (_controller.status.value) {
         case PlayerStatus.playing:
@@ -137,10 +122,6 @@ class _PlayerControlsLiteState<T> extends State<PlayerControlsLite<T>> {
         if (didPop) {
           return;
         }
-        if (widget.beforeMediaChanged != null && _controller.duration.value > Duration.zero) {
-          widget.beforeMediaChanged!(_controller.index.value!, _controller.position.value, _controller.duration.value);
-        }
-
         if (context.mounted && Navigator.of(context).canPop()) Navigator.pop(context);
       },
       child: LayoutBuilder(builder: (context, constraints) {

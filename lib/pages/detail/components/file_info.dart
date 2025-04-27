@@ -15,6 +15,8 @@ class FileInfoSection extends StatefulWidget {
 }
 
 class _FileInfoSectionState extends State<FileInfoSection> {
+  late final future = Api.fileInfo(widget.fileId);
+
   @override
   void dispose() {
     super.dispose();
@@ -23,7 +25,7 @@ class _FileInfoSectionState extends State<FileInfoSection> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilderHandler(
-        future: Api.fileInfo(widget.fileId),
+        future: future,
         builder: (context, snapshot) {
           final item = snapshot.requireData;
           return Padding(

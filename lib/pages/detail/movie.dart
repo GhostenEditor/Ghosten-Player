@@ -42,7 +42,11 @@ class MovieDetail extends StatefulWidget {
 }
 
 class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>, SearchableMixin {
-  late final _controller = PlayerController<Movie>(Api.log, onGetPlayBackInfo: _onGetPlayBackInfo);
+  late final _controller = PlayerController<Movie>(
+    Api.log,
+    onGetPlayBackInfo: _onGetPlayBackInfo,
+    onPlaybackStatusUpdate: _onPlaybackStatusUpdate,
+  );
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _navigatorKey = GlobalKey<NavigatorState>();
   late final _autoPlay = Provider.of<UserConfig>(context, listen: false).autoPlay;
@@ -53,8 +57,22 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
       title: item.title,
       description: item.description,
       poster: item.poster,
+      start: item.start,
+      end: item.end,
       url: Uri.parse(data.url).normalize(),
       subtitles: data.subtitles.map((d) => d.toSubtitle()).toList(),
+      others: data.others,
+    );
+  }
+
+  Future<void> _onPlaybackStatusUpdate(PlaylistItem item, PlaybackStatusEvent eventType, Duration position, Duration duration) {
+    return Api.updatePlayedStatus(
+      LibraryType.movie,
+      _controller.currentItem!.source.id,
+      position: position,
+      duration: duration,
+      eventType: eventType.name,
+      others: item.others,
     );
   }
 
@@ -84,10 +102,6 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
                     _controller.setPlaylist([FromMedia.fromMovie(item)]);
                     await _controller.next(0);
                     if (_autoPlay) await _controller.play();
-                  },
-                  beforeMediaChanged: (index, position, duration) {
-                    final item = _controller.playlist.value[index];
-                    Api.updatePlayedStatus(LibraryType.movie, item.source.id, position: position, duration: duration);
                   },
                 ),
                 sidebar: Navigator(

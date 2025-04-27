@@ -40,6 +40,7 @@
   "buttonReset": "Reset",
   "buttonResume": "Resume",
   "buttonSaveMediaInfoToDriver": "Save Media Info to Driver",
+  "buttonScraperLibrary": "Scrape the Media Library",
   "buttonScraperMediaInfo": "Scraper Media Info",
   "buttonShuffle": "Shuffle",
   "buttonSkipFromEnd": "Skip Ending",

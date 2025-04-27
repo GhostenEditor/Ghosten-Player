@@ -200,7 +200,7 @@ class _ScraperSettingSectionState extends State<_ScraperSettingSection> {
               .toList(),
         ),
         SwitchListTile(
-            title: const Text('NFO 启用'),
+            title: const Badge(label: Text('Alpha'), child: Text('NFO 启用')),
             value: widget.settingScraper.nfoEnabled,
             onChanged: (nfoEnabled) {
               widget.onChanged(widget.settingScraper.copyWith(nfoEnabled: nfoEnabled));

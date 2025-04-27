@@ -530,12 +530,21 @@ abstract class ApiPlatform extends PlatformInterface {
     return client.post('/markFavorite/update', data: {'id': id, 'marked': favorite, 'type': type.name});
   }
 
-  Future<void> updatePlayedStatus(LibraryType type, dynamic id, {required Duration position, required Duration duration}) {
+  Future<void> updatePlayedStatus(
+    LibraryType type,
+    dynamic id, {
+    required Duration position,
+    required Duration duration,
+    String? eventType,
+    dynamic others,
+  }) {
     return client.post('/playedStatus/update', data: {
       'type': type.name,
       'id': id,
       'position': position.inMilliseconds,
       'duration': duration.inMilliseconds,
+      'eventType': eventType,
+      'others': others,
     });
   }
 

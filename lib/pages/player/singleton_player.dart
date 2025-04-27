@@ -20,10 +20,14 @@ class SingletonPlayer<T> extends StatefulWidget {
 }
 
 class _SingletonPlayerState<T> extends State<SingletonPlayer<T>> {
-  late final _controller = PlayerController<T>(Api.log, onGetPlayBackInfo: onGetPlayBackInfo);
+  late final _controller = PlayerController<T>(
+    Api.log,
+    onGetPlayBackInfo: _onGetPlayBackInfo,
+    onPlaybackStatusUpdate: _onPlaybackStatusUpdate,
+  );
   late final _progressController = PlayerProgressController(_controller);
 
-  Future<PlaylistItem> onGetPlayBackInfo(PlaylistItemDisplay<T> item) async {
+  Future<PlaylistItem> _onGetPlayBackInfo(PlaylistItemDisplay<T> item) async {
     final fileId = _controller.currentItem!.fileId;
     if (item.fileId == null) {
       return PlaylistItem(
@@ -45,6 +49,31 @@ class _SingletonPlayerState<T> extends State<SingletonPlayer<T>> {
         end: item.end,
         subtitles: data.subtitles.map((d) => d.toSubtitle()).toList(),
       );
+    }
+  }
+
+  Future<void> _onPlaybackStatusUpdate(PlaylistItem item, PlaybackStatusEvent eventType, Duration position, Duration duration) {
+    final source = _controller.currentItem!.source;
+    if (source is TVEpisode) {
+      return Api.updatePlayedStatus(
+        LibraryType.tv,
+        source.id,
+        position: position,
+        duration: duration,
+        eventType: eventType.name,
+        others: item.others,
+      );
+    } else if (source is Movie) {
+      return Api.updatePlayedStatus(
+        LibraryType.movie,
+        source.id,
+        position: position,
+        duration: duration,
+        eventType: eventType.name,
+        others: item.others,
+      );
+    } else {
+      return Future.value();
     }
   }
 

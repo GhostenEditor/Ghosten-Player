@@ -46,13 +46,17 @@ class TVDetail extends StatefulWidget {
 }
 
 class _TVDetailState extends State<TVDetail> with ActionMixin<TVDetail>, SearchableMixin {
-  late final _controller = PlayerController<TVEpisode>(Api.log, onGetPlayBackInfo: onGetPlayBackInfo);
+  late final _controller = PlayerController<TVEpisode>(
+    Api.log,
+    onGetPlayBackInfo: _onGetPlayBackInfo,
+    onPlaybackStatusUpdate: _onPlaybackStatusUpdate,
+  );
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _navigatorKey = GlobalKey<NavigatorState>();
   final _modalBottomSheetHistory = <BuildContext>[];
   late final _autoPlay = Provider.of<UserConfig>(context, listen: false).autoPlay;
 
-  Future<PlaylistItem> onGetPlayBackInfo(PlaylistItemDisplay<TVEpisode> item) async {
+  Future<PlaylistItem> _onGetPlayBackInfo(PlaylistItemDisplay<TVEpisode> item) async {
     final data = await Api.playbackInfo(item.fileId);
     return PlaylistItem(
       title: item.title,
@@ -62,6 +66,18 @@ class _TVDetailState extends State<TVDetail> with ActionMixin<TVDetail>, Searcha
       end: item.end,
       url: Uri.parse(data.url).normalize(),
       subtitles: data.subtitles.map((d) => d.toSubtitle()).toList(),
+      others: data.others,
+    );
+  }
+
+  Future<void> _onPlaybackStatusUpdate(PlaylistItem item, PlaybackStatusEvent eventType, Duration position, Duration duration) {
+    return Api.updatePlayedStatus(
+      LibraryType.tv,
+      _controller.currentItem!.source.id,
+      position: position,
+      duration: duration,
+      eventType: eventType.name,
+      others: item.others,
     );
   }
 
@@ -96,10 +112,6 @@ class _TVDetailState extends State<TVDetail> with ActionMixin<TVDetail>, Searcha
                         final index = _controller.playlist.value.indexWhere((el) => el.source.id == widget.playingId);
                         _controller.next(max(index, 0));
                       }
-                    },
-                    beforeMediaChanged: (index, position, duration) {
-                      final item = _controller.playlist.value[index];
-                      Api.updatePlayedStatus(LibraryType.tv, item.source.id, position: position, duration: duration);
                     },
                   ),
                   sidebar: Navigator(

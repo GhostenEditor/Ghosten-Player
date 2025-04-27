@@ -133,11 +133,11 @@ class _MovieListPageState extends State<MovieListPage> {
                       style: Theme.of(context).textTheme.labelSmall)
                 else
                   const Spacer(),
-                if (item.duration != null && item.lastPlayedPosition != null)
+                if (item.duration != null && item.duration != Duration.zero && item.lastPlayedPosition != null)
                   Text('${(item.lastPlayedPosition!.inSeconds / item.duration!.inSeconds * 100).toStringAsFixed(1)}%'),
               ],
             ),
-            floating: item.duration != null && item.lastPlayedPosition != null
+            floating: item.duration != null && item.duration != Duration.zero && item.lastPlayedPosition != null
                 ? Align(
                     alignment: const Alignment(0, 0.95),
                     child: Padding(

@@ -183,6 +183,7 @@ class PlaylistItem extends Equatable {
   final Duration start;
   final Duration end;
   final List<Subtitle>? subtitles;
+  final dynamic others;
 
   const PlaylistItem({
     this.url,
@@ -192,6 +193,7 @@ class PlaylistItem extends Equatable {
     this.subtitles,
     this.start = Duration.zero,
     this.end = Duration.zero,
+    this.others,
   });
 
   PlaylistItem copyWith({
@@ -203,6 +205,7 @@ class PlaylistItem extends Equatable {
     Duration? end,
     Duration? duration,
     List<Subtitle>? subtitles,
+    dynamic others,
   }) {
     return PlaylistItem(
       poster: poster ?? this.poster,
@@ -212,6 +215,7 @@ class PlaylistItem extends Equatable {
       start: start ?? this.start,
       end: end ?? this.end,
       subtitles: subtitles ?? this.subtitles,
+      others: others ?? this.others,
     );
   }
 

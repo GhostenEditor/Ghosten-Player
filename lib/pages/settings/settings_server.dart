@@ -82,14 +82,14 @@ class _SystemSettingsServerState extends State<SystemSettingsServer> {
                               child: const Icon(Icons.close, color: Colors.white, size: 12),
                             )
                           : null,
-                      subtitle: Row(
+                      title: Row(
                         spacing: 8,
                         children: [
-                          Text(item.type.name),
+                          Text(AppLocalizations.of(context)!.driverType(item.type.name)),
                           if (item.username != null) Text(item.username!),
                         ],
                       ),
-                      title: Text(item.host),
+                      subtitle: Text(item.host),
                     ),
                   );
                 },

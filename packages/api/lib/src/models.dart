@@ -652,11 +652,13 @@ class PlaybackInfo {
   final String url;
   final String? container;
   final List<SubtitleData> subtitles;
+  final dynamic others;
 
   PlaybackInfo.fromJson(Json json)
       : url = json['url'],
         container = json['container'],
-        subtitles = (json['subtitles'] as JsonList).toSubtitles();
+        subtitles = (json['subtitles'] as JsonList).toSubtitles(),
+        others = json['others'];
 }
 
 class DownloadTask {
@@ -788,39 +790,80 @@ class Version {
   final int major;
   final int minor;
   final int patch;
+  final int? alpha;
+  final int? beta;
 
-  const Version(this.major, this.minor, this.patch);
+  const Version(this.major, this.minor, this.patch, {this.alpha, this.beta});
 
   Version.unknown()
       : major = 0,
         minor = 0,
-        patch = 0;
+        patch = 0,
+        alpha = null,
+        beta = null;
 
   factory Version.fromString(String s) {
-    final arr = s.split('.');
-    if (arr.length != 3) {
+    final arr = s.split('-');
+    final pre = arr.elementAtOrNull(0);
+    final suf = arr.elementAtOrNull(1);
+    if (pre == null) {
       return Version.unknown();
+    } else {
+      final list = pre.split('.');
+      if (list.length != 3) {
+        return Version.unknown();
+      }
+      final major = int.tryParse(list[0]);
+      final minor = int.tryParse(list[1]);
+      final patch = int.tryParse(list[2]);
+      if (major == null || minor == null || patch == null) {
+        return Version.unknown();
+      }
+      int? a;
+      int? b;
+      if (suf != null) {
+        if (suf.startsWith('alpha.')) {
+          a = int.tryParse(suf.substring(6));
+        }
+        if (suf.startsWith('beta.')) {
+          b = int.tryParse(suf.substring(5));
+        }
+      }
+      return Version(major, minor, patch, alpha: a, beta: b);
     }
-    final major = int.tryParse(arr[0]);
-    final minor = int.tryParse(arr[1]);
-    final patch = int.tryParse(arr[2]);
-    if (major == null || minor == null || patch == null) {
-      return Version.unknown();
-    }
-    return Version(major, minor, patch);
   }
 
   @override
   String toString() {
+    if (alpha != null) {
+      return '$major.$minor.$patch-alpha.$alpha';
+    }
+    if (beta != null) {
+      return '$major.$minor.$patch-beta.$beta';
+    }
     return '$major.$minor.$patch';
   }
 
+  double toDouble() {
+    double d = patch + minor * 1000.0 + major * 1000000.0;
+    if (alpha != null || beta != null) {
+      d -= 1;
+    }
+    if (alpha != null) {
+      d += (alpha! + 1) / 1000000.0;
+    }
+    if (beta != null) {
+      d += (beta! + 1) / 1000.0;
+    }
+    return d;
+  }
+
   bool operator >(Version other) {
-    return major > other.major || (major == other.major && minor > other.minor) || (major == other.major && minor == other.minor && patch > other.patch);
+    return toDouble() > other.toDouble();
   }
 
   bool operator <(Version other) {
-    return major < other.major || (major == other.major && minor < other.minor) || (major == other.major && minor == other.minor && patch < other.patch);
+    return toDouble() < other.toDouble();
   }
 }
 
