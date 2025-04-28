@@ -116,7 +116,7 @@ class PlayerApp extends StatelessWidget {
       home: QuitConfirm(
           child: SingletonPlayer(
         playlist: [
-          PlaylistItem(url: Uri.parse(url), sourceType: PlaylistItemSourceType.local, source: null),
+          PlaylistItemDisplay(url: Uri.parse(url), source: null),
         ],
       )),
       builder: (context, widget) => MediaQuery(

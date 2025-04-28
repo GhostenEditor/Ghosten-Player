@@ -61,8 +61,8 @@ class _PlayerControlsState extends State<PlayerControls> {
   @override
   void initState() {
     if (widget.onMediaChange != null) {
-      _controller.mediaChange.addListener(() {
-        final data = _controller.mediaChange.value!;
+      _controller.beforeMediaChanged.addListener(() {
+        final data = _controller.beforeMediaChanged.value!;
         widget.onMediaChange!(data.$1.index, data.$1.position, data.$2);
       });
     }
@@ -833,7 +833,7 @@ class PlayerPlaylistView<T> extends StatefulWidget {
 
   final ValueChanged<int> onTap;
   final int? activeIndex;
-  final List<PlaylistItem<dynamic>> playlist;
+  final List<PlaylistItemDisplay<dynamic>> playlist;
 
   @override
   State<PlayerPlaylistView<T>> createState() => _PlayerPlaylistViewState<T>();

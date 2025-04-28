@@ -58,8 +58,8 @@ class MethodChannelPlayer extends PlayerPlatform {
   }
 
   @override
-  Future<void> setSources(List<Map<String, dynamic>> playlist, int index) {
-    return _channel.invokeMethod('setSources', {'playlist': playlist, 'index': index});
+  Future<void> setSource(Map<String, dynamic> item) {
+    return _channel.invokeMethod('setSource', item);
   }
 
   @override

@@ -46,7 +46,7 @@ class AsyncImage extends StatelessWidget {
         borderRadius: radius,
       ),
       child: CachedNetworkImage(
-        imageUrl: src,
+        imageUrl: _resoleSrc(),
         alignment: alignment,
         fit: fit,
         filterQuality: FilterQuality.medium,
@@ -78,6 +78,14 @@ class AsyncImage extends StatelessWidget {
       ),
     );
     return viewable ? GestureDetector(onLongPress: () => navigateTo(navigatorKey.currentContext!, ImageViewer(url: Uri.parse(src))), child: image) : image;
+  }
+
+  String _resoleSrc() {
+    if (src.startsWith('/file/download')) {
+      return '${Api.baseUrl}$src';
+    } else {
+      return src;
+    }
   }
 }
 

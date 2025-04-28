@@ -8,6 +8,8 @@ import '../../components/async_image.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
 import '../components/theme_builder.dart';
+import 'components/cast.dart';
+import 'components/crew.dart';
 import 'components/overview.dart';
 import 'dialogs/season_metadata.dart';
 import 'episode.dart';
@@ -132,12 +134,15 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin<SeasonDeta
                         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          spacing: 12,
                           children: [
                             BlocSelector<TVSeasonCubit, TVSeason?, String?>(
                                 selector: (season) => season?.poster,
-                                builder: (context, poster) =>
-                                    poster != null ? AsyncImage(poster, width: 100, radius: BorderRadius.circular(4), viewable: true) : const SizedBox()),
+                                builder: (context, poster) => poster != null
+                                    ? Padding(
+                                        padding: const EdgeInsets.only(right: 16),
+                                        child: AsyncImage(poster, width: 100, height: 150, radius: BorderRadius.circular(4), viewable: true),
+                                      )
+                                    : const SizedBox()),
                             BlocSelector<TVSeasonCubit, TVSeason?, String?>(
                               selector: (season) => season?.overview,
                               builder: (context, overview) => Expanded(child: OverviewSection(text: overview, trimLines: 7)),
@@ -172,9 +177,9 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin<SeasonDeta
                                                   episode: episode,
                                                   onTap: () async {
                                                     final episodes = context.read<TVSeasonCubit>().state!.episodes;
-                                                    await widget.controller
-                                                        .setSources(episodes.map((episode) => FromMedia.fromEpisode(episode)).toList(), index);
+                                                    widget.controller.setPlaylist(episodes.map((episode) => FromMedia.fromEpisode(episode)).toList());
                                                     await widget.controller.next(index);
+                                                    await widget.controller.play();
                                                   },
                                                   onTapMore: () async {
                                                     final box = rootContext.findRenderObject()! as RenderBox;
@@ -198,7 +203,18 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin<SeasonDeta
                               });
                         }),
                       ),
-                    )
+                    ),
+                    SliverToBoxAdapter(
+                      child: BlocSelector<TVSeasonCubit, TVSeason?, List<MediaCast>?>(
+                          selector: (season) => season?.mediaCast ?? [],
+                          builder: (context, cast) => (cast != null && cast.isNotEmpty) ? CastSection(type: MediaType.season, cast: cast) : const SizedBox()),
+                    ),
+                    SliverToBoxAdapter(
+                      child: BlocSelector<TVSeasonCubit, TVSeason?, List<MediaCrew>?>(
+                          selector: (season) => season?.mediaCrew ?? [],
+                          builder: (context, crew) => (crew != null && crew.isNotEmpty) ? CrewSection(type: MediaType.season, crew: crew) : const SizedBox()),
+                    ),
+                    const SliverToBoxAdapter(child: SafeArea(child: SizedBox())),
                   ],
                 ),
               );
@@ -297,11 +313,11 @@ class _EpisodeListTile extends StatelessWidget {
                     ),
                     IconButton(
                       onPressed: onTapMore,
-                      icon: const Icon(Icons.more_horiz_rounded),
+                      icon: const Icon(Icons.more_vert_rounded),
                       style: IconButton.styleFrom(
                         visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
                         padding: EdgeInsets.zero,
-                        iconSize: 12,
+                        iconSize: 16,
                         minimumSize: const Size.square(36),
                       ),
                     ),

@@ -11,12 +11,8 @@ import '../components/icon_button.dart';
 import '../components/setting.dart';
 import '../utils/notification.dart';
 import '../utils/player.dart';
-import '../utils/utils.dart';
-import 'components/actors.dart';
 import 'components/overview.dart';
 import 'components/scaffold.dart';
-import 'dialogs/movie_metadata.dart';
-import 'dialogs/subtitle.dart';
 import 'mixins/action.dart';
 import 'mixins/searchable.dart';
 
@@ -162,9 +158,9 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin, SearchableM
                           const WidgetSpan(child: SizedBox(width: 20)),
                           TextSpan(text: AppLocalizations.of(context)!.seriesStatus(item.status.name)),
                           const WidgetSpan(child: Gap.hSM),
-                          if (item.fileSize != null) TextSpan(text: item.fileSize!.toSizeDisplay(), style: Theme.of(context).textTheme.labelSmall),
-                          if (item.fileSize != null) const WidgetSpan(child: Gap.hSM),
-                          TextSpan(text: '${item.filename}.${item.ext}', style: Theme.of(context).textTheme.labelSmall),
+                          // if (item.fileSize != null) TextSpan(text: item.fileSize!.toSizeDisplay(), style: Theme.of(context).textTheme.labelSmall),
+                          // if (item.fileSize != null) const WidgetSpan(child: Gap.hSM),
+                          // TextSpan(text: '.${item.ext}', style: Theme.of(context).textTheme.labelSmall),
                           if (item.duration != null) const WidgetSpan(child: Gap.hSM),
                           if (item.duration != null) const WidgetSpan(child: Icon(Icons.access_time_rounded, size: 14)),
                           if (item.duration != null) const WidgetSpan(child: SizedBox(width: 4)),
@@ -193,15 +189,15 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin, SearchableM
                     title: Text(AppLocalizations.of(context)!.titleCast),
                     onTap: () {
                       _showSide.value = true;
-                      navigateToSlideLeft(
-                          _navigatorKey.currentContext!,
-                          Align(
-                            alignment: Alignment.topRight,
-                            child: FractionallySizedBox(
-                              widthFactor: 0.5,
-                              child: ActorSection(actors: item.actors),
-                            ),
-                          ));
+                      // navigateToSlideLeft(
+                      //     _navigatorKey.currentContext!,
+                      //     Align(
+                      //       alignment: Alignment.topRight,
+                      //       child: FractionallySizedBox(
+                      //         widthFactor: 0.5,
+                      //         child: ActorSection(actors: item.actors),
+                      //       ),
+                      //     ));
                     },
                   ),
                   const Spacer(),
@@ -242,28 +238,25 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin, SearchableM
           ),
           const DividerSettingItem(),
           buildEditMetadataAction(context, () async {
-            final res = await Navigator.of(context).push<(String, int?)>(FadeInPageRoute(builder: (context) => MovieMetadata(movie: item)));
-            if (res != null) {
-              final (title, year) = res;
-              await Api.movieMetadataUpdateById(id: item.id, title: title, airDate: year == null ? null : DateTime(year));
-              setState(() => refresh = true);
-            }
+            // final res = await Navigator.of(context).push<(String, int?)>(FadeInPageRoute(builder: (context) => MovieMetadata(movie: item)));
+            // if (res != null) {
+            //   final (title, year) = res;
+            //   await Api.movieMetadataUpdateById(id: item.id, title: title, airDate: year == null ? null : DateTime(year));
+            //   setState(() => refresh = true);
+            // }
           }),
           ButtonSettingItem(
             title: Text(AppLocalizations.of(context)!.buttonSubtitle),
             leading: const Icon(Icons.subtitles_outlined),
             onTap: () async {
-              final subtitle = await Navigator.of(context).push<SubtitleData>(FadeInPageRoute(
-                  builder: (context) => SubtitleDialog(
-                        subtitle: item.subtitles.firstOrNull,
-                      )));
-              if (subtitle != null && context.mounted) {
-                final resp = await showNotification(context, Api.movieSubtitleUpdateById(id: item.id, subtitle: subtitle));
-                if (resp?.error == null) setState(() => refresh = true);
-              }
+              // final subtitle = await Navigator.of(context).push<SubtitleData>(FadeInPageRoute(builder: (context) => const SubtitleDialog()));
+              // if (subtitle != null && context.mounted) {
+              //   final resp = await showNotification(context, Api.movieSubtitleUpdateById(id: item.id, subtitle: subtitle));
+              //   if (resp?.error == null) setState(() => refresh = true);
+              // }
             },
           ),
-          buildDownloadAction(context, item.url!),
+          buildDownloadAction(context, item.fileId),
           if (item.scrapper.id != null) buildHomeAction(context, ImdbUri(MediaType.movie, item.scrapper.id!).toUri()),
           const DividerSettingItem(),
           buildDeleteAction(context, () => Api.movieDeleteById(item.id)),
@@ -282,17 +275,18 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin, SearchableM
   }
 
   Future<bool> _refreshMovie(BuildContext context, Movie item) async {
-    return search(
-      context,
-      ({required String title, int? year, int? index}) => Api.movieUpdateById(
-        item.id,
-        title,
-        Localizations.localeOf(context).languageCode,
-        year: year.toString(),
-        index: index,
-      ),
-      title: item.title ?? item.originalTitle ?? item.filename,
-      year: item.airDate?.year,
-    );
+    // return search(
+    //   context,
+    //   ({required String title, int? year, int? index}) => Api.movieScraperById(
+    //     item.id,
+    //     title,
+    //     Localizations.localeOf(context).languageCode,
+    //     year: year.toString(),
+    //     index: index,
+    //   ),
+    //   title: item.title ?? item.originalTitle ?? '',
+    //   year: item.airDate?.year,
+    // );
+    return true;
   }
 }

@@ -20,7 +20,7 @@ import '../components/setting.dart';
 class LivePlayerPage extends StatefulWidget {
   const LivePlayerPage({super.key, required this.playlist, required this.index});
 
-  final List<PlaylistItem<Channel>> playlist;
+  final List<PlaylistItemDisplay<Channel>> playlist;
   final int index;
 
   @override
@@ -104,9 +104,8 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
                               title: Text('${AppLocalizations.of(context)!.playerBroadcastLine} ${index + 1}'),
                               onChanged: (_) {
                                 final currentItem = _controller.currentItem!;
-                                final item = PlaylistItem(
-                                    url: url, sourceType: PlaylistItemSourceType.fromBroadcastUri(url), source: currentItem.source, poster: currentItem.poster);
-                                _controller.playlist.value[_controller.index.value!] = item;
+                                final item = PlaylistItem(url: url, poster: currentItem.poster);
+                                // _controller.playlist.value[_controller.index.value!] = item;
                                 _controller.updateSource(item, _controller.index.value!);
                                 setState(() {});
                               },
@@ -119,7 +118,7 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
           fit: StackFit.expand,
           children: [
             PlayerPlatformView(initialized: () async {
-              await _controller.setSources(widget.playlist, widget.index);
+              await _controller.setSources(widget.playlist);
               await _controller.play();
             }),
             PopScope(
@@ -343,7 +342,7 @@ class _ChannelListGrouped extends StatefulWidget {
 class _ChannelListGroupedState extends State<_ChannelListGrouped> {
   late final _groupedPlaylist = widget.controller.playlist.value.groupListsBy((channel) => channel.source.category);
   late final _groupName = ValueNotifier<String?>(null);
-  late final _playlist = ValueNotifier<List<PlaylistItem<Channel>>>([]);
+  late final _playlist = ValueNotifier<List<PlaylistItemDisplay<Channel>>>([]);
   late final _epg = ValueNotifier<List<ChannelEpgItem>?>([]);
 
   @override

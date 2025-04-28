@@ -125,7 +125,7 @@ class _LibraryItem extends StatelessWidget {
       itemBuilder: (context) => [
         PopupMenuItem(
           padding: EdgeInsets.zero,
-          onTap: () => showNotification(context, refreshMedia(context, item.id, incremental: false), showSuccess: false),
+          onTap: () => showNotification(context, refreshMedia(context, item.id, incremental: true), showSuccess: false),
           child: ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
             leading: const Icon(Icons.sync),
@@ -134,11 +134,11 @@ class _LibraryItem extends StatelessWidget {
         ),
         PopupMenuItem(
           padding: EdgeInsets.zero,
-          onTap: () => showNotification(context, refreshMedia(context, item.id, incremental: true), showSuccess: false),
+          onTap: () => showNotification(context, refreshMedia(context, item.id, incremental: false), showSuccess: false),
           child: ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
             leading: const Icon(Icons.cloud_sync_rounded),
-            title: Text(AppLocalizations.of(context)!.buttonIncrementalSyncLibrary),
+            title: Text(AppLocalizations.of(context)!.buttonScraperLibrary),
           ),
         ),
         PopupMenuItem(

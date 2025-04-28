@@ -4,18 +4,22 @@ typedef Json = Map<String, dynamic>;
 typedef JsonList = List<dynamic>;
 
 class SortConfig {
-  final FilterType filter;
+  final FilterType? filter;
   final SortType type;
   final SortDirection direction;
 
-  const SortConfig({required this.filter, required this.type, required this.direction});
+  const SortConfig({this.filter, required this.type, required this.direction});
 
   SortConfig.fromJson(dynamic json)
       : type = SortType.fromString(json?['type']),
         direction = SortDirection.fromString(json?['direction']),
         filter = FilterType.fromString(json?['filter']);
 
-  Json toMap() => {'type': type.name, 'direction': direction.name, 'filter': filter.name};
+  Json toMap() => {
+        'type': type.name,
+        'direction': direction.name,
+        if (filter?.name != null) 'filter': filter?.name,
+      };
 
   SortConfig copyWith({
     SortType? type,
@@ -75,21 +79,25 @@ class MediaBase extends Equatable {
 class Media extends MediaBase {
   final String? originalTitle;
   final DateTime? lastPlayedTime;
-  final String filename;
   final List<Actor> actors;
+  final List<MediaCast> mediaCast;
+  final List<MediaCrew> mediaCrew;
+  final double? voteAverage;
 
   Media.fromJson(super.json)
       : originalTitle = json['originalTitle'],
         lastPlayedTime = (json['lastPlayedTime'] as String?)?.toDateTime(),
-        actors = (json['actors'] as JsonList).toActors(),
-        filename = json['filename'],
+        voteAverage = json['voteAverage'],
+        actors = (json['actors'] as JsonList?)?.toActors() ?? [],
+        mediaCast = (json['mediaCast'] as JsonList?)?.toCast() ?? [],
+        mediaCrew = (json['mediaCrew'] as JsonList?)?.toCrew() ?? [],
         super.fromJson();
 
   String displayTitle() {
     if (title != null && originalTitle != null) {
       return title == originalTitle ? title! : '$title ($originalTitle)';
     } else {
-      return title ?? originalTitle ?? filename;
+      return title ?? originalTitle ?? '';
     }
   }
 
@@ -102,7 +110,6 @@ class MediaRecommendation {
   final dynamic id;
   final String? title;
   final String? originalTitle;
-  final String filename;
   final DateTime? airDate;
   final String? poster;
   final String? logo;
@@ -110,7 +117,7 @@ class MediaRecommendation {
   final String? overview;
   final int? themeColor;
   final double? voteAverage;
-  final int voteCount;
+  final int? voteCount;
   final MediaStatus status;
   final List<Genre> genres;
 
@@ -118,7 +125,6 @@ class MediaRecommendation {
       : id = json['id'],
         title = json['title'],
         originalTitle = json['originalTitle'],
-        filename = json['filename'],
         airDate = (json['airDate'] as String?)?.toDateTime(),
         poster = json['poster'],
         themeColor = json['themeColor'],
@@ -134,14 +140,13 @@ class MediaRecommendation {
     if (title != null && originalTitle != null) {
       return title == originalTitle ? title! : '$title ($originalTitle)';
     } else {
-      return title ?? originalTitle ?? filename;
+      return title ?? originalTitle ?? '';
     }
   }
 }
 
 class Movie extends Media {
-  final double? voteAverage;
-  final int voteCount;
+  final int? voteCount;
   final String? country;
   final String? trailer;
   final MediaStatus status;
@@ -150,16 +155,13 @@ class Movie extends Media {
   final List<Keyword> keywords;
   final Duration? lastPlayedPosition;
   final bool downloaded;
-  final String ext;
-  final Uri? url;
-  final int? fileSize;
-  final List<SubtitleData> subtitles;
+  final String? fileId;
+  final DateTime? releaseDate;
   final Duration? duration;
   final Scrapper scrapper;
 
   Movie.fromJson(super.json)
-      : voteAverage = json['voteAverage'],
-        voteCount = json['voteCount'],
+      : voteCount = json['voteCount'],
         country = json['country'],
         trailer = json['trailer'],
         status = MediaStatus.fromString(json['status']),
@@ -168,17 +170,14 @@ class Movie extends Media {
         genres = (json['genres'] as JsonList).toGenres(),
         studios = (json['studios'] as JsonList).toStudios(),
         downloaded = json['downloaded'] ?? false,
-        ext = json['ext'],
-        url = json['url'] != null ? Uri.parse(json['url']) : null,
-        fileSize = json['fileSize'],
+        fileId = json['fileId'],
         duration = (json['duration'] as int?)?.toDuration(),
-        subtitles = (json['subtitles'] as JsonList).toSubtitles(),
+        releaseDate = (json['releaseDate'] as String?)?.toDateTime(),
         scrapper = Scrapper.fromJson(json['scrapper']),
         super.fromJson();
 }
 
 class TVSeries extends Media {
-  final double? voteAverage;
   final int? voteCount;
   final String? country;
   final String? trailer;
@@ -190,11 +189,12 @@ class TVSeries extends Media {
   final List<Keyword> keywords;
   final List<TVSeason> seasons;
   final TVEpisode? nextToPlay;
+  final DateTime? firstAirDate;
+  final DateTime? lastAirDate;
   final Scrapper scrapper;
 
   TVSeries.fromJson(super.json)
-      : voteAverage = json['voteAverage'],
-        voteCount = json['voteCount'],
+      : voteCount = json['voteCount'],
         country = json['country'],
         trailer = json['trailer'],
         status = MediaStatus.fromString(json['status']),
@@ -204,12 +204,14 @@ class TVSeries extends Media {
         genres = (json['genres'] as JsonList).toGenres(),
         studios = (json['studios'] as JsonList).toStudios(),
         seasons = (json['seasons'] as JsonList).toSeasons(),
+        firstAirDate = (json['firstAirDate'] as String?)?.toDateTime(),
+        lastAirDate = (json['lastAirDate'] as String?)?.toDateTime(),
         nextToPlay = json['nextToPlay'] == null ? null : TVEpisode.fromJson(json['nextToPlay']),
         scrapper = Scrapper.fromJson(json['scrapper']),
         super.fromJson();
 }
 
-class TVSeason extends MediaBase {
+class TVSeason extends Media {
   final int season;
   final String? seriesTitle;
   final Duration skipIntro;
@@ -238,11 +240,10 @@ class TVEpisode extends Media {
   final Duration skipEnding;
   final Duration? lastPlayedPosition;
   final bool downloaded;
-  final String ext;
-  final Uri? url;
+  final List<MediaCast> guestStars;
+  final String? fileId;
   final int? fileSize;
   final Duration? duration;
-  final List<SubtitleData> subtitles;
 
   TVEpisode.fromJson(super.json)
       : episode = json['episode'],
@@ -251,15 +252,14 @@ class TVEpisode extends Media {
         seasonTitle = json['seasonTitle'],
         seriesId = json['seriesId'],
         seriesTitle = json['seriesTitle'],
+        fileId = json['fileId'],
         skipIntro = (json['skipIntro'] as int?).toDuration(),
         skipEnding = (json['skipEnding'] as int?).toDuration(),
         duration = (json['duration'] as int?)?.toDuration(),
         lastPlayedPosition = (json['lastPlayedPosition'] as int?).toDuration(),
         downloaded = json['downloaded'] ?? false,
-        ext = json['ext'],
-        url = json['url'] != null ? Uri.parse(json['url']) : null,
+        guestStars = (json['guestStars'] as JsonList?)?.toCast() ?? [],
         fileSize = json['fileSize'],
-        subtitles = (json['subtitles'] as JsonList).toSubtitles(),
         super.fromJson();
 
   @override
@@ -274,6 +274,62 @@ class Scrapper {
       : id = json['id'],
         type = json['type'],
         super();
+}
+
+class MediaCast {
+  final dynamic id;
+  final String name;
+  final String? originalName;
+  final String? knownForDepartment;
+  final bool? adult;
+  final int? gender;
+  final String? role;
+  final String? profile;
+  final double? popularity;
+  final int? episodeCount;
+  final Scrapper scrapper;
+
+  MediaCast.fromJson(Json json)
+      : id = json['id'],
+        name = json['name'],
+        originalName = json['originalName'],
+        knownForDepartment = json['knownForDepartment'],
+        gender = json['gender'],
+        profile = json['profile'],
+        role = json['role'],
+        episodeCount = json['episodeCount'],
+        popularity = json['popularity'],
+        adult = json['adult'],
+        scrapper = Scrapper.fromJson(json['scrapper']);
+}
+
+class MediaCrew {
+  final dynamic id;
+  final String name;
+  final String? originalName;
+  final String? knownForDepartment;
+  final String? department;
+  final bool? adult;
+  final int? gender;
+  final String? job;
+  final String? profile;
+  final double? popularity;
+  final int? episodeCount;
+  final Scrapper scrapper;
+
+  MediaCrew.fromJson(Json json)
+      : id = json['id'],
+        name = json['name'],
+        originalName = json['originalName'],
+        knownForDepartment = json['knownForDepartment'],
+        department = json['department'],
+        gender = json['gender'],
+        profile = json['profile'],
+        job = json['job'],
+        episodeCount = json['episodeCount'],
+        popularity = json['popularity'],
+        adult = json['adult'],
+        scrapper = Scrapper.fromJson(json['scrapper']);
 }
 
 class Actor {
@@ -298,7 +354,7 @@ class Actor {
         super();
 }
 
-class Genre {
+class Genre extends Equatable {
   final String name;
   final dynamic id;
   final Scrapper scrapper;
@@ -308,9 +364,12 @@ class Genre {
         name = json['name'],
         scrapper = Scrapper.fromJson(json['scrapper']),
         super();
+
+  @override
+  List<Object?> get props => [id];
 }
 
-class Keyword {
+class Keyword extends Equatable {
   final String name;
   final dynamic id;
   final Scrapper scrapper;
@@ -320,9 +379,12 @@ class Keyword {
         name = json['name'],
         scrapper = Scrapper.fromJson(json['scrapper']),
         super();
+
+  @override
+  List<Object?> get props => [id];
 }
 
-class Studio {
+class Studio extends Equatable {
   final dynamic id;
   final String name;
   final String? country;
@@ -336,28 +398,37 @@ class Studio {
         country = json['country'],
         scrapper = Scrapper.fromJson(json['scrapper']),
         super();
+
+  @override
+  List<Object?> get props => [id];
 }
 
 class SubtitleData {
-  final Uri? url;
-  final String? title;
+  final dynamic id;
+  final String? url;
+  final String? label;
   final String? language;
   final String? mimeType;
+  final bool selected;
 
   const SubtitleData({
+    this.id,
     this.url,
     this.mimeType,
-    this.title,
+    this.label,
     this.language,
+    this.selected = false,
   });
 
   static const SubtitleData empty = SubtitleData();
 
   SubtitleData.fromJson(Json json)
-      : url = Uri.parse(json['url']),
-        title = json['title'],
+      : id = json['id'],
+        url = json['url'],
+        label = json['label'],
         language = json['language'],
-        mimeType = json['mimeType'];
+        mimeType = json['mimeType'],
+        selected = json['selected'];
 }
 
 class Library {
@@ -458,8 +529,9 @@ class ChannelEpgItem {
 }
 
 class SearchResult {
-  final int id;
+  final String id;
   final String title;
+  final String type;
   final String? originalTitle;
   final String? overview;
   final String? poster;
@@ -469,22 +541,25 @@ class SearchResult {
       : id = json['id'],
         title = json['title'],
         originalTitle = json['originalTitle'],
+        type = json['type'],
         overview = json['overview'],
         poster = json['poster'],
         airDate = (json['airDate'] as String?)?.toDateTime();
 }
 
 class SearchFuzzyResult {
-  final List<Movie> movies;
-  final List<TVSeries> series;
-  final List<TVEpisode> episodes;
-  final List<Actor> actors;
+  final PageData<Movie> movies;
+  final PageData<TVSeries> series;
+  final PageData<TVEpisode> episodes;
+  final PageData<MediaCast> mediaCast;
+  final PageData<MediaCrew> mediaCrew;
 
   SearchFuzzyResult.fromJson(Json json)
-      : movies = (json['movies'] as JsonList).map((e) => Movie.fromJson(e)).toList(),
-        series = (json['series'] as JsonList).map((e) => TVSeries.fromJson(e)).toList(),
-        episodes = (json['episodes'] as JsonList).map((e) => TVEpisode.fromJson(e)).toList(),
-        actors = (json['actors'] as JsonList).map((e) => Actor.fromJson(e)).toList();
+      : movies = PageData.fromJson(json['movies'], (json['movies']['data'] as JsonList).map((e) => Movie.fromJson(e))),
+        series = PageData.fromJson(json['series'], (json['series']['data'] as JsonList).map((e) => TVSeries.fromJson(e))),
+        episodes = PageData.fromJson(json['episodes'], (json['episodes']['data'] as JsonList).map((e) => TVEpisode.fromJson(e))),
+        mediaCast = PageData.fromJson(json['mediaCast'], (json['mediaCast']['data'] as JsonList).map((e) => MediaCast.fromJson(e))),
+        mediaCrew = PageData.fromJson(json['mediaCrew'], (json['mediaCrew']['data'] as JsonList).map((e) => MediaCrew.fromJson(e)));
 }
 
 class Session<T> {
@@ -516,6 +591,19 @@ class DriverAccount {
         avatar = json['avatar'];
 }
 
+class DriverFileInfo {
+  final String filename;
+  final int size;
+  final DriverType driverType;
+  final DateTime createdAt;
+
+  DriverFileInfo.fromJson(Json json)
+      : filename = json['filename'],
+        driverType = DriverType.fromString(json['driverType']),
+        createdAt = (json['createAt'] as String).toDateTime()!,
+        size = json['size'];
+}
+
 class DriverFile {
   final String name;
   final String id;
@@ -526,6 +614,7 @@ class DriverFile {
   final FileCategory? category;
   final int? size;
   final Uri? url;
+  final String? fileId;
 
   DriverFile.fromJson(Json json)
       : name = json['name'],
@@ -536,7 +625,8 @@ class DriverFile {
         createdAt = (json['createdAt'] as String?)?.toDateTime(),
         updatedAt = (json['updatedAt'] as String?)?.toDateTime(),
         size = json['size'],
-        url = json['url'] != null ? Uri.tryParse(json['url']) : null;
+        url = json['url'] != null ? Uri.tryParse(json['url']) : null,
+        fileId = json['fileId'];
 }
 
 class PlayerHistory {
@@ -556,6 +646,19 @@ class PlayerHistory {
         duration = (json['duration'] as int?).toDuration(),
         lastPlayedTime = ((json['lastPlayedTime'] as String?)?.toDateTime())!,
         lastPlayedPosition = (json['lastPlayedPosition'] as int?).toDuration();
+}
+
+class PlaybackInfo {
+  final String url;
+  final String? container;
+  final List<SubtitleData> subtitles;
+  final dynamic others;
+
+  PlaybackInfo.fromJson(Json json)
+      : url = json['url'],
+        container = json['container'],
+        subtitles = (json['subtitles'] as JsonList).toSubtitles(),
+        others = json['others'];
 }
 
 class DownloadTask {
@@ -602,6 +705,65 @@ enum DownloadTaskStatus {
   }
 }
 
+enum ScraperBehavior {
+  skip,
+  chooseFirst,
+  exact;
+
+  static ScraperBehavior fromString(String s) {
+    return ScraperBehavior.values.firstWhere((e) => e.name == s);
+  }
+}
+
+class SettingScraper {
+  final bool nfoEnabled;
+  final bool tmdbEnabled;
+  final ScraperBehavior behavior;
+  final int tmdbMaxCast;
+  final int tmdbMaxCrew;
+
+  const SettingScraper({
+    required this.nfoEnabled,
+    required this.tmdbEnabled,
+    required this.behavior,
+    required this.tmdbMaxCast,
+    required this.tmdbMaxCrew,
+  });
+
+  SettingScraper.fromJson(Json json)
+      : behavior = ScraperBehavior.fromString(json['behavior']),
+        nfoEnabled = json['nfoEnabled'],
+        tmdbEnabled = json['tmdbEnabled'],
+        tmdbMaxCast = json['tmdbMaxCast'],
+        tmdbMaxCrew = json['tmdbMaxCrew'];
+
+  Json toJson() {
+    return {
+      'behavior': behavior.name,
+      'nfoEnabled': nfoEnabled,
+      'tmdbEnabled': tmdbEnabled,
+      'tmdbMaxCast': tmdbMaxCast,
+      'tmdbMaxCrew': tmdbMaxCrew,
+    };
+  }
+
+  SettingScraper copyWith({
+    bool? nfoEnabled,
+    bool? tmdbEnabled,
+    ScraperBehavior? behavior,
+    int? tmdbMaxCast,
+    int? tmdbMaxCrew,
+  }) {
+    return SettingScraper(
+      nfoEnabled: nfoEnabled ?? this.nfoEnabled,
+      tmdbEnabled: tmdbEnabled ?? this.tmdbEnabled,
+      behavior: behavior ?? this.behavior,
+      tmdbMaxCast: tmdbMaxCast ?? this.tmdbMaxCast,
+      tmdbMaxCrew: tmdbMaxCrew ?? this.tmdbMaxCrew,
+    );
+  }
+}
+
 class UpdateResp {
   List<UpdateRespAsset> assets;
   DateTime? createAt;
@@ -628,39 +790,84 @@ class Version {
   final int major;
   final int minor;
   final int patch;
+  final int? alpha;
+  final int? beta;
 
-  const Version(this.major, this.minor, this.patch);
+  const Version(this.major, this.minor, this.patch, {this.alpha, this.beta});
 
   Version.unknown()
       : major = 0,
         minor = 0,
-        patch = 0;
+        patch = 0,
+        alpha = null,
+        beta = null;
 
   factory Version.fromString(String s) {
-    final arr = s.split('.');
-    if (arr.length != 3) {
+    final arr = s.split('-');
+    final pre = arr.elementAtOrNull(0);
+    final suf = arr.elementAtOrNull(1);
+    if (pre == null) {
       return Version.unknown();
+    } else {
+      final list = pre.split('.');
+      if (list.length != 3) {
+        return Version.unknown();
+      }
+      final major = int.tryParse(list[0]);
+      final minor = int.tryParse(list[1]);
+      final patch = int.tryParse(list[2]);
+      if (major == null || minor == null || patch == null) {
+        return Version.unknown();
+      }
+      int? a;
+      int? b;
+      if (suf != null) {
+        if (suf.startsWith('alpha.')) {
+          a = int.tryParse(suf.substring(6));
+        }
+        if (suf.startsWith('beta.')) {
+          b = int.tryParse(suf.substring(5));
+        }
+      }
+      return Version(major, minor, patch, alpha: a, beta: b);
     }
-    final major = int.tryParse(arr[0]);
-    final minor = int.tryParse(arr[1]);
-    final patch = int.tryParse(arr[2]);
-    if (major == null || minor == null || patch == null) {
-      return Version.unknown();
-    }
-    return Version(major, minor, patch);
   }
 
   @override
   String toString() {
+    if (alpha != null) {
+      return '$major.$minor.$patch-alpha.$alpha';
+    }
+    if (beta != null) {
+      return '$major.$minor.$patch-beta.$beta';
+    }
     return '$major.$minor.$patch';
   }
 
+  bool isPrerelease() {
+    return alpha != null || beta != null;
+  }
+
+  double toDouble() {
+    double d = patch + minor * 1000.0 + major * 1000000.0;
+    if (alpha != null || beta != null) {
+      d -= 1;
+    }
+    if (alpha != null) {
+      d += (alpha! + 1) / 1000000.0;
+    }
+    if (beta != null) {
+      d += (beta! + 1) / 1000.0;
+    }
+    return d;
+  }
+
   bool operator >(Version other) {
-    return major > other.major || (major == other.major && minor > other.minor) || (major == other.major && minor == other.minor && patch > other.patch);
+    return toDouble() > other.toDouble();
   }
 
   bool operator <(Version other) {
-    return major < other.major || (major == other.major && minor < other.minor) || (major == other.major && minor == other.minor && patch < other.patch);
+    return toDouble() < other.toDouble();
   }
 }
 
@@ -759,17 +966,11 @@ enum DriverType {
   quark,
   webdav,
   emby,
+  jellyfin,
   local;
 
   static DriverType fromString(String? name) {
-    return switch (name) {
-      'alipan' => DriverType.alipan,
-      'quark' => DriverType.quark,
-      'webdav' => DriverType.webdav,
-      'emby' => DriverType.emby,
-      'local' => DriverType.local,
-      _ => throw Exception('Wrong Driver Type of "$name"'),
-    };
+    return DriverType.values.firstWhere((s) => s.name == name);
   }
 }
 
@@ -873,14 +1074,13 @@ enum SortDirection {
 }
 
 enum FilterType {
-  all,
   favorite,
   exceptFavorite,
   watched,
   unwatched;
 
   static FilterType fromString(String? str) {
-    return FilterType.values.firstWhere((element) => element.name == str, orElse: () => FilterType.all);
+    return FilterType.values.firstWhere((element) => element.name == str);
   }
 }
 
@@ -925,6 +1125,10 @@ DateTime? epgTimeToDateTime(String? s) {
 
 extension on JsonList {
   List<Actor> toActors() => List.generate(length, (index) => Actor.fromJson(this[index]));
+
+  List<MediaCast> toCast() => List.generate(length, (index) => MediaCast.fromJson(this[index]));
+
+  List<MediaCrew> toCrew() => List.generate(length, (index) => MediaCrew.fromJson(this[index]));
 
   List<Genre> toGenres() => List.generate(length, (index) => Genre.fromJson(this[index]));
 

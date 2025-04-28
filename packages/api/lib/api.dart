@@ -16,11 +16,18 @@ class Api {
   static final resetData = ApiPlatform.instance.resetData;
   static final log = ApiPlatform.instance.log;
   static final requestStoragePermission = ApiPlatform.instance.requestStoragePermission;
+  static final fileInfo = ApiPlatform.instance.fileInfo;
   static final fileList = ApiPlatform.instance.fileList;
   static final fileRename = ApiPlatform.instance.fileRename;
   static final fileRemove = ApiPlatform.instance.fileRemove;
   static final fileMkdir = ApiPlatform.instance.fileMkdir;
+  static final playbackInfo = ApiPlatform.instance.playbackInfo;
   static final playerHistory = ApiPlatform.instance.playerHistory;
+  static final subtitleQueryById = ApiPlatform.instance.subtitleQueryById;
+  static final subtitleInsert = ApiPlatform.instance.subtitleInsert;
+  static final subtitleDeleteById = ApiPlatform.instance.subtitleDeleteById;
+  static final settingScraperQuery = ApiPlatform.instance.settingScraperQuery;
+  static final settingScraperUpdate = ApiPlatform.instance.settingScraperUpdate;
   static final downloadTaskCreate = ApiPlatform.instance.downloadTaskCreate;
   static final downloadTaskPauseById = ApiPlatform.instance.downloadTaskPauseById;
   static final downloadTaskResumeById = ApiPlatform.instance.downloadTaskResumeById;
@@ -56,8 +63,8 @@ class Api {
   static final movieQueryById = ApiPlatform.instance.movieQueryById;
   static final movieNextToPlayQueryAll = ApiPlatform.instance.movieNextToPlayQueryAll;
   static final movieMetadataUpdateById = ApiPlatform.instance.movieMetadataUpdateById;
-  static final movieSubtitleUpdateById = ApiPlatform.instance.movieSubtitleUpdateById;
-  static final movieUpdateById = ApiPlatform.instance.movieUpdateById;
+  static final movieScraperById = ApiPlatform.instance.movieScraperById;
+  static final movieScraperSearch = ApiPlatform.instance.movieScraperSearch;
   static final movieRenameById = ApiPlatform.instance.movieRenameById;
   static final movieDeleteById = ApiPlatform.instance.movieDeleteById;
   static final tvRecommendation = ApiPlatform.instance.tvRecommendation;
@@ -65,7 +72,8 @@ class Api {
   static final tvSeriesQueryByFilter = ApiPlatform.instance.tvSeriesQueryByFilter;
   static final tvSeriesQueryById = ApiPlatform.instance.tvSeriesQueryById;
   static final tvSeriesNextToPlayQueryAll = ApiPlatform.instance.tvSeriesNextToPlayQueryAll;
-  static final tvSeriesUpdateById = ApiPlatform.instance.tvSeriesUpdateById;
+  static final tvSeriesScraperSearch = ApiPlatform.instance.tvSeriesScraperSearch;
+  static final tvSeriesScraperById = ApiPlatform.instance.tvSeriesScraperById;
   static final tvSeriesSyncById = ApiPlatform.instance.tvSeriesSyncById;
   static final tvSeriesMetadataUpdateById = ApiPlatform.instance.tvSeriesMetadataUpdateById;
   static final tvSeriesRenameById = ApiPlatform.instance.tvSeriesRenameById;
@@ -75,7 +83,6 @@ class Api {
   static final tvSeasonDeleteById = ApiPlatform.instance.tvSeasonDeleteById;
   static final tvEpisodeQueryById = ApiPlatform.instance.tvEpisodeQueryById;
   static final tvEpisodeMetadataUpdateById = ApiPlatform.instance.tvEpisodeMetadataUpdateById;
-  static final tvEpisodeSubtitleUpdateById = ApiPlatform.instance.tvEpisodeSubtitleUpdateById;
   static final tvEpisodeDeleteById = ApiPlatform.instance.tvEpisodeDeleteById;
   static final libraryQueryAll = ApiPlatform.instance.libraryQueryAll;
   static final libraryInsert = ApiPlatform.instance.libraryInsert;
@@ -85,6 +92,8 @@ class Api {
   static final studioQueryAll = ApiPlatform.instance.studioQueryAll;
   static final keywordQueryAll = ApiPlatform.instance.keywordQueryAll;
   static final actorQueryAll = ApiPlatform.instance.actorQueryAll;
+  static final castQueryAll = ApiPlatform.instance.castQueryAll;
+  static final crewQueryAll = ApiPlatform.instance.crewQueryAll;
   static final markWatched = ApiPlatform.instance.markWatched;
   static final markFavorite = ApiPlatform.instance.markFavorite;
   static final updatePlayedStatus = ApiPlatform.instance.updatePlayedStatus;

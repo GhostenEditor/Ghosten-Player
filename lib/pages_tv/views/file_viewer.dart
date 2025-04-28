@@ -71,9 +71,8 @@ class FileViewer extends StatelessWidget {
                                   toPlayer(
                                     navigatorKey.currentContext!,
                                     [
-                                      PlaylistItem(
+                                      PlaylistItemDisplay(
                                         url: item.url!.normalize(),
-                                        sourceType: PlaylistItemSourceType.other,
                                         title: item.name,
                                         description: item.updatedAt?.format(),
                                         source: null,

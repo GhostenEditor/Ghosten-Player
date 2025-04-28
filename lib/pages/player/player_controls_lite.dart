@@ -4,12 +4,14 @@ import 'package:animations/animations.dart';
 import 'package:api/api.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:video_player/player.dart';
 
 import '../../components/error_message.dart';
+import '../../providers/user_config.dart';
 import '../../utils/utils.dart';
 import '../player/player_controls_full.dart';
 import '../utils/utils.dart';
@@ -18,13 +20,18 @@ import 'player_appbar.dart';
 import 'player_controls_gesture.dart';
 
 class PlayerControlsLite<T> extends StatefulWidget {
-  const PlayerControlsLite(this.controller, {super.key, this.theme, this.artwork, this.onMediaChange, this.initialized});
+  const PlayerControlsLite(
+    this.controller, {
+    super.key,
+    this.theme,
+    this.artwork,
+    this.initialized,
+  });
 
   final PlayerController<T> controller;
   final VoidCallback? initialized;
   final int? theme;
   final Widget? artwork;
-  final void Function(int, Duration, Duration)? onMediaChange;
 
   @override
   State<PlayerControlsLite<T>> createState() => _PlayerControlsLiteState<T>();
@@ -53,12 +60,6 @@ class _PlayerControlsLiteState<T> extends State<PlayerControlsLite<T>> {
       _isShowControls.value = show;
     });
     _controlsStream.add(ControlsStreamStatus.show);
-    if (widget.onMediaChange != null) {
-      _controller.mediaChange.addListener(() {
-        final data = _controller.mediaChange.value!;
-        widget.onMediaChange!(data.$1.index, data.$1.position, data.$2);
-      });
-    }
     _controller.status.addListener(() {
       switch (_controller.status.value) {
         case PlayerStatus.playing:
@@ -121,10 +122,6 @@ class _PlayerControlsLiteState<T> extends State<PlayerControlsLite<T>> {
         if (didPop) {
           return;
         }
-        if (widget.onMediaChange != null && _controller.duration.value > Duration.zero) {
-          widget.onMediaChange!(_controller.index.value!, _controller.position.value, _controller.duration.value);
-        }
-
         if (context.mounted && Navigator.of(context).canPop()) Navigator.pop(context);
       },
       child: LayoutBuilder(builder: (context, constraints) {
@@ -248,7 +245,7 @@ class _PlayerControlsLiteState<T> extends State<PlayerControlsLite<T>> {
                           child: Stack(
                             fit: StackFit.expand,
                             children: [
-                              PlayerPlatformView(initialized: widget.initialized),
+                              PlayerPlatformView(initialized: widget.initialized, autoPip: context.read<UserConfig>().autoPip),
                               ListenableBuilder(
                                   listenable: _isShowControls,
                                   builder: (context, _) => PageTransitionSwitcher(

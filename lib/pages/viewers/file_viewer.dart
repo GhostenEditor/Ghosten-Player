@@ -60,9 +60,9 @@ class FileViewer extends StatelessWidget {
                   toPlayer(
                     context,
                     [
-                      PlaylistItem(
-                        url: item.url!.normalize(),
-                        sourceType: PlaylistItemSourceType.other,
+                      PlaylistItemDisplay(
+                        url: item.url?.normalize(),
+                        fileId: item.fileId,
                         title: item.name,
                         description: item.updatedAt?.format(),
                         source: null,
@@ -259,9 +259,6 @@ class FilePropertyBottomSheet extends StatelessWidget {
 
 extension on DriverFile {
   bool viewable() {
-    if (url == null) {
-      return false;
-    }
     switch (category) {
       case FileCategory.image:
       case FileCategory.video:

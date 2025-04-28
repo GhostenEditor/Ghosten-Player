@@ -12,10 +12,10 @@ final lightTheme = ThemeData(
   ),
   dividerTheme: const DividerThemeData(space: 1, color: Colors.black12),
   cardTheme: const CardTheme(elevation: 0.75),
-  appBarTheme: const AppBarTheme(scrolledUnderElevation: 0.75, shadowColor: Color(0xFFE2E5E8), backgroundColor: Color(0xFFF8F6FD)),
-  navigationBarTheme: const NavigationBarThemeData(elevation: 0.75, shadowColor: Color(0xFFE2E5E8)),
+  appBarTheme: const AppBarTheme(scrolledUnderElevation: 0.75, shadowColor: Color(0xFFFCFCFF), backgroundColor: Color(0xFFFCFCFF)),
+  navigationBarTheme: const NavigationBarThemeData(elevation: 0.7, backgroundColor: Color(0xFFF4F4F4)),
   drawerTheme: const DrawerThemeData(endShape: ContinuousRectangleBorder()),
-  scaffoldBackgroundColor: const Color(0xFFF5F5FA),
+  scaffoldBackgroundColor: const Color(0xFFFCFCFF),
 );
 
 final darkTheme = ThemeData(

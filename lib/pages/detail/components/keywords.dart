@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../utils/utils.dart';
-import '../../media/filter.dart';
+import '../../media/search.dart';
 
 class KeywordsSection extends StatelessWidget {
-  const KeywordsSection({super.key, required this.keywords});
+  const KeywordsSection({super.key, required this.keywords, required this.type});
 
+  final MediaType type;
   final List<Keyword> keywords;
 
   @override
@@ -28,7 +29,7 @@ class KeywordsSection extends StatelessWidget {
               itemCount: keywords.length,
               itemBuilder: (BuildContext context, int index) => TextButton(
                   style: const ButtonStyle(padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 6))),
-                  onPressed: () => navigateTo(context, FilterPage(queryType: QueryType.keyword, id: keywords[index].id)),
+                  onPressed: () => navigateTo(context, SearchPage(activeTab: type == MediaType.movie ? 1 : 0, selectedKeyword: [keywords[index]])),
                   child: Text(keywords[index].name, style: Theme.of(context).textTheme.labelSmall))),
         ),
       ],

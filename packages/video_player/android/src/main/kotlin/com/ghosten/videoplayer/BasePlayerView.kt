@@ -10,7 +10,7 @@ interface BasePlayerView {
     fun next(index: Int)
     fun seekTo(position: Long)
     fun updateSource(data: HashMap<String, Any>, index: Int)
-    fun setSources(data: List<HashMap<String, Any>>, index: Int)
+    fun setSource(data: HashMap<String, Any>)
     fun setTransform(matrix: ArrayList<Double>)
     fun setAspectRatio(aspectRatio: Float?)
     fun fullscreen(flag: Boolean)
@@ -26,7 +26,6 @@ interface BasePlayerView {
 }
 
 internal class Video(
-    val type: Int,
     val url: String,
     val title: String?,
     val description: String?,
@@ -43,4 +42,6 @@ internal class Subtitle(
     val url: String,
     val mimeType: String,
     val language: String?,
+    val selected: Boolean,
+    val label: String?,
 )

@@ -1,11 +1,79 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:video_player/player.dart';
 
+import '../../../components/future_builder_handler.dart';
+import '../../../components/no_data.dart';
 import '../../../providers/user_config.dart';
 import '../../../validators/validators.dart';
+import '../../utils/notification.dart';
 import '../../utils/utils.dart';
+
+class SubtitleManager extends StatefulWidget {
+  const SubtitleManager({super.key, required this.fileId});
+
+  final String fileId;
+
+  @override
+  State<SubtitleManager> createState() => _SubtitleManagerState();
+}
+
+class _SubtitleManagerState extends State<SubtitleManager> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.buttonSubtitle),
+        actions: [
+          IconButton(
+              onPressed: () async {
+                final subtitle = await showDialog<SubtitleData>(context: context, builder: (context) => const SubtitleDialog());
+                if (subtitle != null && context.mounted) {
+                  final resp = await showNotification(context, Api.subtitleInsert(widget.fileId, subtitle));
+                  if (resp?.error == null && context.mounted) setState(() {});
+                }
+              },
+              icon: const Icon(Icons.add)),
+        ],
+      ),
+      body: LayoutBuilder(builder: (context, constraints) {
+        return FutureBuilderHandler(
+            future: Api.subtitleQueryById(widget.fileId),
+            builder: (context, snapshot) => snapshot.requireData.isNotEmpty
+                ? ListView.builder(
+                    itemCount: snapshot.requireData.length,
+                    itemBuilder: (context, index) {
+                      final item = snapshot.requireData[index];
+                      return Slidable(
+                        endActionPane: ActionPane(
+                          extentRatio: 48 / constraints.maxWidth,
+                          motion: const BehindMotion(),
+                          children: [
+                            IconButton(
+                                onPressed: () async {
+                                  final confirm = await showConfirm(context, AppLocalizations.of(context)!.deleteConfirmText);
+                                  if (confirm != true || !context.mounted) return;
+                                  final resp = await showNotification(context, Api.subtitleDeleteById(item.id));
+                                  if (resp?.error == null && context.mounted) setState(() {});
+                                },
+                                icon: const Icon(Icons.delete_outline)),
+                          ],
+                        ),
+                        child: ListTile(
+                          leading: Text(item.mimeType ?? ''),
+                          trailing: Text(item.language ?? ''),
+                          title: Text(item.label ?? ''),
+                        ),
+                      );
+                    })
+                : const NoData());
+      }),
+    );
+  }
+}
 
 class SubtitleDialog extends StatefulWidget {
   const SubtitleDialog({super.key, this.subtitle});
@@ -18,10 +86,11 @@ class SubtitleDialog extends StatefulWidget {
 
 class _SubtitleDialogState extends State<SubtitleDialog> {
   final _controller = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
   String? _mimeType;
   String? _language;
   String? _filename;
-  final _formKey = GlobalKey<FormState>();
+  bool selected = false;
 
   @override
   void dispose() {
@@ -51,29 +120,31 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
                     final res = await showDriverFilePicker(context, AppLocalizations.of(context)!.titleEditSubtitle, selectableType: FileType.file);
                     if (res != null) {
                       final file = res.$2;
-                      final ext = file.name.split('.').lastOrNull;
+                      final ar = file.name.split('.');
+                      final ext = ar.lastOrNull;
                       _mimeType = SubtitleMimeType.fromString(ext)?.name;
-                      _filename = file.name;
+                      _filename = ar.firstOrNull;
                       _controller.text = 'driver://${res.$1}/${file.id}';
                       setState(() {});
                     }
                   },
                 ),
-                hintText: widget.subtitle?.title?.toString(),
+                hintText: widget.subtitle?.label?.toString(),
                 filled: true,
                 isDense: true,
                 labelText: AppLocalizations.of(context)!.subtitleFormItemLabelUrl,
               ),
               validator: (value) => requiredValidator(context, value),
-              onEditingComplete: () {
-                final value = _controller.text;
+              onChanged: (value) {
                 if (value.startsWith(RegExp(r'^http(s)://'))) {
-                  final ext = value.split('.').lastOrNull;
+                  final uri = Uri.parse(value.trim());
+                  final filename = uri.path.split('/').lastOrNull;
+                  final ar = filename?.split('.');
+                  final ext = ar?.lastOrNull;
+                  _filename = ar?.firstOrNull;
                   _mimeType = SubtitleMimeType.fromString(ext)?.name;
-                  _filename = null;
                   setState(() {});
                 }
-                FocusScope.of(context).nextFocus();
               },
             ),
             DropdownButtonFormField(
@@ -103,6 +174,14 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
                   ...SystemLanguage.values.map((lang) => DropdownMenuItem(value: lang.name, child: Text(lang.name.toUpperCase())))
                 ],
                 onChanged: (v) => setState(() => _language = v)),
+            CheckboxListTile(
+              dense: true,
+              title: const Text('默认选中'),
+              contentPadding: const EdgeInsets.only(left: 8),
+              value: selected,
+              onChanged: (v) => setState(() => selected = v ?? false),
+              // trailing: Checkbox(),
+            ),
           ],
         ),
       ),
@@ -111,18 +190,14 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
           onPressed: () {
             if (_formKey.currentState!.validate() && _mimeType != null) {
               Navigator.of(context).pop(SubtitleData(
-                url: Uri.parse(_controller.text),
+                url: _controller.text,
                 mimeType: _mimeType,
                 language: _language,
-                title: _filename,
+                label: _filename,
               ));
             }
           },
           child: Text(AppLocalizations.of(context)!.buttonConfirm),
-        ),
-        TextButton(
-          onPressed: () => Navigator.pop(context, SubtitleData.empty),
-          child: Text(AppLocalizations.of(context)!.buttonReset),
         ),
         TextButton(
           onPressed: () => Navigator.pop(context),

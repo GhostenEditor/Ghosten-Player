@@ -26,11 +26,11 @@ import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlaybackException
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.SeekParameters
-import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.mediacodec.MediaCodecDecoderException
 import androidx.media3.exoplayer.mediacodec.MediaCodecRenderer.DecoderInitializationException
-import androidx.media3.exoplayer.rtsp.RtspMediaSource
-import androidx.media3.exoplayer.source.*
+import androidx.media3.exoplayer.source.BehindLiveWindowException
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.exoplayer.source.UnrecognizedInputFormatException
 import androidx.media3.exoplayer.upstream.Loader
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaStyleNotificationHelper
@@ -60,6 +60,7 @@ class Media3PlayerView(
     private val height: Int?,
     private val top: Int?,
     private val left: Int?,
+    private val autoPip: Boolean,
 ) : Player.Listener, BasePlayerView {
     private val mRootView: FrameLayout = activity.findViewById<FrameLayout>(android.R.id.content)
     private val mNativeView: View = View.inflate(context, R.layout.player_view, null)
@@ -110,23 +111,19 @@ class Media3PlayerView(
 
         fun add(result: MethodChannel.Result, timeMs: Long) {
             val video = mPlaylist[player.currentMediaItemIndex]
-            if (video.type != C.CONTENT_TYPE_OTHER && video.type != 5) {
-                return activity.runOnUiThread { result.success(null) }
-            }
             val task = {
                 if (video.url != url) {
                     url = video.url
                     retriever?.release()
                     retriever = MediaMetadataRetriever()
                     try {
-                        if (video.type == 5) {
-                            if (url!!.startsWith("content://", ignoreCase = true)) {
-                                retriever?.setDataSource(context, Uri.parse(url))
-                            } else {
-                                retriever?.setDataSource(url)
-                            }
+                        if (url!!.startsWith("content://", ignoreCase = true)) {
+                            retriever?.setDataSource(context, Uri.parse(url))
+                        } else if (url!!.startsWith("file://", ignoreCase = true)) {
+                            retriever?.setDataSource(url)
                         } else {
                             retriever?.setDataSource(url, HashMap<String, String>())
+
                         }
                     } catch (e: Exception) {
                         retriever = null
@@ -234,9 +231,7 @@ class Media3PlayerView(
         player = initPlayer()
         mediaSession = MediaSession.Builder(context, player).build()
 
-        player.setMediaSources(mPlaylist.map {
-            buildMediaSource(it)
-        }.toList(), index, mPlaylist[index].startPosition)
+        player.setMediaItem(buildMediaItem(mPlaylist[0]), mPlaylist[index].startPosition)
         if (isPlaying) {
             player.playWhenReady = true
             player.prepare()
@@ -632,61 +627,35 @@ class Media3PlayerView(
         }
     }
 
-    private fun buildMediaSource(video: Video): MediaSource {
-        val uri = Uri.parse(video.url)
-        return when (video.type) {
-            C.CONTENT_TYPE_HLS -> HlsMediaSource.Factory(httpDataSourceFactory)
-                .createMediaSource(MediaItem.fromUri(uri))
-
-            C.CONTENT_TYPE_RTSP -> RtspMediaSource.Factory()
-                .createMediaSource(MediaItem.fromUri(uri))
-
-            C.CONTENT_TYPE_OTHER -> {
-                var mediaItem = MediaItem.fromUri(uri)
-                if (video.subtitle != null) {
-                    mediaItem = mediaItem.buildUpon().setSubtitleConfigurations(video.subtitle.map {
-                        MediaItem.SubtitleConfiguration.Builder(Uri.parse(it.url))
-                            .setMimeType(
-                                when (it.mimeType) {
-                                    "xml" -> MimeTypes.APPLICATION_TTML
-                                    "vtt" -> MimeTypes.TEXT_VTT
-                                    "ass" -> MimeTypes.TEXT_SSA
-                                    "srt" -> MimeTypes.APPLICATION_SUBRIP
-                                    else -> throw Exception("Unknown Subtitle Mime Type")
-                                }
-                            )
-                            .setLanguage(it.language)
-                            .build()
-                    }).build()
-                }
-                ProgressiveMediaSource.Factory(httpDataSourceFactory).createMediaSource(mediaItem)
-            }
-
-            5 -> {
-                var mediaItem = MediaItem.fromUri(uri)
-                if (video.subtitle != null) {
-                    mediaItem = mediaItem.buildUpon().setSubtitleConfigurations(video.subtitle.map {
-                        MediaItem.SubtitleConfiguration.Builder(Uri.parse(it.url))
-                            .setMimeType(
-                                when (it.mimeType) {
-                                    "xml" -> "application/ttml+xml"
-                                    "vtt" -> "text/vtt"
-                                    "ass" -> "text/x-ssa"
-                                    else -> throw Exception("Unknown Subtitle Mime Type")
-                                }
-                            )
-                            .setLanguage(it.language)
-                            .build()
-                    }).build()
-                }
-                ProgressiveMediaSource.Factory(DefaultDataSource.Factory(context)).createMediaSource(mediaItem)
-            }
-
-            else -> throw IllegalStateException("Unsupported type: ${video.type}")
-        }
+    private fun buildMediaItem(video: Video): MediaItem {
+        return MediaItem.fromUri(Uri.parse(video.url))
+            .buildUpon()
+            .setSubtitleConfigurations((video.subtitle ?: listOf()).map {
+                MediaItem.SubtitleConfiguration.Builder(Uri.parse(it.url))
+                    .setMimeType(
+                        when (it.mimeType) {
+                            "xml" -> MimeTypes.APPLICATION_TTML
+                            "vtt" -> MimeTypes.TEXT_VTT
+                            "ass" -> MimeTypes.TEXT_SSA
+                            "srt" -> MimeTypes.APPLICATION_SUBRIP
+                            else -> throw Exception("Unknown Subtitle Mime Type")
+                        }
+                    )
+                    .setLabel(it.label)
+                    .setSelectionFlags(
+                        if (it.selected) {
+                            C.SELECTION_FLAG_AUTOSELECT
+                        } else {
+                            C.SELECTION_FLAG_DEFAULT
+                        }
+                    )
+                    .build()
+            })
+            .build()
     }
 
     private fun setPictureInPictureParams() {
+        if (!autoPip) return
         val params = getPictureInPictureParams()
         if (params != null) activity.setPictureInPictureParams(params)
     }
@@ -857,59 +826,48 @@ class Media3PlayerView(
         player.seekTo(position)
     }
 
-    override fun setSources(data: List<HashMap<String, Any>>, index: Int) {
-        val playlist = data.map { item ->
-            Video(
-                when (item[TYPE]) {
-                    "hls" -> C.CONTENT_TYPE_HLS
-                    "dash" -> C.CONTENT_TYPE_DASH
-                    "ss" -> C.CONTENT_TYPE_SS
-                    "rtsp" -> C.CONTENT_TYPE_RTSP
-                    "local" -> 5
-                    else -> C.CONTENT_TYPE_OTHER
-                },
-                item[URL] as String,
-                item[TITLE] as String?,
-                item[DESCRIPTION] as String?,
-                item[POSTER] as String?,
-                (item[SUBTITLE] as List<HashMap<String, Any>>?)?.map {
-                    Subtitle(it[URL] as String, it[MIME_TYPE] as String, it[LANGUAGE] as String?)
-                },
-                (item[START_POSITION] as Int? ?: 0).toLong(),
-                (item[END_POSITION] as Int? ?: 0).toLong(),
-            )
-        }.toTypedArray()
-
-        mPlaylist = playlist
-        player.setMediaSources(playlist.map {
-            buildMediaSource(it)
-        }.toList(), index, playlist[index].startPosition)
-    }
-
-    override fun updateSource(data: HashMap<String, Any>, index: Int) {
+    override fun setSource(data: HashMap<String, Any>) {
         val video = Video(
-            when (data[TYPE]) {
-                "hls" -> C.CONTENT_TYPE_HLS
-                "dash" -> C.CONTENT_TYPE_DASH
-                "ss" -> C.CONTENT_TYPE_SS
-                "rtsp" -> C.CONTENT_TYPE_RTSP
-                "local" -> 5
-                else -> C.CONTENT_TYPE_OTHER
-            },
             data[URL] as String,
             data[TITLE] as String?,
             data[DESCRIPTION] as String?,
             data[POSTER] as String?,
             (data[SUBTITLE] as List<HashMap<String, Any>>?)?.map {
-                Subtitle(it[URL] as String, it[MIME_TYPE] as String, it[LANGUAGE] as String?)
+                Subtitle(
+                    it[URL] as String,
+                    it[MIME_TYPE] as String,
+                    it[LANGUAGE] as String?,
+                    it[SELECTED] as Boolean,
+                    it[LABEL] as String?
+                )
             },
             (data[START_POSITION] as Int? ?: 0).toLong(),
             (data[END_POSITION] as Int? ?: 0).toLong(),
         )
-        mPlaylist[index] = video
-        player.removeMediaItem(index)
-        player.addMediaSource(index, buildMediaSource(video))
-        player.prepare()
+        mPlaylist = arrayOf(video)
+        player.setMediaItem(buildMediaItem(video), video.startPosition)
+    }
+
+    override fun updateSource(data: HashMap<String, Any>, index: Int) {
+        val video = Video(
+            data[URL] as String,
+            data[TITLE] as String?,
+            data[DESCRIPTION] as String?,
+            data[POSTER] as String?,
+            (data[SUBTITLE] as List<HashMap<String, Any>>?)?.map {
+                Subtitle(
+                    it[URL] as String,
+                    it[MIME_TYPE] as String,
+                    it[LANGUAGE] as String?,
+                    it[SELECTED] as Boolean,
+                    it[LABEL] as String?
+                )
+            },
+            (data[START_POSITION] as Int? ?: 0).toLong(),
+            (data[END_POSITION] as Int? ?: 0).toLong(),
+        )
+        mPlaylist = arrayOf(video)
+        player.replaceMediaItem(index, buildMediaItem(video))
     }
 
     override fun setTransform(matrix: ArrayList<Double>) {
@@ -964,6 +922,8 @@ class Media3PlayerView(
         const val END_POSITION: String = "end"
         const val LANGUAGE: String = "language"
         const val MIME_TYPE: String = "mimeType"
+        const val SELECTED: String = "selected"
+        const val LABEL: String = "label"
         const val NOTIFICATION_ID = 3423523
         const val USER_AGENT =
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.83 Safari/537.36"

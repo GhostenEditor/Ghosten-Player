@@ -39,12 +39,14 @@ class PlayerControlsFull<T> extends StatefulWidget {
 class _PlayerControlsFullState<T> extends State<PlayerControlsFull<T>> with PlayerActionsMixin {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _navigatorKey = GlobalKey<NavigatorState>();
+  final _zoomKey = GlobalKey<PlayerZoomWrapperState>();
   late final _controller = widget.controller;
   late final _progressController = widget.progressController;
   final _isShowControls = ValueNotifier(false);
   final _isLocked = ValueNotifier(false);
   final _isShowLockButton = ValueNotifier(false);
   final _forceLandScape = ValueNotifier(false);
+  final _isZoomed = ValueNotifier(false);
   final _controlsStream = StreamController<ControlsStreamStatus>();
   StreamSubscription<bool>? _subscription;
   StreamSubscription<bool>? _pipSubscription;
@@ -121,6 +123,7 @@ class _PlayerControlsFullState<T> extends State<PlayerControlsFull<T>> with Play
     _isShowLockButton.dispose();
     _isLocked.dispose();
     _forceLandScape.dispose();
+    _isZoomed.dispose();
     _subscription?.cancel();
     _pipSubscription?.cancel();
     super.dispose();
@@ -205,8 +208,10 @@ class _PlayerControlsFullState<T> extends State<PlayerControlsFull<T>> with Play
                   alignment: const Alignment(0.9, 0),
                   children: [
                     PlayerZoomWrapper(
+                      key: _zoomKey,
                       controller: _controller,
                       child: const SizedBox.expand(),
+                      onZoomChanged: (zoom) => _isZoomed.value = zoom,
                     ),
                     ListenableBuilder(
                         listenable: _isLocked,
@@ -214,9 +219,9 @@ class _PlayerControlsFullState<T> extends State<PlayerControlsFull<T>> with Play
                           return _isLocked.value
                               ? const SizedBox.expand()
                               : PlayerControlsGesture(
-                                controller: _controller,
-                                child: const SizedBox.expand(),
-                              );
+                                  controller: _controller,
+                                  child: const SizedBox.expand(),
+                                );
                         }),
                     ListenableBuilder(
                         listenable: _isShowControls,
@@ -305,6 +310,11 @@ class _PlayerControlsFullState<T> extends State<PlayerControlsFull<T>> with Play
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              ListenableBuilder(
+                listenable: _isZoomed,
+                builder: (context, child) => _isZoomed.value ? child! : const SizedBox(),
+                child: FilledButton(onPressed: () => _zoomKey.currentState?.reset(), child: Text(AppLocalizations.of(context)!.buttonReset)),
+              ),
               _PlayerInfoView(_controller),
               if (aspectRatio <= 1)
                 Padding(
@@ -511,7 +521,7 @@ class _Playlist extends StatefulWidget {
   final double imageHeight;
 
   final int? activeIndex;
-  final List<PlaylistItem<dynamic>> playlist;
+  final List<PlaylistItemDisplay<dynamic>> playlist;
 
   final ValueChanged<int>? onTap;
 
@@ -602,10 +612,10 @@ class _SwitchLinkButtonState<T> extends State<SwitchLinkButton<T>> {
         builder: (context, _) => (widget.controller.currentItem?.source is Channel && (widget.controller.currentItem!.source as Channel).links.length > 1)
             ? PopupMenuButton(
                 onSelected: (url) {
-                  final currentItem = widget.controller.currentItem!;
-                  final item = currentItem.copyWith(url: url, sourceType: PlaylistItemSourceType.fromBroadcastUri(url));
-                  widget.controller.playlist.value[widget.controller.index.value!] = item;
-                  widget.controller.updateSource(item, widget.controller.index.value!);
+                  // final currentItem = widget.controller.currentItem!;
+                  // final item = currentItem.copyWith(url: url);
+                  // widget.controller.playlist.value[widget.controller.index.value!] = item;
+                  widget.controller.updateSource(widget.controller.currentItem!.toItem(url: url), widget.controller.index.value!);
                   setState(() {});
                 },
                 itemBuilder: (context) => (widget.controller.currentItem!.source as Channel)
@@ -620,7 +630,7 @@ class _SwitchLinkButtonState<T> extends State<SwitchLinkButton<T>> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Text(
-                      '${AppLocalizations.of(context)!.playerBroadcastLine} ${(widget.controller.currentItem!.source as Channel).links.indexOf(widget.controller.currentItem!.url) + 1}'),
+                      '${AppLocalizations.of(context)!.playerBroadcastLine} ${(widget.controller.currentItem!.source as Channel).links.indexOf(widget.controller.currentItem!.url!) + 1}'),
                 ),
               )
             : const SizedBox());
@@ -640,7 +650,7 @@ class _ChannelListGrouped extends StatefulWidget {
 class _ChannelListGroupedState extends State<_ChannelListGrouped> {
   late final _groupedPlaylist = widget.controller.playlist.value.groupListsBy((channel) => channel.source.category);
   late final _groupName = ValueNotifier<String?>(null);
-  late final _playlist = ValueNotifier<List<PlaylistItem<Channel>>>([]);
+  late final _playlist = ValueNotifier<List<PlaylistItemDisplay<Channel>>>([]);
   late final _epg = ValueNotifier<List<ChannelEpgItem>?>([]);
 
   @override

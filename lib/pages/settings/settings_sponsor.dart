@@ -24,7 +24,7 @@ class _SettingsSponsorState extends State<SettingsSponsor> {
         child: CustomScrollView(
           slivers: [
             SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
               sliver: SliverToBoxAdapter(
                 child: SafeArea(
                   child: Center(
@@ -33,7 +33,7 @@ class _SettingsSponsorState extends State<SettingsSponsor> {
                       child: AspectRatio(
                         aspectRatio: 1,
                         child: Material(
-                          elevation: 24,
+                          elevation: 16,
                           borderRadius: BorderRadius.circular(12),
                           clipBehavior: Clip.antiAlias,
                           child: Image.asset('assets/common/images/sponsor_code.webp'),
@@ -105,11 +105,11 @@ class _SettingsSponsorState extends State<SettingsSponsor> {
 
   Future<List<String>> _getSponsorList() async {
     try {
-      final resp = await Dio().get('https://github.com/$repoAuthor/$repoName/raw/main/sponsor_list.txt');
+      final resp = await Dio().get('https://raw.githubusercontent.com/$repoAuthor/$repoName/main/sponsor_list.txt');
       final data = resp.data as String;
       return data.split('\n');
     } catch (e) {
-      return [];
+      rethrow;
     }
   }
 }

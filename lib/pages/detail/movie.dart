@@ -19,11 +19,14 @@ import '../components/image_card.dart';
 import '../components/theme_builder.dart';
 import '../player/player_controls_lite.dart';
 import '../utils/notification.dart';
-import 'components/actors.dart';
+import 'components/cast.dart';
+import 'components/crew.dart';
+import 'components/file_info.dart';
 import 'components/overview.dart';
 import 'components/player_backdrop.dart';
 import 'components/player_scaffold.dart';
 import 'components/playlist.dart';
+import 'dialogs/scraper.dart';
 import 'dialogs/subtitle.dart';
 import 'mixins/action.dart';
 import 'mixins/searchable.dart';
@@ -39,10 +42,39 @@ class MovieDetail extends StatefulWidget {
 }
 
 class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>, SearchableMixin {
-  final _controller = PlayerController<Movie>(Api.log);
+  late final _controller = PlayerController<Movie>(
+    Api.log,
+    onGetPlayBackInfo: _onGetPlayBackInfo,
+    onPlaybackStatusUpdate: _onPlaybackStatusUpdate,
+  );
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _navigatorKey = GlobalKey<NavigatorState>();
   late final _autoPlay = Provider.of<UserConfig>(context, listen: false).autoPlay;
+
+  Future<PlaylistItem> _onGetPlayBackInfo(PlaylistItemDisplay<Movie> item) async {
+    final data = await Api.playbackInfo(item.fileId);
+    return PlaylistItem(
+      title: item.title,
+      description: item.description,
+      poster: item.poster,
+      start: item.start,
+      end: item.end,
+      url: Uri.parse(data.url).normalize(),
+      subtitles: data.subtitles.map((d) => d.toSubtitle()).toList(),
+      others: data.others,
+    );
+  }
+
+  Future<void> _onPlaybackStatusUpdate(PlaylistItem item, PlaybackStatusEvent eventType, Duration position, Duration duration) {
+    return Api.updatePlayedStatus(
+      LibraryType.movie,
+      _controller.currentItem!.source.id,
+      position: position,
+      duration: duration,
+      eventType: eventType.name,
+      others: item.others,
+    );
+  }
 
   @override
   void dispose() {
@@ -67,12 +99,9 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
                   initialized: () async {
                     if (!mounted) return;
                     final item = await Api.movieQueryById(widget.id);
-                    _controller.setSources([FromMedia.fromMovie(item)], 0);
-                    if (_autoPlay) _controller.play();
-                  },
-                  onMediaChange: (index, position, duration) {
-                    final item = _controller.playlist.value[index];
-                    Api.updatePlayedStatus(LibraryType.movie, item.source.id, position: position, duration: duration);
+                    _controller.setPlaylist([FromMedia.fromMovie(item)]);
+                    await _controller.next(0);
+                    if (_autoPlay) await _controller.play();
                   },
                 ),
                 sidebar: Navigator(
@@ -103,12 +132,15 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
                             padding: const EdgeInsets.all(16),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              spacing: 16,
                               children: [
                                 BlocSelector<MovieCubit, Movie?, String?>(
                                     selector: (movie) => movie?.poster,
-                                    builder: (context, poster) =>
-                                        poster != null ? AsyncImage(poster, width: 100, radius: BorderRadius.circular(4), viewable: true) : const SizedBox()),
+                                    builder: (context, poster) => poster != null
+                                        ? Padding(
+                                            padding: const EdgeInsets.only(right: 16),
+                                            child: AsyncImage(poster, width: 100, height: 150, radius: BorderRadius.circular(4), viewable: true),
+                                          )
+                                        : const SizedBox()),
                                 BlocSelector<MovieCubit, Movie?, String?>(
                                   selector: (movie) => movie?.overview,
                                   builder: (context, overview) => Expanded(child: OverviewSection(text: overview, trimLines: 7)),
@@ -128,17 +160,29 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
                                     )),
                           BlocSelector<MovieCubit, Movie?, List<Studio>?>(
                               selector: (movie) => movie?.studios ?? [],
-                              builder: (context, studios) => (studios != null && studios.isNotEmpty) ? StudiosSection(studios: studios) : const SizedBox()),
+                              builder: (context, studios) =>
+                                  (studios != null && studios.isNotEmpty) ? StudiosSection(type: MediaType.movie, studios: studios) : const SizedBox()),
                           BlocSelector<MovieCubit, Movie?, List<Genre>?>(
                               selector: (movie) => movie?.genres ?? [],
-                              builder: (context, genres) => (genres != null && genres.isNotEmpty) ? GenresSection(genres: genres) : const SizedBox()),
+                              builder: (context, genres) =>
+                                  (genres != null && genres.isNotEmpty) ? GenresSection(type: MediaType.movie, genres: genres) : const SizedBox()),
                           BlocSelector<MovieCubit, Movie?, List<Keyword>?>(
                               selector: (movie) => movie?.keywords ?? [],
                               builder: (context, keywords) =>
-                                  (keywords != null && keywords.isNotEmpty) ? KeywordsSection(keywords: keywords) : const SizedBox()),
-                          BlocSelector<MovieCubit, Movie?, List<Actor>?>(
-                              selector: (movie) => movie?.actors ?? [],
-                              builder: (context, actors) => (actors != null && actors.isNotEmpty) ? ActorsSection(actors: actors) : const SizedBox()),
+                                  (keywords != null && keywords.isNotEmpty) ? KeywordsSection(type: MediaType.movie, keywords: keywords) : const SizedBox()),
+                          BlocSelector<MovieCubit, Movie?, List<MediaCast>?>(
+                              selector: (movie) => movie?.mediaCast ?? [],
+                              builder: (context, cast) =>
+                                  (cast != null && cast.isNotEmpty) ? CastSection(type: MediaType.movie, cast: cast) : const SizedBox()),
+                          BlocSelector<MovieCubit, Movie?, List<MediaCrew>?>(
+                              selector: (movie) => movie?.mediaCrew ?? [],
+                              builder: (context, crew) =>
+                                  (crew != null && crew.isNotEmpty) ? CrewSection(type: MediaType.movie, crew: crew) : const SizedBox()),
+                          BlocSelector<MovieCubit, Movie?, String?>(
+                              selector: (movie) => movie?.fileId,
+                              builder: (context, fileId) {
+                                return fileId != null ? FileInfoSection(fileId: fileId) : const SizedBox();
+                              }),
                         ]),
                       ),
                     ],
@@ -168,7 +212,7 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
                       text: TextSpan(
                         style: Theme.of(context).textTheme.labelSmall,
                         children: [
-                          TextSpan(text: item.airDate?.format() ?? AppLocalizations.of(context)!.tagUnknown),
+                          TextSpan(text: item.releaseDate?.format() ?? AppLocalizations.of(context)!.tagUnknown),
                           const WidgetSpan(child: SizedBox(width: 20)),
                           const WidgetSpan(child: Icon(Icons.star, color: Colors.orangeAccent, size: 14)),
                           TextSpan(text: item.voteAverage?.toStringAsFixed(1) ?? AppLocalizations.of(context)!.tagUnknown),
@@ -200,6 +244,7 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
                       const PopupMenuDivider(),
                       PopupMenuItem(
                         padding: EdgeInsets.zero,
+                        enabled: false,
                         onTap: () => showNotification(context, Api.movieRenameById(widget.id)),
                         child: ListTile(
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
@@ -208,27 +253,22 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
                         ),
                       ),
                       const PopupMenuDivider(),
-                      buildRefreshInfoAction<MovieCubit, Movie>(context, () => _refreshMovie(context)),
+                      buildScraperAction<MovieCubit, Movie>(context, () => _refreshMovie(context, item)),
                       const PopupMenuDivider(),
                       buildEditMetadataAction(context, () async {
                         final item = context.read<MovieCubit>().state!;
-                        final res = await showDialog<(String, int?)>(context: context, builder: (context) => MovieMetadata(movie: item));
-                        if (res != null) {
-                          final (title, year) = res;
-                          await Api.movieMetadataUpdateById(id: widget.id, title: title, airDate: year == null ? null : DateTime(year));
-                          if (context.mounted) context.read<MovieCubit>().update();
-                        }
+                        final res = await showDialog<bool>(context: context, builder: (context) => MovieMetadata(movie: item));
+                        if ((res ?? false) && context.mounted) context.read<MovieCubit>().update();
                       }),
                       PopupMenuItem(
                         padding: EdgeInsets.zero,
                         onTap: () async {
-                          final item = context.read<MovieCubit>().state!;
-                          final subtitle =
-                              await showDialog<SubtitleData>(context: context, builder: (context) => SubtitleDialog(subtitle: item.subtitles.firstOrNull));
-                          if (subtitle != null && context.mounted) {
-                            final resp = await showNotification(context, Api.movieSubtitleUpdateById(id: widget.id, subtitle: subtitle));
-                            if (resp?.error == null && context.mounted) context.read<MovieCubit>().update();
-                          }
+                          navigateTo(context, SubtitleManager(fileId: item.fileId!));
+                          // final subtitle = await showDialog<SubtitleData>(context: context, builder: (context) => const SubtitleDialog());
+                          // if (subtitle != null && context.mounted) {
+                          //   final resp = await showNotification(context, Api.movieSubtitleUpdateById(id: widget.id, subtitle: subtitle));
+                          //   if (resp?.error == null && context.mounted) context.read<MovieCubit>().update();
+                          // }
                         },
                         child: ListTile(
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
@@ -238,16 +278,17 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
                       ),
                       PopupMenuItem(
                         padding: EdgeInsets.zero,
+                        enabled: !item.downloaded,
                         onTap: item.downloaded
                             ? null
                             : () async {
-                                final resp = await showNotification(context, Api.downloadTaskCreate(item.url!.queryParameters['id']!),
+                                final resp = await showNotification(context, Api.downloadTaskCreate(item.fileId),
                                     successText: AppLocalizations.of(context)!.tipsForDownload);
                                 if (resp?.error == null && context.mounted) context.read<MovieCubit>().update();
                               },
                         child: ListTile(
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                          title: Text(AppLocalizations.of(context)!.buttonDownload),
+                          title: Text(item.downloaded ? AppLocalizations.of(context)!.downloaderLabelDownloaded : AppLocalizations.of(context)!.buttonDownload),
                           leading: const Icon(Icons.download_outlined),
                         ),
                       ),
@@ -263,25 +304,17 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
     ];
   }
 
-  Future<bool> _refreshMovie(BuildContext context) async {
-    final item = context.read<MovieCubit>().state!;
-    final done = await search(
-      context,
-      ({required String title, int? year, int? index}) => Api.movieUpdateById(
-        item.id,
-        title,
-        Localizations.localeOf(context).languageCode,
-        year: year.toString(),
-        index: index,
-      ),
-      title: item.title ?? item.originalTitle ?? item.filename,
-      year: item.airDate?.year,
-    );
-    if (done) {
-      final movie = await Api.movieQueryById(item.id);
-      _controller.setSources([FromMedia.fromMovie(movie)], 0);
+  Future<bool> _refreshMovie(BuildContext context, Movie item) async {
+    final data = await showDialog<(String, String, String?)>(context: context, builder: (context) => ScraperDialog(item: item));
+    if (data != null && context.mounted) {
+      final resp = await showNotification(context, Api.movieScraperById(item.id, data.$1, data.$2, data.$3));
+      if (resp?.error == null) {
+        final movie = await Api.movieQueryById(item.id);
+        _controller.setPlaylist([FromMedia.fromMovie(movie)]);
+        return true;
+      }
     }
-    return done;
+    return false;
   }
 }
 
@@ -289,7 +322,7 @@ class _PlaylistSidebar extends StatefulWidget {
   const _PlaylistSidebar({this.activeIndex, required this.playlist, this.onTap, this.themeColor});
 
   final int? activeIndex;
-  final List<PlaylistItem<Movie>> playlist;
+  final List<PlaylistItemDisplay<Movie>> playlist;
   final int? themeColor;
 
   final ValueChanged<int>? onTap;

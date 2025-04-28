@@ -96,7 +96,7 @@ class _SearchPageState extends State<SearchPage> {
         body: _searchFuzzyResult != null
             ? CustomScrollView(
                 slivers: [
-                  if (_searchFuzzyResult!.movies.isNotEmpty)
+                  if (_searchFuzzyResult!.movies.data.isNotEmpty)
                     SliverPadding(
                       padding: const EdgeInsets.all(16),
                       sliver: SliverMainAxisGroup(
@@ -111,9 +111,9 @@ class _SearchPageState extends State<SearchPage> {
                                 mainAxisSpacing: 16,
                                 crossAxisSpacing: 16,
                               ),
-                              itemCount: _searchFuzzyResult!.movies.length,
+                              itemCount: _searchFuzzyResult!.movies.data.length,
                               itemBuilder: (context, index) {
-                                final item = _searchFuzzyResult!.movies[index];
+                                final item = _searchFuzzyResult!.movies.data[index];
                                 return MediaGridItem(
                                   imageUrl: item.poster,
                                   imageWidth: 172,
@@ -128,7 +128,7 @@ class _SearchPageState extends State<SearchPage> {
                         ],
                       ),
                     ),
-                  if (_searchFuzzyResult!.series.isNotEmpty)
+                  if (_searchFuzzyResult!.series.data.isNotEmpty)
                     SliverPadding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       sliver: SliverMainAxisGroup(
@@ -143,9 +143,9 @@ class _SearchPageState extends State<SearchPage> {
                                 mainAxisSpacing: 16,
                                 crossAxisSpacing: 16,
                               ),
-                              itemCount: _searchFuzzyResult!.series.length,
+                              itemCount: _searchFuzzyResult!.series.data.length,
                               itemBuilder: (context, index) {
-                                final item = _searchFuzzyResult!.series[index];
+                                final item = _searchFuzzyResult!.series.data[index];
                                 return MediaGridItem(
                                   imageUrl: item.poster,
                                   imageWidth: 172,
@@ -160,7 +160,7 @@ class _SearchPageState extends State<SearchPage> {
                         ],
                       ),
                     ),
-                  if (_searchFuzzyResult!.episodes.isNotEmpty)
+                  if (_searchFuzzyResult!.episodes.data.isNotEmpty)
                     SliverPadding(
                       padding: const EdgeInsets.all(16),
                       sliver: SliverMainAxisGroup(
@@ -175,9 +175,9 @@ class _SearchPageState extends State<SearchPage> {
                                 mainAxisSpacing: 16,
                                 crossAxisSpacing: 16,
                               ),
-                              itemCount: _searchFuzzyResult!.episodes.length,
+                              itemCount: _searchFuzzyResult!.episodes.data.length,
                               itemBuilder: (context, index) {
-                                final item = _searchFuzzyResult!.episodes[index];
+                                final item = _searchFuzzyResult!.episodes.data[index];
                                 return MediaGridItem(
                                   imageUrl: item.poster,
                                   imageWidth: 220,
@@ -193,7 +193,7 @@ class _SearchPageState extends State<SearchPage> {
                         ],
                       ),
                     ),
-                  if (_searchFuzzyResult!.actors.isNotEmpty)
+                  if (_searchFuzzyResult!.mediaCast.data.isNotEmpty)
                     SliverPadding(
                       padding: const EdgeInsets.all(16),
                       sliver: SliverMainAxisGroup(
@@ -208,9 +208,9 @@ class _SearchPageState extends State<SearchPage> {
                                 mainAxisSpacing: 16,
                                 crossAxisSpacing: 16,
                               ),
-                              itemCount: _searchFuzzyResult!.actors.length,
+                              itemCount: _searchFuzzyResult!.mediaCast.data.length,
                               itemBuilder: (context, index) {
-                                final item = _searchFuzzyResult!.actors[index];
+                                final item = _searchFuzzyResult!.mediaCast.data[index];
                                 return MediaGridItem(
                                   imageUrl: item.profile,
                                   imageWidth: 120,
@@ -234,7 +234,7 @@ class _SearchPageState extends State<SearchPage> {
     if (_filter.isEmpty) {
       _searchFuzzyResult = null;
     } else {
-      _searchFuzzyResult = await Api.searchFuzzy(_filter);
+      // _searchFuzzyResult = await Api.searchFuzzy(_filter);
     }
     setState(() {});
   }

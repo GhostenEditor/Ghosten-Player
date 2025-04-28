@@ -210,14 +210,27 @@ class _PlayerControlsGestureState extends State<PlayerControlsGesture> {
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
+                                  const SizedBox(height: 8),
+                                  Builder(builder: (context) {
+                                    final delta = Duration(seconds: _gestureValue.value?.toInt() ?? 0) - _controller.position.value;
+                                    return Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      spacing: 16,
+                                      children: [
+                                        Icon(delta.isNegative ? Icons.fast_rewind_rounded : null, size: 16),
+                                        Text(delta.abs().toDisplay(), style: Theme.of(context).textTheme.labelSmall),
+                                        Icon(!delta.isNegative ? Icons.fast_forward_rounded : null, size: 16),
+                                      ],
+                                    );
+                                  }),
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    padding: const EdgeInsets.only(bottom: 8),
                                     child: Text(
                                         '${Duration(seconds: _gestureValue.value?.toInt() ?? 0).toDisplay()} / ${_controller.duration.value.toDisplay()}',
                                         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                         overflow: TextOverflow.ellipsis),
                                   ),
-                                  LinearProgressIndicator(value: (_gestureValue.value?.toInt() ?? 0) / _controller.duration.value.inSeconds, minHeight: 4)
+                                  LinearProgressIndicator(value: (_gestureValue.value?.toInt() ?? 0) / _controller.duration.value.inSeconds, minHeight: 4),
                                 ],
                               ),
                             ),

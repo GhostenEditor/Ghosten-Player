@@ -85,10 +85,12 @@ class MediaChannel<B extends StateStreamable<S>, S> extends StatelessWidget {
     required this.height,
     required this.builder,
     required this.selector,
+    this.more,
   });
 
   final String label;
   final double height;
+  final Widget? more;
   final Widget Function(BuildContext, int) builder;
   final BlocWidgetSelector<S?, int> selector;
 
@@ -102,7 +104,14 @@ class MediaChannel<B extends StateStreamable<S>, S> extends StatelessWidget {
                   slivers: [
                     SliverPadding(
                       padding: const EdgeInsets.all(16),
-                      sliver: SliverToBoxAdapter(child: Text(label, style: Theme.of(context).textTheme.titleMedium)),
+                      sliver: SliverToBoxAdapter(
+                          child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(label, style: Theme.of(context).textTheme.titleMedium),
+                          if (more != null) more!,
+                        ],
+                      )),
                     ),
                     SliverToBoxAdapter(
                       child: SizedBox(
@@ -206,6 +215,15 @@ class MediaBadges<T extends Media> extends StatelessWidget {
                   child: const Padding(
                     padding: EdgeInsets.all(2),
                     child: Icon(Icons.check_rounded, color: Colors.white, size: 12),
+                  ),
+                ),
+              if (item.voteAverage != null && item.voteAverage != 0)
+                Material(
+                  color: Theme.of(context).colorScheme.primary,
+                  shape: const StadiumBorder(),
+                  child: Badge(
+                    label: Text(item.voteAverage!.toStringAsFixed(1)),
+                    backgroundColor: Theme.of(context).colorScheme.primary,
                   ),
                 ),
             ],

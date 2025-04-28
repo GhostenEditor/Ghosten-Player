@@ -156,11 +156,6 @@ class PlayerWeb extends PlayerPlatform {
   }
 
   @override
-  Future<void> setSources(List<Map<String, dynamic>> playlist, int index) async {
-    invoke('set_sources', {'playlist': playlist, 'index': index});
-  }
-
-  @override
   Future<String?> getVideoThumbnail(int position) async {
     return null;
   }

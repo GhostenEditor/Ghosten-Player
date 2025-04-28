@@ -4,11 +4,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../components/async_image.dart';
-import '../../components/gap.dart';
 import '../../utils/utils.dart';
 import '../components/theme_builder.dart';
 import '../utils/notification.dart';
-import 'components/actors.dart';
+import 'components/cast.dart';
+import 'components/crew.dart';
+import 'components/file_info.dart';
 import 'components/overview.dart';
 import 'dialogs/episode_metadata.dart';
 import 'dialogs/subtitle.dart';
@@ -91,21 +92,17 @@ class _EpisodeDetailState extends State<EpisodeDetail> with ActionMixin<EpisodeD
                                         buildSkipFromEndAction<TVEpisodeCubit, TVEpisode>(context, item, MediaType.episode, item.skipEnding),
                                         const PopupMenuDivider(),
                                         buildEditMetadataAction(context, () async {
-                                          final res = await showDialog<(String, int)>(context: context, builder: (context) => EpisodeMetadata(episode: item));
-                                          if (res != null) {
-                                            final (title, episode) = res;
-                                            await Api.tvEpisodeMetadataUpdateById(id: item.id, title: title, episode: episode);
-                                            if (context.mounted) context.read<TVEpisodeCubit>().update();
-                                          }
+                                          final res = await showDialog<bool>(context: context, builder: (context) => EpisodeMetadata(episode: item));
+                                          if ((res ?? false) && context.mounted) context.read<TVEpisodeCubit>().update();
                                         }),
                                         PopupMenuItem(
                                           padding: EdgeInsets.zero,
                                           onTap: () async {
-                                            final subtitle = await showDialog<SubtitleData>(
-                                                context: context, builder: (context) => SubtitleDialog(subtitle: item.subtitles.firstOrNull));
-                                            if (subtitle != null && context.mounted) {
-                                              await showNotification(context, Api.tvEpisodeSubtitleUpdateById(id: item.id, subtitle: subtitle));
-                                            }
+                                            // final subtitle = await showDialog<SubtitleData>(context: context, builder: (context) => const SubtitleDialog());
+                                            // if (subtitle != null && context.mounted) {
+                                            //   await showNotification(context, Api.tvEpisodeSubtitleUpdateById(id: item.id, subtitle: subtitle));
+                                            // }
+                                            navigateTo(context, SubtitleManager(fileId: item.fileId!));
                                           },
                                           child: ListTile(
                                             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
@@ -115,13 +112,16 @@ class _EpisodeDetailState extends State<EpisodeDetail> with ActionMixin<EpisodeD
                                         ),
                                         PopupMenuItem(
                                           padding: EdgeInsets.zero,
+                                          enabled: !item.downloaded,
                                           onTap: item.downloaded
                                               ? null
-                                              : () => showNotification(context, Api.downloadTaskCreate(item.url!.queryParameters['id']!),
+                                              : () => showNotification(context, Api.downloadTaskCreate(item.fileId),
                                                   successText: AppLocalizations.of(context)!.tipsForDownload),
                                           child: ListTile(
                                             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                                            title: Text(AppLocalizations.of(context)!.buttonDownload),
+                                            title: Text(item.downloaded
+                                                ? AppLocalizations.of(context)!.downloaderLabelDownloaded
+                                                : AppLocalizations.of(context)!.buttonDownload),
                                             leading: const Icon(Icons.download_outlined),
                                           ),
                                         ),
@@ -144,41 +144,42 @@ class _EpisodeDetailState extends State<EpisodeDetail> with ActionMixin<EpisodeD
                           padding: const EdgeInsets.all(16),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            spacing: 12,
                             children: [
                               BlocSelector<TVEpisodeCubit, TVEpisode?, String?>(
                                   selector: (movie) => movie?.poster,
-                                  builder: (context, poster) =>
-                                      poster != null ? AsyncImage(poster, width: 160, radius: BorderRadius.circular(4), viewable: true) : const SizedBox()),
+                                  builder: (context, poster) => poster != null
+                                      ? Padding(
+                                          padding: const EdgeInsets.only(right: 16),
+                                          child: AsyncImage(poster, width: 160, radius: BorderRadius.circular(4), viewable: true),
+                                        )
+                                      : const SizedBox()),
                               BlocBuilder<TVEpisodeCubit, TVEpisode?>(builder: (context, item) {
                                 return item != null
                                     ? Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                                          children: [
-                                            if (item.title != null) Text(item.title!, style: Theme.of(context).textTheme.titleMedium),
-                                            if (item.airDate != null)
-                                              Text(item.airDate!.format(),
-                                                  style: Theme.of(context).textTheme.labelSmall!.copyWith(height: 2, fontWeight: FontWeight.bold)),
-                                            RichText(
-                                                text: TextSpan(children: [
-                                              TextSpan(text: '${item.filename}.${item.ext}', style: Theme.of(context).textTheme.labelSmall),
-                                              const WidgetSpan(child: Gap.hSM),
-                                              if (item.fileSize != null)
-                                                TextSpan(text: item.fileSize!.toSizeDisplay(), style: Theme.of(context).textTheme.labelSmall),
-                                            ])),
-                                            OverviewSection(text: item.overview, trimLines: 4),
-                                          ],
-                                        ),
+                                        child: OverviewSection(text: item.overview, trimLines: 6),
                                       )
                                     : const SizedBox();
                               }),
                             ],
                           ),
                         ),
-                        BlocSelector<TVEpisodeCubit, TVEpisode?, List<Actor>?>(
-                            selector: (episode) => episode?.actors ?? [],
-                            builder: (context, actors) => (actors != null && actors.isNotEmpty) ? ActorsSection(actors: actors) : const SizedBox()),
+                        BlocSelector<TVEpisodeCubit, TVEpisode?, List<MediaCast>?>(
+                            selector: (episode) => episode?.mediaCast ?? [],
+                            builder: (context, cast) =>
+                                (cast != null && cast.isNotEmpty) ? CastSection(type: MediaType.episode, cast: cast) : const SizedBox()),
+                        BlocSelector<TVEpisodeCubit, TVEpisode?, List<MediaCast>?>(
+                            selector: (episode) => episode?.guestStars ?? [],
+                            builder: (context, cast) =>
+                                (cast != null && cast.isNotEmpty) ? CastSection(type: MediaType.episode, cast: cast) : const SizedBox()),
+                        BlocSelector<TVEpisodeCubit, TVEpisode?, List<MediaCrew>?>(
+                            selector: (episode) => episode?.mediaCrew ?? [],
+                            builder: (context, crew) =>
+                                (crew != null && crew.isNotEmpty) ? CrewSection(type: MediaType.episode, crew: crew) : const SizedBox()),
+                        BlocSelector<TVEpisodeCubit, TVEpisode?, String?>(
+                            selector: (episode) => episode?.fileId,
+                            builder: (context, fileId) {
+                              return fileId != null ? FileInfoSection(fileId: fileId) : const SizedBox();
+                            }),
                       ]),
                     ),
                   ],

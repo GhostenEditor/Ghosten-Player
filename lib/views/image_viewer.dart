@@ -1,3 +1,4 @@
+import 'package:api/api.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
@@ -23,10 +24,22 @@ class ImageViewer extends StatelessWidget {
           ),
           extendBodyBehindAppBar: true,
           body: PhotoView(
-            imageProvider: CachedNetworkImageProvider(url.toString()),
+            imageProvider: CachedNetworkImageProvider(_resoleSrc().toString()),
           ),
         );
       }),
     );
+  }
+
+  Uri _resoleSrc() {
+    if (url.path == '/file/download') {
+      return url.replace(
+        scheme: Api.baseUrl.scheme,
+        host: Api.baseUrl.host,
+        port: Api.baseUrl.port,
+      );
+    } else {
+      return url;
+    }
   }
 }

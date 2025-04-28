@@ -60,13 +60,12 @@ mixin ActionMixin<S extends StatefulWidget> on State<S> {
     );
   }
 
-  Widget buildDownloadAction(BuildContext context, Uri url) {
+  Widget buildDownloadAction(BuildContext context, dynamic fileId) {
     return ButtonSettingItem(
       title: Text(AppLocalizations.of(context)!.buttonDownload),
       leading: const Icon(Icons.download_outlined),
       onTap: () async {
-        final resp =
-            await showNotification(context, Api.downloadTaskCreate(url.queryParameters['id']!), successText: AppLocalizations.of(context)!.tipsForDownload);
+        final resp = await showNotification(context, Api.downloadTaskCreate(fileId), successText: AppLocalizations.of(context)!.tipsForDownload);
         if (resp?.error == null) setState(() => refresh = true);
       },
     );
