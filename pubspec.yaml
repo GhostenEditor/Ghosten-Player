@@ -34,7 +34,7 @@ dependencies:
   rxdart: ^0.28.0
   scaled_app: ^2.3.0
   screen_brightness: ^2.1.0
-  shared_preferences: ^2.5.0
+  shared_preferences: ^2.5.3
   shimmer: ^3.0.0
   smooth_page_indicator: ^1.2.0
   url_launcher: ^6.3.0
