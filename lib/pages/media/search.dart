@@ -623,16 +623,17 @@ class _MultiSelectState<T> extends State<_MultiSelect<T>> {
                 mainAxisSpacing: 8,
                 crossAxisSpacing: 8,
               ),
-          itemBuilder: (context, index) => InkWell(
-              onTap: () {
-                setState(() {
-                  _collapsed = !_collapsed;
-                });
-              },
-              child: Material(
+          itemBuilder: (context, index) =>
+              Material(
                 color: _selected.contains(widget.items[index])
-                    ? Theme.of(context).colorScheme.primaryContainer
-                    : Theme.of(context).colorScheme.surfaceContainerHighest,
+                    ? Theme
+                    .of(context)
+                    .colorScheme
+                    .primaryContainer
+                    : Theme
+                    .of(context)
+                    .colorScheme
+                    .surfaceContainerHighest,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                 child: InkWell(
                     onTap: () {
@@ -648,12 +649,15 @@ class _MultiSelectState<T> extends State<_MultiSelect<T>> {
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: Center(
                         child: DefaultTextStyle(
-                          style: Theme.of(context).textTheme.labelSmall!,
+                          style: Theme
+                              .of(context)
+                              .textTheme
+                              .labelSmall!,
                           child: widget.itemBuilder(context, widget.items[index]),
                         ),
                       ),
                     )),
-              )),
+              ),
         ),
       ],
     );

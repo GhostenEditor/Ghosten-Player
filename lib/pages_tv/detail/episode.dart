@@ -2,7 +2,6 @@ import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../components/gap.dart';
 import '../../models/models.dart';
 import '../../pages/detail/utils/tmdb_uri.dart';
 import '../../utils/utils.dart';
@@ -10,8 +9,12 @@ import '../components/future_builder_handler.dart';
 import '../components/icon_button.dart';
 import '../components/setting.dart';
 import '../utils/player.dart';
+import '../utils/utils.dart';
+import 'components/cast_crew.dart';
 import 'components/overview.dart';
 import 'components/scaffold.dart';
+import 'dialogs/episode_metadata.dart';
+import 'dialogs/subtitle.dart';
 import 'mixins/action.dart';
 
 class EpisodeDetail extends StatefulWidget {
@@ -136,12 +139,13 @@ class _EpisodeDetailState extends State<EpisodeDetail> with ActionMixin {
                     OverviewSection(
                       navigatorKey: _navigatorKey,
                       item: item,
+                      fileId: item.fileId,
                       description: RichText(
                           text: TextSpan(children: [
-                        TextSpan(text: '.', style: Theme.of(context).textTheme.labelSmall),
-                        const WidgetSpan(child: Gap.hSM),
+                        // TextSpan(text: '.', style: Theme.of(context).textTheme.labelSmall),
+                        // const WidgetSpan(child: Gap.hSM),
                         // if (item.fileSize != null) TextSpan(text: item.fileSize!.toSizeDisplay(), style: Theme.of(context).textTheme.labelSmall),
-                        if (item.duration != null) const WidgetSpan(child: Gap.hSM),
+                        // if (item.duration != null) const WidgetSpan(child: Gap.hSM),
                         if (item.duration != null) const WidgetSpan(child: Icon(Icons.access_time_rounded, size: 14)),
                         if (item.duration != null) const WidgetSpan(child: SizedBox(width: 4)),
                         if (item.duration != null) TextSpan(text: item.duration!.toDisplay(), style: Theme.of(context).textTheme.labelSmall)
@@ -159,18 +163,15 @@ class _EpisodeDetailState extends State<EpisodeDetail> with ActionMixin {
                     ),
                     ButtonSettingItem(
                       leading: const Icon(Icons.person_rounded),
-                      title: Text(AppLocalizations.of(context)!.titleCast),
+                      title: Text(AppLocalizations.of(context)!.titleCastCrew),
                       onTap: () {
                         _showSide.value = true;
-                        // navigateToSlideLeft(
-                        //     _navigatorKey.currentContext!,
-                        //     Align(
-                        //       alignment: Alignment.topRight,
-                        //       child: FractionallySizedBox(
-                        //         widthFactor: 0.5,
-                        //         child: ActorSection(actors: item.actors),
-                        //       ),
-                        //     ));
+                        navigateToSlideLeft(
+                            _navigatorKey.currentContext!,
+                            Align(
+                              alignment: Alignment.topRight,
+                              child: CastCrewSection(mediaCast: item.mediaCast, mediaCrew: item.mediaCrew),
+                            ));
                       },
                     ),
                     const Spacer(),
@@ -196,23 +197,13 @@ class _EpisodeDetailState extends State<EpisodeDetail> with ActionMixin {
           buildSkipEndingAction(context, item, MediaType.episode, item.skipEnding),
           const DividerSettingItem(),
           buildEditMetadataAction(context, () async {
-            // final resp = await Navigator.of(context).push<(String, int)>(FadeInPageRoute(builder: (context) => EpisodeMetadata(episode: item)));
-            // if (resp is (String, int)) {
-            //   final (title, episode) = resp;
-            //   await Api.tvEpisodeMetadataUpdateById(id: item.id, title: title, episode: episode);
-            //   setState(() => refresh = true);
-            // }
+            final res = await Navigator.of(context).push<bool>(FadeInPageRoute(builder: (context) => EpisodeMetadata(episode: item)));
+            if ((res ?? false) && context.mounted) setState(() => refresh = true);
           }),
           ButtonSettingItem(
             title: Text(AppLocalizations.of(context)!.buttonSubtitle),
             leading: const Icon(Icons.subtitles_outlined),
-            onTap: () async {
-              // final subtitle = await Navigator.of(context).push<SubtitleData>(FadeInPageRoute(builder: (context) => const SubtitleDialog()));
-              // if (subtitle != null && context.mounted) {
-              //   final resp = await showNotification(context, Api.tvEpisodeSubtitleUpdateById(id: item.id, subtitle: subtitle));
-              //   if (resp?.error == null) setState(() => refresh = true);
-              // }
-            },
+            onTap: () => Navigator.of(context).push<SubtitleData>(FadeInPageRoute(builder: (context) => SubtitleListPage(fileId: item.fileId!))),
           ),
           // buildDownloadAction(context, item.url!),
           if (widget.scrapper.id != null)

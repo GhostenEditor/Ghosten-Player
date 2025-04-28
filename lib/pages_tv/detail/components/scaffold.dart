@@ -142,7 +142,7 @@ class _DetailScaffoldState<T extends MediaBase> extends State<DetailScaffold<T>>
                   gradient: LinearGradient(
                     colors: [
                       Theme.of(context).scaffoldBackgroundColor.withAlpha(item.backdrop != null ? 0xEE : 0xAA),
-                      const Color(0x66000000),
+                      Theme.of(context).scaffoldBackgroundColor.withAlpha(0x66),
                     ],
                     stops: const [0.3, 0.8],
                   ),

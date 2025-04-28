@@ -140,104 +140,90 @@ class _MovieListPageState extends State<MovieListPage> with NeedUpdateMixin, Cha
                     ),
                   );
                 }),
-            buildChannel(
-              context,
+            MediaChannel(
               label: AppLocalizations.of(context)!.watchNow,
               future: Api.movieNextToPlayQueryAll(),
               height: 340,
-              builder: (context, item) => Stack(
-                children: [
-                  MediaGridItem(
-                    imageWidth: 160,
-                    imageHeight: 160 / 0.67,
-                    title: Text(item.displayRecentTitle()),
-                    subtitle: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        if (item.lastPlayedTime != null)
-                          Text(AppLocalizations.of(context)!.timeAgo(item.lastPlayedTime!.fromNow().fromNowFormat(context)),
-                              style: Theme.of(context).textTheme.labelSmall)
-                        else
-                          const Spacer(),
-                        if (item.duration != null && item.lastPlayedTime != null)
-                          Text('${(item.lastPlayedPosition!.inSeconds / item.duration!.inSeconds * 100).toStringAsFixed(1)}%'),
-                      ],
-                    ),
-                    imageUrl: item.poster,
-                    onTap: () async {
-                      final movie = await Api.movieQueryById(item.id);
-                      if (!context.mounted) return;
-                      await toPlayer(
-                        context,
-                        [FromMedia.fromMovie(movie)],
-                        theme: item.themeColor,
-                      );
-                      setState(() {});
-                    },
-                  ),
-                  if (item.duration != null && item.lastPlayedTime != null)
-                    SizedBox(
-                      width: 160,
-                      child: Align(
-                        alignment: const Alignment(0, 0.48),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 6),
-                          child: LinearProgressIndicator(
-                            value: item.lastPlayedPosition!.inSeconds / item.duration!.inSeconds,
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(3),
-                            minHeight: 3,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
+              builder: (context, item) => _buildRecentMediaItem(context, item, width: 160, height: 160 / 0.67),
             ),
-            buildChannel(
-              context,
+            MediaChannel(
               label: AppLocalizations.of(context)!.tagNewAdd,
               future: Api.movieQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.createAt, direction: SortDirection.desc), limit: 8)),
               height: 340,
-              builder: (context, item) => MediaGridItem(
-                imageWidth: 160,
-                imageHeight: 160 / 0.67,
-                title: Text(item.displayTitle()),
-                subtitle: Text(item.airDate?.format() ?? ''),
-                imageUrl: item.poster,
-                onTap: () => _onMediaTap(item),
-              ),
+              builder: (context, item) => _buildMediaItem(context, item, width: 160, height: 160 / 0.67),
             ),
-            buildChannel(
-              context,
+            MediaChannel(
               label: AppLocalizations.of(context)!.tagNewRelease,
               future: Api.movieQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.airDate, direction: SortDirection.desc), limit: 8)),
               height: 340,
-              builder: (context, item) => MediaGridItem(
-                imageWidth: 160,
-                imageHeight: 160 / 0.67,
-                title: Text(item.displayTitle()),
-                subtitle: Text(item.airDate?.format() ?? ''),
-                imageUrl: item.poster,
-                onTap: () => _onMediaTap(item),
-              ),
+              builder: (context, item) => _buildMediaItem(context, item, width: 160, height: 160 / 0.67),
             ),
-            buildGridChannel(
-              context,
+            MediaGridChannel(
               label: AppLocalizations.of(context)!.tagAll,
               future: Api.movieQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.title, direction: SortDirection.asc))),
-              builder: (context, item) => MediaGridItem(
-                imageWidth: 160,
-                imageHeight: 160 / 0.67,
-                imageUrl: item.poster,
-                title: Text(item.displayTitle()),
-                subtitle: Text(item.airDate?.format() ?? ''),
-                onTap: () => _onMediaTap(item),
-              ),
+              builder: (context, item) => _buildMediaItem(context, item, width: 160, height: 160 / 0.67),
             ),
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildRecentMediaItem(BuildContext context, Movie item, {double? width, double? height}) {
+    return MediaGridItem(
+      imageWidth: width,
+      imageHeight: height,
+      title: Text(item.displayRecentTitle()),
+      subtitle: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          if (item.lastPlayedTime != null)
+            Text(AppLocalizations.of(context)!.timeAgo(item.lastPlayedTime!.fromNow().fromNowFormat(context)), style: Theme.of(context).textTheme.labelSmall)
+          else
+            const Spacer(),
+          if (item.duration != null && item.lastPlayedTime != null)
+            Text('${(item.lastPlayedPosition!.inSeconds / item.duration!.inSeconds * 100).toStringAsFixed(1)}%'),
+        ],
+      ),
+      imageUrl: item.poster,
+      floating: item.duration != null && item.duration != Duration.zero && item.lastPlayedTime != null
+          ? SizedBox(
+              width: 240,
+              child: Align(
+                alignment: const Alignment(0, 0.2),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: LinearProgressIndicator(
+                    value: item.lastPlayedPosition!.inSeconds / item.duration!.inSeconds,
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(3),
+                    minHeight: 3,
+                  ),
+                ),
+              ),
+            )
+          : null,
+      onTap: () async {
+        final movie = await Api.movieQueryById(item.id);
+        if (!context.mounted) return;
+        await toPlayer(
+          context,
+          [FromMedia.fromMovie(movie)],
+          theme: item.themeColor,
+        );
+        setState(() {});
+      },
+    );
+  }
+
+  Widget _buildMediaItem(BuildContext context, Movie item, {double? width, double? height}) {
+    return MediaGridItem(
+      imageWidth: width,
+      imageHeight: height,
+      imageUrl: item.poster,
+      title: Text(item.displayTitle()),
+      subtitle: Text(item.releaseDate?.format() ?? ''),
+      onTap: () => _onMediaTap(item),
     );
   }
 

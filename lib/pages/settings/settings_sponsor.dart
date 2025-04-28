@@ -107,7 +107,7 @@ class _SettingsSponsorState extends State<SettingsSponsor> {
     try {
       final resp = await Dio().get('https://raw.githubusercontent.com/$repoAuthor/$repoName/main/sponsor_list.txt');
       final data = resp.data as String;
-      return data.split('\n');
+      return data.split('\n').where((s) => s.trim().isNotEmpty).toList();
     } catch (e) {
       rethrow;
     }

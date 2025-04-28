@@ -28,7 +28,7 @@ class SettingsSponsor extends StatelessWidget {
               fit: FlexFit.tight,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                spacing: 24,
+                spacing: 36,
                 children: [
                   Material(
                     elevation: 24,
@@ -95,11 +95,11 @@ class SettingsSponsor extends StatelessWidget {
 
   Future<List<String>> _getSponsorList() async {
     try {
-      final resp = await Dio().get('https://github.com/$repoAuthor/$repoName/raw/releases/v1.8.0/sponsor_list.txt');
+      final resp = await Dio().get('https://raw.githubusercontent.com/$repoAuthor/$repoName/main/sponsor_list.txt');
       final data = resp.data as String;
-      return data.split('\n');
+      return data.split('\n').where((s) => s.trim().isNotEmpty).toList();
     } catch (e) {
-      return [];
+      rethrow;
     }
   }
 }
