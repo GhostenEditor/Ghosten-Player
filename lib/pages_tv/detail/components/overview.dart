@@ -6,9 +6,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../components/async_image.dart';
-import '../../../components/gap.dart';
 import '../../../utils/utils.dart';
 import '../../utils/utils.dart';
+import 'file_info.dart';
 
 class OverviewSection<T extends MediaBase> extends StatefulWidget {
   const OverviewSection({
@@ -17,9 +17,11 @@ class OverviewSection<T extends MediaBase> extends StatefulWidget {
     this.description,
     required this.navigatorKey,
     this.onTap,
+    this.fileId,
   });
 
   final T item;
+  final String? fileId;
   final Widget? description;
   final GlobalKey<NavigatorState> navigatorKey;
   final GestureTapCallback? onTap;
@@ -69,6 +71,7 @@ class _OverviewSectionState<T extends MediaBase> extends State<OverviewSection<T
           child: Overview(
             item: widget.item,
             description: widget.description,
+            fileId: widget.fileId,
           ),
         ),
       );
@@ -78,9 +81,10 @@ class _OverviewSectionState<T extends MediaBase> extends State<OverviewSection<T
 }
 
 class Overview<T extends MediaBase> extends StatefulWidget {
-  const Overview({super.key, required this.item, this.description});
+  const Overview({super.key, required this.item, this.description, required this.fileId});
 
   final T item;
+  final String? fileId;
   final Widget? description;
 
   @override
@@ -132,37 +136,53 @@ class _OverviewState<T extends MediaBase> extends State<Overview<T>> {
       child: Scrollbar(
         controller: _scrollController,
         thumbVisibility: focused,
-        child: ListView(
+        child: CustomScrollView(
           controller: _scrollController,
-          padding: const EdgeInsets.all(32),
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 16,
-              children: [
-                if (widget.item.poster != null) AsyncImage(widget.item.poster!, width: 140, radius: const BorderRadius.all(Radius.circular(8))),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (widget.item.title != null)
-                        Text(widget.item.title!, style: Theme.of(context).textTheme.titleLarge!.copyWith(height: 2, fontWeight: FontWeight.bold)),
-                      if (widget.item.airDate != null)
-                        Text(widget.item.airDate!.format(), style: Theme.of(context).textTheme.labelSmall!.copyWith(height: 2, fontWeight: FontWeight.bold)),
-                      if (widget.description != null) widget.description!,
-                    ],
-                  ),
+          // padding: const EdgeInsets.all(32),
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.only(left: 32, top: 32, right: 32),
+              sliver: SliverToBoxAdapter(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 16,
+                  children: [
+                    if (widget.item.poster != null) AsyncImage(widget.item.poster!, width: 140, radius: const BorderRadius.all(Radius.circular(8))),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          if (widget.item.title != null)
+                            Text(widget.item.title!, style: Theme.of(context).textTheme.titleLarge!.copyWith(height: 2, fontWeight: FontWeight.bold)),
+                          if (widget.item.airDate != null)
+                            Text(widget.item.airDate!.format(),
+                                style: Theme.of(context).textTheme.labelSmall!.copyWith(height: 2, fontWeight: FontWeight.bold)),
+                          if (widget.description != null) widget.description!,
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-            Gap.vLG,
-            const Divider(),
-            Gap.vLG,
-            Text(
-              widget.item.overview ?? AppLocalizations.of(context)!.noOverview,
-              style: Theme.of(context).textTheme.bodyMedium,
+            const SliverPadding(padding: EdgeInsets.symmetric(horizontal: 32), sliver: SliverToBoxAdapter(child: Divider(height: 48))),
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              sliver: SliverToBoxAdapter(
+                child: Text(
+                  widget.item.overview ?? AppLocalizations.of(context)!.noOverview,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ),
             ),
-            const SafeArea(child: SizedBox()),
+            if (widget.fileId != null)
+              SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Align(alignment: Alignment.bottomCenter, child: FileInfoSection(fileId: widget.fileId!)),
+                  )),
+            const SliverToBoxAdapter(child: SafeArea(child: SizedBox())),
           ],
         ),
       ),

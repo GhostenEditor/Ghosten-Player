@@ -5,24 +5,24 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../components/focusable_image.dart';
 
 class ActorSection extends StatelessWidget {
-  const ActorSection({super.key, required this.actors});
+  const ActorSection({super.key, required this.mediaCast});
 
-  final List<Actor> actors;
+  final List<MediaCast> mediaCast;
 
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
       padding: const EdgeInsets.symmetric(vertical: 32),
-      itemCount: actors.length,
-      itemBuilder: (context, index) => _ActorListTile(actor: actors[index], autofocus: index == 0),
+      itemCount: mediaCast.length,
+      itemBuilder: (context, index) => _ActorListTile(mediaCast: mediaCast[index], autofocus: index == 0),
     );
   }
 }
 
 class _ActorListTile extends StatefulWidget {
-  const _ActorListTile({required this.actor, this.autofocus = false});
+  const _ActorListTile({required this.mediaCast, this.autofocus = false});
 
-  final Actor actor;
+  final MediaCast mediaCast;
   final bool autofocus;
 
   @override
@@ -30,7 +30,7 @@ class _ActorListTile extends StatefulWidget {
 }
 
 class _ActorListTileState extends State<_ActorListTile> {
-  late final actor = widget.actor;
+  late final mediaCast = widget.mediaCast;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +44,7 @@ class _ActorListTileState extends State<_ActorListTile> {
               aspectRatio: 2 / 3,
               child: FocusableImage(
                 autofocus: widget.autofocus,
-                poster: actor.profile,
+                poster: mediaCast.profile,
                 placeholderIcon: Icons.account_circle_outlined,
                 onTap: () {},
               ),
@@ -54,9 +54,9 @@ class _ActorListTileState extends State<_ActorListTile> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(actor.name, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.titleMedium!.copyWith(fontWeight: FontWeight.bold)),
-                  if (actor.character != null) Text('${AppLocalizations.of(context)!.actAs} ${actor.character}', style: Theme.of(context).textTheme.bodySmall),
-                  Text(AppLocalizations.of(context)!.gender(actor.gender.toString())),
+                  Text(mediaCast.name, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.titleMedium!.copyWith(fontWeight: FontWeight.bold)),
+                  if (mediaCast.role != null) Text('${AppLocalizations.of(context)!.actAs} ${mediaCast.role}', style: Theme.of(context).textTheme.bodySmall),
+                  Text(AppLocalizations.of(context)!.gender(mediaCast.gender.toString())),
                   Container(
                     decoration: BoxDecoration(
                       border: Border.all(color: const Color(0xff86caa5)),

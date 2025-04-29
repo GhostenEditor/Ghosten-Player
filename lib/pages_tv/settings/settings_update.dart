@@ -154,9 +154,17 @@ class _SettingsUpdateState extends State<SettingsUpdate> {
   }
 
   Future<UpdateResp?> _checkUpdate() async {
-    final res = await Dio(BaseOptions(connectTimeout: const Duration(seconds: 30))).get(updateUrl);
-    final data = UpdateResp.fromJson(res.data);
-    if (Version.fromString(appVersion) < data.tagName) {
+    final currentVersion = Version.fromString(appVersion);
+    late final UpdateResp data;
+    if (currentVersion.isPrerelease()) {
+      final res = await Dio(BaseOptions(connectTimeout: const Duration(seconds: 30))).get<List<dynamic>>(updateUrl);
+      data = UpdateResp.fromJson(res.data![0]);
+    } else {
+      final res = await Dio(BaseOptions(connectTimeout: const Duration(seconds: 30))).get('$updateUrl/latest');
+      data = UpdateResp.fromJson(res.data);
+    }
+
+    if (currentVersion < data.tagName) {
       return data;
     } else {
       return null;
@@ -197,11 +205,15 @@ class _SettingsUpdatingState extends State<_SettingsUpdating> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(AppLocalizations.of(context)!.latestVersion(widget.data.tagName), style: Theme.of(context).textTheme.displaySmall),
+                    Text(
+                      AppLocalizations.of(context)!.latestVersion(widget.data.tagName),
+                      style: Theme.of(context).textTheme.displaySmall,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     Text(widget.data.createAt?.format() ?? '', style: Theme.of(context).textTheme.labelLarge),
                   ],
                 ),

@@ -12,9 +12,10 @@ import '../components/setting.dart';
 import '../utils/notification.dart';
 import '../utils/player.dart';
 import '../utils/utils.dart';
-import 'components/actors.dart';
+import 'components/cast_crew.dart';
 import 'components/overview.dart';
 import 'components/scaffold.dart';
+import 'dialogs/series_metadata.dart';
 import 'mixins/action.dart';
 import 'mixins/searchable.dart';
 import 'season.dart';
@@ -74,7 +75,7 @@ class _TVDetailState extends State<TVDetail> with ActionMixin, SearchableMixin {
                         children: item.genres
                             .map((genre) => TextButton(
                                 style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero, visualDensity: VisualDensity.compact),
-                                onPressed: null,
+                                onPressed: () {},
                                 child: Text(genre.name, style: Theme.of(context).textTheme.labelSmall)))
                             .toList()),
                   ),
@@ -90,7 +91,7 @@ class _TVDetailState extends State<TVDetail> with ActionMixin, SearchableMixin {
                       children: [
                         const WidgetSpan(child: Icon(Icons.calendar_month_rounded, size: 14)),
                         const WidgetSpan(child: SizedBox(width: 4)),
-                        TextSpan(text: item.airDate?.format() ?? AppLocalizations.of(context)!.tagUnknown),
+                        TextSpan(text: item.firstAirDate?.format() ?? AppLocalizations.of(context)!.tagUnknown),
                         const WidgetSpan(child: SizedBox(width: 20)),
                         const WidgetSpan(child: Icon(Icons.star, color: Colors.amber, size: 14)),
                         TextSpan(text: item.voteAverage?.toStringAsFixed(1) ?? AppLocalizations.of(context)!.tagUnknown),
@@ -196,15 +197,12 @@ class _TVDetailState extends State<TVDetail> with ActionMixin, SearchableMixin {
                   ),
                   ButtonSettingItem(
                     leading: const Icon(Icons.person_rounded),
-                    title: Text(AppLocalizations.of(context)!.titleCast),
+                    title: Text(AppLocalizations.of(context)!.titleCastCrew),
                     onTap: () {
                       Navigator.pushAndRemoveUntil(_navigatorKey.currentContext!, FadeInPageRoute(builder: (context) {
                         return Align(
                           alignment: Alignment.topRight,
-                          child: FractionallySizedBox(
-                            widthFactor: 0.5,
-                            child: ActorSection(actors: item.actors),
-                          ),
+                          child: CastCrewSection(mediaCast: item.mediaCast, mediaCrew: item.mediaCrew),
                         );
                       }), (_) => false);
                       _showSide.value = true;
@@ -241,23 +239,26 @@ class _TVDetailState extends State<TVDetail> with ActionMixin, SearchableMixin {
                   if (!context.mounted) return;
                   Navigator.of(context).pop(true);
                 }
-              } else {
-                setState(() => refresh = true);
+              } else if (context.mounted) {
+                setState(() {});
               }
             },
           ),
           ButtonSettingItem(
             leading: const Icon(Icons.save_outlined),
             title: Text(AppLocalizations.of(context)!.buttonSaveMediaInfoToDriver),
-            onTap: () => showNotification(context, Api.tvSeriesRenameById(item.id)),
+            // onTap: () => showNotification(context, Api.tvSeriesRenameById(item.id)),
           ),
           const Divider(),
           ButtonSettingItem(
             leading: const Icon(Icons.info_outline),
             title: Text(AppLocalizations.of(context)!.buttonScraperMediaInfo),
             onTap: () async {
-              final resp = await showNotification(context, _refreshTVSeries(context, item));
-              if (resp?.data ?? false) setState(() => refresh = true);
+              final data = await navigateTo<(String, String, String?)>(navigatorKey.currentContext!, SearchResultSelect(item: item));
+              if (data != null && context.mounted) {
+                final resp = await showNotification(context, Api.tvSeriesScraperById(item.id, data.$1, data.$2, data.$3));
+                if (resp?.error == null) setState(() {});
+              }
             },
           ),
           const Divider(),
@@ -265,12 +266,8 @@ class _TVDetailState extends State<TVDetail> with ActionMixin, SearchableMixin {
           buildSkipEndingAction(context, item, MediaType.series, item.skipEnding),
           const Divider(),
           buildEditMetadataAction(context, () async {
-            // final res = await Navigator.of(context).push<(String, int?)>(FadeInPageRoute(builder: (context) => SeriesMetadata(series: item)));
-            // if (res != null) {
-            //   final (title, year) = res;
-            //   // await Api.tvSeriesMetadataUpdateById(id: item.id, title: title, airDate: year == null ? null : DateTime(year));
-            //   if (context.mounted) setState(() => refresh = true);
-            // }
+            final res = await Navigator.of(context).push<bool>(FadeInPageRoute(builder: (context) => SeriesMetadata(series: item)));
+            if ((res ?? false) && context.mounted) setState(() => refresh = true);
           }),
           if (item.scrapper.id != null) buildHomeAction(context, ImdbUri(MediaType.series, item.scrapper.id!).toUri()),
           const Divider(),
@@ -289,21 +286,5 @@ class _TVDetailState extends State<TVDetail> with ActionMixin, SearchableMixin {
       await toPlayer(context, playlist, index: season.episodes.indexWhere((episode) => episode.id == res.id), theme: item.themeColor);
       if (context.mounted) setState(() => refresh = true);
     }
-  }
-
-  Future<bool> _refreshTVSeries(BuildContext context, TVSeries item) async {
-    return true;
-    // return search(
-    //   context,
-    //   ({required String title, int? year, int? index}) => Api.tvSeriesScraperById(
-    //     item.id,
-    //     title,
-    //     Localizations.localeOf(context).languageCode,
-    //     year: year.toString(),
-    //     index: index,
-    //   ),
-    //   title: item.title ?? item.originalTitle ?? '',
-    //   year: item.airDate?.year,
-    // );
   }
 }

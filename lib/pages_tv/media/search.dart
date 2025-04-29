@@ -1,250 +1,1014 @@
+import 'dart:math';
+
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
+import '../../components/async_image.dart';
+import '../../components/error_message.dart';
+import '../../components/future_builder_handler.dart';
 import '../../components/logo.dart';
 import '../../components/no_data.dart';
 import '../../utils/utils.dart';
-import '../detail/episode.dart';
+import '../components/focusable.dart';
+import '../components/icon_button.dart';
+import '../components/setting.dart';
 import '../detail/movie.dart';
 import '../detail/series.dart';
 import 'components/media_grid_item.dart';
 
 class SearchPage extends StatefulWidget {
-  const SearchPage({super.key});
+  const SearchPage({
+    super.key,
+    this.filterType = const [],
+    this.selectedGenre = const [],
+    this.selectedStudio = const [],
+    this.selectedKeyword = const [],
+    this.selectedCast = const [],
+    this.selectedCrew = const [],
+    this.activeTab = 0,
+  });
+
+  final int activeTab;
+  final List<FilterType> filterType;
+  final List<Genre> selectedGenre;
+  final List<Studio> selectedStudio;
+  final List<Keyword> selectedKeyword;
+  final List<MediaCast> selectedCast;
+  final List<MediaCrew> selectedCrew;
 
   @override
   State<SearchPage> createState() => _SearchPageState();
 }
 
 class _SearchPageState extends State<SearchPage> {
-  final TextEditingController _searchController = TextEditingController();
-  bool _focused = false;
+  late int _activeIndex = widget.activeTab;
+  final _searchController = TextEditingController();
+  late final _pageController = PageController(initialPage: _activeIndex);
 
   String get _filter => _searchController.value.text;
   final _focusNode = FocusNode();
+  final _clearFocusNode = FocusNode();
+  late final _tabs = [
+    _TabItem(title: AppLocalizations.of(context)!.homeTabTV, canFilter: true),
+    _TabItem(title: AppLocalizations.of(context)!.homeTabMovie, canFilter: true),
+    _TabItem(title: AppLocalizations.of(context)!.formLabelEpisode),
+    _TabItem(title: AppLocalizations.of(context)!.titleCast),
+    _TabItem(title: AppLocalizations.of(context)!.titleCrew),
+  ];
 
-  SearchFuzzyResult? _searchFuzzyResult;
+  late List<FilterType> _filterType = [...widget.filterType];
+  late List<Genre> _selectedGenre = [...widget.selectedGenre];
+  late List<Studio> _selectedStudio = [...widget.selectedStudio];
+  late List<Keyword> _selectedKeyword = [...widget.selectedKeyword];
+  late List<MediaCast> _selectedCast = [...widget.selectedCast];
+  late List<MediaCrew> _selectedCrew = [...widget.selectedCrew];
 
-  @override
-  void initState() {
-    _focusNode.addListener(_updateState);
-    _searchController.addListener(_updateState);
-    super.initState();
+  _SearchParams get _params {
+    return _SearchParams(
+      filter: _filter,
+      genres: _selectedGenre.map((e) => e.id).toList(),
+      studios: _selectedStudio.map((e) => e.id).toList(),
+      keywords: _selectedKeyword.map((e) => e.id).toList(),
+      mediaCast: _selectedCast.map((e) => e.id).toList(),
+      mediaCrew: _selectedCrew.map((e) => e.id).toList(),
+      favorite: switch ((_filterType.contains(FilterType.favorite), _filterType.contains(FilterType.exceptFavorite))) {
+        ((true, false)) => true,
+        ((false, true)) => false,
+        _ => null
+      },
+      watched: switch ((_filterType.contains(FilterType.watched), _filterType.contains(FilterType.unwatched))) {
+        ((true, false)) => true,
+        ((false, true)) => false,
+        _ => null
+      },
+    );
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _pageController.dispose();
     _focusNode.dispose();
+    _clearFocusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, _) {
-        if (didPop) {
-          return;
-        }
-        if (_focusNode.hasFocus && _searchFuzzyResult != null) {
-          _focusNode.nextFocus();
-        } else {
-          Navigator.of(context).pop();
-        }
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          leading: const Padding(
-            padding: EdgeInsets.all(12),
-            child: Logo(),
+    return Scaffold(
+      appBar: AppBar(
+        leading: const Padding(
+          padding: EdgeInsets.all(12),
+          child: Logo(),
+        ),
+        backgroundColor: Colors.transparent,
+        leadingWidth: 120,
+        title: IconButtonTheme(
+          data: IconButtonThemeData(
+            style: IconButton.styleFrom(
+              padding: EdgeInsets.zero,
+              iconSize: 16,
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
           ),
-          leadingWidth: 120,
-          title: IconButtonTheme(
-            data: IconButtonThemeData(
-              style: IconButton.styleFrom(
-                padding: EdgeInsets.zero,
-                iconSize: 16,
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          child: TextField(
+            autofocus: true,
+            focusNode: _focusNode,
+            controller: _searchController,
+            decoration: InputDecoration(
+              border: const OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(50)),
+                borderSide: BorderSide.none,
               ),
+              hintText: AppLocalizations.of(context)!.searchHint,
+              hintStyle: Theme.of(context).textTheme.bodyMedium,
+              contentPadding: EdgeInsets.zero,
+              prefixIcon: const Icon(Icons.search),
+              suffixIconConstraints: const BoxConstraints(minHeight: 36, minWidth: 36),
             ),
-            child: TextField(
-              autofocus: true,
-              focusNode: _focusNode,
-              controller: _searchController,
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(50)),
-                  borderSide: BorderSide.none,
-                ),
-                hintText: AppLocalizations.of(context)!.searchHint,
-                contentPadding: EdgeInsets.zero,
-                prefixIcon: const Icon(Icons.search),
-                suffixIconConstraints: const BoxConstraints(minHeight: 36, minWidth: 36),
-              ),
-              onTap: () {},
-              onChanged: (_) {},
-              onTapOutside: (_) => _focusNode.unfocus(),
-              onSubmitted: (res) {
-                _search();
-              },
-            ),
+            onTap: () {},
+            onChanged: (_) {},
+            onTapOutside: (_) => _focusNode.unfocus(),
+            onSubmitted: (res) {
+              setState(() {});
+            },
           ),
         ),
-        body: _searchFuzzyResult != null
-            ? CustomScrollView(
-                slivers: [
-                  if (_searchFuzzyResult!.movies.data.isNotEmpty)
-                    SliverPadding(
-                      padding: const EdgeInsets.all(16),
-                      sliver: SliverMainAxisGroup(
-                        slivers: [
-                          SliverToBoxAdapter(
-                              child: Text(AppLocalizations.of(context)!.homeTabMovie, style: Theme.of(context).textTheme.bodyLarge!.copyWith(height: 3))),
-                          SliverGrid.builder(
-                              addAutomaticKeepAlives: false,
-                              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                                maxCrossAxisExtent: 172,
-                                childAspectRatio: 0.56,
-                                mainAxisSpacing: 16,
-                                crossAxisSpacing: 16,
-                              ),
-                              itemCount: _searchFuzzyResult!.movies.data.length,
-                              itemBuilder: (context, index) {
-                                final item = _searchFuzzyResult!.movies.data[index];
-                                return MediaGridItem(
-                                  imageUrl: item.poster,
-                                  imageWidth: 172,
-                                  imageHeight: 258,
-                                  title: Text(item.displayRecentTitle()),
-                                  subtitle: Text(item.airDate?.format() ?? ''),
-                                  onTap: () {
-                                    navigateTo(context, MovieDetail(initialData: item));
-                                  },
-                                );
-                              })
-                        ],
-                      ),
-                    ),
-                  if (_searchFuzzyResult!.series.data.isNotEmpty)
-                    SliverPadding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      sliver: SliverMainAxisGroup(
-                        slivers: [
-                          SliverToBoxAdapter(
-                              child: Text(AppLocalizations.of(context)!.homeTabTV, style: Theme.of(context).textTheme.bodyLarge!.copyWith(height: 3))),
-                          SliverGrid.builder(
-                              addAutomaticKeepAlives: false,
-                              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                                maxCrossAxisExtent: 172,
-                                childAspectRatio: 0.56,
-                                mainAxisSpacing: 16,
-                                crossAxisSpacing: 16,
-                              ),
-                              itemCount: _searchFuzzyResult!.series.data.length,
-                              itemBuilder: (context, index) {
-                                final item = _searchFuzzyResult!.series.data[index];
-                                return MediaGridItem(
-                                  imageUrl: item.poster,
-                                  imageWidth: 172,
-                                  imageHeight: 258,
-                                  title: Text(item.displayRecentTitle()),
-                                  subtitle: Text(item.airDate?.format() ?? ''),
-                                  onTap: () {
-                                    navigateTo<bool>(context, TVDetail(initialData: item));
-                                  },
-                                );
-                              })
-                        ],
-                      ),
-                    ),
-                  if (_searchFuzzyResult!.episodes.data.isNotEmpty)
-                    SliverPadding(
-                      padding: const EdgeInsets.all(16),
-                      sliver: SliverMainAxisGroup(
-                        slivers: [
-                          SliverToBoxAdapter(
-                              child: Text(AppLocalizations.of(context)!.formLabelEpisode, style: Theme.of(context).textTheme.bodyLarge!.copyWith(height: 3))),
-                          SliverGrid.builder(
-                              addAutomaticKeepAlives: false,
-                              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                                maxCrossAxisExtent: 240,
-                                childAspectRatio: 1.2,
-                                mainAxisSpacing: 16,
-                                crossAxisSpacing: 16,
-                              ),
-                              itemCount: _searchFuzzyResult!.episodes.data.length,
-                              itemBuilder: (context, index) {
-                                final item = _searchFuzzyResult!.episodes.data[index];
-                                return MediaGridItem(
-                                  imageUrl: item.poster,
-                                  imageWidth: 220,
-                                  imageHeight: 220 / 1.78,
-                                  title: Text(item.displayRecentTitle()),
-                                  subtitle: Text(item.airDate?.format() ?? ''),
-                                  onTap: () async {
-                                    final series = await Api.tvSeriesQueryById(item.seriesId);
-                                    if (context.mounted) await navigateTo(context, EpisodeDetail(item, scrapper: series.scrapper));
-                                  },
-                                );
-                              })
-                        ],
-                      ),
-                    ),
-                  if (_searchFuzzyResult!.mediaCast.data.isNotEmpty)
-                    SliverPadding(
-                      padding: const EdgeInsets.all(16),
-                      sliver: SliverMainAxisGroup(
-                        slivers: [
-                          SliverToBoxAdapter(
-                              child: Text(AppLocalizations.of(context)!.titleCast, style: Theme.of(context).textTheme.bodyLarge!.copyWith(height: 3))),
-                          SliverGrid.builder(
-                              addAutomaticKeepAlives: false,
-                              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                                maxCrossAxisExtent: 120,
-                                childAspectRatio: 0.56,
-                                mainAxisSpacing: 16,
-                                crossAxisSpacing: 16,
-                              ),
-                              itemCount: _searchFuzzyResult!.mediaCast.data.length,
-                              itemBuilder: (context, index) {
-                                final item = _searchFuzzyResult!.mediaCast.data[index];
-                                return MediaGridItem(
-                                  imageUrl: item.profile,
-                                  imageWidth: 120,
-                                  imageHeight: 180,
-                                  placeholderIcon: Icons.account_circle_outlined,
-                                  title: Text(item.name),
-                                  onTap: () {},
-                                );
-                              })
-                        ],
-                      ),
-                    ),
-                ],
-              )
-            : const Center(child: NoData()),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Builder(builder: (context) {
+              return TVIconButton(
+                  onPressed: _tabs[_activeIndex].canFilter
+                      ? () {
+                          Scaffold.of(context).openEndDrawer();
+                        }
+                      : null,
+                  icon: const Icon(Icons.filter_alt_outlined, size: 18));
+            }),
+          ),
+        ],
+        bottom: _HomeTabs(
+          activeIndex: _activeIndex,
+          tabs: _tabs,
+          onTabChange: (index) {
+            _activeIndex = index;
+            _pageController.jumpToPage(index);
+            setState(() {});
+          },
+        ),
+      ),
+      endDrawer: Drawer(
+        child: _SearchFilter(
+          selectedFilterType: _filterType,
+          selectedGenre: _selectedGenre,
+          selectedStudio: _selectedStudio,
+          selectedKeyword: _selectedKeyword,
+          selectedCast: _selectedCast,
+          selectedCrew: _selectedCrew,
+          onChanged: (value) {
+            _filterType = value.$1;
+            _selectedGenre = value.$2;
+            _selectedStudio = value.$3;
+            _selectedKeyword = value.$4;
+            _selectedCast = value.$5;
+            _selectedCrew = value.$6;
+            setState(() {});
+          },
+        ),
+      ),
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          _activeIndex = index;
+          setState(() {});
+        },
+        children: [
+          CustomScrollView(
+            slivers: [
+              _buildFilterChipsGroup(context),
+              _ItemSearchPage(
+                key: const ValueKey('series'),
+                params: _params,
+                searchType: 'series',
+                itemBuilder: (context, item, index) {
+                  return MediaGridItem(
+                    imageUrl: item.poster,
+                    imageHeight: 178,
+                    title: Text(item.displayRecentTitle()),
+                    subtitle: Text(item.firstAirDate?.format() ?? ''),
+                    onTap: () {
+                      navigateTo<bool>(context, TVDetail(initialData: item));
+                    },
+                  );
+                },
+                dataResolve: (data) => data.series,
+              ),
+            ],
+          ),
+          CustomScrollView(
+            slivers: [
+              _buildFilterChipsGroup(context),
+              _ItemSearchPage(
+                key: const ValueKey('movie'),
+                params: _params,
+                searchType: 'movie',
+                itemBuilder: (context, item, index) {
+                  return MediaGridItem(
+                    imageUrl: item.poster,
+                    imageHeight: 178,
+                    title: Text(item.displayRecentTitle()),
+                    subtitle: Text(item.releaseDate?.format() ?? ''),
+                    onTap: () {
+                      navigateTo<bool>(context, MovieDetail(initialData: item));
+                    },
+                  );
+                },
+                dataResolve: (data) => data.movies,
+              ),
+            ],
+          ),
+          CustomScrollView(
+            slivers: [
+              _ItemSearchPage(
+                key: const ValueKey('episode'),
+                params: _params,
+                searchType: 'episode',
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 240,
+                  childAspectRatio: 1.2,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                ),
+                itemBuilder: (context, item, index) {
+                  return MediaGridItem(
+                    imageUrl: item.poster,
+                    title: Text(item.displayTitle()),
+                    subtitle: Text('S${item.season} E${item.episode} ${item.seriesTitle}'),
+                    imageHeight: 119,
+                    onTap: () async {
+                      final series = await Api.tvSeriesQueryById(item.seriesId);
+                      if (context.mounted) await navigateTo(context, TVDetail(initialData: series));
+                    },
+                  );
+                },
+                dataResolve: (data) => data.episodes,
+              ),
+            ],
+          ),
+          CustomScrollView(
+            slivers: [
+              _ItemSearchPage(
+                key: const ValueKey('cast'),
+                params: _params,
+                searchType: 'media_cast',
+                itemBuilder: (context, item, index) {
+                  return MediaGridItem(
+                    imageUrl: item.profile,
+                    imageHeight: 178,
+
+                    title: Text(item.name, textAlign: TextAlign.center),
+                    // noImageIcon: item.gender == 1 ? Icons.person_2 : Icons.person,
+                    onTap: () {},
+                  );
+                },
+                dataResolve: (data) => data.mediaCast,
+              ),
+            ],
+          ),
+          CustomScrollView(
+            slivers: [
+              _ItemSearchPage(
+                key: const ValueKey('crew'),
+                params: _params,
+                searchType: 'media_crew',
+                itemBuilder: (context, item, index) {
+                  return MediaGridItem(
+                    imageUrl: item.profile,
+                    imageHeight: 178,
+                    title: Text(item.name),
+                    subtitle: Text(item.knownForDepartment ?? ''),
+                    // noImageIcon: item.gender == 1 ? Icons.person_2 : Icons.person,
+                    onTap: () {},
+                  );
+                },
+                dataResolve: (data) => data.mediaCrew,
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 
-  Future<void> _search() async {
-    if (_filter.isEmpty) {
-      _searchFuzzyResult = null;
-    } else {
-      // _searchFuzzyResult = await Api.searchFuzzy(_filter);
-    }
-    setState(() {});
+  Widget _buildFilterChipsGroup(BuildContext context) {
+    return _FilterChipsGroup(
+      filerType: _filterType,
+      onFilterTypeDeleted: (ty) {
+        setState(() {
+          _filterType.remove(ty);
+        });
+      },
+      genres: _selectedGenre,
+      onGenreDeleted: (genre) {
+        setState(() {
+          _selectedGenre.remove(genre);
+        });
+      },
+      studios: _selectedStudio,
+      onStudioDeleted: (studio) {
+        setState(() {
+          _selectedStudio.remove(studio);
+        });
+      },
+      keywords: _selectedKeyword,
+      onKeywordDeleted: (keyword) {
+        setState(() {
+          _selectedKeyword.remove(keyword);
+        });
+      },
+      cast: _selectedCast,
+      onCastDeleted: (cast) {
+        setState(() {
+          _selectedCast.remove(cast);
+        });
+      },
+      crew: _selectedCrew,
+      onCrewDeleted: (crew) {
+        setState(() {
+          _selectedCrew.remove(crew);
+        });
+      },
+    );
+  }
+}
+
+class _SearchFilter extends StatefulWidget {
+  const _SearchFilter({
+    this.selectedFilterType = const [],
+    this.selectedGenre = const [],
+    this.selectedStudio = const [],
+    this.selectedKeyword = const [],
+    this.selectedCast = const [],
+    this.selectedCrew = const [],
+    required this.onChanged,
+  });
+
+  final List<FilterType> selectedFilterType;
+  final List<Genre> selectedGenre;
+  final List<Studio> selectedStudio;
+  final List<Keyword> selectedKeyword;
+  final List<MediaCast> selectedCast;
+  final List<MediaCrew> selectedCrew;
+
+  final ValueChanged<(List<FilterType>, List<Genre>, List<Studio>, List<Keyword>, List<MediaCast>, List<MediaCrew>)> onChanged;
+
+  @override
+  State<_SearchFilter> createState() => _SearchFilterState();
+}
+
+class _SearchFilterState extends State<_SearchFilter> {
+  late List<FilterType> _selectedFilterType = widget.selectedFilterType;
+  late List<Genre> _selectedGenre = widget.selectedGenre;
+  late List<Studio> _selectedStudio = widget.selectedStudio;
+  late List<Keyword> _selectedKeyword = widget.selectedKeyword;
+  late List<MediaCast> _selectedCast = widget.selectedCast;
+  late List<MediaCrew> _selectedCrew = widget.selectedCrew;
+
+  @override
+  Widget build(BuildContext context) {
+    return SettingPage(
+      title: '全部筛选',
+      child: Scrollbar(
+        child: CustomScrollView(
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              sliver: _MultiSelect(
+                collapsedMax: 6,
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 150,
+                  childAspectRatio: 3,
+                  mainAxisSpacing: 8,
+                  crossAxisSpacing: 8,
+                ),
+                selected: _selectedFilterType,
+                items: FilterType.values,
+                itemBuilder: (context, item) => Text(item.name, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, maxLines: 2),
+                onChanged: (value) {
+                  _selectedFilterType = value;
+                  _onChanged();
+                },
+              ),
+            ),
+            FutureBuilderSliverHandler(
+                initialData: const <Genre>[],
+                future: Api.genreQueryAll(),
+                builder: (context, snapshot) {
+                  return SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    sliver: snapshot.requireData.isNotEmpty
+                        ? _MultiSelect(
+                            label: AppLocalizations.of(context)!.titleGenre,
+                            collapsedMax: 9,
+                            selected: _selectedGenre,
+                            items: snapshot.requireData,
+                            itemBuilder: (context, item) => Text(item.name, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, maxLines: 2),
+                            onChanged: (value) {
+                              _selectedGenre = value;
+                              _onChanged();
+                            },
+                          )
+                        : const SliverToBoxAdapter(),
+                  );
+                }),
+            FutureBuilderSliverHandler(
+                initialData: const <Studio>[],
+                future: Api.studioQueryAll(),
+                builder: (context, snapshot) {
+                  return snapshot.requireData.isNotEmpty
+                      ? SliverPadding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          sliver: _MultiSelect(
+                            label: AppLocalizations.of(context)!.titleStudios,
+                            collapsedMax: 6,
+                            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: 150,
+                              childAspectRatio: 3,
+                              mainAxisSpacing: 8,
+                              crossAxisSpacing: 8,
+                            ),
+                            selected: _selectedStudio,
+                            items: snapshot.requireData,
+                            itemBuilder: (context, item) => item.logo != null
+                                ? Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                    child: AsyncImage(item.logo!, errorIconSize: 12),
+                                  )
+                                : Text(item.name, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, maxLines: 2),
+                            onChanged: (value) {
+                              _selectedStudio = value;
+                              _onChanged();
+                            },
+                          ),
+                        )
+                      : const SliverToBoxAdapter();
+                }),
+            FutureBuilderSliverHandler(
+                initialData: const <Keyword>[],
+                future: Api.keywordQueryAll(),
+                builder: (context, snapshot) {
+                  return snapshot.requireData.isNotEmpty
+                      ? SliverPadding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          sliver: _MultiSelect(
+                            label: AppLocalizations.of(context)!.titleKeyword,
+                            collapsedMax: 6,
+                            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: 150,
+                              childAspectRatio: 3,
+                              mainAxisSpacing: 8,
+                              crossAxisSpacing: 8,
+                            ),
+                            selected: _selectedKeyword,
+                            items: snapshot.requireData,
+                            itemBuilder: (context, item) => Text(item.name, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, maxLines: 2),
+                            onChanged: (value) {
+                              _selectedKeyword = value;
+                              _onChanged();
+                            },
+                          ),
+                        )
+                      : const SliverToBoxAdapter();
+                }),
+            FutureBuilderSliverHandler(
+                initialData: const <MediaCast>[],
+                future: Api.castQueryAll(),
+                builder: (context, snapshot) {
+                  return snapshot.requireData.isNotEmpty
+                      ? SliverPadding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          sliver: _MultiSelect(
+                            label: AppLocalizations.of(context)!.titleCast,
+                            collapsedMax: 6,
+                            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: 150,
+                              childAspectRatio: 3,
+                              mainAxisSpacing: 8,
+                              crossAxisSpacing: 8,
+                            ),
+                            selected: _selectedCast,
+                            items: snapshot.requireData,
+                            itemBuilder: (context, item) => Text(item.name, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, maxLines: 2),
+                            onChanged: (value) {
+                              _selectedCast = value;
+                              _onChanged();
+                            },
+                          ),
+                        )
+                      : const SliverToBoxAdapter();
+                }),
+            FutureBuilderSliverHandler(
+                initialData: const <MediaCrew>[],
+                future: Api.crewQueryAll(),
+                builder: (context, snapshot) {
+                  return snapshot.requireData.isNotEmpty
+                      ? SliverPadding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          sliver: _MultiSelect(
+                            label: AppLocalizations.of(context)!.titleCrew,
+                            collapsedMax: 6,
+                            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: 150,
+                              childAspectRatio: 3,
+                              mainAxisSpacing: 8,
+                              crossAxisSpacing: 8,
+                            ),
+                            selected: _selectedCrew,
+                            items: snapshot.requireData,
+                            itemBuilder: (context, item) => Text(item.name, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, maxLines: 2),
+                            onChanged: (value) {
+                              _selectedCrew = value;
+                              _onChanged();
+                            },
+                          ),
+                        )
+                      : const SliverToBoxAdapter();
+                }),
+            const SliverSafeArea(
+                sliver: SliverToBoxAdapter(
+              child: SizedBox(height: 32),
+            )),
+          ],
+        ),
+      ),
+    );
   }
 
-  void _updateState() {
-    if (!_focusNode.hasFocus && _focused && _filter.isEmpty) {
-      setState(() {
-        _focused = false;
-        _focusNode.unfocus();
-      });
+  void _onChanged() {
+    widget.onChanged((
+      _selectedFilterType,
+      _selectedGenre,
+      _selectedStudio,
+      _selectedKeyword,
+      _selectedCast,
+      _selectedCrew,
+    ));
+  }
+}
+
+class _MultiSelect<T> extends StatefulWidget {
+  const _MultiSelect({
+    super.key,
+    required this.items,
+    required this.itemBuilder,
+    this.gridDelegate,
+    this.label,
+    required this.onChanged,
+    this.selected = const [],
+    this.collapsedMax = 12,
+  });
+
+  final String? label;
+  final List<T> items;
+  final List<T> selected;
+  final Function(BuildContext, T) itemBuilder;
+  final ValueChanged<List<T>> onChanged;
+  final SliverGridDelegate? gridDelegate;
+  final int collapsedMax;
+
+  @override
+  State<_MultiSelect<T>> createState() => _MultiSelectState();
+}
+
+class _MultiSelectState<T> extends State<_MultiSelect<T>> {
+  bool _collapsed = true;
+  late final _selected = [...widget.selected];
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverMainAxisGroup(
+      slivers: [
+        if (widget.label != null || widget.items.length > widget.collapsedMax)
+          SliverPadding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              sliver: SliverToBoxAdapter(
+                  child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  if (widget.label != null) Text(widget.label!, style: Theme.of(context).textTheme.titleMedium),
+                  if (widget.items.length > widget.collapsedMax)
+                    InkWell(
+                        onTap: () {
+                          setState(() {
+                            _collapsed = !_collapsed;
+                          });
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Center(
+                              child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [Text(_collapsed ? '更多' : '收起'), Icon(_collapsed ? Icons.arrow_drop_down : Icons.arrow_drop_up)],
+                          )),
+                        )),
+                ],
+              ))),
+        SliverGrid.builder(
+          itemCount: _collapsed ? min(widget.items.length, widget.collapsedMax) : widget.items.length,
+          addAutomaticKeepAlives: false,
+          gridDelegate: widget.gridDelegate ??
+              const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 100,
+                childAspectRatio: 2,
+                mainAxisSpacing: 8,
+                crossAxisSpacing: 8,
+              ),
+          itemBuilder: (context, index) => Focusable(
+            onTap: () {
+              if (_selected.contains(widget.items[index])) {
+                _selected.remove(widget.items[index]);
+              } else {
+                _selected.add(widget.items[index]);
+              }
+              widget.onChanged(_selected);
+              setState(() {});
+            },
+            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+            selectedBackgroundColor: Theme.of(context).colorScheme.primaryContainer,
+            selected: _selected.contains(widget.items[index]),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Center(
+                child: DefaultTextStyle(
+                  style: Theme.of(context).textTheme.labelSmall!,
+                  child: widget.itemBuilder(context, widget.items[index]),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TabItem {
+  const _TabItem({required this.title, this.canFilter = false});
+
+  final String title;
+  final bool canFilter;
+}
+
+class _HomeTabs extends StatefulWidget implements PreferredSizeWidget {
+  const _HomeTabs({required this.tabs, required this.onTabChange, this.activeIndex = 0})
+      : assert(activeIndex < tabs.length),
+        assert(activeIndex >= 0);
+  final int activeIndex;
+
+  final List<_TabItem> tabs;
+  final ValueChanged<int> onTabChange;
+
+  @override
+  State<_HomeTabs> createState() => _HomeTabsState();
+
+  @override
+  Size get preferredSize => const Size.fromHeight(36);
+}
+
+class _HomeTabsState extends State<_HomeTabs> {
+  late int _activeIndex = widget.activeIndex;
+
+  late final tabKeys = List.generate(widget.tabs.length, (_) => GlobalKey());
+
+  @override
+  void didUpdateWidget(covariant _HomeTabs oldWidget) {
+    if (_activeIndex != widget.activeIndex) {
+      _activeIndex = widget.activeIndex;
+      setState(() {});
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = switch (Theme.of(context).brightness) {
+      Brightness.dark => Colors.white,
+      Brightness.light => Colors.black,
+    };
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Stack(
+          alignment: Alignment.bottomLeft,
+          children: [
+            SizedBox(
+              height: 36,
+              child: Row(
+                children: widget.tabs.indexed
+                    .map((tab) => Builder(builder: (context) {
+                          return TextButton(
+                            key: tabKeys[tab.$1],
+                            style: TextButton.styleFrom(
+                                shape: const RoundedRectangleBorder(),
+                                // minimumSize: Size(0, 12),
+                                // maximumSize: Size(0, 32),
+                                // fixedSize: Size(12, 12),
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                visualDensity: VisualDensity.compact),
+                            onPressed: () {
+                              _activeIndex = tab.$1;
+                              widget.onTabChange(tab.$1);
+                              setState(() {});
+                            },
+                            child: Text(
+                              tab.$2.title,
+                              style: Theme.of(context).textTheme.labelMedium!.copyWith(color: tab.$1 == _activeIndex ? color : Colors.grey),
+                            ),
+                          );
+                        }))
+                    .toList(),
+              ),
+            ),
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: FutureBuilder(
+                  initialData: (0.0, 0.0),
+                  future: _updateActiveLine(context),
+                  builder: (context, snapshot) => AnimatedContainer(
+                        duration: const Duration(milliseconds: 400),
+                        curve: Curves.easeOut,
+                        width: snapshot.requireData.$1,
+                        height: 2,
+                        margin: EdgeInsets.only(left: snapshot.requireData.$2),
+                        decoration:
+                            BoxDecoration(color: color, borderRadius: const BorderRadius.only(topLeft: Radius.circular(2), topRight: Radius.circular(2))),
+                      )),
+            )
+          ],
+        ),
+      ],
+    );
+  }
+
+  Future<(double, double)> _updateActiveLine(BuildContext context) async {
+    await Future.delayed(const Duration(milliseconds: 10));
+    final box = tabKeys[_activeIndex].currentContext!.findRenderObject()! as RenderBox;
+    final offset = box.globalToLocal(Offset.zero, ancestor: box.parent);
+    final lineWidth = box.size.width * 0.6;
+    final lineOffset = -offset.dx + lineWidth * 0.3;
+    return (lineWidth, lineOffset);
+  }
+}
+
+class _FilterChips<T> extends StatelessWidget {
+  const _FilterChips({
+    super.key,
+    required this.title,
+    required this.chips,
+    required this.onDeleted,
+    required this.labelBuilder,
+  });
+
+  final String title;
+  final List<T> chips;
+  final Function(T) onDeleted;
+  final Function(BuildContext, T) labelBuilder;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 38,
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        scrollDirection: Axis.horizontal,
+        itemBuilder: (context, index) {
+          if (index == 0) {
+            return Center(child: Text('$title: ', style: Theme.of(context).textTheme.labelSmall));
+          } else {
+            final chip = chips[index - 1];
+            return Chip(
+              label: labelBuilder(context, chip),
+              labelPadding: EdgeInsets.zero,
+              labelStyle: Theme.of(context).textTheme.labelSmall,
+              shape: const StadiumBorder(),
+              visualDensity: VisualDensity.compact,
+              onDeleted: () {
+                onDeleted(chip);
+              },
+            );
+          }
+        },
+        itemCount: chips.length + 1,
+        separatorBuilder: (context, index) => const SizedBox(width: 4),
+      ),
+    );
+  }
+}
+
+class _FilterChipsGroup extends StatelessWidget {
+  const _FilterChipsGroup({
+    required this.genres,
+    required this.onGenreDeleted,
+    required this.studios,
+    required this.onStudioDeleted,
+    required this.keywords,
+    required this.onKeywordDeleted,
+    required this.filerType,
+    required this.onFilterTypeDeleted,
+    required this.cast,
+    required this.onCastDeleted,
+    required this.crew,
+    required this.onCrewDeleted,
+  });
+
+  final List<FilterType> filerType;
+  final Function(FilterType) onFilterTypeDeleted;
+  final List<Genre> genres;
+  final Function(Genre) onGenreDeleted;
+  final List<Studio> studios;
+  final Function(Studio) onStudioDeleted;
+  final List<Keyword> keywords;
+  final Function(Keyword) onKeywordDeleted;
+  final List<MediaCast> cast;
+  final Function(MediaCast) onCastDeleted;
+  final List<MediaCrew> crew;
+  final Function(MediaCrew) onCrewDeleted;
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverMainAxisGroup(slivers: [
+      if (filerType.isNotEmpty)
+        SliverToBoxAdapter(
+          child: _FilterChips(
+            title: AppLocalizations.of(context)!.titleGenre,
+            chips: filerType,
+            onDeleted: onFilterTypeDeleted,
+            labelBuilder: (context, ty) => Text(ty.name),
+          ),
+        ),
+      if (genres.isNotEmpty)
+        SliverToBoxAdapter(
+          child: _FilterChips(
+            title: AppLocalizations.of(context)!.titleGenre,
+            chips: genres,
+            onDeleted: onGenreDeleted,
+            labelBuilder: (context, genre) => Text(genre.name),
+          ),
+        ),
+      if (studios.isNotEmpty)
+        SliverToBoxAdapter(
+          child: _FilterChips(
+            title: AppLocalizations.of(context)!.titleStudios,
+            chips: studios,
+            onDeleted: onStudioDeleted,
+            labelBuilder: (context, studio) => Text(studio.name),
+          ),
+        ),
+      if (keywords.isNotEmpty)
+        SliverToBoxAdapter(
+          child: _FilterChips(
+            title: AppLocalizations.of(context)!.titleKeyword,
+            chips: keywords,
+            onDeleted: onKeywordDeleted,
+            labelBuilder: (context, keyword) => Text(keyword.name),
+          ),
+        ),
+      if (cast.isNotEmpty)
+        SliverToBoxAdapter(
+          child: _FilterChips(
+            title: AppLocalizations.of(context)!.titleCast,
+            chips: cast,
+            onDeleted: onCastDeleted,
+            labelBuilder: (context, cast) => Text(cast.name),
+          ),
+        ),
+      if (crew.isNotEmpty)
+        SliverToBoxAdapter(
+          child: _FilterChips(
+            title: AppLocalizations.of(context)!.titleCrew,
+            chips: crew,
+            onDeleted: onCrewDeleted,
+            labelBuilder: (context, crew) => Text(crew.name),
+          ),
+        ),
+    ]);
+  }
+}
+
+class _ItemSearchPage<T> extends StatefulWidget {
+  const _ItemSearchPage({
+    super.key,
+    required this.params,
+    required this.searchType,
+    required this.itemBuilder,
+    required this.dataResolve,
+    this.gridDelegate = const SliverGridDelegateWithMaxCrossAxisExtent(
+      maxCrossAxisExtent: 120,
+      childAspectRatio: 0.5,
+      mainAxisSpacing: 16,
+      crossAxisSpacing: 16,
+    ),
+  });
+
+  final _SearchParams params;
+  final String searchType;
+  final ItemWidgetBuilder<T> itemBuilder;
+  final PageData<T> Function(SearchFuzzyResult) dataResolve;
+  final SliverGridDelegate gridDelegate;
+
+  @override
+  State<_ItemSearchPage<T>> createState() => _ItemSearchPageState();
+}
+
+class _ItemSearchPageState<T> extends State<_ItemSearchPage<T>> {
+  final _pagingController = PagingController<int, T>(firstPageKey: 0);
+
+  @override
+  void initState() {
+    super.initState();
+    _pagingController.addPageRequestListener(_search);
+  }
+
+  @override
+  void dispose() {
+    _pagingController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant _ItemSearchPage<T> oldWidget) {
+    _pagingController.refresh();
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+      sliver: PagedSliverGrid(
+        gridDelegate: widget.gridDelegate,
+        builderDelegate: PagedChildBuilderDelegate<T>(
+          itemBuilder: widget.itemBuilder,
+          firstPageErrorIndicatorBuilder: (_) => ErrorMessage(error: _pagingController.error),
+          newPageErrorIndicatorBuilder: (_) => ErrorMessage(error: _pagingController.error),
+          noItemsFoundIndicatorBuilder: (_) => const NoData(),
+        ),
+        pagingController: _pagingController,
+      ),
+    );
+  }
+
+  Future<void> _search(int page) async {
+    try {
+      final data = await Api.searchFuzzy(
+        widget.searchType,
+        limit: 30,
+        offset: page * 30,
+        filter: widget.params.filter,
+        genres: widget.params.genres.isNotEmpty ? widget.params.genres : null,
+        studios: widget.params.studios.isNotEmpty ? widget.params.studios : null,
+        keywords: widget.params.keywords.isNotEmpty ? widget.params.keywords : null,
+        mediaCast: widget.params.mediaCast.isNotEmpty ? widget.params.mediaCast : null,
+        mediaCrew: widget.params.mediaCrew.isNotEmpty ? widget.params.mediaCrew : null,
+        watched: widget.params.watched,
+        favorite: widget.params.favorite,
+      );
+      final res = widget.dataResolve(data);
+      if (!mounted) return;
+      if (res.offset + res.limit >= res.count) {
+        _pagingController.appendLastPage(res.data);
+      } else {
+        _pagingController.appendPage(res.data, page + 1);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      _pagingController.error = e;
     }
   }
+}
+
+class _SearchParams {
+  const _SearchParams({
+    required this.filter,
+    required this.genres,
+    required this.studios,
+    required this.keywords,
+    required this.mediaCast,
+    required this.mediaCrew,
+    required this.watched,
+    required this.favorite,
+  });
+
+  final String? filter;
+  final List<dynamic> genres;
+  final List<dynamic> studios;
+  final List<dynamic> keywords;
+  final List<dynamic> mediaCast;
+  final List<dynamic> mediaCrew;
+  final bool? watched;
+  final bool? favorite;
 }

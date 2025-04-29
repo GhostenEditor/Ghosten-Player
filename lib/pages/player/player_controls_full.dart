@@ -170,8 +170,20 @@ class _PlayerControlsFullState<T> extends State<PlayerControlsFull<T>> with Play
                     IconButton(
                         onPressed: () => showDialog(
                             context: context,
-                            builder: (context) =>
-                                _ChannelListGrouped(controller: _controller as PlayerController<Channel>, onTap: (index) => _controller.next(index))),
+                            builder: (context) => _ChannelListGrouped(
+                                controller: _controller as PlayerController<Channel>,
+                                onTap: (index) async {
+                                  await _controller.next(index);
+                                  switch (_controller.status.value) {
+                                    case PlayerStatus.paused:
+                                    case PlayerStatus.ended:
+                                    case PlayerStatus.error:
+                                    case PlayerStatus.idle:
+                                      await _controller.play();
+                                    case PlayerStatus.playing:
+                                    case PlayerStatus.buffering:
+                                  }
+                                })),
                         icon: const Icon(Icons.list)),
                   SwitchLinkButton(_controller),
                   IconButton(onPressed: () => _controller.requestPip(), icon: const Icon(Icons.picture_in_picture_rounded)),
@@ -418,7 +430,10 @@ class _PlayerInfoView<T> extends StatelessWidget {
                                     };
                                   }),
                               if (_controller.fatalError.value != null)
-                                Text(_controller.fatalError.value!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                                ConstrainedBox(
+                                    constraints: const BoxConstraints(maxHeight: 140),
+                                    child: SingleChildScrollView(
+                                        child: Text(_controller.fatalError.value!, style: TextStyle(color: Theme.of(context).colorScheme.error)))),
                             ],
                           ),
                         ),
@@ -498,7 +513,18 @@ class _PlaylistButton<T> extends StatelessWidget {
                           activeIndex: controller.index.value,
                           imageWidth: 160,
                           imageHeight: 90,
-                          onTap: controller.next,
+                          onTap: (index) async {
+                            await controller.next(index);
+                            switch (controller.status.value) {
+                              case PlayerStatus.paused:
+                              case PlayerStatus.ended:
+                              case PlayerStatus.error:
+                              case PlayerStatus.idle:
+                                await controller.play();
+                              case PlayerStatus.playing:
+                              case PlayerStatus.buffering:
+                            }
+                          },
                         );
                       }));
             },

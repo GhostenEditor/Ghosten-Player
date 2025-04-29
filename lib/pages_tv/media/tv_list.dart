@@ -145,103 +145,91 @@ class _TVListPageState extends State<TVListPage> with NeedUpdateMixin, ChannelMi
                 );
               },
             ),
-            buildChannel(
-              context,
+            MediaChannel(
               label: AppLocalizations.of(context)!.watchNow,
               future: Api.tvSeriesNextToPlayQueryAll(),
               height: 240,
-              builder: (context, item) => Stack(
-                children: [
-                  MediaGridItem(
-                      imageWidth: 240,
-                      imageHeight: 240 / 1.78,
-                      title: Text(item.displayRecentTitle()),
-                      subtitle: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          if (item.lastPlayedTime != null)
-                            Text(AppLocalizations.of(context)!.timeAgo(item.lastPlayedTime!.fromNow().fromNowFormat(context)),
-                                style: Theme.of(context).textTheme.labelSmall)
-                          else
-                            const Spacer(),
-                          if (item.duration != null && item.lastPlayedTime != null)
-                            Text('${(item.lastPlayedPosition!.inSeconds / item.duration!.inSeconds * 100).toStringAsFixed(1)}%'),
-                        ],
-                      ),
-                      imageUrl: item.poster,
-                      onTap: () async {
-                        final season = await Api.tvSeasonQueryById(item.seasonId);
-                        final playlist = season.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList();
-                        if (!context.mounted) return;
-                        await toPlayer(
-                          context,
-                          playlist,
-                          index: season.episodes.indexWhere((episode) => episode.id == item.id),
-                          theme: item.themeColor,
-                        );
-                        setState(() {});
-                      }),
-                  if (item.duration != null && item.lastPlayedTime != null)
-                    SizedBox(
-                      width: 240,
-                      child: Align(
-                        alignment: const Alignment(0, 0.2),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 6),
-                          child: LinearProgressIndicator(
-                            value: item.lastPlayedPosition!.inSeconds / item.duration!.inSeconds,
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(3),
-                            minHeight: 3,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
+              builder: (context, item) => _buildRecentMediaItem(context, item, width: 240, height: 240 / 1.78),
             ),
-            buildChannel(
-              context,
+            MediaChannel(
               label: AppLocalizations.of(context)!.tagNewAdd,
               future: Api.tvSeriesQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.createAt, direction: SortDirection.desc), limit: 8)),
               height: 340,
-              builder: (context, item) => MediaGridItem(
-                  imageWidth: 160,
-                  imageHeight: 160 / 0.67,
-                  title: Text(item.displayRecentTitle()),
-                  subtitle: Text(item.airDate?.format() ?? ''),
-                  imageUrl: item.poster,
-                  onTap: () => _onMediaTap(item)),
+              builder: (context, item) => _buildMediaItem(context, item, width: 160, height: 160 / 0.67),
             ),
-            buildChannel(
-              context,
+            MediaChannel(
               label: AppLocalizations.of(context)!.tagNewRelease,
               future: Api.tvSeriesQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.airDate, direction: SortDirection.desc), limit: 8)),
               height: 340,
-              builder: (context, item) => MediaGridItem(
-                  imageWidth: 160,
-                  imageHeight: 160 / 0.67,
-                  title: Text(item.displayRecentTitle()),
-                  subtitle: Text(item.airDate?.format() ?? ''),
-                  imageUrl: item.poster,
-                  onTap: () => _onMediaTap(item)),
+              builder: (context, item) => _buildMediaItem(context, item, width: 160, height: 160 / 0.67),
             ),
-            buildGridChannel(
-              context,
+            MediaGridChannel(
               label: AppLocalizations.of(context)!.tagAll,
               future: Api.tvSeriesQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.title, direction: SortDirection.asc))),
-              builder: (context, item) => MediaGridItem(
-                imageWidth: 160,
-                imageHeight: 160 / 0.67,
-                imageUrl: item.poster,
-                title: Text(item.displayTitle()),
-                subtitle: Text(item.airDate?.format() ?? ''),
-                onTap: () => _onMediaTap(item),
-              ),
+              builder: (context, item) => _buildMediaItem(context, item, width: 160, height: 160 / 0.67),
             ),
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildRecentMediaItem(BuildContext context, TVEpisode item, {double? width, double? height}) {
+    return MediaGridItem(
+        imageWidth: width,
+        imageHeight: height,
+        title: Text(item.displayRecentTitle()),
+        subtitle: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            if (item.lastPlayedTime != null)
+              Text(AppLocalizations.of(context)!.timeAgo(item.lastPlayedTime!.fromNow().fromNowFormat(context)), style: Theme.of(context).textTheme.labelSmall)
+            else
+              const Spacer(),
+            if (item.duration != null && item.lastPlayedTime != null)
+              Text('${(item.lastPlayedPosition!.inSeconds / item.duration!.inSeconds * 100).toStringAsFixed(1)}%'),
+          ],
+        ),
+        imageUrl: item.poster,
+        floating: item.duration != null && item.duration != Duration.zero && item.lastPlayedTime != null
+            ? SizedBox(
+                width: 240,
+                child: Align(
+                  alignment: const Alignment(0, 0.2),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    child: LinearProgressIndicator(
+                      value: item.lastPlayedPosition!.inSeconds / item.duration!.inSeconds,
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(3),
+                      minHeight: 3,
+                    ),
+                  ),
+                ),
+              )
+            : null,
+        onTap: () async {
+          final season = await Api.tvSeasonQueryById(item.seasonId);
+          final playlist = season.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList();
+          if (!context.mounted) return;
+          await toPlayer(
+            context,
+            playlist,
+            index: season.episodes.indexWhere((episode) => episode.id == item.id),
+            theme: item.themeColor,
+          );
+          setState(() {});
+        });
+  }
+
+  Widget _buildMediaItem(BuildContext context, TVSeries item, {double? width, double? height}) {
+    return MediaGridItem(
+      imageWidth: width,
+      imageHeight: height,
+      imageUrl: item.poster,
+      title: Text(item.displayTitle()),
+      subtitle: Text(item.firstAirDate?.format() ?? ''),
+      onTap: () => _onMediaTap(item),
     );
   }
 

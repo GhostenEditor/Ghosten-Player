@@ -194,6 +194,7 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
                 mimeType: _mimeType,
                 language: _language,
                 label: _filename,
+                selected: selected,
               ));
             }
           },

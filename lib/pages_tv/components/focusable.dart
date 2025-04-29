@@ -10,6 +10,8 @@ class Focusable extends StatefulWidget {
     this.autofocus,
     this.onFocusChange,
     this.selected,
+    this.backgroundColor,
+    this.selectedBackgroundColor,
   });
 
   final Widget child;
@@ -17,6 +19,8 @@ class Focusable extends StatefulWidget {
   final double? height;
   final bool? autofocus;
   final bool? selected;
+  final Color? backgroundColor;
+  final Color? selectedBackgroundColor;
   final GestureTapCallback? onTap;
   final ValueChanged<bool>? onFocusChange;
 
@@ -33,7 +37,9 @@ class _FocusableState extends State<Focusable> {
       width: widget.width,
       height: widget.height,
       child: Material(
-        color: widget.selected ?? false ? Theme.of(context).colorScheme.surfaceContainerHighest : Theme.of(context).colorScheme.surfaceContainerLow,
+        color: widget.selected ?? false
+            ? (widget.selectedBackgroundColor ?? Theme.of(context).colorScheme.surfaceContainerHighest)
+            : (widget.backgroundColor ?? Theme.of(context).colorScheme.surfaceContainerLow),
         shape: RoundedRectangleBorder(
           side: _focused ? BorderSide(width: 4, color: Theme.of(context).colorScheme.inverseSurface, strokeAlign: 2) : BorderSide.none,
           borderRadius: BorderRadius.circular(6),

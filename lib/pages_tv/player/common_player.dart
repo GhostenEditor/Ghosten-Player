@@ -6,6 +6,8 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:video_player/player.dart';
 
 import '../../components/player_i18n_adaptor.dart';
+import '../../models/models.dart';
+import '../../utils/utils.dart';
 import '../components/focusable_image.dart';
 import '../components/setting.dart';
 import '../components/time_picker.dart';
@@ -32,7 +34,48 @@ class CommonPlayerPage<T> extends StatefulWidget {
 }
 
 class _CommonPlayerPageState<T> extends State<CommonPlayerPage<T>> {
-  final _controller = PlayerController<T>(Api.log);
+  late final _controller = PlayerController<T>(
+    Api.log,
+    onGetPlayBackInfo: _onGetPlayBackInfo,
+    onPlaybackStatusUpdate: _onPlaybackStatusUpdate,
+  );
+
+  Future<PlaylistItem> _onGetPlayBackInfo(PlaylistItemDisplay<T> item) async {
+    final data = await Api.playbackInfo(item.fileId);
+    return PlaylistItem(
+      title: item.title,
+      description: item.description,
+      poster: item.poster,
+      start: item.start,
+      end: item.end,
+      url: Uri.parse(data.url).normalize(),
+      subtitles: data.subtitles.map((d) => d.toSubtitle()).toList(),
+      others: data.others,
+    );
+  }
+
+  Future<void> _onPlaybackStatusUpdate(PlaylistItem item, PlaybackStatusEvent eventType, Duration position, Duration duration) {
+    final source = _controller.currentItem!.source;
+    return switch (source) {
+      final TVEpisode s => Api.updatePlayedStatus(
+          LibraryType.tv,
+          s.id,
+          position: position,
+          duration: duration,
+          eventType: eventType.name,
+          others: item.others,
+        ),
+      final Movie s => Api.updatePlayedStatus(
+          LibraryType.movie,
+          s.id,
+          position: position,
+          duration: duration,
+          eventType: eventType.name,
+          others: item.others,
+        ),
+      _ => Future.value(),
+    };
+  }
 
   @override
   void dispose() {
@@ -45,9 +88,10 @@ class _CommonPlayerPageState<T> extends State<CommonPlayerPage<T>> {
     return Stack(
       children: [
         PlayerPlatformView(
-          initialized: () {
-            _controller.setSources(widget.playlist);
-            _controller.play();
+          initialized: () async {
+            _controller.setPlaylist(widget.playlist);
+            await _controller.next(0);
+            await _controller.play();
           },
         ),
         PlayerI18nAdaptor(

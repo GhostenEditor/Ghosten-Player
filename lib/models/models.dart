@@ -28,7 +28,7 @@ extension FromMedia<T> on PlaylistItemDisplay<T> {
     return PlaylistItemDisplay(
       fileId: movie.fileId,
       title: movie.displayTitle(),
-      description: movie.airDate?.format(),
+      description: movie.releaseDate?.format(),
       url: Uri(),
       poster: movie.poster,
       start: movie.lastPlayedPosition ?? Duration.zero,

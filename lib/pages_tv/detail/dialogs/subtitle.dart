@@ -8,10 +8,72 @@ import '../../../providers/user_config.dart';
 import '../../../utils/utils.dart';
 import '../../../validators/validators.dart';
 import '../../components/filled_button.dart';
+import '../../components/future_builder_handler.dart';
+import '../../components/icon_button.dart';
 import '../../components/keyboard_reopen.dart';
 import '../../components/setting.dart';
-import '../../components/text_button.dart';
 import '../../utils/driver_file_picker.dart';
+import '../../utils/notification.dart';
+import '../../utils/utils.dart';
+
+class SubtitleListPage extends StatefulWidget {
+  const SubtitleListPage({super.key, required this.fileId});
+
+  final String fileId;
+
+  @override
+  State<SubtitleListPage> createState() => _SubtitleListPageState();
+}
+
+class _SubtitleListPageState extends State<SubtitleListPage> {
+  @override
+  Widget build(BuildContext context) {
+    return SettingPage(
+      title: AppLocalizations.of(context)!.buttonSubtitle,
+      child: FutureBuilderHandler(
+          future: Api.subtitleQueryById(widget.fileId),
+          builder: (context, snapshot) => ListView.builder(
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+              itemCount: snapshot.requireData.length + 1,
+              itemBuilder: (context, index) {
+                if (index < snapshot.requireData.length) {
+                  final item = snapshot.requireData[index];
+                  return SlidableSettingItem(
+                    actions: [
+                      TVIconButton(
+                          onPressed: () async {
+                            final confirm = await showConfirm(context, AppLocalizations.of(context)!.deleteConfirmText);
+                            if (confirm != true || !context.mounted) return;
+                            final resp = await showNotification(context, Api.subtitleDeleteById(item.id));
+                            if (resp?.error == null && context.mounted) setState(() {});
+                          },
+                          icon: const Icon(Icons.delete_outline)),
+                    ],
+                    leading: Text(item.mimeType ?? ''),
+                    trailing: Text(item.language ?? ''),
+                    title: Text(item.label ?? ''),
+                    onTap: () {},
+                  );
+                } else {
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: IconButtonSettingItem(
+                      autofocus: snapshot.requireData.isEmpty,
+                      icon: const Icon(Icons.add),
+                      onPressed: () async {
+                        final subtitle = await navigateToSlideLeft<SubtitleData>(context, const SubtitleDialog());
+                        if (subtitle != null && context.mounted) {
+                          final resp = await showNotification(context, Api.subtitleInsert(widget.fileId, subtitle));
+                          if (resp?.error == null && context.mounted) setState(() {});
+                        }
+                      },
+                    ),
+                  );
+                }
+              })),
+    );
+  }
+}
 
 class SubtitleDialog extends StatefulWidget {
   const SubtitleDialog({super.key, this.subtitle});
@@ -27,6 +89,7 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
   String? _mimeType;
   String? _language;
   String? _filename;
+  bool selected = false;
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -109,6 +172,14 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
                       ...SystemLanguage.values.map((lang) => DropdownMenuItem(value: lang.name, child: Text(lang.name.toUpperCase())))
                     ],
                     onChanged: (v) => setState(() => _language = v)),
+                CheckboxListTile(
+                  dense: true,
+                  title: const Text('默认选中'),
+                  contentPadding: const EdgeInsets.only(left: 8),
+                  value: selected,
+                  onChanged: (v) => setState(() => selected = v ?? false),
+                  // trailing: Checkbox(),
+                ),
                 const Spacer(),
                 TVFilledButton(
                   onPressed: () {
@@ -118,14 +189,11 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
                         mimeType: _mimeType,
                         language: _language,
                         label: _filename,
+                        selected: selected,
                       ));
                     }
                   },
                   child: Text(AppLocalizations.of(context)!.buttonConfirm),
-                ),
-                TVTextButton(
-                  onPressed: () => Navigator.pop(context, SubtitleData.empty),
-                  child: Text(AppLocalizations.of(context)!.buttonReset),
                 ),
               ],
             ),
