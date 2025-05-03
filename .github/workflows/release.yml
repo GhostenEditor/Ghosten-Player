@@ -123,3 +123,23 @@ jobs:
           generate_release_notes: true
           prerelease: false
           files: build/app/outputs/flutter-apk/app-arm*-release.apk
+          append_body: true
+          body: |
+            > 如果项目对您有帮助，就请给颗[🌟Star](https://github.com/GhostenEditor/Ghosten-Player)吧。
+            > ${{env.chatGroup}}
+
+            ## 🎉New Features
+            
+            1. 
+            
+            ## 🐞Bug Fixed
+            
+            1. 
+            
+            ## 🚀 Improvement
+            
+            1. 
+          
+            ## 📣 Breaking Change
+            
+            1. 
