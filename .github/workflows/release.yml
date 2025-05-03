@@ -126,7 +126,7 @@ jobs:
           append_body: true
           body: |
             > 如果项目对您有帮助，就请给颗[🌟Star](https://github.com/GhostenEditor/Ghosten-Player)吧。
-            > ${{env.chatGroup}}
+            > ${{vars.CHAT_GROUP}}
 
             ## 🎉New Features
             
