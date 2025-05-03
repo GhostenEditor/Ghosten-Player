@@ -3,6 +3,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'filled_button.dart';
 import 'keyboard_reopen.dart';
+import 'text_field_focus.dart';
 
 class StepperForm extends StatefulWidget {
   const StepperForm({super.key, required this.items, required this.onComplete});
@@ -51,25 +52,26 @@ class _StepperFormState extends State<StepperForm> {
                 title: Text(entry.$2.labelText),
                 isActive: _currentStep == entry.$1,
                 state: _stepState(entry.$2, entry.$1),
-                content: TextField(
-                  controller: widget.items[entry.$1].controller,
-                  focusNode: _focusNodes[entry.$1],
-                  decoration: InputDecoration(
-                    isDense: true,
-                    prefixIcon: entry.$2.prefixIcon,
-                    suffixIcon: entry.$2.suffixIcon,
-                    helperText: entry.$2.helperText,
-                    border: const OutlineInputBorder(),
-                    errorText: _dirties[entry.$1] && entry.$2.validator != null ? entry.$2.validator!(widget.items[entry.$1].controller.text) : null,
+                content: TextFieldFocus(
+                  child: TextField(
+                    controller: widget.items[entry.$1].controller,
+                    focusNode: _focusNodes[entry.$1],
+                    decoration: InputDecoration(
+                      isDense: true,
+                      prefixIcon: entry.$2.prefixIcon,
+                      suffixIcon: entry.$2.suffixIcon,
+                      helperText: entry.$2.helperText,
+                      border: const OutlineInputBorder(),
+                      errorText: _dirties[entry.$1] && entry.$2.validator != null ? entry.$2.validator!(widget.items[entry.$1].controller.text) : null,
+                    ),
+                    obscureText: entry.$2.obscureText,
+                    onEditingComplete: () {
+                      setState(() {
+                        _currentStep = entry.$1 + 1;
+                        _dirties[entry.$1] = true;
+                      });
+                    },
                   ),
-                  obscureText: entry.$2.obscureText,
-                  onEditingComplete: () {
-                    setState(() {
-                      _currentStep = entry.$1 + 1;
-                      _dirties[entry.$1] = true;
-                      Future.delayed(const Duration(milliseconds: 100)).then((_) => _focusNodes[_currentStep].requestFocus());
-                    });
-                  },
                 ))),
             Step(
               title: Text(AppLocalizations.of(context)!.buttonComplete),

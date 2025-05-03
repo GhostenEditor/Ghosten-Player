@@ -214,6 +214,7 @@ class _SeasonPageState extends State<_SeasonPage> {
         builder: (context, snapshot) {
           final item = snapshot.requireData;
           return CustomScrollView(
+            cacheExtent: 1000,
             slivers: [
               SliverPadding(
                 padding: const EdgeInsets.only(top: 32, left: 8, right: 8, bottom: 16),
@@ -390,15 +391,18 @@ class _EpisodeListTile extends StatelessWidget {
                           if (episode.favorite) const Badge(label: Icon(Icons.favorite_rounded)),
                           if (episode.downloaded) const Badge(label: Icon(Icons.download_rounded)),
                           if (episode.duration != null)
-                            Badge(
-                                label: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              spacing: 2,
-                              children: [
-                                const Icon(Icons.access_time_rounded),
-                                Text(episode.duration!.toDisplay()),
-                              ],
-                            )),
+                            IconTheme(
+                              data: IconThemeData(color: Theme.of(context).colorScheme.onInverseSurface, size: 14),
+                              child: Badge(
+                                  label: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                spacing: 2,
+                                children: [
+                                  const Icon(Icons.access_time_rounded),
+                                  Text(episode.duration!.toDisplay()),
+                                ],
+                              )),
+                            ),
                         ],
                       ),
                     ),

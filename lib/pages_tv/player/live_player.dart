@@ -82,7 +82,14 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
           )),
           child: _ChannelListGrouped(
             controller: _controller,
-            onTap: (index) => _controller.next(index),
+            onTap: (index) async {
+              await _controller.next(index);
+              if (_controller.status.value == PlayerStatus.idle ||
+                  _controller.status.value == PlayerStatus.error ||
+                  _controller.status.value == PlayerStatus.ended) {
+                await _controller.play();
+              }
+            },
           ),
         ),
         endDrawer: SizedBox(
@@ -102,11 +109,20 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
                               groupValue: _controller.currentItem?.url,
                               value: url,
                               title: Text('${AppLocalizations.of(context)!.playerBroadcastLine} ${index + 1}'),
-                              onChanged: (_) {
+                              onChanged: (_) async {
                                 final currentItem = _controller.currentItem!;
-                                final item = PlaylistItem(url: url, poster: currentItem.poster);
+                                // final item = PlaylistItem(url: url, poster: currentItem.poster);
                                 // _controller.playlist.value[_controller.index.value!] = item;
-                                _controller.updateSource(item, _controller.index.value!);
+                                _controller.updateSource(currentItem.copyWith(url: url), _controller.index.value!);
+                                switch (_controller.status.value) {
+                                  case PlayerStatus.paused:
+                                  case PlayerStatus.ended:
+                                  case PlayerStatus.error:
+                                  case PlayerStatus.idle:
+                                    await _controller.play();
+                                  case PlayerStatus.playing:
+                                  case PlayerStatus.buffering:
+                                }
                                 setState(() {});
                               },
                             );
@@ -118,7 +134,8 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
           fit: StackFit.expand,
           children: [
             PlayerPlatformView(initialized: () async {
-              await _controller.setSources(widget.playlist);
+              _controller.setPlaylist(widget.playlist);
+              await _controller.next(0);
               await _controller.play();
             }),
             PopScope(
@@ -146,9 +163,19 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
                     switch (event.logicalKey) {
                       case LogicalKeyboardKey.arrowUp:
                         if (_controller.index.value != null) _controller.next(_controller.index.value! + 1);
+                        if (_controller.status.value == PlayerStatus.idle ||
+                            _controller.status.value == PlayerStatus.error ||
+                            _controller.status.value == PlayerStatus.ended) {
+                          _controller.play();
+                        }
                         return KeyEventResult.handled;
                       case LogicalKeyboardKey.arrowDown:
                         if (_controller.index.value != null) _controller.next(_controller.index.value! - 1);
+                        if (_controller.status.value == PlayerStatus.idle ||
+                            _controller.status.value == PlayerStatus.error ||
+                            _controller.status.value == PlayerStatus.ended) {
+                          _controller.play();
+                        }
                         return KeyEventResult.handled;
                       case LogicalKeyboardKey.arrowRight:
                         if (_controller.currentItem != null && _controller.currentItem!.source.links.length > 1) {

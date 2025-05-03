@@ -76,11 +76,6 @@ class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activit
                                 call.argument<String?>("id")
                             )
 
-                            "setSkipPosition" -> mPlayerView?.setSkipPosition(
-                                call.argument("type")!!,
-                                call.argument("list")!!
-                            )
-
                             "getVideoThumbnail" -> return mPlayerView!!.getVideoThumbnail(
                                 result,
                                 call.argument<Long>("position")!!

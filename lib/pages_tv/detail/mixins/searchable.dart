@@ -1,59 +1,12 @@
-
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../components/error_message.dart';
 import '../../../utils/utils.dart';
 import '../../../validators/validators.dart';
 import '../../components/focusable_image.dart';
-import '../dialogs/search_no_result.dart';
-
-mixin SearchableMixin {
-  Future<bool> search(
-    BuildContext context,
-    Future<void> Function({required String title, int? year, int? index}) future, {
-    required String title,
-    int? year,
-    int? index,
-  }) async {
-    try {
-      await future(title: title, year: year, index: index);
-    } on PlatformException catch (e) {
-      switch (e.code) {
-        case '40401':
-          if (!context.mounted) return false;
-          final res = await navigateTo<(String, int?)>(navigatorKey.currentContext!, SearchNoResult(text: title, year: year));
-          if (res != null) {
-            if (!context.mounted) return false;
-            return search(context, future, title: res.$1, year: res.$2);
-          } else {
-            rethrow;
-          }
-        case '30001':
-          if (!context.mounted) return false;
-        // final data = (jsonDecode(e.message!) as List<dynamic>).map((e) => SearchResult.fromJson(e)).toList();
-        // final res = await navigateTo<int>(
-        //     navigatorKey.currentContext!,
-        //     SearchResultSelect(
-        //       items: data,
-        //       title: title,
-        //       year: year,
-        //     ));
-        // if (res != null) {
-        //   if (!context.mounted) return false;
-        //   return search(context, future, title: title, year: year, index: res);
-        // } else {
-        //   rethrow;
-        // }
-        default:
-          rethrow;
-      }
-    }
-    return true;
-  }
-}
+import '../../components/text_field_focus.dart';
 
 class SearchResultSelect<T extends MediaBase> extends StatefulWidget {
   const SearchResultSelect({super.key, required this.item});
@@ -181,30 +134,32 @@ class _SearchResultSelectState extends State<SearchResultSelect> {
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                TextFormField(
-                                  autofocus: true,
-                                  controller: _controller1,
-                                  decoration: InputDecoration(
-                                    prefixIcon: const Icon(Icons.title),
-                                    border: const UnderlineInputBorder(),
-                                    isDense: true,
-                                    labelText: AppLocalizations.of(context)!.formLabelTitle,
+                                TextFieldFocus(
+                                  child: TextFormField(
+                                    controller: _controller1,
+                                    decoration: InputDecoration(
+                                      prefixIcon: const Icon(Icons.title),
+                                      border: const UnderlineInputBorder(),
+                                      isDense: true,
+                                      labelText: AppLocalizations.of(context)!.formLabelTitle,
+                                    ),
+                                    validator: (value) => requiredValidator(context, value),
+                                    onEditingComplete: () => FocusScope.of(context).nextFocus(),
                                   ),
-                                  validator: (value) => requiredValidator(context, value),
-                                  onEditingComplete: () => FocusScope.of(context).nextFocus(),
                                 ),
-                                TextFormField(
-                                  autofocus: true,
-                                  controller: _controller2,
-                                  keyboardType: TextInputType.number,
-                                  decoration: InputDecoration(
-                                    prefixIcon: const Icon(Icons.calendar_month_outlined),
-                                    border: const UnderlineInputBorder(),
-                                    isDense: true,
-                                    labelText: AppLocalizations.of(context)!.formLabelYear,
+                                TextFieldFocus(
+                                  child: TextFormField(
+                                    controller: _controller2,
+                                    keyboardType: TextInputType.number,
+                                    decoration: InputDecoration(
+                                      prefixIcon: const Icon(Icons.calendar_month_outlined),
+                                      border: const UnderlineInputBorder(),
+                                      isDense: true,
+                                      labelText: AppLocalizations.of(context)!.formLabelYear,
+                                    ),
+                                    validator: (value) => yearValidator(context, value),
+                                    onEditingComplete: () => FocusScope.of(context).nextFocus(),
                                   ),
-                                  validator: (value) => yearValidator(context, value),
-                                  onEditingComplete: () => FocusScope.of(context).nextFocus(),
                                 ),
                                 DropdownButtonFormField(
                                   value: languageCode,
@@ -228,7 +183,6 @@ class _SearchResultSelectState extends State<SearchResultSelect> {
                                   },
                                 ),
                                 ElevatedButton(
-                                  autofocus: true,
                                   onPressed: _search,
                                   style: ElevatedButton.styleFrom(
                                       padding: const EdgeInsets.symmetric(horizontal: 64),

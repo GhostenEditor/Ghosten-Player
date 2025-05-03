@@ -151,11 +151,6 @@ class PlayerWeb extends PlayerPlatform {
   }
 
   @override
-  Future<void> setSkipPosition(String type, List<int> list) {
-    throw UnimplementedError('setSkipPosition() has not been implemented.');
-  }
-
-  @override
   Future<String?> getVideoThumbnail(int position) async {
     return null;
   }
