@@ -45,10 +45,6 @@ abstract class PlayerPlatform extends PlatformInterface {
     throw UnimplementedError('requestPip() has not been implemented.');
   }
 
-  Future<void> setSkipPosition(String type, List<int> list) {
-    throw UnimplementedError('setSkipPosition() has not been implemented.');
-  }
-
   Future<void> setTransform(List<double> matrix) {
     throw UnimplementedError('setTransform() has not been implemented.');
   }

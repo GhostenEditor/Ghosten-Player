@@ -637,11 +637,17 @@ class _SwitchLinkButtonState<T> extends State<SwitchLinkButton<T>> {
         listenable: widget.controller.index,
         builder: (context, _) => (widget.controller.currentItem?.source is Channel && (widget.controller.currentItem!.source as Channel).links.length > 1)
             ? PopupMenuButton(
-                onSelected: (url) {
-                  // final currentItem = widget.controller.currentItem!;
-                  // final item = currentItem.copyWith(url: url);
-                  // widget.controller.playlist.value[widget.controller.index.value!] = item;
-                  widget.controller.updateSource(widget.controller.currentItem!.toItem(url: url), widget.controller.index.value!);
+                onSelected: (url) async {
+                  await widget.controller.updateSource(widget.controller.currentItem!.copyWith(url: url), widget.controller.index.value!);
+                  switch (widget.controller.status.value) {
+                    case PlayerStatus.paused:
+                    case PlayerStatus.ended:
+                    case PlayerStatus.error:
+                    case PlayerStatus.idle:
+                      await widget.controller.play();
+                    case PlayerStatus.playing:
+                    case PlayerStatus.buffering:
+                  }
                   setState(() {});
                 },
                 itemBuilder: (context) => (widget.controller.currentItem!.source as Channel)

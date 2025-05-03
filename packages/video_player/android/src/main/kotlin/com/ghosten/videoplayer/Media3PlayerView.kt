@@ -628,8 +628,9 @@ class Media3PlayerView(
     }
 
     private fun buildMediaItem(video: Video): MediaItem {
-        return MediaItem.fromUri(Uri.parse(video.url))
-            .buildUpon()
+        return MediaItem.Builder()
+            .setUri(video.url)
+            .setMimeType(video.mimeType)
             .setSubtitleConfigurations((video.subtitle ?: listOf()).map {
                 MediaItem.SubtitleConfiguration.Builder(Uri.parse(it.url))
                     .setMimeType(
@@ -768,20 +769,6 @@ class Media3PlayerView(
         }
     }
 
-    override fun setSkipPosition(skipType: String, list: List<Int>) {
-        for (i in list.indices) {
-            when (skipType) {
-                "start" -> {
-                    mPlaylist[i].startPosition = list[i].toLong()
-                }
-
-                "end" -> {
-                    mPlaylist[i].endPosition = list[i].toLong()
-                }
-            }
-        }
-    }
-
     override fun play() {
         when (player.playbackState) {
             Player.STATE_BUFFERING -> {
@@ -829,6 +816,7 @@ class Media3PlayerView(
     override fun setSource(data: HashMap<String, Any>) {
         val video = Video(
             data[URL] as String,
+            data[MIME_TYPE] as String?,
             data[TITLE] as String?,
             data[DESCRIPTION] as String?,
             data[POSTER] as String?,
@@ -851,6 +839,7 @@ class Media3PlayerView(
     override fun updateSource(data: HashMap<String, Any>, index: Int) {
         val video = Video(
             data[URL] as String,
+            data[MIME_TYPE] as String?,
             data[TITLE] as String?,
             data[DESCRIPTION] as String?,
             data[POSTER] as String?,
@@ -867,7 +856,7 @@ class Media3PlayerView(
             (data[END_POSITION] as Int? ?: 0).toLong(),
         )
         mPlaylist = arrayOf(video)
-        player.replaceMediaItem(index, buildMediaItem(video))
+        player.setMediaItem(buildMediaItem(video), video.startPosition)
     }
 
     override fun setTransform(matrix: ArrayList<Double>) {

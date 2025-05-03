@@ -31,7 +31,7 @@ class _SingletonPlayerState<T> extends State<SingletonPlayer<T>> {
     final fileId = _controller.currentItem!.fileId;
     if (item.fileId == null) {
       return PlaylistItem(
-        url: item.url,
+        url: item.url!,
         title: item.title,
         description: item.description,
         poster: item.poster,
@@ -97,7 +97,7 @@ class _SingletonPlayerState<T> extends State<SingletonPlayer<T>> {
             autoPip: context.read<UserConfig>().autoPip,
             initialized: () {
               _controller.enterFullscreen();
-              _controller.setSources(widget.playlist);
+              _controller.setPlaylist(widget.playlist);
               _controller.play();
             }),
         PlayerControlsFull(_controller, _progressController, theme: widget.theme),

@@ -12,6 +12,7 @@ import '../../components/future_builder_handler.dart';
 import '../../components/icon_button.dart';
 import '../../components/keyboard_reopen.dart';
 import '../../components/setting.dart';
+import '../../components/text_field_focus.dart';
 import '../../utils/driver_file_picker.dart';
 import '../../utils/notification.dart';
 import '../../utils/utils.dart';
@@ -110,40 +111,42 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                TextFormField(
-                  autofocus: true,
-                  controller: _controller,
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.link),
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.folder_open_rounded),
-                      onPressed: () async {
-                        final resp = await navigateTo(navigatorKey.currentContext!, const DriverFilePicker(selectableType: FileType.file));
-                        if (resp is (int, DriverFile)) {
-                          final file = resp.$2;
-                          final ext = file.name.split('.').lastOrNull;
-                          _mimeType = SubtitleMimeType.fromString(ext)?.name;
-                          _filename = file.name;
-                          _controller.text = 'driver://${resp.$1}/${file.id}';
-                          setState(() {});
-                        }
-                      },
+                TextFieldFocus(
+                  child: TextFormField(
+                    autofocus: true,
+                    controller: _controller,
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(Icons.link),
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.folder_open_rounded),
+                        onPressed: () async {
+                          final resp = await navigateTo(navigatorKey.currentContext!, const DriverFilePicker(selectableType: FileType.file));
+                          if (resp is (int, DriverFile)) {
+                            final file = resp.$2;
+                            final ext = file.name.split('.').lastOrNull;
+                            _mimeType = SubtitleMimeType.fromString(ext)?.name;
+                            _filename = file.name;
+                            _controller.text = 'driver://${resp.$1}/${file.id}';
+                            setState(() {});
+                          }
+                        },
+                      ),
+                      hintText: widget.subtitle?.label?.toString(),
+                      isDense: true,
+                      labelText: AppLocalizations.of(context)!.subtitleFormItemLabelUrl,
                     ),
-                    hintText: widget.subtitle?.label?.toString(),
-                    isDense: true,
-                    labelText: AppLocalizations.of(context)!.subtitleFormItemLabelUrl,
+                    validator: (value) => requiredValidator(context, value),
+                    onEditingComplete: () {
+                      final value = _controller.text;
+                      if (value.startsWith(RegExp(r'^http(s)://'))) {
+                        final ext = value.split('.').lastOrNull;
+                        _mimeType = SubtitleMimeType.fromString(ext)?.name;
+                        _filename = null;
+                        setState(() {});
+                      }
+                      FocusScope.of(context).nextFocus();
+                    },
                   ),
-                  validator: (value) => requiredValidator(context, value),
-                  onEditingComplete: () {
-                    final value = _controller.text;
-                    if (value.startsWith(RegExp(r'^http(s)://'))) {
-                      final ext = value.split('.').lastOrNull;
-                      _mimeType = SubtitleMimeType.fromString(ext)?.name;
-                      _filename = null;
-                      setState(() {});
-                    }
-                    FocusScope.of(context).nextFocus();
-                  },
                 ),
                 Gap.vMD,
                 DropdownButtonFormField(

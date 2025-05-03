@@ -16,7 +16,6 @@ interface BasePlayerView {
     fun fullscreen(flag: Boolean)
     fun dispose()
     fun setTrack(trackType: String?, trackId: String?)
-    fun setSkipPosition(skipType: String, list: List<Int>)
     fun getVideoThumbnail(result: MethodChannel.Result, timeMs: Long)
     fun setPlaybackSpeed(speed: Float)
     fun getPictureInPictureParams(): PictureInPictureParams?
@@ -27,6 +26,7 @@ interface BasePlayerView {
 
 internal class Video(
     val url: String,
+    val mimeType: String?,
     val title: String?,
     val description: String?,
     val poster: String?,

@@ -43,11 +43,6 @@ class MethodChannelPlayer extends PlayerPlatform {
   }
 
   @override
-  setSkipPosition(String type, List<int> list) {
-    return _channel.invokeMethod('setSkipPosition', {'type': type, 'list': list});
-  }
-
-  @override
   Future<void> setTransform(List<double> matrix) {
     return _channel.invokeMethod('setTransform', {'matrix': matrix});
   }

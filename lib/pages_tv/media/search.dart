@@ -14,6 +14,7 @@ import '../../utils/utils.dart';
 import '../components/focusable.dart';
 import '../components/icon_button.dart';
 import '../components/setting.dart';
+import '../components/text_field_focus.dart';
 import '../detail/movie.dart';
 import '../detail/series.dart';
 import 'components/media_grid_item.dart';
@@ -114,27 +115,29 @@ class _SearchPageState extends State<SearchPage> {
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
           ),
-          child: TextField(
-            autofocus: true,
-            focusNode: _focusNode,
-            controller: _searchController,
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(50)),
-                borderSide: BorderSide.none,
+          child: TextFieldFocus(
+            child: TextField(
+              autofocus: true,
+              focusNode: _focusNode,
+              controller: _searchController,
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(50)),
+                  borderSide: BorderSide.none,
+                ),
+                hintText: AppLocalizations.of(context)!.searchHint,
+                hintStyle: Theme.of(context).textTheme.bodyMedium,
+                contentPadding: EdgeInsets.zero,
+                prefixIcon: const Icon(Icons.search),
+                suffixIconConstraints: const BoxConstraints(minHeight: 36, minWidth: 36),
               ),
-              hintText: AppLocalizations.of(context)!.searchHint,
-              hintStyle: Theme.of(context).textTheme.bodyMedium,
-              contentPadding: EdgeInsets.zero,
-              prefixIcon: const Icon(Icons.search),
-              suffixIconConstraints: const BoxConstraints(minHeight: 36, minWidth: 36),
+              onTap: () {},
+              onChanged: (_) {},
+              onTapOutside: (_) => _focusNode.unfocus(),
+              onSubmitted: (res) {
+                setState(() {});
+              },
             ),
-            onTap: () {},
-            onChanged: (_) {},
-            onTapOutside: (_) => _focusNode.unfocus(),
-            onSubmitted: (res) {
-              setState(() {});
-            },
           ),
         ),
         actions: [

@@ -36,6 +36,7 @@ class _TimePickerState extends State<TimePicker> {
                     value: _minutes,
                     minValue: 0,
                     maxValue: 59,
+                    width: 24,
                     onChanged: (value) => setState(() => _minutes = value),
                   ),
                   const Padding(
@@ -46,6 +47,7 @@ class _TimePickerState extends State<TimePicker> {
                     value: _seconds,
                     minValue: 0,
                     maxValue: 59,
+                    width: 24,
                     onChanged: (value) => setState(() => _seconds = value),
                   ),
                 ],

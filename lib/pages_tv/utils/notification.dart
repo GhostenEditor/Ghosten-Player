@@ -90,13 +90,19 @@ Future<bool?> showConfirm(BuildContext context, String confirmText, [String? sub
                   ),
                 ),
                 DecoratedBox(
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     gradient: RadialGradient(
-                      colors: [
-                        Colors.black38,
-                        Colors.black,
-                      ],
-                      stops: [0.2, 1],
+                      colors: switch (Theme.of(context).brightness) {
+                        Brightness.dark => [
+                            Colors.black38,
+                            Colors.black,
+                          ],
+                        Brightness.light => [
+                            Colors.white60,
+                            Colors.white,
+                          ]
+                      },
+                      stops: const [0.2, 1],
                       radius: 1,
                     ),
                   ),

@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -90,7 +88,7 @@ class _CommonPlayerPageState<T> extends State<CommonPlayerPage<T>> {
         PlayerPlatformView(
           initialized: () async {
             _controller.setPlaylist(widget.playlist);
-            await _controller.next(0);
+            await _controller.next(widget.index);
             await _controller.play();
           },
         ),
@@ -111,11 +109,10 @@ class _CommonPlayerPageState<T> extends State<CommonPlayerPage<T>> {
                               value: _controller.position.value,
                             ))));
                     if (time != null) {
-                      if (T is TVEpisode) {
+                      if (_controller.currentItem!.source is TVEpisode) {
                         final episode = await Api.tvEpisodeQueryById((_controller.currentItem!.source as TVEpisode).id);
                         Api.setSkipTime(SkipTimeType.intro, MediaType.season, episode.seasonId, time);
-                        _controller.setSkipPosition(
-                            SkipTimeType.intro.name, _controller.playlist.value.map((item) => max(time.inMilliseconds, item.start.inMilliseconds)).toList());
+                        _controller.setSkipPosition(SkipTimeType.intro.name, time);
                       }
                     }
                   },
@@ -134,10 +131,10 @@ class _CommonPlayerPageState<T> extends State<CommonPlayerPage<T>> {
                                   : Duration.zero,
                             ))));
                     if (time != null) {
-                      if (T is TVEpisode) {
+                      if (_controller.currentItem!.source is TVEpisode) {
                         final episode = await Api.tvEpisodeQueryById((_controller.currentItem!.source as TVEpisode).id);
                         Api.setSkipTime(SkipTimeType.ending, MediaType.season, episode.seasonId, time);
-                        _controller.setSkipPosition(SkipTimeType.ending.name, List.generate(_controller.playlist.value.length, (index) => time.inMilliseconds));
+                        _controller.setSkipPosition(SkipTimeType.ending.name, time);
                       }
                     }
                   },
@@ -147,23 +144,25 @@ class _CommonPlayerPageState<T> extends State<CommonPlayerPage<T>> {
                   leading: const Icon(Icons.download_outlined),
                   title: Text(AppLocalizations.of(context)!.buttonDownload),
                   onTap: () {
-                    final item = _controller.currentItem!;
-                    showNotification(
-                      context,
-                      Api.downloadTaskCreate(item.url!.queryParameters['id']),
-                      successText: AppLocalizations.of(context)!.tipsForDownload,
-                    );
+                    final item = _controller.currentItem;
+                    if (item?.source is TVEpisode) {
+                      showNotification(
+                        context,
+                        Api.downloadTaskCreate((item!.source as TVEpisode).fileId),
+                        successText: AppLocalizations.of(context)!.tipsForDownload,
+                        showSuccess: true,
+                      );
+                    } else if (item?.source is Movie) {
+                      showNotification(
+                        context,
+                        Api.downloadTaskCreate((item!.source as Movie).fileId),
+                        successText: AppLocalizations.of(context)!.tipsForDownload,
+                        showSuccess: true,
+                      );
+                    }
                   },
                 ),
             ],
-            onMediaChange: (index, position, duration) {
-              final item = _controller.playlist.value[index];
-              if (item.source is TVEpisode) {
-                Api.updatePlayedStatus(LibraryType.tv, (item.source as TVEpisode).id, position: position, duration: duration);
-              } else if (item.source is Movie) {
-                Api.updatePlayedStatus(LibraryType.movie, (item.source as Movie).id, position: position, duration: duration);
-              }
-            },
             playlistItemBuilder: (context, index, onTap) {
               final item = _controller.playlist.value[index];
               return SizedBox(

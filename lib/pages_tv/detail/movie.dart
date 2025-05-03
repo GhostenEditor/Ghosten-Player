@@ -29,7 +29,7 @@ class MovieDetail extends StatefulWidget {
   State<MovieDetail> createState() => _MovieDetailState();
 }
 
-class _MovieDetailState extends State<MovieDetail> with ActionMixin, SearchableMixin {
+class _MovieDetailState extends State<MovieDetail> with ActionMixin {
   final _navigatorKey = GlobalKey<NavigatorState>();
   final _showSide = ValueNotifier(false);
   final _scaffoldKey = GlobalKey<ScaffoldState>();

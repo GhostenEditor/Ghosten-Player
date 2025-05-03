@@ -29,7 +29,7 @@ class TVDetail extends StatefulWidget {
   State<TVDetail> createState() => _TVDetailState();
 }
 
-class _TVDetailState extends State<TVDetail> with ActionMixin, SearchableMixin {
+class _TVDetailState extends State<TVDetail> with ActionMixin {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _navigatorKey = GlobalKey<NavigatorState>();
   final _drawerNavigatorKey = GlobalKey<NavigatorState>();

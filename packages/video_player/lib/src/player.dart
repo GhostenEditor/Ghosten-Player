@@ -202,8 +202,13 @@ class PlayerController<T> implements PlayerBaseController {
     return PlayerPlatform.instance.requestPip();
   }
 
-  Future<void> setSkipPosition(String type, List<int> list) {
-    return PlayerPlatform.instance.setSkipPosition(type, list);
+  void setSkipPosition(String type, Duration duration) {
+    switch (type) {
+      case 'intro':
+        playlist.value = playlist.value.map((item) => item.copyWith(start: duration)).toList();
+      case 'ending':
+        playlist.value = playlist.value.map((item) => item.copyWith(end: duration)).toList();
+    }
   }
 
   @override
@@ -219,8 +224,9 @@ class PlayerController<T> implements PlayerBaseController {
     return PlayerPlatform.instance.setAspectRatio(aspectRatio);
   }
 
-  Future<void> updateSource(PlaylistItem source, int index) {
-    return PlayerPlatform.instance.updateSource(source.toSource(), index);
+  Future<void> updateSource(PlaylistItemDisplay<T> source, int index) {
+    playlist.value[index] = source;
+    return PlayerPlatform.instance.updateSource(source.toItem().toSource(), index);
   }
 
   Future<void> setSource(PlaylistItem playItem) async {
@@ -234,15 +240,6 @@ class PlayerController<T> implements PlayerBaseController {
     }
     this.index.value = null;
     this.playlist.value = playlist;
-  }
-
-  Future<void> setSources(List<PlaylistItemDisplay<T>> playlist) async {
-    // if (playlist.length == this.playlist.value.length &&
-    //     List.generate(playlist.length, (i) => i).every((index) => playlist[index] == this.playlist.value[index])) {
-    //   return;
-    // }
-    // this.playlist.value = playlist;
-    // // await next(index);
   }
 
   Future<void> enterFullscreen() {
