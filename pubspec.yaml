@@ -42,7 +42,7 @@ dependencies:
     path: packages/video_player
   volume_controller: ^3.3.3
   webview_cookie_manager: ^2.0.0
-  webview_flutter: ^4.10.0
+  webview_flutter: ^4.11.0
 
 dev_dependencies:
   flutter_test:
