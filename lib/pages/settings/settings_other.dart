@@ -200,13 +200,13 @@ class _ScraperSettingSectionState extends State<_ScraperSettingSection> {
               .toList(),
         ),
         SwitchListTile(
-            title: const Badge(label: Text('Alpha'), child: Text('NFO 启用')),
+            title: Badge(label: const Text('Alpha'), child: Text(AppLocalizations.of(context)!.settingsItemNfoEnabled)),
             value: widget.settingScraper.nfoEnabled,
             onChanged: (nfoEnabled) {
               widget.onChanged(widget.settingScraper.copyWith(nfoEnabled: nfoEnabled));
             }),
         SwitchListTile(
-            title: const Text('TMDB 启用'),
+            title: Text(AppLocalizations.of(context)!.settingsItemTmdbEnabled),
             value: widget.settingScraper.tmdbEnabled,
             onChanged: (tmdbEnabled) {
               widget.onChanged(widget.settingScraper.copyWith(tmdbEnabled: tmdbEnabled));

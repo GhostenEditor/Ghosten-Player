@@ -29,7 +29,6 @@ import 'components/playlist.dart';
 import 'dialogs/scraper.dart';
 import 'dialogs/subtitle.dart';
 import 'mixins/action.dart';
-import 'mixins/searchable.dart';
 
 class MovieDetail extends StatefulWidget {
   const MovieDetail(this.id, {super.key, this.initialData});
@@ -41,7 +40,7 @@ class MovieDetail extends StatefulWidget {
   State<MovieDetail> createState() => _MovieDetailState();
 }
 
-class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>, SearchableMixin {
+class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail> {
   late final _controller = PlayerController<Movie>(
     Api.log,
     onGetPlayBackInfo: _onGetPlayBackInfo,
@@ -262,14 +261,7 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
                       }),
                       PopupMenuItem(
                         padding: EdgeInsets.zero,
-                        onTap: () async {
-                          navigateTo(context, SubtitleManager(fileId: item.fileId!));
-                          // final subtitle = await showDialog<SubtitleData>(context: context, builder: (context) => const SubtitleDialog());
-                          // if (subtitle != null && context.mounted) {
-                          //   final resp = await showNotification(context, Api.movieSubtitleUpdateById(id: widget.id, subtitle: subtitle));
-                          //   if (resp?.error == null && context.mounted) context.read<MovieCubit>().update();
-                          // }
-                        },
+                        onTap: () => navigateTo(context, SubtitleManager(fileId: item.fileId!)),
                         child: ListTile(
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                           title: Text(AppLocalizations.of(context)!.buttonSubtitle),

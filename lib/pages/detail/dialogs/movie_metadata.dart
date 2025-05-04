@@ -51,7 +51,6 @@ class _MovieMetadataState extends State<MovieMetadata> {
               autofocus: true,
               controller: _controller1,
               decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.title),
                 border: const UnderlineInputBorder(),
                 filled: true,
                 isDense: true,
@@ -63,11 +62,11 @@ class _MovieMetadataState extends State<MovieMetadata> {
             TextFormField(
               autofocus: true,
               controller: _controller2,
-              decoration: const InputDecoration(
-                border: UnderlineInputBorder(),
+              decoration: InputDecoration(
+                border: const UnderlineInputBorder(),
                 filled: true,
                 isDense: true,
-                labelText: '原始标题',
+                labelText: AppLocalizations.of(context)!.formLabelOriginalTitle,
               ),
               validator: (value) => requiredValidator(context, value),
               onEditingComplete: () => FocusScope.of(context).nextFocus(),
@@ -75,11 +74,11 @@ class _MovieMetadataState extends State<MovieMetadata> {
             TextFormField(
               autofocus: true,
               controller: _controller3,
-              decoration: const InputDecoration(
-                border: UnderlineInputBorder(),
+              decoration: InputDecoration(
+                border: const UnderlineInputBorder(),
                 filled: true,
                 isDense: true,
-                labelText: '首映日期',
+                labelText: AppLocalizations.of(context)!.formLabelAirDate,
               ),
               keyboardType: TextInputType.datetime,
               onTap: () async {
@@ -95,11 +94,11 @@ class _MovieMetadataState extends State<MovieMetadata> {
             TextFormField(
               autofocus: true,
               controller: _controller4,
-              decoration: const InputDecoration(
-                border: UnderlineInputBorder(),
+              decoration: InputDecoration(
+                border: const UnderlineInputBorder(),
                 filled: true,
                 isDense: true,
-                labelText: '简介',
+                labelText: AppLocalizations.of(context)!.formLabelPlot,
               ),
               maxLines: 6,
               validator: (value) => requiredValidator(context, value),
@@ -109,11 +108,11 @@ class _MovieMetadataState extends State<MovieMetadata> {
               autofocus: true,
               controller: _controller5,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                border: UnderlineInputBorder(),
+              decoration: InputDecoration(
+                border: const UnderlineInputBorder(),
                 filled: true,
                 isDense: true,
-                labelText: '评分',
+                labelText: AppLocalizations.of(context)!.formLabelVoteAverage,
               ),
               validator: (value) => requiredValidator(context, value),
               onEditingComplete: () => FocusScope.of(context).nextFocus(),
@@ -122,11 +121,11 @@ class _MovieMetadataState extends State<MovieMetadata> {
               autofocus: true,
               keyboardType: TextInputType.number,
               controller: _controller6,
-              decoration: const InputDecoration(
-                border: UnderlineInputBorder(),
+              decoration: InputDecoration(
+                border: const UnderlineInputBorder(),
                 filled: true,
                 isDense: true,
-                labelText: '评分数',
+                labelText: AppLocalizations.of(context)!.formLabelVoteCount,
               ),
               validator: (value) => requiredValidator(context, value),
               onEditingComplete: () => FocusScope.of(context).nextFocus(),
@@ -135,12 +134,12 @@ class _MovieMetadataState extends State<MovieMetadata> {
               autofocus: true,
               keyboardType: TextInputType.number,
               controller: _controller7,
-              decoration: const InputDecoration(
-                border: UnderlineInputBorder(),
+              decoration: InputDecoration(
+                border: const UnderlineInputBorder(),
                 filled: true,
                 isDense: true,
-                labelText: '时长',
-                suffix: Text('秒'),
+                labelText: AppLocalizations.of(context)!.formLabelRuntime,
+                suffix: Text(AppLocalizations.of(context)!.second),
               ),
               validator: (value) => requiredValidator(context, value),
               onEditingComplete: () => FocusScope.of(context).nextFocus(),

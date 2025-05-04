@@ -30,7 +30,6 @@ import 'components/studios.dart';
 import 'dialogs/scraper.dart';
 import 'dialogs/series_metadata.dart';
 import 'mixins/action.dart';
-import 'mixins/searchable.dart';
 import 'season.dart';
 import 'utils/tmdb_uri.dart';
 
@@ -45,7 +44,7 @@ class TVDetail extends StatefulWidget {
   State<TVDetail> createState() => _TVDetailState();
 }
 
-class _TVDetailState extends State<TVDetail> with ActionMixin<TVDetail>, SearchableMixin {
+class _TVDetailState extends State<TVDetail> with ActionMixin<TVDetail> {
   late final _controller = PlayerController<TVEpisode>(
     Api.log,
     onGetPlayBackInfo: _onGetPlayBackInfo,

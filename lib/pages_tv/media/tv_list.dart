@@ -152,7 +152,7 @@ class _TVListPageState extends State<TVListPage> with NeedUpdateMixin, ChannelMi
               builder: (context, item) => _buildRecentMediaItem(context, item, width: 240, height: 240 / 1.78),
             ),
             MediaChannel(
-              label: '收藏夹',
+              label: AppLocalizations.of(context)!.tagFavorite,
               future: Api.tvSeriesQueryAll(
                   const MediaSearchQuery(sort: SortConfig(type: SortType.createAt, direction: SortDirection.desc, filter: FilterType.favorite), limit: 8)),
               height: 340,
