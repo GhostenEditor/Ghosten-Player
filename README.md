@@ -21,9 +21,13 @@ Ghosten Player 是一款同时适配 📱**Android Phone** 和 📺**Android TV*
 
 项目处于用爱发电阶段，请考虑[赞助](#赞助)支持项目持续维护。您的支持是我维护的最大动力(′･ω･`)
 
+QQ群 1033449405
+
 ## Features
 
 - 自动刮削媒体信息
+  - [themoviedb](https://www.themoviedb.org)
+  - nfo
 - 客户端
     - Android Phone 和 Android Pad
     - Android TV
@@ -87,8 +91,6 @@ Demo仅作展示用，部分功能受Web限制，并非完整版。Demo可能更
 最新版为准
 
 > 注: 请使用桌面端的Chrome或Edge浏览器查看demo，移动端可能存在兼容问题
-
-QQ群 1033449405
 
 ## 预览 [^3]
 
