@@ -64,7 +64,8 @@ class Media3PlayerView(
 ) : Player.Listener, BasePlayerView {
     private val mRootView: FrameLayout = activity.findViewById<FrameLayout>(android.R.id.content)
     private val mNativeView: View = View.inflate(context, R.layout.player_view, null)
-    private var httpDataSourceFactory = DefaultHttpDataSource.Factory().setUserAgent(USER_AGENT)
+    private var httpDataSourceFactory = DefaultHttpDataSource.Factory()
+//        .setUserAgent(USER_AGENT)
         .setAllowCrossProtocolRedirects(true)
     private var mPlaylist: Array<Video> = arrayOf()
     private var trackNameProvider: TrackNameProvider = DefaultTrackNameProvider(context.resources)
