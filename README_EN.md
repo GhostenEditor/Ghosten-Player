@@ -24,6 +24,8 @@ The project is currently maintained with passion. Consider [sponsoring](#sponsor
 ## Features
 
 - **Automatic metadata scraping**
+  - [themoviedb](https://www.themoviedb.org)
+  - nfo
 - **Clients**
     - Android Phone & Pad
     - Android TV
