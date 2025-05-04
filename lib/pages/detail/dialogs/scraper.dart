@@ -72,12 +72,12 @@ class _ScraperDialogState<T extends MediaBase> extends State<ScraperDialog<T>> {
             ),
             DropdownButtonFormField(
               value: languageCode,
-              decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.language_rounded),
-                border: UnderlineInputBorder(),
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.language_rounded),
+                border: const UnderlineInputBorder(),
                 filled: true,
                 isDense: true,
-                labelText: '语言',
+                labelText: AppLocalizations.of(context)!.formLabelLanguage,
               ),
               items: AppLocalizations.supportedLocales
                   .map((locale) => DropdownMenuItem(

@@ -85,7 +85,7 @@ class _MovieListPageState extends State<MovieListPage> {
           builder: _buildRecentMediaCard,
         ),
         MediaChannel<MovieListCubit, AsyncSnapshot<MovieListModel>>(
-          label: '收藏夹',
+          label: AppLocalizations.of(context)!.tagFavorite,
           more: IconButton(
               onPressed: () {
                 navigateTo(context, const SearchPage(filterType: [FilterType.favorite], activeTab: 1));

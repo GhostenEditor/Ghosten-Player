@@ -224,13 +224,11 @@ class SwitchSettingItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TVListTile(
+    return TVSwitchListTile(
       autofocus: autofocus,
       title: title,
-      trailing: Switch(
-        value: value,
-        onChanged: onChanged,
-      ),
+      onChanged: onChanged,
+      value: value,
     );
   }
 }

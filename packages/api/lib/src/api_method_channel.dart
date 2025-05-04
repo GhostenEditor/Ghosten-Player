@@ -140,7 +140,7 @@ class MethodChannelApi extends ApiPlatform {
   Stream<List<dynamic>> dlnaDiscover() async* {
     final data = await client.post('/dlna/discover/cb');
     final eventChannel = EventChannel('$_pluginNamespace/update/${data['id']}');
-    yield* eventChannel.receiveBroadcastStream().map((event) => jsonDecode(event) as List<Json>);
+    yield* eventChannel.receiveBroadcastStream().map((event) => jsonDecode(event) as List<dynamic>);
   }
 
   ///  Cast End

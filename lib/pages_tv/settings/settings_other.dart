@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../providers/user_config.dart';
 import '../../utils/utils.dart';
 import '../components/setting.dart';
+import '../components/text_field_focus.dart';
 import '../utils/notification.dart';
 import '../utils/utils.dart';
 import 'settings_dns.dart';
@@ -42,18 +43,21 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
             onTap: () => navigateToSlideLeft(context, const SettingsThemePage()),
           ),
           const DividerSettingItem(),
-          ListTile(title: Text(AppLocalizations.of(context)!.settingsItemScraperSettings), dense: true),
-          ButtonSettingItem(
-            title: Text(AppLocalizations.of(context)!.settingsItemScraperSettings),
-            subtitle: Text(AppLocalizations.of(context)!.settingsItemScraperBehaviorDescription),
-            leading: const Icon(Icons.light_mode_outlined),
-            trailing: Text(AppLocalizations.of(context)!.scraperBehavior(_ScraperBehavior.fromString(userConfig.scraperBehavior).name)),
-            onTap: () async {
-              await navigateToSlideLeft(context, const SettingsScraperBehaviorPage());
-              if (context.mounted) setState(() {});
-            },
-          ),
-          const DividerSettingItem(),
+          FutureBuilder(
+              future: Api.settingScraperQuery(),
+              builder: (context, snapshot) {
+                final data = snapshot.data;
+                return data != null
+                    ? _ScraperSettingSection(
+                        settingScraper: data,
+                        onChanged: (SettingScraper value) async {
+                          await Api.settingScraperUpdate(value);
+                          if (context.mounted) setState(() {});
+                        },
+                      )
+                    : const SizedBox();
+              }),
+          // const DividerSettingItem(),
           ListTile(title: Text(AppLocalizations.of(context)!.settingsItemDataSettings), dense: true),
           ButtonSettingItem(
             title: Text(AppLocalizations.of(context)!.settingsItemDataSync),
@@ -83,46 +87,46 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
   }
 }
 
-enum _ScraperBehavior {
-  skip,
-  chooseFirst,
-  exact;
-
-  static _ScraperBehavior fromString(String s) {
-    return _ScraperBehavior.values.firstWhere((e) => e.name == s);
-  }
-}
-
 class SettingsScraperBehaviorPage extends StatefulWidget {
-  const SettingsScraperBehaviorPage({super.key});
+  const SettingsScraperBehaviorPage({super.key, required this.behavior});
+
+  final ScraperBehavior behavior;
 
   @override
   State<SettingsScraperBehaviorPage> createState() => _SettingsScraperBehaviorPageState();
 }
 
 class _SettingsScraperBehaviorPageState extends State<SettingsScraperBehaviorPage> {
+  late ScraperBehavior behavior = widget.behavior;
+
   @override
   Widget build(BuildContext context) {
-    final userConfig = Provider.of<UserConfig>(context);
-
-    return SettingPage(
-      title: AppLocalizations.of(context)!.settingsItemScraperBehavior,
-      child: ListView(
-          padding: const EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 32),
-          children: _ScraperBehavior.values
-              .map((behavior) => RadioSettingItem(
-                    autofocus: behavior == _ScraperBehavior.fromString(userConfig.scraperBehavior),
-                    value: behavior,
-                    groupValue: _ScraperBehavior.fromString(userConfig.scraperBehavior),
-                    title: Text(AppLocalizations.of(context)!.scraperBehavior(behavior.name)),
-                    onChanged: (behavior) {
-                      if (behavior != null) {
-                        userConfig.setScraperBehavior(behavior.name);
-                        setState(() {});
-                      }
-                    },
-                  ))
-              .toList()),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          Navigator.of(context).pop(behavior);
+        }
+      },
+      child: SettingPage(
+        title: AppLocalizations.of(context)!.settingsItemScraperBehavior,
+        child: ListView(
+            padding: const EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 32),
+            children: ScraperBehavior.values
+                .map((be) => RadioSettingItem(
+                      autofocus: behavior == be,
+                      value: be,
+                      groupValue: behavior,
+                      title: Text(AppLocalizations.of(context)!.scraperBehavior(be.name)),
+                      onChanged: (be) {
+                        if (be != null) {
+                          behavior = be;
+                          setState(() {});
+                        }
+                      },
+                    ))
+                .toList()),
+      ),
     );
   }
 }
@@ -175,6 +179,101 @@ class SettingsThemePage extends StatelessWidget {
                 ))
             .toList(),
       ),
+    );
+  }
+}
+
+class _ScraperSettingSection extends StatefulWidget {
+  const _ScraperSettingSection({required this.settingScraper, required this.onChanged});
+
+  final ValueChanged<SettingScraper> onChanged;
+
+  final SettingScraper settingScraper;
+
+  @override
+  State<_ScraperSettingSection> createState() => _ScraperSettingSectionState();
+}
+
+class _ScraperSettingSectionState extends State<_ScraperSettingSection> {
+  late final _controller1 = TextEditingController(text: widget.settingScraper.tmdbMaxCast.toString());
+  late final _controller2 = TextEditingController(text: widget.settingScraper.tmdbMaxCrew.toString());
+
+  @override
+  void dispose() {
+    _controller1.dispose();
+    _controller2.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ListTile(title: Text(AppLocalizations.of(context)!.settingsItemScraperSettings), dense: true),
+        ButtonSettingItem(
+          title: Text(AppLocalizations.of(context)!.settingsItemScraperSettings),
+          subtitle: Text(AppLocalizations.of(context)!.settingsItemScraperBehaviorDescription),
+          trailing: Text(AppLocalizations.of(context)!.scraperBehavior(ScraperBehavior.fromString(widget.settingScraper.behavior.name).name)),
+          onTap: () async {
+            final behavior = await navigateToSlideLeft<ScraperBehavior>(context, SettingsScraperBehaviorPage(behavior: widget.settingScraper.behavior));
+            if (context.mounted && behavior != null) widget.onChanged(widget.settingScraper.copyWith(behavior: behavior));
+          },
+        ),
+        SwitchSettingItem(
+            title: Badge(label: const Text('Alpha'), child: Text(AppLocalizations.of(context)!.settingsItemNfoEnabled)),
+            value: widget.settingScraper.nfoEnabled,
+            onChanged: (nfoEnabled) {
+              widget.onChanged(widget.settingScraper.copyWith(nfoEnabled: nfoEnabled));
+            }),
+        SwitchSettingItem(
+            title: Text(AppLocalizations.of(context)!.settingsItemTmdbEnabled),
+            value: widget.settingScraper.tmdbEnabled,
+            onChanged: (tmdbEnabled) {
+              widget.onChanged(widget.settingScraper.copyWith(tmdbEnabled: tmdbEnabled));
+            }),
+        ButtonSettingItem(
+          title: const Text('TMDB Max Cast Members'),
+          trailing: SizedBox(
+              width: 50,
+              child: TextFieldFocus(
+                child: TextField(
+                  controller: _controller1,
+                  decoration: const InputDecoration(
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,
+                    ),
+                    filled: true,
+                  ),
+                  keyboardType: TextInputType.number,
+                  textAlign: TextAlign.end,
+                ),
+              )),
+        ),
+        ButtonSettingItem(
+          title: const Text('TMDB Max Crew Members'),
+          trailing: SizedBox(
+              width: 50,
+              child: TextFieldFocus(
+                child: TextField(
+                  controller: _controller2,
+                  decoration: const InputDecoration(
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,
+                    ),
+                    filled: true,
+                  ),
+                  keyboardType: TextInputType.number,
+                  textAlign: TextAlign.end,
+                ),
+              )),
+        ),
+        const DividerSettingItem(),
+      ],
     );
   }
 }

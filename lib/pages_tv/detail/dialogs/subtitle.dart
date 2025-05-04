@@ -177,7 +177,7 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
                     onChanged: (v) => setState(() => _language = v)),
                 CheckboxListTile(
                   dense: true,
-                  title: const Text('默认选中'),
+                  title: Text(AppLocalizations.of(context)!.formLabelSelectedByDefault),
                   contentPadding: const EdgeInsets.only(left: 8),
                   value: selected,
                   onChanged: (v) => setState(() => selected = v ?? false),

@@ -377,7 +377,7 @@ class _SearchFilterState extends State<_SearchFilter> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('全部筛选', style: Theme.of(context).textTheme.titleMedium),
+              Text(AppLocalizations.of(context)!.searchFilterTitle, style: Theme.of(context).textTheme.titleMedium),
               IconButton(
                   onPressed: () {
                     widget.onChanged((
@@ -608,7 +608,10 @@ class _MultiSelectState<T> extends State<_MultiSelect<T>> {
                           child: Center(
                               child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: [Text(_collapsed ? '更多' : '收起'), Icon(_collapsed ? Icons.arrow_drop_down : Icons.arrow_drop_up)],
+                            children: [
+                              Text(_collapsed ? AppLocalizations.of(context)!.buttonMore : AppLocalizations.of(context)!.buttonCollapse),
+                              Icon(_collapsed ? Icons.arrow_drop_down : Icons.arrow_drop_up)
+                            ],
                           )),
                         )),
                 ],
@@ -623,41 +626,31 @@ class _MultiSelectState<T> extends State<_MultiSelect<T>> {
                 mainAxisSpacing: 8,
                 crossAxisSpacing: 8,
               ),
-          itemBuilder: (context, index) =>
-              Material(
-                color: _selected.contains(widget.items[index])
-                    ? Theme
-                    .of(context)
-                    .colorScheme
-                    .primaryContainer
-                    : Theme
-                    .of(context)
-                    .colorScheme
-                    .surfaceContainerHighest,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                child: InkWell(
-                    onTap: () {
-                      if (_selected.contains(widget.items[index])) {
-                        _selected.remove(widget.items[index]);
-                      } else {
-                        _selected.add(widget.items[index]);
-                      }
-                      widget.onChanged(_selected);
-                      setState(() {});
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Center(
-                        child: DefaultTextStyle(
-                          style: Theme
-                              .of(context)
-                              .textTheme
-                              .labelSmall!,
-                          child: widget.itemBuilder(context, widget.items[index]),
-                        ),
-                      ),
-                    )),
-              ),
+          itemBuilder: (context, index) => Material(
+            color: _selected.contains(widget.items[index])
+                ? Theme.of(context).colorScheme.primaryContainer
+                : Theme.of(context).colorScheme.surfaceContainerHighest,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+            child: InkWell(
+                onTap: () {
+                  if (_selected.contains(widget.items[index])) {
+                    _selected.remove(widget.items[index]);
+                  } else {
+                    _selected.add(widget.items[index]);
+                  }
+                  widget.onChanged(_selected);
+                  setState(() {});
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Center(
+                    child: DefaultTextStyle(
+                      style: Theme.of(context).textTheme.labelSmall!,
+                      child: widget.itemBuilder(context, widget.items[index]),
+                    ),
+                  ),
+                )),
+          ),
         ),
       ],
     );
@@ -730,9 +723,6 @@ class _HomeTabsState extends State<_HomeTabs> {
                                 key: tabKeys[tab.$1],
                                 style: TextButton.styleFrom(
                                     shape: const RoundedRectangleBorder(),
-                                    // minimumSize: Size(0, 12),
-                                    // maximumSize: Size(0, 32),
-                                    // fixedSize: Size(12, 12),
                                     padding: const EdgeInsets.symmetric(horizontal: 8),
                                     visualDensity: VisualDensity.compact),
                                 onPressed: () {

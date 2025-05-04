@@ -147,7 +147,7 @@ class _MovieListPageState extends State<MovieListPage> with NeedUpdateMixin, Cha
               builder: (context, item) => _buildRecentMediaItem(context, item, width: 160, height: 160 / 0.67),
             ),
             MediaChannel(
-              label: '收藏夹',
+              label: AppLocalizations.of(context)!.tagFavorite,
               future: Api.movieQueryAll(
                   const MediaSearchQuery(sort: SortConfig(type: SortType.createAt, direction: SortDirection.desc, filter: FilterType.favorite), limit: 8)),
               height: 340,
@@ -195,9 +195,9 @@ class _MovieListPageState extends State<MovieListPage> with NeedUpdateMixin, Cha
       imageUrl: item.poster,
       floating: item.duration != null && item.duration != Duration.zero && item.lastPlayedTime != null
           ? SizedBox(
-              width: 240,
+              width: 160,
               child: Align(
-                alignment: const Alignment(0, 0.2),
+                alignment: const Alignment(0, 0.47),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 6),
                   child: LinearProgressIndicator(

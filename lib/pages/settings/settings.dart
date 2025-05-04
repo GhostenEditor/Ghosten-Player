@@ -64,7 +64,6 @@ class SettingsPage extends StatelessWidget {
             _buildItem(
               AppLocalizations.of(context)!.settingsItemServer,
               Icons.storage_outlined,
-              trailing: const Badge(label: Text('Beta')),
               onTap: () => navigateTo(context, const SystemSettingsServer()),
             ),
             _buildItem(

@@ -384,7 +384,7 @@ class _SearchFilterState extends State<_SearchFilter> {
   @override
   Widget build(BuildContext context) {
     return SettingPage(
-      title: '全部筛选',
+      title: AppLocalizations.of(context)!.searchFilterTitle,
       child: Scrollbar(
         child: CustomScrollView(
           slivers: [
@@ -615,7 +615,10 @@ class _MultiSelectState<T> extends State<_MultiSelect<T>> {
                           child: Center(
                               child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: [Text(_collapsed ? '更多' : '收起'), Icon(_collapsed ? Icons.arrow_drop_down : Icons.arrow_drop_up)],
+                            children: [
+                              Text(_collapsed ? AppLocalizations.of(context)!.buttonMore : AppLocalizations.of(context)!.buttonCollapse),
+                              Icon(_collapsed ? Icons.arrow_drop_down : Icons.arrow_drop_up)
+                            ],
                           )),
                         )),
                 ],

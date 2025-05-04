@@ -76,10 +76,10 @@ class _SeriesMetadataState extends State<SeriesMetadata> {
               TextFieldFocus(
                 child: TextFormField(
                   controller: _controller2,
-                  decoration: const InputDecoration(
-                    border: UnderlineInputBorder(),
+                  decoration: InputDecoration(
+                    border: const UnderlineInputBorder(),
                     isDense: true,
-                    labelText: '原始标题',
+                    labelText: AppLocalizations.of(context)!.formLabelOriginalTitle,
                   ),
                   validator: (value) => requiredValidator(context, value),
                   onEditingComplete: () => FocusScope.of(context).nextFocus(),
@@ -90,10 +90,10 @@ class _SeriesMetadataState extends State<SeriesMetadata> {
                 child: TextFormField(
                   autofocus: true,
                   controller: _controller3,
-                  decoration: const InputDecoration(
-                    border: UnderlineInputBorder(),
+                  decoration: InputDecoration(
+                    border: const UnderlineInputBorder(),
                     isDense: true,
-                    labelText: '首映日期',
+                    labelText: AppLocalizations.of(context)!.formLabelAirDate,
                   ),
                   keyboardType: TextInputType.datetime,
                   onTap: () async {
@@ -112,10 +112,10 @@ class _SeriesMetadataState extends State<SeriesMetadata> {
                 child: TextFormField(
                   autofocus: true,
                   controller: _controller4,
-                  decoration: const InputDecoration(
-                    border: UnderlineInputBorder(),
+                  decoration: InputDecoration(
+                    border: const UnderlineInputBorder(),
                     isDense: true,
-                    labelText: '简介',
+                    labelText: AppLocalizations.of(context)!.formLabelPlot,
                   ),
                   maxLines: 6,
                   validator: (value) => requiredValidator(context, value),
@@ -128,10 +128,10 @@ class _SeriesMetadataState extends State<SeriesMetadata> {
                   autofocus: true,
                   controller: _controller5,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    border: UnderlineInputBorder(),
+                  decoration: InputDecoration(
+                    border: const UnderlineInputBorder(),
                     isDense: true,
-                    labelText: '评分',
+                    labelText: AppLocalizations.of(context)!.formLabelVoteAverage,
                   ),
                   validator: (value) => requiredValidator(context, value),
                   onEditingComplete: () => FocusScope.of(context).nextFocus(),
@@ -143,10 +143,10 @@ class _SeriesMetadataState extends State<SeriesMetadata> {
                   autofocus: true,
                   keyboardType: TextInputType.number,
                   controller: _controller6,
-                  decoration: const InputDecoration(
-                    border: UnderlineInputBorder(),
+                  decoration: InputDecoration(
+                    border: const UnderlineInputBorder(),
                     isDense: true,
-                    labelText: '评分数',
+                    labelText: AppLocalizations.of(context)!.formLabelVoteCount,
                   ),
                   validator: (value) => requiredValidator(context, value),
                   onEditingComplete: () => FocusScope.of(context).nextFocus(),

@@ -87,7 +87,7 @@ class _TVListPageState extends State<TVListPage> {
             builder: _buildRecentMediaCard,
           ),
           MediaChannel<TVListCubit, AsyncSnapshot<TVListModel>>(
-            label: '收藏夹',
+            label: AppLocalizations.of(context)!.tagFavorite,
             more: IconButton(
                 onPressed: () {
                   navigateTo(context, const SearchPage(filterType: [FilterType.favorite]));
