@@ -8,6 +8,7 @@ import '../components/filled_button.dart';
 import '../components/icon_button.dart';
 import '../components/keyboard_reopen.dart';
 import '../components/setting.dart';
+import '../components/text_field_focus.dart';
 import '../utils/notification.dart';
 import '../utils/utils.dart';
 
@@ -61,7 +62,7 @@ class _SystemSettingsServerState extends State<SystemSettingsServer> {
                                 },
                                 icon: const Icon(Icons.check_rounded),
                               ),
-                            if (!item.active)
+                            if (!item.active && item.id != 0)
                               TVIconButton(
                                 onPressed: () async {
                                   final confirmed = await showConfirm(context, AppLocalizations.of(context)!.deleteConfirmText);
@@ -120,12 +121,14 @@ class _SystemSettingsAddState extends State<_SystemSettingsAdd> {
   late final _serverAddress = TextEditingController();
   late final _username = TextEditingController();
   late final _userPassword = TextEditingController();
+  late final _userAgent = TextEditingController();
 
   @override
   void dispose() {
     _serverAddress.dispose();
     _username.dispose();
     _userPassword.dispose();
+    _userAgent.dispose();
     super.dispose();
   }
 
@@ -145,58 +148,75 @@ class _SystemSettingsAddState extends State<_SystemSettingsAdd> {
                 DropdownButtonFormField(
                   value: 'emby',
                   isExpanded: true,
-                  decoration: const InputDecoration(
-                    labelText: '类型',
-                    prefixIcon: Icon(Icons.domain),
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.serverFormItemLabelServerType,
+                    prefixIcon: const Icon(Icons.domain),
                     isDense: true,
-                    hintText: '8.8.8.8',
                   ),
                   items: const [
                     DropdownMenuItem(value: 'emby', child: Text('Emby')),
-                    // DropdownMenuItem(value: 'jellyfin', child: Text('Jellyfin')),
+                    DropdownMenuItem(value: 'jellyfin', child: Text('Jellyfin')),
                   ],
                   onChanged: (ty) => _type = ty!,
                 ),
-                TextFormField(
-                  controller: _serverAddress,
-                  autofocus: true,
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.link),
-                    border: const UnderlineInputBorder(),
-                    labelText: AppLocalizations.of(context)!.serverFormItemLabelServer,
-                    isDense: true,
+                TextFieldFocus(
+                  child: TextFormField(
+                    controller: _serverAddress,
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(Icons.link),
+                      border: const UnderlineInputBorder(),
+                      labelText: AppLocalizations.of(context)!.serverFormItemLabelServer,
+                      isDense: true,
+                    ),
+                    validator: (value) => urlValidator(context, value, true),
+                    onEditingComplete: () => FocusScope.of(context).nextFocus(),
                   ),
-                  validator: (value) => urlValidator(context, value, true),
-                  onEditingComplete: () => FocusScope.of(context).nextFocus(),
                 ),
-                TextFormField(
-                  controller: _username,
-                  autofocus: true,
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.account_circle_outlined),
-                    border: const UnderlineInputBorder(),
-                    labelText: AppLocalizations.of(context)!.loginFormItemLabelUsername,
-                    isDense: true,
+                TextFieldFocus(
+                  child: TextFormField(
+                    controller: _username,
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(Icons.account_circle_outlined),
+                      border: const UnderlineInputBorder(),
+                      labelText: AppLocalizations.of(context)!.loginFormItemLabelUsername,
+                      isDense: true,
+                    ),
+                    validator: (value) => requiredValidator(context, value),
+                    onEditingComplete: () => FocusScope.of(context).nextFocus(),
                   ),
-                  validator: (value) => requiredValidator(context, value),
-                  onEditingComplete: () => FocusScope.of(context).nextFocus(),
                 ),
-                TextFormField(
-                  controller: _userPassword,
-                  autofocus: true,
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.password),
-                    border: const UnderlineInputBorder(),
-                    labelText: AppLocalizations.of(context)!.loginFormItemLabelPwd,
-                    isDense: true,
+                TextFieldFocus(
+                  child: TextFormField(
+                    controller: _userPassword,
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(Icons.password),
+                      border: const UnderlineInputBorder(),
+                      labelText: AppLocalizations.of(context)!.loginFormItemLabelPwd,
+                      isDense: true,
+                    ),
+                    onEditingComplete: () => FocusScope.of(context).nextFocus(),
                   ),
-                  onEditingComplete: () => FocusScope.of(context).nextFocus(),
+                ),
+                TextFieldFocus(
+                  child: TextFormField(
+                    controller: _userAgent,
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(Icons.web_rounded),
+                      border: const UnderlineInputBorder(),
+                      labelText: AppLocalizations.of(context)!.loginFormItemLabelUserAgent,
+                      isDense: true,
+                    ),
+                    onEditingComplete: () => FocusScope.of(context).nextFocus(),
+                  ),
                 ),
                 const Spacer(),
                 TVFilledButton(
                   child: Text(AppLocalizations.of(context)!.buttonConfirm),
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
+                      final userAgent = _userAgent.text.trim();
                       final resp = await showNotification(
                           context,
                           Api.serverInsert({
@@ -204,6 +224,7 @@ class _SystemSettingsAddState extends State<_SystemSettingsAdd> {
                             'host': _serverAddress.text.trim(),
                             'username': _username.text.trim(),
                             'userPassword': _userPassword.text.trim(),
+                            'userAgent': userAgent.isNotEmpty ? userAgent : null,
                           }));
                       if (resp?.error == null && context.mounted) {
                         Navigator.of(context).pop(true);
