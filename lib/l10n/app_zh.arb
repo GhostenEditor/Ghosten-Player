@@ -134,6 +134,7 @@
   "liveCreateFormItemLabelTitle": "直播源名称",
   "liveCreateFormItemLabelUrl": "直播源地址",
   "loginFormItemLabelPwd": "密码",
+  "loginFormItemLabelUserAgent": "User Agent",
   "loginFormItemLabelUsername": "用户名",
   "minute": "分",
   "modalNotificationDeleteLoadingText": "数据删除中...",

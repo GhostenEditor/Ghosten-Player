@@ -2,7 +2,6 @@ import 'package:api/api.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
-import '../const.dart';
 import '../utils/utils.dart';
 import '../views/image_viewer.dart';
 
@@ -19,7 +18,7 @@ class AsyncImage extends StatelessWidget {
     this.needLoading = true,
     this.errorIconSize = 36,
     this.padding = EdgeInsets.zero,
-    this.httpHeaders = const {headerUserAgent: ua},
+    this.httpHeaders,
     this.viewable = false,
     this.showErrorWidget = true,
   });
