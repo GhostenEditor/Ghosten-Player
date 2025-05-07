@@ -20,7 +20,7 @@ class _SystemSettingsServerState extends State<SystemSettingsServer> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Badge(label: const Text('Beta'), child: Text(AppLocalizations.of(context)!.settingsItemServer)),
+        title: Text(AppLocalizations.of(context)!.settingsItemServer),
         actions: [
           IconButton(
               onPressed: () async {
@@ -54,7 +54,7 @@ class _SystemSettingsServerState extends State<SystemSettingsServer> {
                             title: Text(AppLocalizations.of(context)!.buttonActivate),
                           ),
                         ),
-                      if (!item.active)
+                      if (!item.active && item.id != 0)
                         PopupMenuItem(
                           padding: EdgeInsets.zero,
                           onTap: () async {
@@ -112,12 +112,14 @@ class _SystemSettingsAddState extends State<_SystemSettingsAdd> {
   late final _serverAddress = TextEditingController();
   late final _username = TextEditingController();
   late final _userPassword = TextEditingController();
+  late final _userAgent = TextEditingController();
 
   @override
   void dispose() {
     _serverAddress.dispose();
     _username.dispose();
     _userPassword.dispose();
+    _userAgent.dispose();
     super.dispose();
   }
 
@@ -130,6 +132,7 @@ class _SystemSettingsAddState extends State<_SystemSettingsAdd> {
           IconButton(
             onPressed: () async {
               if (_formKey.currentState!.validate()) {
+                final userAgent = _userAgent.text.trim();
                 final resp = await showNotification(
                     context,
                     Api.serverInsert({
@@ -137,6 +140,7 @@ class _SystemSettingsAddState extends State<_SystemSettingsAdd> {
                       'host': _serverAddress.text.trim(),
                       'username': _username.text.trim(),
                       'userPassword': _userPassword.text.trim(),
+                      'userAgent': userAgent.isNotEmpty ? userAgent : null,
                     }));
                 if (resp?.error == null && context.mounted) {
                   Navigator.of(context).pop(true);
@@ -162,7 +166,6 @@ class _SystemSettingsAddState extends State<_SystemSettingsAdd> {
                   labelText: AppLocalizations.of(context)!.serverFormItemLabelServerType,
                   prefixIcon: const Icon(Icons.domain),
                   isDense: true,
-                  hintText: '8.8.8.8',
                 ),
                 items: const [
                   DropdownMenuItem(value: 'emby', child: Text('Emby')),
@@ -172,7 +175,6 @@ class _SystemSettingsAddState extends State<_SystemSettingsAdd> {
               ),
               TextFormField(
                 controller: _serverAddress,
-                autofocus: true,
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Icons.link),
                   border: const UnderlineInputBorder(),
@@ -184,7 +186,6 @@ class _SystemSettingsAddState extends State<_SystemSettingsAdd> {
               ),
               TextFormField(
                 controller: _username,
-                autofocus: true,
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Icons.account_circle_outlined),
                   border: const UnderlineInputBorder(),
@@ -196,11 +197,20 @@ class _SystemSettingsAddState extends State<_SystemSettingsAdd> {
               ),
               TextFormField(
                 controller: _userPassword,
-                autofocus: true,
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Icons.password),
                   border: const UnderlineInputBorder(),
                   labelText: AppLocalizations.of(context)!.loginFormItemLabelPwd,
+                  isDense: true,
+                ),
+                onEditingComplete: () => FocusScope.of(context).nextFocus(),
+              ),
+              TextFormField(
+                controller: _userAgent,
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.web_rounded),
+                  border: const UnderlineInputBorder(),
+                  labelText: AppLocalizations.of(context)!.loginFormItemLabelUserAgent,
                   isDense: true,
                 ),
                 onEditingComplete: () => FocusScope.of(context).nextFocus(),
