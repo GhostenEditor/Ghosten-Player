@@ -45,7 +45,7 @@ class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnec
             "databasePath" -> result.success(apiService?.databasePath?.path)
             "initialized" -> {
                 if (serviceConnected) {
-                    result.success(apiService?.apiInitialized())
+                    result.success(apiService?.apiInitializedPort())
                 } else {
                     methodCallResult = result
                 }
@@ -232,7 +232,7 @@ class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnec
         val binder = service as ApiService.LocalBinder
         apiService = binder.getService()
         serviceConnected = true
-        methodCallResult?.success(apiService?.apiInitialized())
+        methodCallResult?.success(apiService?.apiInitializedPort())
         methodCallResult = null
     }
 

@@ -956,17 +956,19 @@ class _ItemSearchPageState<T> extends State<_ItemSearchPage<T>> {
 
   @override
   Widget build(BuildContext context) {
-    return SliverPadding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      sliver: PagedSliverGrid(
-        gridDelegate: widget.gridDelegate,
-        builderDelegate: PagedChildBuilderDelegate<T>(
-          itemBuilder: widget.itemBuilder,
-          firstPageErrorIndicatorBuilder: (_) => ErrorMessage(error: _pagingController.error),
-          newPageErrorIndicatorBuilder: (_) => ErrorMessage(error: _pagingController.error),
-          noItemsFoundIndicatorBuilder: (_) => const NoData(),
+    return SliverSafeArea(
+      sliver: SliverPadding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        sliver: PagedSliverGrid(
+          gridDelegate: widget.gridDelegate,
+          builderDelegate: PagedChildBuilderDelegate<T>(
+            itemBuilder: widget.itemBuilder,
+            firstPageErrorIndicatorBuilder: (_) => ErrorMessage(error: _pagingController.error),
+            newPageErrorIndicatorBuilder: (_) => ErrorMessage(error: _pagingController.error),
+            noItemsFoundIndicatorBuilder: (_) => const NoData(),
+          ),
+          pagingController: _pagingController,
         ),
-        pagingController: _pagingController,
       ),
     );
   }

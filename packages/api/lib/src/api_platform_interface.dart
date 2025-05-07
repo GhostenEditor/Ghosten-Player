@@ -26,7 +26,7 @@ abstract class ApiPlatform extends PlatformInterface {
 
   abstract final ApiClient client;
 
-  final baseUrl = Uri(
+  Uri baseUrl = Uri(
     scheme: 'http',
     host: '127.0.0.1',
     port: 38916,
