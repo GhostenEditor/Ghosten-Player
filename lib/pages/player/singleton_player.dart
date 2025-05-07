@@ -95,10 +95,11 @@ class _SingletonPlayerState<T> extends State<SingletonPlayer<T>> {
       children: [
         PlayerPlatformView(
             autoPip: context.read<UserConfig>().autoPip,
-            initialized: () {
-              _controller.enterFullscreen();
+            initialized: () async {
+              await _controller.enterFullscreen();
               _controller.setPlaylist(widget.playlist);
-              _controller.play();
+              await _controller.next(0);
+              await _controller.play();
             }),
         PlayerControlsFull(_controller, _progressController, theme: widget.theme),
       ],

@@ -5,7 +5,7 @@ export 'src/errors.dart';
 export 'src/models.dart';
 
 class Api {
-  static final Uri baseUrl = ApiPlatform.instance.baseUrl;
+  static Uri get baseUrl => ApiPlatform.instance.baseUrl;
   static final Stream<double?> progress$ = ApiPlatform.instance.progress$;
   static final Stream<double?> needUpdate$ = ApiPlatform.instance.needUpdate$;
 

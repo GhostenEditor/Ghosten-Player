@@ -250,6 +250,7 @@ String? parseMimeType(Uri uri) {
       case 'm3u8':
         return 'application/x-mpegURL';
       case 'mp4':
+      case 'mkv':
         return null;
       case 'php':
         return 'application/x-mpegURL';

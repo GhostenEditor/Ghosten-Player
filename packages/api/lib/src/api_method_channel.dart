@@ -24,7 +24,14 @@ class MethodChannelApi extends ApiPlatform {
   Future<String?> databasePath() => _methodChannel.invokeMethod<String>('databasePath');
 
   @override
-  Future<bool?> initialized() => _methodChannel.invokeMethod('initialized');
+  Future<bool?> initialized() async {
+    final port = await _methodChannel.invokeMethod<int>('initialized');
+    if (port != null) {
+      baseUrl = baseUrl.replace(port: port);
+      return true;
+    }
+    return false;
+  }
 
   @override
   Future<void> syncData(String filePath) => _methodChannel.invokeMethod('syncData', filePath);

@@ -8,6 +8,7 @@ import android.os.IBinder
 import androidx.annotation.Keep
 import java.io.File
 import java.io.IOException
+import java.net.ServerSocket
 
 @Keep
 interface ApiMethodHandler {
@@ -25,7 +26,8 @@ class ApiService : Service() {
     ): Boolean
 
     private external fun apiStop()
-    external fun apiInitialized(): Boolean
+    private external fun apiInitialized(): Boolean
+
     external fun call(method: String, data: String, params: String): ByteArray
     external fun callWithCallback(method: String, data: String, params: String, callback: ApiMethodHandler): ByteArray
     external fun log(level: Int, message: String)
@@ -33,6 +35,7 @@ class ApiService : Service() {
     private var apiThread: ProxyThread? = null
     private val binder = LocalBinder()
     private var loaded = false
+    private var port = 38916
 
     val databasePath: File
         get() {
@@ -52,6 +55,9 @@ class ApiService : Service() {
         val databaseDir = databasePath.parentFile
         if (databaseDir?.exists() != true) {
             databaseDir!!.mkdirs()
+        }
+        port = ServerSocket(0).use { serverSocket ->
+            serverSocket.localPort
         }
         loaded = true
         apiThread = ProxyThread()
@@ -107,6 +113,14 @@ class ApiService : Service() {
         }
     }
 
+    public fun apiInitializedPort(): Int? {
+        if (apiInitialized()) {
+            return port
+        } else {
+            return null
+        }
+    }
+
     private inner class ProxyThread : Thread() {
         private var shouldLoop = true
         override fun run() {
@@ -117,7 +131,7 @@ class ApiService : Service() {
                     cacheFolder.mkdir()
                 }
                 if (!apiStart(
-                        PORT,
+                        port,
                         databasePath.path,
                         Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES).path,
                         cacheFolder.path,
@@ -144,6 +158,5 @@ class ApiService : Service() {
         const val APP_NAME = "Ghosten Player"
         const val DB_BACKUP_NAME = "data.bak"
         const val LIB_NAME = "api"
-        const val PORT = 38916
     }
 }

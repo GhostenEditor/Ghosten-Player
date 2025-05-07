@@ -193,7 +193,7 @@ class UpdateToLatest extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               spacing: 10,
               children: [
-                Text(AppLocalizations.of(context)!.versionDeprecatedTip),
+                Text(AppLocalizations.of(context)!.versionDeprecatedTip, textAlign: TextAlign.center),
                 FilledButton.tonal(
                   onPressed: () {
                     launchUrlString('https://github.com/$repoAuthor/$repoName', browserConfiguration: const BrowserConfiguration(showTitle: true));
