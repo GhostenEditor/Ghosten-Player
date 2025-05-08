@@ -426,8 +426,13 @@ class _PlayerControlsState extends State<PlayerControls> {
                 child: PlayerPlaylistView(
                   playlist: widget.controller.playlist.value,
                   activeIndex: widget.controller.index.value,
-                  onTap: (index) {
-                    widget.controller.next(index);
+                  onTap: (index) async {
+                    await widget.controller.next(index);
+                    if (widget.controller.status.value == PlayerStatus.ended ||
+                        widget.controller.status.value == PlayerStatus.error ||
+                        widget.controller.status.value == PlayerStatus.idle) {
+                      await widget.controller.play();
+                    }
                     _panelType.value = _PlayerPanelType.progressbar;
                   },
                 ),
