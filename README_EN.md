@@ -82,7 +82,7 @@ Download the latest version from [Releases](https://github.com/GhostenEditor/Gho
 Android 6.0+
 
 ## Demo
-[https://ghosteneditor.github.io](https://ghosteneditor.github.io)
+[https://ghosteneditor.github.io/Ghosten-Player](https://ghosteneditor.github.io/Ghosten-Player)
 
 **Note:** The demo is for preview purposes only. Some features are limited due to web restrictions and may not reflect the latest release. Check [Releases](https://github.com/GhostenEditor/Ghosten-Player/releases/latest) for the full version.
 
