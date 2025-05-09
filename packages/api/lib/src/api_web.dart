@@ -1,12 +1,11 @@
 import 'dart:async';
 
-import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 import '../api.dart';
 import 'api_platform_interface.dart';
+import 'fake_data.dart';
 
 class ApiWeb extends ApiPlatform {
   ApiWeb();
@@ -16,15 +15,18 @@ class ApiWeb extends ApiPlatform {
   }
 
   @override
-  late final Client client = Client(baseUrl);
+  late final Client client = Client();
+
+  @override
+  Future<void> resetData() {
+    throw forbiddenException;
+  }
 
   /// Session Start
   @override
   @override
   Future<SessionCreate> sessionCreate() async {
-    final data = await client.put('/session/create');
-    final id = data['id'];
-    return SessionCreate(id: id, uri: baseUrl.replace(path: '/session/webpage', queryParameters: {'id': id.toString()}));
+    return SessionCreate(id: '', uri: baseUrl.replace(path: '/session/webpage', queryParameters: {'id': ''}));
   }
 
   /// Session End
@@ -33,26 +35,7 @@ class ApiWeb extends ApiPlatform {
 
   @override
   Stream<dynamic> driverInsert(Json data) async* {
-    final resp = await client.put('/driver/insert/cb', data: data);
-    if (resp != null) {
-      final sessionId = resp['id'];
-      loop:
-      while (true) {
-        await Future.delayed(const Duration(milliseconds: 100));
-        final session = await sessionStatus<dynamic>(sessionId);
-        switch (session.status) {
-          case SessionStatus.progressing:
-            yield session.data;
-          case SessionStatus.finished:
-            break loop;
-          case SessionStatus.failed:
-            throw Exception(session.data);
-          default:
-        }
-      }
-    } else {
-      throw Exception(resp.error);
-    }
+    throw forbiddenException;
   }
 
   /// Driver End
@@ -61,36 +44,18 @@ class ApiWeb extends ApiPlatform {
 
   @override
   Future<void> libraryRefreshById(dynamic id, bool incremental, String behavior) async {
-    final data = await client.post('/library/refresh/id/cb', data: {
-      'id': id,
-      'incremental': incremental,
-      'behavior': behavior,
-    });
-    final sessionId = data['id'];
+    await Future.delayed(Duration(seconds: 1));
     Stream<double?> s() async* {
-      loop:
-      while (true) {
-        try {
-          final session = await sessionStatus(sessionId);
-          switch (session.status) {
-            case SessionStatus.progressing:
-              yield session.data['progress'];
-            case SessionStatus.finished:
-              yield 1;
-              break loop;
-            case SessionStatus.failed:
-              yield -1;
-              break loop;
-            case SessionStatus.created:
-            case SessionStatus.data:
-          }
-        } catch (e) {
-          yield null;
-          rethrow;
-        }
-        await Future.delayed(const Duration(milliseconds: 300));
-      }
-      await Future.delayed(const Duration(milliseconds: 3000));
+      yield 0.2;
+      await Future.delayed(Duration(seconds: 1));
+      yield 0.4;
+      await Future.delayed(Duration(seconds: 1));
+      yield 0.6;
+      await Future.delayed(Duration(seconds: 1));
+      yield 0.8;
+      await Future.delayed(Duration(seconds: 1));
+      yield 1;
+      await Future.delayed(Duration(seconds: 3));
       yield null;
     }
 
@@ -102,23 +67,20 @@ class ApiWeb extends ApiPlatform {
   /// Miscellaneous Start
   @override
   Stream<List<NetworkDiagnotics>> networkDiagnostics() async* {
-    final data = await client.post<Json>('/network/diagnostics/cb');
-    if (data != null) {
-      final sessionId = data['id'];
-      loop:
-      while (true) {
-        await Future.delayed(const Duration(milliseconds: 100));
-        final session = await sessionStatus<List<dynamic>>(sessionId);
-        switch (session.status) {
-          case SessionStatus.progressing:
-            yield session.data!.map((d) => NetworkDiagnotics.fromJson(d)).toList();
-          case SessionStatus.finished:
-          case SessionStatus.failed:
-            break loop;
-          default:
-        }
-      }
-    }
+    final items = [
+      {'domain': 'openapi.alipan.com', 'ip': '***.***.***.***', 'status': 'success'},
+      {'domain': 'api.themoviedb.org', 'ip': '***.***.***.***', 'status': 'success'},
+      {'domain': 'image.tmdb.org', 'ip': '***.***.***.***', 'status': 'success'},
+      {'domain': 'drive-pc.quark.cn', 'ip': '***.***.***.***', 'status': 'success'}
+    ];
+    await Future.delayed(Duration(seconds: 2));
+    yield items.take(1).map(NetworkDiagnotics.fromJson).toList();
+    await Future.delayed(Duration(seconds: 1));
+    yield items.take(2).map(NetworkDiagnotics.fromJson).toList();
+    await Future.delayed(Duration(seconds: 1));
+    yield items.take(3).map(NetworkDiagnotics.fromJson).toList();
+    await Future.delayed(Duration(seconds: 1));
+    yield items.take(4).map(NetworkDiagnotics.fromJson).toList();
   }
 
   /// Miscellaneous End
@@ -126,96 +88,181 @@ class ApiWeb extends ApiPlatform {
   /// Cast Start
   @override
   Stream<List<dynamic>> dlnaDiscover() async* {
-    final data = await client.post<Json>('/dlna/discover/cb');
-    if (data != null) {
-      final sessionId = data['id'];
-      loop:
-      while (true) {
-        await Future.delayed(const Duration(milliseconds: 500));
-        final session = await sessionStatus(sessionId);
-        switch (session.status) {
-          case SessionStatus.progressing:
-            yield session.data;
-          case SessionStatus.finished:
-          case SessionStatus.failed:
-            break loop;
-          default:
-        }
-      }
-    }
+    await Future.delayed(Duration(seconds: 1));
+    yield [
+      {'id': '1', 'friendlyName': '投屏设备'}
+    ];
   }
 
   ///  Cast End
 }
 
+final forbiddenException = PlatformException(code: '40301');
+
 class Client extends ApiClient {
-  late final Dio _client;
+  @override
+  Future<T?> delete<T>(String path, {Object? data}) async {
+    return switch (path) {
+      _ => throw forbiddenException,
+    };
+  }
 
-  Client(Uri baseUrl) {
-    _client = Dio(BaseOptions(
-      connectTimeout: const Duration(seconds: 10),
-      baseUrl: baseUrl.toString(),
-      validateStatus: (status) => status != null && status >= 200 && status < 300 || status == 304,
-    ))
-      ..interceptors.add(InterceptorsWrapper(
-        onRequest: (options, handler) {
-          handler.next(options..headers.putIfAbsent('content-type', () => 'application/json'));
+  @override
+  Future<T?> get<T>(String path, {Json? queryParameters}) async {
+    return switch (path) {
+      '/session/status' => {
+          'status': 'created',
+          'data': '',
         },
-        onError: (error, handler) {
-          handler.reject(error);
+      '/file/info' => {
+          'filename': '展示文件.mp4',
+          'driverType': 'webdav',
+          'createAt': DateTime.now().subtract(Duration(days: 20)).toString(),
+          'size': 1 << 31,
         },
-      ))
-      ..interceptors.add(InterceptorsWrapper(onRequest: (RequestOptions options, RequestInterceptorHandler handler) {
-        options.headers['Accept-Language'] = Localizations.localeOf(navigatorKey.currentContext!).languageCode;
-        return handler.next(options);
-      }));
+      '/player/history' => episodes
+          .where((episode) => episode['lastPlayedTime'] != null)
+          .map((episode) => {
+                'mediaType': 'episode',
+                ...episode,
+              })
+          .toList(),
+      '/playback/info' => {
+          'url': 'http://127.0.0.1',
+          'subtitles': [],
+        },
+      '/server/query/all' => servers,
+      '/download/task/query/all' => downloadTasks,
+      '/playlist/query/all' => playlists,
+      '/playlist/channels/query/id' => channels,
+      '/tv/recommendation' => series.take(6).toList(),
+      '/tv/series/query/all' => series.take(queryParameters?['limit'] ?? 100).toList(),
+      '/tv/series/nextToPlay/query/all' => episodes.where((item) => item['lastPlayedTime'] != null).toList(),
+      '/tv/series/query/id' => series.firstWhere((el) => el['id'] == 61),
+      '/tv/season/query/id' => seasons.firstWhere((el) => el['id'] == queryParameters!['id']),
+      '/tv/episode/query/id' => episodes.firstWhere((el) => el['id'] == queryParameters!['id']),
+      '/movie/query/all' => movies,
+      '/movie/nextToPlay/query/all' => movies.take(2).toList(),
+      '/movie/recommendation' => movies,
+      '/movie/query/id' => movies[0],
+      '/studio/query/all' => studios,
+      '/genre/query/all' => genres,
+      '/keyword/query/all' => keywords,
+      '/cast/query/all' => actors,
+      '/crew/query/all' => [],
+      '/driver/query/all' => drivers,
+      '/driver/setting/query/id' => {
+          if (queryParameters!['id'] != 2) 'concurrency': 3,
+          if (queryParameters['id'] == 1) 'proxy': true,
+          if (queryParameters['id'] != 2) 'sliceSize': 5,
+        },
+      '/library/query/all' => [
+          {
+            'driverAvatar': null,
+            'driverId': 0,
+            'driverName': 'TEST Name',
+            'driverType': 'webdav',
+            'filename': 'TEST',
+            'id': 0,
+            'poster': null,
+            'type': queryParameters!['type']
+          }
+        ],
+      '/dns/override/query/all' => dns,
+      '/log/query/page' => {
+          'offset': 0,
+          'limit': 50,
+          'count': 1,
+          'data': [
+            {'level': 3, 'time': DateTime.now().toString(), 'message': '这是一条展示用日志！'}
+          ]
+        },
+      _ => null
+    } as T?;
+    // return null;
   }
 
   @override
-  Future<T?> delete<T>(String path, {Object? data}) {
-    return _client.delete<T>(path, data: data).then((resp) => resp.data).catchError((error) {
-      throw convert(error);
-    }, test: (error) => error is DioException);
+  Future<T?> post<T>(String path, {Object? data}) async {
+    switch (path) {
+      case '/download/task/pause/id':
+        final item = downloadTasks.firstWhere((el) => el['id'] == (data as dynamic)['id']);
+        item['speed'] = null;
+        item['status'] = 'idle';
+      case '/download/task/resume/id':
+        final item = downloadTasks.firstWhere((el) => el['id'] == (data as dynamic)['id']);
+        item['status'] = 'downloading';
+        item['speed'] = 19323377;
+      case '/file/list':
+        return fileList as T;
+      case '/file/rename':
+      case '/playlist/update/id':
+        throw forbiddenException;
+      case '/playlist/refresh/id':
+      case '/tv/series/sync/id':
+        return Future.delayed(Duration(seconds: 3));
+      case '/tv/season/number/update':
+        final item = seasons.firstWhere((el) => el['id'] == (data as dynamic)['id']);
+        item['season'] = (data as dynamic)['season'];
+        return (data as dynamic)['season'];
+      case '/skipTime/update':
+        final id = (data as dynamic)['id'];
+        final type = (data as dynamic)['type'];
+        final time = (data as dynamic)['time'];
+        final mediaType = MediaType.fromString((data as dynamic)['mediaType']);
+        final item = switch (mediaType) {
+          MediaType.movie => throw UnimplementedError(),
+          MediaType.series => series.firstWhere((el) => el['id'] == id),
+          MediaType.season => seasons.firstWhere((el) => el['id'] == id),
+          MediaType.episode => episodes.firstWhere((el) => el['id'] == id),
+        };
+        switch (type) {
+          case 'intro':
+            item['skipIntro'] = time;
+          case 'ending':
+            item['skipEnding'] = time;
+        }
+        item['updateAt'] = DateTime.now().toString();
+      case '/markWatched/update':
+        final type = MediaType.fromString((data as dynamic)['type']);
+        final id = (data as dynamic)['id'];
+        final watched = (data as dynamic)['marked'];
+        final item = switch (type) {
+          MediaType.movie => movies.firstWhere((el) => el['id'] == id),
+          MediaType.series => series.firstWhere((el) => el['id'] == id),
+          MediaType.season => seasons.firstWhere((el) => el['id'] == id),
+          MediaType.episode => episodes.firstWhere((el) => el['id'] == id),
+        };
+        item['watched'] = watched;
+        item['updateAt'] = DateTime.now().toString();
+      case '/markFavorite/update':
+        final type = MediaType.fromString((data as dynamic)['type']);
+        final id = (data as dynamic)['id'];
+        final favorite = (data as dynamic)['marked'];
+        final item = switch (type) {
+          MediaType.movie => movies.firstWhere((el) => el['id'] == id),
+          MediaType.series => series.firstWhere((el) => el['id'] == id),
+          MediaType.season => seasons.firstWhere((el) => el['id'] == id),
+          MediaType.episode => episodes.firstWhere((el) => el['id'] == id),
+        };
+        item['favorite'] = favorite;
+        item['updateAt'] = DateTime.now().toString();
+      case '/dns/override/update/id':
+        final id = (data as dynamic)['id'];
+        final domain = (data as dynamic)['domain'];
+        final ip = (data as dynamic)['ip'];
+        final item = dns.firstWhere((el) => el['id'] == id);
+        item['domain'] = domain;
+        item['ip'] = ip;
+    }
+    return null;
   }
 
   @override
-  Future<T?> get<T>(String path, {Json? queryParameters}) {
-    return _client.get<T>(path, queryParameters: queryParameters).then((resp) => resp.data).catchError((error) {
-      throw convert(error);
-    }, test: (error) => error is DioException);
-  }
-
-  @override
-  Future<T?> post<T>(String path, {Object? data}) {
-    return _client.post<T>(path, data: data).then((resp) => resp.data).catchError((error) {
-      throw convert(error);
-    }, test: (error) => error is DioException);
-  }
-
-  @override
-  Future<T?> put<T>(String path, {Object? data}) {
-    return _client.put<T>(path, data: data).then((resp) => resp.data).catchError((error) {
-      throw convert(error);
-    }, test: (error) => error is DioException);
-  }
-
-  PlatformException convert(DioException exception) {
-    return switch (exception.type) {
-      DioExceptionType.connectionTimeout || DioExceptionType.sendTimeout || DioExceptionType.receiveTimeout => PlatformException(
-          code: '40800',
-          message: exception.response?.data.toString() ?? exception.message,
-          stacktrace: exception.stackTrace.toString(),
-        ),
-      DioExceptionType.badCertificate ||
-      DioExceptionType.badResponse ||
-      DioExceptionType.cancel ||
-      DioExceptionType.connectionError ||
-      DioExceptionType.unknown =>
-        PlatformException(
-          code: exception.response?.headers.value('Error-Code') ?? ((exception.response?.statusCode ?? 0) * 100).toString(),
-          message: exception.response?.data.toString() ?? exception.message,
-          stacktrace: exception.stackTrace.toString(),
-        ),
+  Future<T?> put<T>(String path, {Object? data}) async {
+    return switch (path) {
+      '/file/mkdir' || '/server/insert' || '/playlist/insert' || '/library/insert' || '/dns/override/insert' => throw forbiddenException,
+      _ => null,
     };
   }
 }

@@ -54,9 +54,7 @@ flutter:
   generate: true
   assets:
     - assets/common/images/
-    - path: assets/tv/images/
-      flavors:
-        - tv
+    - assets/tv/images/
   fonts:
     - family: Roboto Condensed
       fonts:

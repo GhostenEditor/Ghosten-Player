@@ -146,6 +146,9 @@ class PlayerWeb extends PlayerPlatform {
   }
 
   @override
+  Future<void> setSource(Map<String, dynamic> item) async {}
+
+  @override
   Future<bool?> requestPip() async {
     return false;
   }
