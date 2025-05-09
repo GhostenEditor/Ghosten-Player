@@ -145,7 +145,7 @@ For user guides and FAQs, visit the [Wiki](https://github.com/GhostenEditor/Ghos
     - [Skip Intro/Outro](https://github.com/GhostenEditor/Ghosten-Player/wiki/%E8%B7%B3%E8%BF%87%E7%89%87%E5%A4%B4%E7%89%87%E5%B0%BE)
 - **Troubleshooting**
     - [WebDAV Errors](https://github.com/GhostenEditor/Ghosten-Player/wiki/Webdav%E6%8A%A5%E9%94%99)
-    - [Metadata Scraping Timeout](https://github.com/GhostenEditor/Ghosten-Player/wiki/%E5%88%AE%E5%89%8A%E5%AA%92%E4%BD%93%E4%BF%A1%E6%81%AF%E8%B6%85%E6%97%B6)
+    - [Metadata Scraping Problems](https://github.com/GhostenEditor/Ghosten-Player/wiki/%E5%88%AE%E5%89%8A%E5%AA%92%E4%BD%93%E4%BF%A1%E6%81%AF%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98)
     - [App Crashes](https://github.com/GhostenEditor/Ghosten-Player/wiki/%E5%BA%94%E7%94%A8%E9%97%AA%E9%80%80)
     - [Playback Lag](https://github.com/GhostenEditor/Ghosten-Player/wiki/%E6%92%AD%E6%94%BE%E5%8D%A1%E9%A1%BF)
     - [Data Errors](https://github.com/GhostenEditor/Ghosten-Player/wiki/%E6%95%B0%E6%8D%AE%E9%94%99%E8%AF%AF)
