@@ -158,6 +158,7 @@ class _PlayerControlsLiteState<T> extends State<PlayerControlsLite<T>> {
                                 playlist: _controller.playlist.value,
                                 index: _controller.index.value!,
                                 theme: widget.theme,
+                                onGetPlayBackInfo: widget.controller.onGetPlayBackInfo,
                               ));
                           if (context.mounted) await _controller.play();
                         }
