@@ -150,7 +150,7 @@ Demo仅作展示用，部分功能受Web限制，并非完整版。Demo可能更
   - [跳过片头片尾](https://github.com/GhostenEditor/Ghosten-Player/wiki/%E8%B7%B3%E8%BF%87%E7%89%87%E5%A4%B4%E7%89%87%E5%B0%BE)
 - 常见问题
   - [Webdav报错](https://github.com/GhostenEditor/Ghosten-Player/wiki/Webdav%E6%8A%A5%E9%94%99)
-  - [刮削媒体信息超时](https://github.com/GhostenEditor/Ghosten-Player/wiki/%E5%88%AE%E5%89%8A%E5%AA%92%E4%BD%93%E4%BF%A1%E6%81%AF%E8%B6%85%E6%97%B6)
+  - [刮削媒体信息相关问题](https://github.com/GhostenEditor/Ghosten-Player/wiki/%E5%88%AE%E5%89%8A%E5%AA%92%E4%BD%93%E4%BF%A1%E6%81%AF%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98)
   - [应用闪退](https://github.com/GhostenEditor/Ghosten-Player/wiki/%E5%BA%94%E7%94%A8%E9%97%AA%E9%80%80)
   - [播放卡顿](https://github.com/GhostenEditor/Ghosten-Player/wiki/%E6%92%AD%E6%94%BE%E5%8D%A1%E9%A1%BF)
   - [数据错误](https://github.com/GhostenEditor/Ghosten-Player/wiki/%E6%95%B0%E6%8D%AE%E9%94%99%E8%AF%AF)
