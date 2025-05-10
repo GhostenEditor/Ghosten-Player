@@ -222,7 +222,10 @@ class CarouselBackground extends StatelessWidget {
               child: src != null
                   ? AsyncImage(key: UniqueKey(), src!)
                   : Image.asset(
-                      'assets/tv/images/bg-pixel.webp',
+                      switch (Theme.of(context).brightness) {
+                        Brightness.dark => 'assets/tv/images/bg-pixel.webp',
+                        Brightness.light => 'assets/tv/images/bg-pixel-light.webp',
+                      },
                       repeat: ImageRepeat.repeat,
                     ),
             ),
