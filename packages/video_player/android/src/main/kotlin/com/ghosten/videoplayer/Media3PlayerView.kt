@@ -468,8 +468,13 @@ class Media3PlayerView(
                     is HttpDataSource.InvalidResponseCodeException -> {
                         if (cause.responseCode == HttpURLConnection.HTTP_FORBIDDEN) {
                             val host = cause.dataSpec.uri.host
-                            if (host != null && host.endsWith("aliyuncs.com")) {
+                            if (host != null && (host.endsWith("aliyuncs.com") || host.endsWith("aliyundrive.net"))) {
                                 play()
+                            } else {
+                                mChannel.invokeMethod(
+                                    "fatalError",
+                                    "${cause.responseCode} ${cause.responseBody.decodeToString()}"
+                                )
                             }
                         } else {
                             mChannel.invokeMethod(
