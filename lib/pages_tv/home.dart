@@ -3,7 +3,9 @@ import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 
+import '../providers/shortcut_tv.dart';
 import '../utils/utils.dart';
 import 'components/clock.dart';
 import 'components/icon_button.dart';
@@ -34,16 +36,16 @@ class _HomeState extends State<TVHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final shortcuts = context.watch<ShortcutTV>();
     return Focus(
       skipTraversal: true,
       onKeyEvent: (FocusNode node, KeyEvent event) {
         if (event is KeyDownEvent || event is KeyRepeatEvent) {
-          switch (event.logicalKey) {
-            case LogicalKeyboardKey.contextMenu:
-              if (!_scaffoldKey.currentState!.isEndDrawerOpen) {
-                _scaffoldKey.currentState!.openEndDrawer();
-                return KeyEventResult.handled;
-              }
+          if (event.logicalKey == shortcuts.menu) {
+            if (!_scaffoldKey.currentState!.isEndDrawerOpen) {
+              _scaffoldKey.currentState!.openEndDrawer();
+              return KeyEventResult.handled;
+            }
           }
         }
         return KeyEventResult.ignored;

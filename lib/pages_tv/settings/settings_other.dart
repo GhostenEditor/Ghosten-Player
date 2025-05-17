@@ -10,6 +10,7 @@ import '../components/text_field_focus.dart';
 import '../utils/notification.dart';
 import '../utils/utils.dart';
 import 'settings_dns.dart';
+import 'settings_shortcut.dart';
 import 'settings_sync.dart';
 
 class SystemSettingsOther extends StatefulWidget {
@@ -80,6 +81,12 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
             title: Text(AppLocalizations.of(context)!.settingsItemDNS),
             leading: const Icon(Icons.dns_outlined),
             onTap: () => navigateToSlideLeft(context, const SystemSettingsDNS()),
+          ),
+          ListTile(title: Text(AppLocalizations.of(context)!.settingsItemShortcutSettings), dense: true),
+          ButtonSettingItem(
+            title: Text(AppLocalizations.of(context)!.settingsItemShortcuts),
+            leading: const Icon(Icons.shortcut_rounded),
+            onTap: () => navigateToSlideLeft(context, const SystemSettingsShortcut()),
           ),
         ],
       ),

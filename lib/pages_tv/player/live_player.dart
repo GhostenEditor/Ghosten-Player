@@ -7,11 +7,13 @@ import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:video_player/player.dart';
 
 import '../../components/async_image.dart';
 import '../../components/playing_icon.dart';
+import '../../providers/shortcut_tv.dart';
 import '../../theme.dart';
 import '../../utils/utils.dart';
 import '../components/loading.dart';
@@ -67,6 +69,7 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
 
   @override
   Widget build(BuildContext context) {
+    final shortcuts = context.watch<ShortcutTV>();
     return Theme(
       data: tvDarkTheme,
       child: Scaffold(
@@ -160,48 +163,45 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
                 autofocus: true,
                 onKeyEvent: (node, event) {
                   if (event is KeyUpEvent) {
-                    switch (event.logicalKey) {
-                      case LogicalKeyboardKey.arrowUp:
-                        if (_controller.index.value != null) _controller.next(_controller.index.value! + 1);
-                        if (_controller.status.value == PlayerStatus.idle ||
-                            _controller.status.value == PlayerStatus.error ||
-                            _controller.status.value == PlayerStatus.ended) {
-                          _controller.play();
-                        }
+                    if (event.logicalKey == shortcuts.nextChannel) {
+                      if (_controller.index.value != null) _controller.next(_controller.index.value! + 1);
+                      if (_controller.status.value == PlayerStatus.idle ||
+                          _controller.status.value == PlayerStatus.error ||
+                          _controller.status.value == PlayerStatus.ended) {
+                        _controller.play();
+                      }
+                      return KeyEventResult.handled;
+                    } else if (event.logicalKey == shortcuts.previousChannel) {
+                      if (_controller.index.value != null) _controller.next(_controller.index.value! - 1);
+                      if (_controller.status.value == PlayerStatus.idle ||
+                          _controller.status.value == PlayerStatus.error ||
+                          _controller.status.value == PlayerStatus.ended) {
+                        _controller.play();
+                      }
+                      return KeyEventResult.handled;
+                    } else if (event.logicalKey == LogicalKeyboardKey.select) {
+                      if (_isShowControls.value) {
+                        _controlsStream.add(ControlsStreamStatus.hide);
+                      } else {
+                        _controlsStream.add(ControlsStreamStatus.show);
+                      }
+                      return KeyEventResult.handled;
+                    } else if (event.logicalKey == shortcuts.switchLinePanel) {
+                      if (_controller.currentItem != null && _controller.currentItem!.source.links.length > 1) {
+                        _scaffoldKey.currentState!.openEndDrawer();
+                      }
+                      return KeyEventResult.handled;
+                    } else if (event.logicalKey == shortcuts.channelsPanel) {
+                      if (_controller.index.value != null) _drawerUpdateStream.value = 170 * (_controller.index.value! ~/ 2);
+                      _scrollController.dispose();
+                      _scrollController = ScrollController(initialScrollOffset: _drawerUpdateStream.value.toDouble());
+                      _scaffoldKey.currentState!.openDrawer();
+                      return KeyEventResult.handled;
+                    } else if (event.logicalKey == LogicalKeyboardKey.goBack) {
+                      if (_isShowControls.value) {
+                        _hideControls();
                         return KeyEventResult.handled;
-                      case LogicalKeyboardKey.arrowDown:
-                        if (_controller.index.value != null) _controller.next(_controller.index.value! - 1);
-                        if (_controller.status.value == PlayerStatus.idle ||
-                            _controller.status.value == PlayerStatus.error ||
-                            _controller.status.value == PlayerStatus.ended) {
-                          _controller.play();
-                        }
-                        return KeyEventResult.handled;
-                      case LogicalKeyboardKey.arrowRight:
-                        if (_controller.currentItem != null && _controller.currentItem!.source.links.length > 1) {
-                          _scaffoldKey.currentState!.openEndDrawer();
-                        }
-                        return KeyEventResult.handled;
-                      case LogicalKeyboardKey.select:
-                        if (_isShowControls.value) {
-                          _controlsStream.add(ControlsStreamStatus.hide);
-                        } else {
-                          _controlsStream.add(ControlsStreamStatus.show);
-                        }
-                        return KeyEventResult.handled;
-                      case LogicalKeyboardKey.arrowLeft:
-                      case LogicalKeyboardKey.contextMenu:
-                      case LogicalKeyboardKey.browserFavorites:
-                        if (_controller.index.value != null) _drawerUpdateStream.value = 170 * (_controller.index.value! ~/ 2);
-                        _scrollController.dispose();
-                        _scrollController = ScrollController(initialScrollOffset: _drawerUpdateStream.value.toDouble());
-                        _scaffoldKey.currentState!.openDrawer();
-                        return KeyEventResult.handled;
-                      case LogicalKeyboardKey.goBack:
-                        if (_isShowControls.value) {
-                          _hideControls();
-                          return KeyEventResult.handled;
-                        }
+                      }
                     }
                   }
                   return KeyEventResult.ignored;
