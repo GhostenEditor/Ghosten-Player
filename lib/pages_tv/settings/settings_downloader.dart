@@ -229,7 +229,7 @@ class _SystemSettingsDownloaderState extends State<SystemSettingsDownloader> {
         _subscription?.pause();
         await toPlayer(
           navigatorKey.currentContext!,
-          [FromMedia.fromMovie(movie)],
+          ([FromMedia.fromMovie(movie)], 0),
           theme: movie.themeColor,
         );
         _subscription?.resume();
@@ -240,8 +240,7 @@ class _SystemSettingsDownloaderState extends State<SystemSettingsDownloader> {
         _subscription?.pause();
         await toPlayer(
           navigatorKey.currentContext!,
-          season.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList(),
-          index: season.episodes.indexWhere((e) => episode.id == e.id),
+          (season.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList(), season.episodes.indexWhere((e) => episode.id == e.id)),
           theme: season.themeColor,
         );
         _subscription?.resume();

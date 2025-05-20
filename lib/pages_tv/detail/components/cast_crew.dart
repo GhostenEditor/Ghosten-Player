@@ -4,13 +4,16 @@ import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../../utils/utils.dart';
 import '../../components/focusable_image.dart';
+import '../../media/search.dart';
 
 class CastCrewInner extends StatelessWidget {
-  const CastCrewInner({super.key, required this.mediaCast, required this.mediaCrew});
+  const CastCrewInner({super.key, required this.mediaCast, required this.mediaCrew, required this.type});
 
   final List<MediaCast> mediaCast;
   final List<MediaCrew> mediaCrew;
+  final MediaType type;
 
   @override
   Widget build(BuildContext context) {
@@ -25,9 +28,23 @@ class CastCrewInner extends StatelessWidget {
         itemBuilder: (context, index) {
           final int i = (index / 2).floor();
           if (index.isEven) {
-            return i < mediaCast.length ? _CastListTile(mediaCast: mediaCast[i], autofocus: index == 0) : const SizedBox();
+            return i < mediaCast.length
+                ? _CastListTile(
+                    mediaCast: mediaCast[i],
+                    autofocus: index == 0,
+                    onTap: () {
+                      navigateTo(navigatorKey.currentContext!, SearchPage(activeTab: type == MediaType.movie ? 1 : 0, selectedCast: [mediaCast[i]]));
+                    })
+                : const SizedBox();
           } else {
-            return i < mediaCrew.length ? _CrewListTile(mediaCrew: mediaCrew[i]) : const SizedBox();
+            return i < mediaCrew.length
+                ? _CrewListTile(
+                    mediaCrew: mediaCrew[i],
+                    onTap: () {
+                      navigateTo(navigatorKey.currentContext!, SearchPage(activeTab: type == MediaType.movie ? 1 : 0, selectedCrew: [mediaCrew[i]]));
+                    },
+                  )
+                : const SizedBox();
           }
         });
   }
@@ -60,10 +77,11 @@ class CastCrewTitle extends StatelessWidget {
 }
 
 class CastCrewSection extends StatelessWidget {
-  const CastCrewSection({super.key, required this.mediaCast, required this.mediaCrew});
+  const CastCrewSection({super.key, required this.mediaCast, required this.mediaCrew, required this.type});
 
   final List<MediaCast> mediaCast;
   final List<MediaCrew> mediaCrew;
+  final MediaType type;
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +89,7 @@ class CastCrewSection extends StatelessWidget {
       slivers: [
         const SliverToBoxAdapter(child: SizedBox(height: 32)),
         CastCrewTitle(mediaCast: mediaCast, mediaCrew: mediaCrew),
-        SliverPadding(padding: const EdgeInsets.all(8), sliver: CastCrewInner(mediaCast: mediaCast, mediaCrew: mediaCrew)),
+        SliverPadding(padding: const EdgeInsets.all(8), sliver: CastCrewInner(mediaCast: mediaCast, mediaCrew: mediaCrew, type: type)),
         const SliverToBoxAdapter(child: SizedBox(height: 32)),
       ],
     );
@@ -79,10 +97,11 @@ class CastCrewSection extends StatelessWidget {
 }
 
 class _CastListTile extends StatelessWidget {
-  const _CastListTile({required this.mediaCast, this.autofocus = false});
+  const _CastListTile({required this.mediaCast, this.autofocus = false, this.onTap});
 
   final MediaCast mediaCast;
   final bool autofocus;
+  final GestureTapCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +115,7 @@ class _CastListTile extends StatelessWidget {
               autofocus: autofocus,
               poster: mediaCast.profile,
               placeholderIcon: Icons.account_circle_outlined,
-              onTap: () {},
+              onTap: onTap,
             ),
           ),
           const SizedBox(width: 16),
@@ -120,9 +139,10 @@ class _CastListTile extends StatelessWidget {
 }
 
 class _CrewListTile extends StatelessWidget {
-  const _CrewListTile({required this.mediaCrew});
+  const _CrewListTile({required this.mediaCrew, this.onTap});
 
   final MediaCrew mediaCrew;
+  final GestureTapCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -136,7 +156,7 @@ class _CrewListTile extends StatelessWidget {
             child: FocusableImage(
               poster: mediaCrew.profile,
               placeholderIcon: Icons.account_circle_outlined,
-              onTap: () {},
+              onTap: onTap,
             ),
           ),
           Expanded(

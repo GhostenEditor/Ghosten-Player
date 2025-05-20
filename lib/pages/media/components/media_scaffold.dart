@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 
 import '../../../components/logo.dart';
 import '../../../utils/utils.dart';
-import '../../components/appbar_progress.dart';
 import '../../components/mobile_builder.dart';
 import '../../utils/utils.dart';
 import '../search.dart';
@@ -76,7 +75,6 @@ class _MediaScaffoldState extends State<MediaScaffold> {
               child: const Padding(padding: EdgeInsets.all(12), child: Logo()),
             ),
             systemOverlayStyle: getSystemUiOverlayStyle(context),
-            bottom: const AppbarProgressIndicator(),
             actions: [
               IconButton(onPressed: () => navigateTo(context, const SearchPage()), icon: const Icon(Icons.search_rounded)),
             ],

@@ -27,9 +27,18 @@ class FutureBuilderHandler<T> extends StatelessWidget {
 }
 
 class FutureBuilderSliverHandler<T> extends StatelessWidget {
-  const FutureBuilderSliverHandler({super.key, required this.builder, this.future, this.initialData});
+  const FutureBuilderSliverHandler({
+    super.key,
+    required this.builder,
+    this.future,
+    this.initialData,
+    this.errorBuilder,
+    this.loadingBuilder,
+  });
 
   final AsyncWidgetBuilder<T> builder;
+  final AsyncWidgetBuilder<T>? errorBuilder;
+  final AsyncWidgetBuilder<T>? loadingBuilder;
   final Future<T>? future;
   final T? initialData;
 
@@ -41,10 +50,16 @@ class FutureBuilderSliverHandler<T> extends StatelessWidget {
       builder: (BuildContext context, AsyncSnapshot<T> snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           return snapshot.hasError
-              ? SliverFillRemaining(hasScrollBody: false, child: Center(child: ErrorMessage(error: snapshot.error)))
+              ? errorBuilder != null
+                  ? SliverToBoxAdapter(child: errorBuilder!(context, snapshot))
+                  : SliverFillRemaining(hasScrollBody: false, child: Center(child: ErrorMessage(error: snapshot.error)))
               : builder(context, snapshot);
         } else {
-          return snapshot.hasData ? builder(context, snapshot) : const SliverFillRemaining(hasScrollBody: false, child: Loading());
+          return snapshot.hasData
+              ? builder(context, snapshot)
+              : loadingBuilder != null
+                  ? SliverToBoxAdapter(child: loadingBuilder!(context, snapshot))
+                  : const SliverFillRemaining(hasScrollBody: false, child: Loading());
         }
       },
     );

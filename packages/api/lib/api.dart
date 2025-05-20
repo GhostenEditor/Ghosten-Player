@@ -6,8 +6,6 @@ export 'src/models.dart';
 
 class Api {
   static Uri get baseUrl => ApiPlatform.instance.baseUrl;
-  static final Stream<double?> progress$ = ApiPlatform.instance.progress$;
-  static final Stream<double?> needUpdate$ = ApiPlatform.instance.needUpdate$;
 
   static final databasePath = ApiPlatform.instance.databasePath;
   static final syncData = ApiPlatform.instance.syncData;
@@ -33,6 +31,10 @@ class Api {
   static final downloadTaskResumeById = ApiPlatform.instance.downloadTaskResumeById;
   static final downloadTaskDeleteById = ApiPlatform.instance.downloadTaskDeleteById;
   static final downloadTaskQueryByAll = ApiPlatform.instance.downloadTaskQueryByAll;
+  static final scheduleTaskQueryByAll = ApiPlatform.instance.scheduleTaskQueryByAll;
+  static final scheduleTaskPauseById = ApiPlatform.instance.scheduleTaskPauseById;
+  static final scheduleTaskResumeById = ApiPlatform.instance.scheduleTaskResumeById;
+  static final scheduleTaskDeleteById = ApiPlatform.instance.scheduleTaskDeleteById;
   static final sessionStatus = ApiPlatform.instance.sessionStatus;
   static final sessionCreate = ApiPlatform.instance.sessionCreate;
   static final dnsOverrideQueryAll = ApiPlatform.instance.dnsOverrideQueryAll;

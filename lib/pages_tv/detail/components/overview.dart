@@ -138,7 +138,6 @@ class _OverviewState<T extends MediaBase> extends State<Overview<T>> {
         thumbVisibility: focused,
         child: CustomScrollView(
           controller: _scrollController,
-          // padding: const EdgeInsets.all(32),
           slivers: [
             SliverPadding(
               padding: const EdgeInsets.only(left: 32, top: 32, right: 32),

@@ -6,7 +6,6 @@ import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rxdart/rxdart.dart';
 
 import 'api_platform_interface.dart';
 import 'errors.dart';
@@ -75,25 +74,6 @@ class MethodChannelApi extends ApiPlatform {
   }
 
   /// Driver End
-
-  /// Library Start
-
-  @override
-  Future<void> libraryRefreshById(dynamic id, bool incremental, String behavior) async {
-    final data = await client.post('/library/refresh/id/cb', data: {
-      'id': id,
-      'incremental': incremental,
-      'behavior': behavior,
-    });
-    final eventChannel = EventChannel('$_pluginNamespace/update/${data['id']}');
-
-    ApiPlatform.streamController.addStream(eventChannel
-        .receiveBroadcastStream()
-        .map((data) => jsonDecode(data)['progress'] as double?)
-        .concatWith([TimerStream<double?>(null, const Duration(seconds: 3))]).distinct());
-  }
-
-  /// Library End
 
   /// Miscellaneous Start
 

@@ -66,7 +66,6 @@ class SettingsSponsor extends StatelessWidget {
                         dense: true,
                         title: Text(AppLocalizations.of(context)!.sponsorThanksMessage, style: Theme.of(context).textTheme.titleMedium),
                         subtitle: Text(AppLocalizations.of(context)!.sponsorTipMessage),
-                        // contentPadding: EdgeInsets.zero,
                       ),
                     ),
                   ),
@@ -74,7 +73,6 @@ class SettingsSponsor extends StatelessWidget {
                       future: _getSponsorList(),
                       builder: (context, snapshot) {
                         return SliverList.builder(
-                          // padding: EdgeInsets.only(right: 32),
                           itemCount: snapshot.requireData.length,
                           itemBuilder: (context, index) => ButtonSettingItem(
                             dense: true,

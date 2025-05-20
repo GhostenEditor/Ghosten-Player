@@ -4,6 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../components/future_builder_handler.dart';
 import '../../../utils/utils.dart';
+import '../../components/loading.dart';
 
 class FileInfoSection extends StatefulWidget {
   const FileInfoSection({super.key, required this.fileId});
@@ -26,6 +27,7 @@ class _FileInfoSectionState extends State<FileInfoSection> {
   Widget build(BuildContext context) {
     return FutureBuilderHandler(
         future: future,
+        loadingBuilder: (context, _) => const Padding(padding: EdgeInsets.all(8.0), child: Loading()),
         builder: (context, snapshot) {
           final item = snapshot.requireData;
           return Padding(

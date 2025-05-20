@@ -971,7 +971,7 @@ class _PlayerProgressViewState extends State<PlayerProgressView> {
                         duration: const Duration(milliseconds: 200),
                         widthFactor: max(_controller.buffered / _controller.duration ?? 0, 0),
                         child: Container(color: Theme.of(context).colorScheme.surfaceContainerHighest)),
-                    if (_controller.status == PlayerStatus.error || _controller.status == PlayerStatus.idle)
+                    if (_controller.status == PlayerStatus.error)
                       Container(color: Theme.of(context).colorScheme.errorContainer)
                     else if (_controller.seeking)
                       AnimatedFractionallySizedBox(

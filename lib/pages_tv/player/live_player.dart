@@ -114,8 +114,6 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
                               title: Text('${AppLocalizations.of(context)!.playerBroadcastLine} ${index + 1}'),
                               onChanged: (_) async {
                                 final currentItem = _controller.currentItem!;
-                                // final item = PlaylistItem(url: url, poster: currentItem.poster);
-                                // _controller.playlist.value[_controller.index.value!] = item;
                                 _controller.updateSource(currentItem.copyWith(url: url), _controller.index.value!);
                                 switch (_controller.status.value) {
                                   case PlayerStatus.paused:

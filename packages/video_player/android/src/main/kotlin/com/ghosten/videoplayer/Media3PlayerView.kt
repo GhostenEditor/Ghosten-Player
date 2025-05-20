@@ -76,6 +76,7 @@ class Media3PlayerView(
     private val playerDB: PlayerDatabaseHelper = PlayerDatabaseHelper(context)
     private var thumbnailThread: ThumbnailThread = ThumbnailThread()
     private var isFullscreen = width == null && height == null
+    private var lastStatus: String = "idle"
 
     init {
         mRootView.addView(mNativeView, 0)
@@ -262,7 +263,8 @@ class Media3PlayerView(
         if (player.playbackState == Player.STATE_BUFFERING || player.playbackState == Player.STATE_IDLE) {
             return
         }
-        mChannel.invokeMethod("updateStatus", if (isPlaying) "playing" else "paused")
+        lastStatus = if (isPlaying) "playing" else "paused"
+        mChannel.invokeMethod("updateStatus", lastStatus)
         super.onIsPlayingChanged(isPlaying)
     }
 
@@ -407,16 +409,21 @@ class Media3PlayerView(
         super.onPlaybackStateChanged(playbackState)
         when (playbackState) {
             Player.STATE_IDLE -> {
-                mChannel.invokeMethod("updateStatus", "idle")
+                if (lastStatus != "error") {
+                    lastStatus = "idle"
+                    mChannel.invokeMethod("updateStatus", lastStatus)
+                }
             }
 
             Player.STATE_BUFFERING -> {
-                mChannel.invokeMethod("updateStatus", "buffering")
+                lastStatus = "buffering"
+                mChannel.invokeMethod("updateStatus", lastStatus)
                 mChannel.invokeMethod("bufferingUpdate", player.bufferedPosition)
             }
 
             Player.STATE_READY -> {
-                mChannel.invokeMethod("updateStatus", if (player.isPlaying) "playing" else "paused")
+                lastStatus = if (player.isPlaying) "playing" else "paused"
+                mChannel.invokeMethod("updateStatus", lastStatus)
                 val mediaInfo = HashMap<String, Any?>().apply {
                     this["videoCodecs"] = player.videoFormat?.codecs
                     this["videoMime"] = player.videoFormat?.sampleMimeType
@@ -454,7 +461,10 @@ class Media3PlayerView(
             }
 
             Player.STATE_ENDED -> {
-                mChannel.invokeMethod("updateStatus", "ended")
+                if (mPlaylist.isNotEmpty()) {
+                    lastStatus = "ended"
+                    mChannel.invokeMethod("updateStatus", lastStatus)
+                }
             }
 
         }
@@ -565,8 +575,8 @@ class Media3PlayerView(
                 mChannel.invokeMethod("fatalError", error.cause?.message)
             }
         }
-
-        mChannel.invokeMethod("updateStatus", "error")
+        lastStatus = "error"
+        mChannel.invokeMethod("updateStatus", lastStatus)
     }
 
     override fun onTracksChanged(tracks: Tracks) {
@@ -819,27 +829,32 @@ class Media3PlayerView(
         player.seekTo(position)
     }
 
-    override fun setSource(data: HashMap<String, Any>) {
-        val video = Video(
-            data[URL] as String,
-            data[MIME_TYPE] as String?,
-            data[TITLE] as String?,
-            data[DESCRIPTION] as String?,
-            data[POSTER] as String?,
-            (data[SUBTITLE] as List<HashMap<String, Any>>?)?.map {
-                Subtitle(
-                    it[URL] as String,
-                    it[MIME_TYPE] as String,
-                    it[LANGUAGE] as String?,
-                    it[SELECTED] as Boolean,
-                    it[LABEL] as String?
-                )
-            },
-            (data[START_POSITION] as Int? ?: 0).toLong(),
-            (data[END_POSITION] as Int? ?: 0).toLong(),
-        )
-        mPlaylist = arrayOf(video)
-        player.setMediaItem(buildMediaItem(video), video.startPosition)
+    override fun setSource(data: HashMap<String, Any>?) {
+        if (data != null) {
+            val video = Video(
+                data[URL] as String,
+                data[MIME_TYPE] as String?,
+                data[TITLE] as String?,
+                data[DESCRIPTION] as String?,
+                data[POSTER] as String?,
+                (data[SUBTITLE] as List<HashMap<String, Any>>?)?.map {
+                    Subtitle(
+                        it[URL] as String,
+                        it[MIME_TYPE] as String,
+                        it[LANGUAGE] as String?,
+                        it[SELECTED] as Boolean,
+                        it[LABEL] as String?
+                    )
+                },
+                (data[START_POSITION] as Int? ?: 0).toLong(),
+                (data[END_POSITION] as Int? ?: 0).toLong(),
+            )
+            mPlaylist = arrayOf(video)
+            player.setMediaItem(buildMediaItem(video), video.startPosition)
+        } else {
+            mPlaylist = arrayOf()
+            player.clearMediaItems()
+        }
     }
 
     override fun updateSource(data: HashMap<String, Any>, index: Int) {
@@ -907,23 +922,23 @@ class Media3PlayerView(
     }
 
     companion object {
-        const val TYPE: String = "type"
-        const val URL: String = "url"
-        const val TITLE: String = "title"
-        const val DESCRIPTION: String = "description"
-        const val POSTER: String = "poster"
-        const val SUBTITLE: String = "subtitle"
-        const val START_POSITION: String = "start"
-        const val END_POSITION: String = "end"
-        const val LANGUAGE: String = "language"
-        const val MIME_TYPE: String = "mimeType"
-        const val SELECTED: String = "selected"
-        const val LABEL: String = "label"
-        const val NOTIFICATION_ID = 3423523
-        const val USER_AGENT =
+        private const val TYPE: String = "type"
+        private const val URL: String = "url"
+        private const val TITLE: String = "title"
+        private const val DESCRIPTION: String = "description"
+        private const val POSTER: String = "poster"
+        private const val SUBTITLE: String = "subtitle"
+        private const val START_POSITION: String = "start"
+        private const val END_POSITION: String = "end"
+        private const val LANGUAGE: String = "language"
+        private const val MIME_TYPE: String = "mimeType"
+        private const val SELECTED: String = "selected"
+        private const val LABEL: String = "label"
+        private const val NOTIFICATION_ID = 3423523
+        private const val USER_AGENT =
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.83 Safari/537.36"
-        val CHANNEL_ID = R.string.default_player_channel_id
-        val PENDING_INTENT_FLAG_MUTABLE =
+        private val CHANNEL_ID = R.string.default_player_channel_id
+        private val PENDING_INTENT_FLAG_MUTABLE =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) android.app.PendingIntent.FLAG_MUTABLE else 0;
     }
 }

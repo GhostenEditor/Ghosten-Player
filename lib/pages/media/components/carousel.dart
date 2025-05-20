@@ -7,6 +7,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../../../components/async_image.dart';
+import '../../../components/placeholder.dart';
 import '../../../utils/utils.dart';
 
 class Carousel extends StatefulWidget {
@@ -72,6 +73,128 @@ class _CarouselState extends State<Carousel> {
         ),
       ],
     );
+  }
+}
+
+class CarouselPlaceholder extends StatelessWidget {
+  const CarouselPlaceholder({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final imageHeight = max(min(MediaQuery.of(context).size.width / 4, 240.0), 140.0);
+    final imageWidth = imageHeight * 0.667;
+    return LayoutBuilder(builder: (context, constraints) {
+      final height = max(min(constraints.maxWidth / 1.8, 300.0), 200.0);
+      return SizedBox(
+        height: height,
+        child: GPlaceholder(
+          child: Column(
+            children: [
+              Expanded(
+                  child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 800),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      spacing: MediaQuery.of(context).size.width / 30,
+                      children: [
+                        GPlaceholderImage(
+                          width: imageWidth,
+                          height: imageHeight,
+                        ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Row(
+                                  spacing: 4,
+                                  children: List.generate(
+                                      5,
+                                      (index) => Container(
+                                            width: 24,
+                                            height: 12,
+                                            decoration: GPlaceholderDecoration.base,
+                                          ))),
+                              const SizedBox(height: 6),
+                              FractionallySizedBox(
+                                widthFactor: 0.6,
+                                child: Container(
+                                  height: 20,
+                                  decoration: GPlaceholderDecoration.base,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Row(
+                                children: [
+                                  Container(
+                                    width: 40,
+                                    height: 12,
+                                    decoration: GPlaceholderDecoration.base,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  const Icon(Icons.star, color: Colors.amber, size: 14),
+                                  const SizedBox(width: 4),
+                                  Container(
+                                    width: 20,
+                                    height: 12,
+                                    decoration: GPlaceholderDecoration.base,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Container(
+                                    width: 36,
+                                    height: 12,
+                                    decoration: GPlaceholderDecoration.base,
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                spacing: 4,
+                                children: List.generate(
+                                    4,
+                                    (index) => FractionallySizedBox(
+                                          widthFactor: Random().nextDouble() * 0.2 + 0.7,
+                                          child: const GPlaceholderRect(height: 14),
+                                        )),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              )),
+              SmoothIndicator(
+                offset: 0,
+                count: 9,
+                size: const Size(6, 6),
+                effect: switch (Theme.of(context).brightness) {
+                  Brightness.dark => const WormEffect(
+                      dotWidth: 6,
+                      dotHeight: 6,
+                      spacing: 6,
+                      dotColor: Colors.white38,
+                      activeDotColor: Colors.white,
+                    ),
+                  Brightness.light => const WormEffect(
+                      dotWidth: 6,
+                      dotHeight: 6,
+                      spacing: 6,
+                      dotColor: Colors.black38,
+                      activeDotColor: Colors.black,
+                    ),
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    });
   }
 }
 

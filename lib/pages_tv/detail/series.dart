@@ -74,7 +74,11 @@ class _TVDetailState extends State<TVDetail> with ActionMixin {
                     child: Row(
                         children: item.genres
                             .map((genre) => TextButton(
-                                style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero, visualDensity: VisualDensity.compact),
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.zero,
+                                  minimumSize: Size.zero,
+                                  visualDensity: VisualDensity.compact,
+                                ),
                                 onPressed: () {},
                                 child: Text(genre.name, style: Theme.of(context).textTheme.labelSmall)))
                             .toList()),
@@ -82,7 +86,7 @@ class _TVDetailState extends State<TVDetail> with ActionMixin {
                   Text(
                     item.displayTitle(),
                     style: Theme.of(context).textTheme.displaySmall,
-                    maxLines: 3,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   RichText(
@@ -172,20 +176,28 @@ class _TVDetailState extends State<TVDetail> with ActionMixin {
                     title: Text(AppLocalizations.of(context)!.buttonWatchNow),
                     subtitle: item.nextToPlay != null
                         ? Text('S${item.nextToPlay!.season} E${item.nextToPlay!.episode} - ${item.nextToPlay!.displayTitle()}', overflow: TextOverflow.ellipsis)
-                        : const Text(''),
-                    trailing: (item.nextToPlay?.duration != null && item.nextToPlay?.lastPlayedTime != null && item.nextToPlay!.duration!.inSeconds > 0)
-                        ? SizedBox.square(
-                            dimension: 16,
-                            child: Builder(builder: (context) {
-                              return CircularProgressIndicator(
-                                value: item.nextToPlay!.lastPlayedPosition!.inSeconds / item.nextToPlay!.duration!.inSeconds,
-                                backgroundColor: Colors.white,
-                                strokeAlign: BorderSide.strokeAlignInside,
-                              );
-                            }),
-                          )
                         : null,
-                    onTap: () => _play(context, item),
+                    trailing: item.nextToPlay != null
+                        ? (item.nextToPlay?.duration != null && item.nextToPlay?.lastPlayedTime != null && item.nextToPlay!.duration!.inSeconds > 0)
+                            ? SizedBox.square(
+                                dimension: 16,
+                                child: Builder(builder: (context) {
+                                  return CircularProgressIndicator(
+                                    value: item.nextToPlay!.lastPlayedPosition!.inSeconds / item.nextToPlay!.duration!.inSeconds,
+                                    backgroundColor: Colors.white,
+                                    strokeAlign: BorderSide.strokeAlignInside,
+                                  );
+                                }),
+                              )
+                            : null
+                        : const SizedBox.square(
+                            dimension: 16,
+                            child: CircularProgressIndicator(
+                              backgroundColor: Colors.white,
+                              strokeAlign: BorderSide.strokeAlignInside,
+                            ),
+                          ),
+                    onTap: item.nextToPlay != null ? () => _play(context, item) : () {},
                   ),
                   ButtonSettingItem(
                     leading: const Icon(Icons.playlist_play),
@@ -202,7 +214,7 @@ class _TVDetailState extends State<TVDetail> with ActionMixin {
                       Navigator.pushAndRemoveUntil(_navigatorKey.currentContext!, FadeInPageRoute(builder: (context) {
                         return Align(
                           alignment: Alignment.topRight,
-                          child: CastCrewSection(mediaCast: item.mediaCast, mediaCrew: item.mediaCrew),
+                          child: CastCrewSection(mediaCast: item.mediaCast, mediaCrew: item.mediaCrew, type: MediaType.series),
                         );
                       }), (_) => false);
                       _showSide.value = true;
@@ -280,10 +292,15 @@ class _TVDetailState extends State<TVDetail> with ActionMixin {
   Future<void> _play(BuildContext context, TVSeries item) async {
     final res = item.nextToPlay;
     if (res != null) {
-      final season = await Api.tvSeasonQueryById(res.seasonId);
-      final playlist = season.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList();
-      if (!context.mounted) return;
-      await toPlayer(context, playlist, index: season.episodes.indexWhere((episode) => episode.id == res.id), theme: item.themeColor);
+      await toPlayer(
+        context,
+        Future.microtask(() async {
+          final season = await Api.tvSeasonQueryById(res.seasonId);
+          final playlist = season.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList();
+          return (playlist, season.episodes.indexWhere((episode) => episode.id == res.id));
+        }),
+        theme: item.themeColor,
+      );
       if (context.mounted) setState(() => refresh = true);
     }
   }

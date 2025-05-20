@@ -58,7 +58,6 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
                       )
                     : const SizedBox();
               }),
-          // const DividerSettingItem(),
           ListTile(title: Text(AppLocalizations.of(context)!.settingsItemDataSettings), dense: true),
           ButtonSettingItem(
             title: Text(AppLocalizations.of(context)!.settingsItemDataSync),

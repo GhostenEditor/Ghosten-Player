@@ -53,7 +53,7 @@ abstract class PlayerPlatform extends PlatformInterface {
     throw UnimplementedError('setAspectRatio() has not been implemented.');
   }
 
-  Future<void> setSource(Map<String, dynamic> item) {
+  Future<void> setSource(Map<String, dynamic>? item) {
     throw UnimplementedError('setSource() has not been implemented.');
   }
 

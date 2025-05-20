@@ -17,20 +17,51 @@ class SettingsLogPage extends StatefulWidget {
 }
 
 class _SettingsLogPageState extends State<SettingsLogPage> {
-  final _controller = PagingController<int, Log>(firstPageKey: 0);
   final _scrollController = ScrollController();
   DateTimeRange? _dateTimeRange;
 
-  @override
-  void initState() {
-    super.initState();
-    _controller.addPageRequestListener(_query);
+  PagingState<int, Log> _state = PagingState();
+
+  Future<void> _fetchNextPage() async {
+    if (_state.isLoading) return;
+
+    await Future.value();
+
+    setState(() {
+      _state = _state.copyWith(isLoading: true, error: null);
+    });
+
+    try {
+      final newKey = (_state.keys?.last ?? -1) + 1;
+      final data = await Api.logQueryPage(
+        30,
+        newKey * 30,
+        _dateTimeRange != null ? (_dateTimeRange!.start.millisecondsSinceEpoch, _dateTimeRange!.end.add(const Duration(days: 1)).millisecondsSinceEpoch) : null,
+      );
+
+      final hasNextPage = data.offset + data.limit < data.count;
+
+      setState(() {
+        _state = _state.copyWith(
+          pages: [...?_state.pages, data.data],
+          keys: [...?_state.keys, newKey],
+          hasNextPage: hasNextPage,
+          isLoading: false,
+        );
+      });
+    } catch (error) {
+      setState(() {
+        _state = _state.copyWith(
+          error: error,
+          isLoading: false,
+        );
+      });
+    }
   }
 
   @override
   void dispose() {
     super.dispose();
-    _controller.dispose();
     _scrollController.dispose();
   }
 
@@ -51,7 +82,7 @@ class _SettingsLogPageState extends State<SettingsLogPage> {
                 initialDateRange: _dateTimeRange,
                 initialEntryMode: DatePickerEntryMode.calendarOnly,
               );
-              _controller.refresh();
+              setState(() => _state = PagingState());
             },
           )
         ],
@@ -71,9 +102,12 @@ class _SettingsLogPageState extends State<SettingsLogPage> {
       body: Scrollbar(
         controller: _scrollController,
         child: RefreshIndicator(
-          onRefresh: () async => _controller.refresh(),
+          onRefresh: () async => setState(() {
+            _state = PagingState();
+          }),
           child: PagedListView.separated(
-            pagingController: _controller,
+            state: _state,
+            fetchNextPage: _fetchNextPage,
             scrollController: _scrollController,
             builderDelegate: PagedChildBuilderDelegate<Log>(
               itemBuilder: (context, item, index) => ListTile(
@@ -102,8 +136,8 @@ class _SettingsLogPageState extends State<SettingsLogPage> {
                   );
                 },
               ),
-              firstPageErrorIndicatorBuilder: (_) => ErrorMessage(error: _controller.error),
-              newPageErrorIndicatorBuilder: (_) => ErrorMessage(error: _controller.error),
+              firstPageErrorIndicatorBuilder: (_) => ErrorMessage(error: _state.error),
+              newPageErrorIndicatorBuilder: (_) => ErrorMessage(error: _state.error),
               noItemsFoundIndicatorBuilder: (_) => const NoData(),
               noMoreItemsIndicatorBuilder: (_) => Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -115,23 +149,5 @@ class _SettingsLogPageState extends State<SettingsLogPage> {
         ),
       ),
     );
-  }
-
-  Future<void> _query(int index) async {
-    try {
-      final data = await Api.logQueryPage(
-        30,
-        index * 30,
-        _dateTimeRange != null ? (_dateTimeRange!.start.millisecondsSinceEpoch, _dateTimeRange!.end.add(const Duration(days: 1)).millisecondsSinceEpoch) : null,
-      );
-
-      if (data.offset + data.limit >= data.count) {
-        _controller.appendLastPage(data.data);
-      } else {
-        _controller.appendPage(data.data, index + 1);
-      }
-    } catch (error) {
-      _controller.error = error;
-    }
   }
 }

@@ -57,48 +57,6 @@ class ApiWeb extends ApiPlatform {
 
   /// Driver End
 
-  /// Library Start
-
-  @override
-  Future<void> libraryRefreshById(dynamic id, bool incremental, String behavior) async {
-    final data = await client.post('/library/refresh/id/cb', data: {
-      'id': id,
-      'incremental': incremental,
-      'behavior': behavior,
-    });
-    final sessionId = data['id'];
-    Stream<double?> s() async* {
-      loop:
-      while (true) {
-        try {
-          final session = await sessionStatus(sessionId);
-          switch (session.status) {
-            case SessionStatus.progressing:
-              yield session.data['progress'];
-            case SessionStatus.finished:
-              yield 1;
-              break loop;
-            case SessionStatus.failed:
-              yield -1;
-              break loop;
-            case SessionStatus.created:
-            case SessionStatus.data:
-          }
-        } catch (e) {
-          yield null;
-          rethrow;
-        }
-        await Future.delayed(const Duration(milliseconds: 300));
-      }
-      await Future.delayed(const Duration(milliseconds: 3000));
-      yield null;
-    }
-
-    ApiPlatform.streamController.addStream(s());
-  }
-
-  /// Library End
-
   /// Miscellaneous Start
   @override
   Stream<List<NetworkDiagnotics>> networkDiagnostics() async* {

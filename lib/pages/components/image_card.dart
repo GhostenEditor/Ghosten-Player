@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../components/async_image.dart';
+import '../../components/placeholder.dart';
 
 class ImageCard extends StatelessWidget {
   const ImageCard(
@@ -97,6 +98,51 @@ class ImageCard extends StatelessWidget {
         ),
       );
     });
+  }
+}
+
+class ImageCardPlaceholder extends StatelessWidget {
+  const ImageCardPlaceholder({super.key, this.width, this.height});
+
+  final double? width;
+  final double? height;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: width,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 4,
+        children: [
+          GPlaceholderImage(
+            width: width,
+            height: height,
+          ),
+          FractionallySizedBox(
+            widthFactor: 0.9,
+            child: Container(
+              height: 16,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(4),
+                color: Colors.white60,
+              ),
+            ),
+          ),
+          FractionallySizedBox(
+            widthFactor: 0.6,
+            child: Container(
+              height: 10,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(4),
+                color: Colors.white54,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
