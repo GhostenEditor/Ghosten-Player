@@ -68,7 +68,8 @@ mixin ActionMixin<S extends StatefulWidget> on State<S> {
     );
   }
 
-  PopupMenuEntry<Never> buildSkipFromStartAction<B extends MediaCubit<AsyncSnapshot<T>>, T extends MediaBase>(BuildContext context, T item, MediaType type, Duration value) {
+  PopupMenuEntry<Never> buildSkipFromStartAction<B extends MediaCubit<AsyncSnapshot<T>>, T extends MediaBase>(
+      BuildContext context, T item, MediaType type, Duration value) {
     return PopupMenuItem(
       padding: EdgeInsets.zero,
       onTap: () async {
@@ -90,7 +91,8 @@ mixin ActionMixin<S extends StatefulWidget> on State<S> {
     );
   }
 
-  PopupMenuEntry<Never> buildSkipFromEndAction<B extends MediaCubit<AsyncSnapshot<T>>, T extends MediaBase>(BuildContext context, T item, MediaType type, Duration value) {
+  PopupMenuEntry<Never> buildSkipFromEndAction<B extends MediaCubit<AsyncSnapshot<T>>, T extends MediaBase>(
+      BuildContext context, T item, MediaType type, Duration value) {
     return PopupMenuItem(
       padding: EdgeInsets.zero,
       onTap: () async {

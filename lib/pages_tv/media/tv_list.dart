@@ -210,8 +210,8 @@ class _TVListPageState extends State<TVListPage> {
             ),
             MediaGridChannel(
               label: AppLocalizations.of(context)!.tagAll,
-              onQuery: (index) =>
-                  Api.tvSeriesQueryAll(MediaSearchQuery(limit: 30, offset: 30 * index, sort: const SortConfig(type: SortType.title, direction: SortDirection.asc))),
+              onQuery: (index) => Api.tvSeriesQueryAll(
+                  MediaSearchQuery(limit: 30, offset: 30 * index, sort: const SortConfig(type: SortType.title, direction: SortDirection.asc))),
               itemBuilder: (context, item, index) => _buildMediaItem(context, item, width: 160, height: 160 / 0.67),
             ),
           ],

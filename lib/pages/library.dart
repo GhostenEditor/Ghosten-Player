@@ -89,7 +89,7 @@ class _LibraryManageState extends State<LibraryManage> {
                                     ),
                                   ScheduleTaskType.scrapeLibrary => ListTile(
                                       dense: true,
-                                      title:  Text(AppLocalizations.of(context)!.scheduleTaskScrapeTitle(item.status.name)),
+                                      title: Text(AppLocalizations.of(context)!.scheduleTaskScrapeTitle(item.status.name)),
                                       subtitle: data['progress'] != null ? Text('${((data['progress'] as double) * 100.0).toStringAsFixed(2)}%') : null,
                                       trailing: switch (item.status) {
                                         ScheduleTaskStatus.idle => null,
