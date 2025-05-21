@@ -7,6 +7,7 @@ import 'package:video_player/player.dart';
 
 import '../../components/async_image.dart';
 import '../../components/error_message.dart';
+import '../../components/placeholder.dart';
 import '../../components/playing_icon.dart';
 import '../../models/models.dart';
 import '../../pages/detail/components/genres.dart';
@@ -115,13 +116,15 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
                       onGenerateRoute: (settings) => MaterialPageRoute(
                           builder: (context) => Material(
                                 child: ListenableBuilder(
-                                    listenable: Listenable.merge([_controller.index, _controller.playlist]),
-                                    builder: (context, _) => _PlaylistSidebar(
-                                          themeColor: themeColor,
-                                          playlist: _controller.playlist.value,
-                                          activeIndex: _controller.index.value,
-                                          onTap: (index) => _controller.next(index),
-                                        )),
+                                    listenable: Listenable.merge([_controller.index, _controller.playlist, _controller.playlistError]),
+                                    builder: (context, _) => _controller.playlistError.value == null
+                                        ? _PlaylistSidebar(
+                                            themeColor: themeColor,
+                                            playlist: _controller.playlist.value,
+                                            activeIndex: _controller.index.value,
+                                            onTap: (index) => _controller.next(index),
+                                          )
+                                        : ErrorMessage(error: _controller.playlistError.value)),
                               ),
                           settings: settings),
                     ),
@@ -357,45 +360,84 @@ class _PlaylistSidebarState extends State<_PlaylistSidebar> {
 
   @override
   Widget build(BuildContext context) {
-    return ThemeBuilder(widget.themeColor, builder: (context) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(AppLocalizations.of(context)!.titlePlaylist, style: Theme.of(context).textTheme.titleMedium),
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-          primary: false,
-        ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.titlePlaylist, style: Theme.of(context).textTheme.titleMedium),
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         primary: false,
-        body: ListView.separated(
-          controller: _controller,
-          padding: const EdgeInsets.all(16),
-          separatorBuilder: (context, index) => const SizedBox(height: 12),
-          itemCount: widget.playlist.length,
-          itemBuilder: (context, index) {
-            final item = widget.playlist[index].source;
-            return ImageCardWide(
-              item.poster,
-              width: imageWidth,
-              height: imageHeight,
-              title: Text(item.displayTitle()),
-              subtitle: Text(item.airDate == null ? '' : ' - ${item.airDate?.format()}'),
-              description: Text(item.overview ?? ''),
-              floating: widget.activeIndex == index
-                  ? Container(
-                      color: Theme.of(context).scaffoldBackgroundColor.withAlpha(0x66),
-                      width: imageWidth,
-                      height: imageHeight,
-                      child: Align(
-                        alignment: Alignment.topRight,
-                        child: PlayingIcon(color: Theme.of(context).colorScheme.primary),
-                      ),
-                    )
-                  : null,
-              onTap: widget.onTap == null ? null : () => widget.onTap!(index),
-            );
-          },
-        ),
-      );
-    });
+      ),
+      primary: false,
+      body: widget.playlist.isNotEmpty
+          ? ListView.separated(
+              controller: _controller,
+              padding: const EdgeInsets.all(16),
+              separatorBuilder: (context, index) => const SizedBox(height: 12),
+              itemCount: widget.playlist.length,
+              itemBuilder: (context, index) {
+                final item = widget.playlist[index].source;
+                return ImageCardWide(
+                  item.poster,
+                  width: imageWidth,
+                  height: imageHeight,
+                  title: Text(item.displayTitle()),
+                  subtitle: Text(item.airDate == null ? '' : ' - ${item.airDate?.format()}'),
+                  description: Text(item.overview ?? ''),
+                  floating: widget.activeIndex == index
+                      ? Material(
+                          shape: RoundedRectangleBorder(
+                            side: widget.activeIndex == index
+                                ? BorderSide(width: 6, color: Theme.of(context).colorScheme.primary, strokeAlign: BorderSide.strokeAlignCenter)
+                                : BorderSide.none,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          color: Theme.of(context).scaffoldBackgroundColor.withAlpha(0x66),
+                          child: SizedBox(
+                            width: imageWidth,
+                            height: imageHeight,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                PlayingIcon(color: Theme.of(context).colorScheme.primary),
+                                if (item.duration != null)
+                                  Padding(
+                                    padding: const EdgeInsets.all(4),
+                                    child: Badge(label: Text(item.duration!.toDisplay()), backgroundColor: Theme.of(context).colorScheme.primary),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        )
+                      : item.duration != null
+                          ? SizedBox(
+                              width: imageWidth,
+                              height: imageHeight,
+                              child: Align(
+                                  alignment: Alignment.bottomRight,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(4),
+                                    child: Badge(
+                                        label: Text(item.duration!.toDisplay()),
+                                        backgroundColor:
+                                            widget.activeIndex == index ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.secondary),
+                                  )),
+                            )
+                          : null,
+                  onTap: widget.onTap == null ? null : () => widget.onTap!(index),
+                );
+              },
+            )
+          : GPlaceholder(
+              child: ListView.separated(
+                padding: const EdgeInsets.all(16),
+                separatorBuilder: (context, index) => const SizedBox(height: 12),
+                itemCount: 1,
+                itemBuilder: (context, index) {
+                  return const ImageCardWidePlaceholder(width: 71, height: 107);
+                },
+              ),
+            ),
+    );
   }
 }
 

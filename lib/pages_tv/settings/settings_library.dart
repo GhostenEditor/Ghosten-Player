@@ -66,7 +66,7 @@ class _LibraryManageState extends State<LibraryManage> {
                                   },
                                   subtitle: switch (item.type) {
                                     ScheduleTaskType.syncLibrary =>
-                                      data['files'] != null ? Text(AppLocalizations.of(context)!.scheduleTaskSyncTitle(data['files'])) : null,
+                                      data['files'] != null ? Text(AppLocalizations.of(context)!.scheduleTaskSyncSubtitle(data['files'].toString())) : null,
                                     ScheduleTaskType.scrapeLibrary =>
                                       data['progress'] != null ? Text('${((data['progress'] as double) * 100.0).toStringAsFixed(2)}%') : null,
                                   },

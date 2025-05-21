@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import '../../components/async_image.dart';
@@ -239,6 +241,90 @@ class ImageCardWide extends StatelessWidget {
                         ),
                     ],
                   ),
+                ),
+              ),
+            )
+          ],
+        ),
+      );
+    });
+  }
+}
+
+class ImageCardWidePlaceholder extends StatelessWidget {
+  const ImageCardWidePlaceholder({
+    super.key,
+    this.width,
+    this.height,
+  });
+
+  final double? width;
+  final double? height;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, constraints) {
+      return ConstrainedBox(
+        constraints: constraints.copyWith(maxHeight: height, minHeight: height),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 16,
+          children: [
+            ConstrainedBox(
+              constraints: constraints.deflate(const EdgeInsets.symmetric(vertical: 21)).copyWith(maxWidth: width, minWidth: width),
+              child: Material(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                clipBehavior: Clip.antiAlias,
+                child: GPlaceholderImage(
+                  width: width,
+                  height: height,
+                ),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FractionallySizedBox(
+                      widthFactor: 0.6,
+                      child: Container(
+                        height: 20,
+                        decoration: GPlaceholderDecoration.base,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 12,
+                          decoration: GPlaceholderDecoration.base,
+                        ),
+                        const SizedBox(width: 4),
+                        Container(
+                          width: 20,
+                          height: 12,
+                          decoration: GPlaceholderDecoration.base,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 4,
+                      children: List.generate(
+                          3,
+                          (index) => FractionallySizedBox(
+                                widthFactor: Random().nextDouble() * 0.2 + 0.7,
+                                child: const GPlaceholderRect(height: 14),
+                              )),
+                    ),
+                  ],
                 ),
               ),
             )

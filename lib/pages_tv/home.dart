@@ -62,7 +62,7 @@ class _HomeState extends State<TVHomePage> {
               alignment: Alignment.centerLeft,
               child: TextButton.icon(
                 label: Text(AppLocalizations.of(context)!.search),
-                onPressed: () => navigateTo(context, const SearchPage()),
+                onPressed: () => navigateTo(context, const SearchPage(autofocus: true)),
                 style: TextButton.styleFrom(
                   backgroundColor: Colors.transparent,
                   iconColor: Colors.white,

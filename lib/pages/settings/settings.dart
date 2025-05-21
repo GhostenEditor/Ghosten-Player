@@ -142,39 +142,56 @@ class _UrlDialog extends StatefulWidget {
 }
 
 class __UrlDialogState extends State<_UrlDialog> {
+  final _formKey = GlobalKey<FormState>();
   late final _controller = TextEditingController();
   String? fileId;
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(AppLocalizations.of(context)!.pageTitleAdd),
+      title: Text(AppLocalizations.of(context)!.buttonPlay),
       content: SizedBox(
         width: 600,
-        child: TextField(
-          autofocus: true,
-          controller: _controller,
-          decoration: InputDecoration(
-            isDense: true,
-            border: const UnderlineInputBorder(),
-            labelText: 'Link',
-            prefixIcon: const Icon(Icons.link),
-            suffixIcon: IconButton(
-              icon: const Icon(Icons.folder_open_rounded),
-              onPressed: () async {
-                final res = await showDriverFilePicker(context, '', selectableType: FileType.file);
-                if (res != null) {
-                  final file = res.$2;
-                  _controller.text = file.fileId ?? '';
-                  fileId = file.fileId;
-                  setState(() {});
-                }
-              },
+        child: Form(
+          key: _formKey,
+          child: TextFormField(
+            autofocus: true,
+            controller: _controller,
+            decoration: InputDecoration(
+              isDense: true,
+              border: const UnderlineInputBorder(),
+              labelText: 'Link',
+              prefixIcon: const Icon(Icons.link),
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.folder_open_rounded),
+                onPressed: () async {
+                  final res = await showDriverFilePicker(context, '', selectableType: FileType.file);
+                  if (res != null) {
+                    final file = res.$2;
+                    _controller.text = file.fileId ?? '';
+                    fileId = file.fileId;
+                    setState(() {});
+                  }
+                },
+              ),
             ),
+            validator: (value) {
+              if (_controller.text.trim().isEmpty) {
+                return AppLocalizations.of(context)!.formValidatorRequired;
+              }
+              if (fileId != null) {
+                return null;
+              }
+              final uri = Uri.tryParse(_controller.text);
+              if (uri == null || !uri.hasScheme) {
+                return AppLocalizations.of(context)!.formValidatorUrl;
+              }
+              return null;
+            },
+            onChanged: (_) {
+              fileId = null;
+            },
           ),
-          onChanged: (_) {
-            fileId = null;
-          },
         ),
       ),
       actions: [
@@ -184,6 +201,8 @@ class __UrlDialogState extends State<_UrlDialog> {
   }
 
   Future<void> _onSubmit(BuildContext context) async {
-    Navigator.pop(context, (Uri.tryParse(_controller.text), fileId));
+    if (_formKey.currentState!.validate()) {
+      Navigator.pop(context, (Uri.tryParse(_controller.text), fileId));
+    }
   }
 }

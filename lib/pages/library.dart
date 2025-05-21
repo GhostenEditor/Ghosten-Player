@@ -77,7 +77,8 @@ class _LibraryManageState extends State<LibraryManage> {
                                   ScheduleTaskType.syncLibrary => ListTile(
                                       dense: true,
                                       title: Text(AppLocalizations.of(context)!.scheduleTaskSyncTitle(item.status.name)),
-                                      subtitle: data['files'] != null ? Text(AppLocalizations.of(context)!.scheduleTaskSyncTitle(data['files'])) : null,
+                                      subtitle:
+                                          data['files'] != null ? Text(AppLocalizations.of(context)!.scheduleTaskSyncSubtitle(data['files'].toString())) : null,
                                       trailing: switch (item.status) {
                                         ScheduleTaskStatus.idle => const SizedBox(),
                                         ScheduleTaskStatus.running => const SizedBox.square(dimension: 12, child: CircularProgressIndicator(strokeWidth: 2)),

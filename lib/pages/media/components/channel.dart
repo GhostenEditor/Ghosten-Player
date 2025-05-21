@@ -218,6 +218,7 @@ class _MediaGridChannelState<T> extends State<MediaGridChannel<T>> {
         _count = data.count;
       });
     } catch (error) {
+      if (!mounted) return;
       setState(() {
         _state = _state.copyWith(
           error: error,

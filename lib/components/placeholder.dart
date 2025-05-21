@@ -11,7 +11,7 @@ class GPlaceholder extends StatelessWidget {
     return Shimmer.fromColors(
       baseColor: Theme.of(context).colorScheme.surfaceContainerLow,
       highlightColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-      child: child,
+      child: IgnorePointer(child: child),
     );
   }
 }

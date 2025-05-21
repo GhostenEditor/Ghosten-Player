@@ -76,7 +76,7 @@ class _MediaScaffoldState extends State<MediaScaffold> {
             ),
             systemOverlayStyle: getSystemUiOverlayStyle(context),
             actions: [
-              IconButton(onPressed: () => navigateTo(context, const SearchPage()), icon: const Icon(Icons.search_rounded)),
+              IconButton(onPressed: () => navigateTo(context, const SearchPage(autofocus: true)), icon: const Icon(Icons.search_rounded)),
             ],
           ),
           ...widget.slivers,

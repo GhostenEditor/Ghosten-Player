@@ -24,8 +24,10 @@ class SearchPage extends StatefulWidget {
     this.selectedCast = const [],
     this.selectedCrew = const [],
     this.activeTab = 0,
+    this.autofocus = false,
   });
 
+  final bool autofocus;
   final int activeTab;
   final List<FilterType> filterType;
   final List<Genre> selectedGenre;
@@ -98,7 +100,7 @@ class _SearchPageState extends State<SearchPage> {
             ),
           ),
           child: TextField(
-            autofocus: true,
+            autofocus: widget.autofocus,
             focusNode: _focusNode,
             controller: _searchController,
             decoration: InputDecoration(

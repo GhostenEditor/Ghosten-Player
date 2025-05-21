@@ -67,7 +67,25 @@ class MoviePlaceholder extends StatelessWidget {
                       )),
                 );
               }),
-              sidebar: const SizedBox(),
+              sidebar: Scaffold(
+                appBar: AppBar(
+                  title: Text(AppLocalizations.of(context)!.titlePlaylist, style: Theme.of(context).textTheme.titleMedium),
+                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                  primary: false,
+                  automaticallyImplyLeading: false,
+                ),
+                primary: false,
+                body: GPlaceholder(
+                  child: ListView.separated(
+                    padding: const EdgeInsets.all(16),
+                    separatorBuilder: (context, index) => const SizedBox(height: 12),
+                    itemCount: 1,
+                    itemBuilder: (context, index) {
+                      return const ImageCardWidePlaceholder(width: 71, height: 107);
+                    },
+                  ),
+                ),
+              ),
               child: Scaffold(
                 body: CustomScrollView(
                   slivers: [

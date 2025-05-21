@@ -67,7 +67,25 @@ class TVPlaceholder extends StatelessWidget {
                       )),
                 );
               }),
-              sidebar: const SizedBox(),
+              sidebar: Scaffold(
+                appBar: AppBar(
+                  title: Text(AppLocalizations.of(context)!.titlePlaylist, style: Theme.of(context).textTheme.titleMedium),
+                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                  primary: false,
+                  automaticallyImplyLeading: false,
+                ),
+                primary: false,
+                body: GPlaceholder(
+                  child: ListView.separated(
+                    padding: const EdgeInsets.all(16),
+                    separatorBuilder: (context, index) => const SizedBox(height: 12),
+                    itemCount: 10,
+                    itemBuilder: (context, index) {
+                      return const ImageCardWidePlaceholder(width: 190.0, height: 190.0 / 1.78);
+                    },
+                  ),
+                ),
+              ),
               child: Scaffold(
                 body: CustomScrollView(
                   slivers: [
@@ -136,13 +154,10 @@ class TVPlaceholder extends StatelessWidget {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         spacing: 7,
                                         children: List.generate(
-                                            8,
+                                            7,
                                             (index) => FractionallySizedBox(
                                                   widthFactor: Random().nextDouble() * 0.2 + 0.7,
-                                                  child: Container(
-                                                    height: 12,
-                                                    decoration: GPlaceholderDecoration.base,
-                                                  ),
+                                                  child: GPlaceholderRect(height: 14),
                                                 )),
                                       )),
                                     ],
