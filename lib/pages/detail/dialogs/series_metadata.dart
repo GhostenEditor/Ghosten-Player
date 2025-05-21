@@ -4,6 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../utils/utils.dart';
 import '../../../validators/validators.dart';
+import '../../utils/notification.dart';
 
 class SeriesMetadata extends StatefulWidget {
   const SeriesMetadata({super.key, required this.series});
@@ -135,16 +136,21 @@ class _SeriesMetadataState extends State<SeriesMetadata> {
         FilledButton(
           onPressed: () async {
             if (_formKey.currentState!.validate()) {
-              await Api.tvSeriesMetadataUpdateById({
-                'id': widget.series.id,
-                'title': _controller1.text,
-                'originalTitle': _controller2.text,
-                'firstAirDate': _controller3.text,
-                'overview': _controller4.text,
-                'voteAverage': double.parse(_controller5.text),
-                'voteCount': int.parse(_controller6.text),
-              });
-              if (context.mounted) Navigator.pop(context, true);
+              final resp = await showNotification(
+                  context,
+                  showSuccess: false,
+                  Api.tvSeriesMetadataUpdateById({
+                    'id': widget.series.id,
+                    'title': _controller1.text,
+                    'originalTitle': _controller2.text,
+                    'firstAirDate': _controller3.text,
+                    'overview': _controller4.text,
+                    'voteAverage': double.parse(_controller5.text),
+                    'voteCount': int.parse(_controller6.text),
+                  }));
+              if (resp?.error == null) {
+                if (context.mounted) Navigator.pop(context, true);
+              }
             }
           },
           child: Text(AppLocalizations.of(context)!.buttonConfirm),

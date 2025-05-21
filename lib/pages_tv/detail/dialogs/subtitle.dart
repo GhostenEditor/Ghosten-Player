@@ -181,7 +181,6 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
                   contentPadding: const EdgeInsets.only(left: 8),
                   value: selected,
                   onChanged: (v) => setState(() => selected = v ?? false),
-                  // trailing: Checkbox(),
                 ),
                 const Spacer(),
                 TVFilledButton(

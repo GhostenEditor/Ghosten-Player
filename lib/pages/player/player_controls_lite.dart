@@ -351,9 +351,9 @@ class _PlayerControlsLiteState<T> extends State<PlayerControlsLite<T>> {
                         SizedBox.square(dimension: 48, child: Center(child: Transform.scale(scale: 0.5, child: const CircularProgressIndicator()))),
                       PlayerStatus.paused ||
                       PlayerStatus.idle ||
-                      PlayerStatus.ended =>
+                      PlayerStatus.ended ||
+                      PlayerStatus.error =>
                         IconButton(onPressed: _controller.play, icon: const Icon(Icons.play_arrow_rounded)),
-                      PlayerStatus.error => IconButton(onPressed: null, icon: Icon(Icons.error_outline, color: Theme.of(context).colorScheme.error)),
                     };
                   }),
               Expanded(

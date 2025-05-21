@@ -53,7 +53,7 @@ class MethodChannelPlayer extends PlayerPlatform {
   }
 
   @override
-  Future<void> setSource(Map<String, dynamic> item) {
+  Future<void> setSource(Map<String, dynamic>? item) {
     return _channel.invokeMethod('setSource', item);
   }
 

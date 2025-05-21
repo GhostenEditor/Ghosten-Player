@@ -2,14 +2,15 @@ import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import 'package:video_player/player.dart';
 
 import '../../components/logo.dart';
 import '../../components/scrollbar.dart';
 import '../../const.dart';
 import '../../utils/utils.dart';
 import '../account/account.dart';
-import '../components/appbar_progress.dart';
 import '../library.dart';
+import '../player/singleton_player.dart';
 import '../utils/utils.dart';
 import 'settings_diagnotics.dart';
 import 'settings_downloader.dart';
@@ -28,7 +29,6 @@ class SettingsPage extends StatelessWidget {
     return Scaffold(
         appBar: AppBar(
           title: Text(AppLocalizations.of(context)!.settingsTitle),
-          bottom: const AppbarProgressIndicator(),
           leading: isMobile(context) ? const Padding(padding: EdgeInsets.all(12), child: Logo()) : null,
         ),
         body: ScrollbarListView(
@@ -50,6 +50,22 @@ class SettingsPage extends StatelessWidget {
               onTap: () => navigateTo(context, const LibraryManage(type: LibraryType.movie)),
             ),
             const Divider(),
+            _buildItem(
+              AppLocalizations.of(context)!.buttonPlay,
+              Icons.play_arrow_outlined,
+              onTap: () async {
+                final data = await showDialog<(Uri?, String?)>(context: context, builder: (context) => const _UrlDialog());
+                if (data != null && context.mounted) {
+                  navigateTo(
+                      context,
+                      SingletonPlayer(
+                        playlist: [
+                          PlaylistItemDisplay(url: data.$1, fileId: data.$2, source: null),
+                        ],
+                      ));
+                }
+              },
+            ),
             _buildItem(
               AppLocalizations.of(context)!.settingsItemPlayerHistory,
               Icons.history_rounded,
@@ -115,5 +131,78 @@ class SettingsPage extends StatelessWidget {
         leading: Icon(icon),
         trailing: onTap == null ? null : const Icon(Icons.chevron_right),
         onTap: onTap);
+  }
+}
+
+class _UrlDialog extends StatefulWidget {
+  const _UrlDialog();
+
+  @override
+  State<_UrlDialog> createState() => __UrlDialogState();
+}
+
+class __UrlDialogState extends State<_UrlDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final _controller = TextEditingController();
+  String? fileId;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(AppLocalizations.of(context)!.buttonPlay),
+      content: SizedBox(
+        width: 600,
+        child: Form(
+          key: _formKey,
+          child: TextFormField(
+            autofocus: true,
+            controller: _controller,
+            decoration: InputDecoration(
+              isDense: true,
+              border: const UnderlineInputBorder(),
+              labelText: 'Link',
+              prefixIcon: const Icon(Icons.link),
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.folder_open_rounded),
+                onPressed: () async {
+                  final res = await showDriverFilePicker(context, '', selectableType: FileType.file);
+                  if (res != null) {
+                    final file = res.$2;
+                    _controller.text = file.fileId ?? '';
+                    fileId = file.fileId;
+                    setState(() {});
+                  }
+                },
+              ),
+            ),
+            validator: (value) {
+              if (_controller.text.trim().isEmpty) {
+                return AppLocalizations.of(context)!.formValidatorRequired;
+              }
+              if (fileId != null) {
+                return null;
+              }
+              final uri = Uri.tryParse(_controller.text);
+              if (uri == null || !uri.hasScheme) {
+                return AppLocalizations.of(context)!.formValidatorUrl;
+              }
+              return null;
+            },
+            onChanged: (_) {
+              fileId = null;
+            },
+          ),
+        ),
+      ),
+      actions: [
+        IconButton(icon: const Icon(Icons.check), onPressed: () => _onSubmit(context)),
+      ],
+    );
+  }
+
+  Future<void> _onSubmit(BuildContext context) async {
+    if (_formKey.currentState!.validate()) {
+      Navigator.pop(context, (Uri.tryParse(_controller.text), fileId));
+    }
   }
 }

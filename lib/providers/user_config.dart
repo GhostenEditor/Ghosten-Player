@@ -42,8 +42,7 @@ class UserConfig extends ChangeNotifier {
         autoPlay = prefs.getBool('playerConfig.autoPlay') ?? false,
         autoPip = prefs.getBool('playerConfig.autoPip') ?? false,
         autoForceLandscape = prefs.getBool('playerConfig.autoForceLandscape') ?? false,
-        displayScale = prefs.getDouble('system.displayScale') ?? 1,
-        scraperBehavior = prefs.getString('scraper.behavior') ?? 'exact';
+        displayScale = prefs.getDouble('system.displayScale') ?? 1;
   final SharedPreferences prefs;
   SystemLanguage language;
   ThemeMode themeMode;
@@ -53,7 +52,6 @@ class UserConfig extends ChangeNotifier {
   bool autoForceLandscape;
   bool autoPip;
   double displayScale;
-  String scraperBehavior;
 
   static Future<UserConfig> init() async {
     final prefs = await SharedPreferences.getInstance();
@@ -100,13 +98,6 @@ class UserConfig extends ChangeNotifier {
       displayScale = s;
       ScaledWidgetsFlutterBinding.instance.scaleFactor = (deviceSize) => max(1, deviceSize.width / 1140) * displayScale;
       prefs.setDouble('system.displayScale', displayScale);
-    }
-  }
-
-  void setScraperBehavior(String scraperBehavior) {
-    if (this.scraperBehavior != scraperBehavior) {
-      this.scraperBehavior = scraperBehavior;
-      prefs.setString('scraper.behavior', scraperBehavior);
     }
   }
 

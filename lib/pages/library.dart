@@ -1,13 +1,15 @@
+import 'dart:convert';
+
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../components/async_image.dart';
 import '../components/focus_card.dart';
 import '../components/future_builder_handler.dart';
-import '../providers/user_config.dart';
-import 'components/appbar_progress.dart';
+import '../components/stream_builder_handler.dart';
 import 'utils/notification.dart';
 import 'utils/utils.dart';
 
@@ -43,58 +45,118 @@ class _LibraryManageState extends State<LibraryManage> {
               LibraryType.tv => AppLocalizations.of(context)!.settingsItemTV,
               LibraryType.movie => AppLocalizations.of(context)!.settingsItemMovie,
             }),
-            bottom: const AppbarProgressIndicator(),
           ),
-          body: FutureBuilderHandler<List<Library>>(
-            initialData: const [],
-            future: Api.libraryQueryAll(widget.type),
-            builder: (context, snapshot) => Scrollbar(
+          body: Scrollbar(
+            controller: _controller,
+            child: CustomScrollView(
               controller: _controller,
-              child: GridView.builder(
-                controller: _controller,
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 240, childAspectRatio: 1.25),
-                padding: const EdgeInsets.all(8),
-                itemCount: snapshot.requireData.length + 1,
-                itemBuilder: (context, index) {
-                  if (index == snapshot.requireData.length) {
-                    return FocusCard(
-                      child: const Center(
-                        child: IconButton.filledTonal(
-                          onPressed: null,
-                          icon: Icon(Icons.add),
-                        ),
-                      ),
-                      onTap: () async {
-                        final res = await showDriverFilePicker(
-                            context,
-                            switch (widget.type) {
-                              LibraryType.tv => AppLocalizations.of(context)!.pageTitleCreateTVLibrary,
-                              LibraryType.movie => AppLocalizations.of(context)!.pageTitleCreateMovieLibrary,
+              slivers: [
+                SliverLayoutBuilder(builder: (context, constraints) {
+                  return StreamBuilderSliverHandler(
+                      initialData: const <ScheduleTask>[],
+                      stream: Stream.periodic(const Duration(seconds: 1)).switchMap((_) => Stream.fromFuture(Api.scheduleTaskQueryByAll())),
+                      builder: (context, snapshot) => SliverList.builder(
+                          itemCount: snapshot.requireData.length,
+                          itemBuilder: (context, index) {
+                            final item = snapshot.requireData[index];
+                            return Slidable(
+                              endActionPane: ActionPane(
+                                extentRatio: (48 * 2) / constraints.crossAxisExtent,
+                                motion: const BehindMotion(),
+                                children: [
+                                  if (item.status == ScheduleTaskStatus.running)
+                                    IconButton(onPressed: () => Api.scheduleTaskPauseById(item.id), icon: const Icon(Icons.pause_rounded)),
+                                  if (item.status == ScheduleTaskStatus.paused)
+                                    IconButton(onPressed: () => Api.scheduleTaskResumeById(item.id), icon: const Icon(Icons.pause_rounded)),
+                                  IconButton(onPressed: () => Api.scheduleTaskDeleteById(item.id), icon: const Icon(Icons.delete_outline)),
+                                ],
+                              ),
+                              child: Builder(builder: (context) {
+                                final data = jsonDecode(item.data ?? '{}') as Json;
+                                return switch (item.type) {
+                                  ScheduleTaskType.syncLibrary => ListTile(
+                                      dense: true,
+                                      title: Text(AppLocalizations.of(context)!.scheduleTaskSyncTitle(item.status.name)),
+                                      subtitle:
+                                          data['files'] != null ? Text(AppLocalizations.of(context)!.scheduleTaskSyncSubtitle(data['files'].toString())) : null,
+                                      trailing: switch (item.status) {
+                                        ScheduleTaskStatus.idle => const SizedBox(),
+                                        ScheduleTaskStatus.running => const SizedBox.square(dimension: 12, child: CircularProgressIndicator(strokeWidth: 2)),
+                                        ScheduleTaskStatus.paused => const Icon(Icons.pause_rounded),
+                                        ScheduleTaskStatus.completed => Icon(Icons.check_rounded, color: Theme.of(context).colorScheme.primary),
+                                        ScheduleTaskStatus.error => Icon(Icons.error, color: Theme.of(context).colorScheme.error),
+                                      },
+                                      onTap: () {},
+                                    ),
+                                  ScheduleTaskType.scrapeLibrary => ListTile(
+                                      dense: true,
+                                      title: Text(AppLocalizations.of(context)!.scheduleTaskScrapeTitle(item.status.name)),
+                                      subtitle: data['progress'] != null ? Text('${((data['progress'] as double) * 100.0).toStringAsFixed(2)}%') : null,
+                                      trailing: switch (item.status) {
+                                        ScheduleTaskStatus.idle => null,
+                                        ScheduleTaskStatus.running =>
+                                          SizedBox.square(dimension: 12, child: CircularProgressIndicator(strokeWidth: 2, value: data['progress'] as double?)),
+                                        ScheduleTaskStatus.paused => const Icon(Icons.pause_rounded),
+                                        ScheduleTaskStatus.completed => Icon(Icons.check_rounded, color: Theme.of(context).colorScheme.primary),
+                                        ScheduleTaskStatus.error => Icon(Icons.error, color: Theme.of(context).colorScheme.error),
+                                      },
+                                      onTap: () {},
+                                    ),
+                                };
+                              }),
+                            );
+                          }));
+                }),
+                FutureBuilderSliverHandler<List<Library>>(
+                  future: Api.libraryQueryAll(widget.type),
+                  fillRemaining: true,
+                  builder: (context, snapshot) => SliverPadding(
+                    padding: const EdgeInsets.all(8),
+                    sliver: SliverGrid.builder(
+                      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 240, childAspectRatio: 1.25),
+                      itemCount: snapshot.requireData.length + 1,
+                      itemBuilder: (context, index) {
+                        if (index == snapshot.requireData.length) {
+                          return FocusCard(
+                            child: const Center(
+                              child: IconButton.filledTonal(
+                                onPressed: null,
+                                icon: Icon(Icons.add),
+                              ),
+                            ),
+                            onTap: () async {
+                              final res = await showDriverFilePicker(
+                                  context,
+                                  switch (widget.type) {
+                                    LibraryType.tv => AppLocalizations.of(context)!.pageTitleCreateTVLibrary,
+                                    LibraryType.movie => AppLocalizations.of(context)!.pageTitleCreateMovieLibrary,
+                                  },
+                                  selectableType: FileType.folder);
+                              if (res != null && context.mounted) {
+                                addLibrary(context, res.$1, res.$2);
+                              }
                             },
-                            selectableType: FileType.folder);
-                        if (res != null && context.mounted) {
-                          addLibrary(context, res.$1, res.$2);
+                          );
+                        } else {
+                          final item = snapshot.requireData[index];
+                          return _LibraryItem(
+                            key: ValueKey(item.id),
+                            item: item,
+                            type: widget.type,
+                            needUpdate: () => setState(() => _refresh = true),
+                          );
                         }
                       },
-                    );
-                  } else {
-                    final item = snapshot.requireData[index];
-                    return _LibraryItem(
-                      key: ValueKey(item.id),
-                      item: item,
-                      type: widget.type,
-                      needUpdate: () => setState(() => _refresh = true),
-                    );
-                  }
-                },
-              ),
+                    ),
+                  ),
+                )
+              ],
             ),
           )),
     );
   }
 
   Future<void> addLibrary(BuildContext context, int driverId, DriverFile file) async {
-    final scraperBehavior = Provider.of<UserConfig>(context, listen: false).scraperBehavior;
     final resp = await showNotification<bool>(context, Future(() async {
       final id = await Api.libraryInsert(
         type: widget.type,
@@ -103,7 +165,7 @@ class _LibraryManageState extends State<LibraryManage> {
         parentId: file.parentId,
         filename: file.name,
       );
-      await Api.libraryRefreshById(id, false, scraperBehavior);
+      await Api.libraryRefreshById(id, false);
       return true;
     }));
     if (resp?.data ?? false) {
@@ -213,11 +275,7 @@ class _LibraryItem extends StatelessWidget {
   }
 
   Future<void> refreshMedia(BuildContext context, dynamic id, {required bool incremental}) async {
-    await Api.libraryRefreshById(
-      id,
-      incremental,
-      Provider.of<UserConfig>(context, listen: false).scraperBehavior,
-    );
+    await Api.libraryRefreshById(id, incremental);
     needUpdate();
   }
 }

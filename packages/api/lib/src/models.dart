@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 
 typedef Json = Map<String, dynamic>;
@@ -35,14 +36,18 @@ class SortConfig {
 }
 
 class MediaSearchQuery {
-  final SortConfig sort;
-  final String? search;
+  final SortConfig? sort;
   final int? limit;
+  final int? offset;
 
-  const MediaSearchQuery({required this.sort, this.search, this.limit});
+  const MediaSearchQuery({this.sort, this.limit, this.offset});
 
   Json toMap() {
-    return {...sort.toMap(), 'search': search, 'limit': limit};
+    return {
+      ...?sort?.toMap(),
+      if (limit != null) 'limit': limit,
+      if (offset != null) 'offset': offset,
+    };
   }
 }
 
@@ -695,13 +700,45 @@ enum DownloadTaskStatus {
   failed;
 
   static DownloadTaskStatus fromString(String? name) {
-    return switch (name) {
-      'idle' => DownloadTaskStatus.idle,
-      'downloading' => DownloadTaskStatus.downloading,
-      'complete' => DownloadTaskStatus.complete,
-      'failed' => DownloadTaskStatus.failed,
-      _ => throw Exception('Wrong DownloadTaskStatus Type of "$name"'),
-    };
+    return DownloadTaskStatus.values.firstWhereOrNull((s) => s.name == name) ?? (throw Exception('Wrong DownloadTaskStatus Type of "$name"'));
+  }
+}
+
+class ScheduleTask {
+  final int id;
+  final int rid;
+  final int? pid;
+  final ScheduleTaskType type;
+  final ScheduleTaskStatus status;
+  final dynamic data;
+
+  ScheduleTask.fromJson(Json json)
+      : id = json['id'],
+        rid = json['rid'],
+        pid = json['pid'],
+        type = ScheduleTaskType.fromString(json['type']),
+        status = ScheduleTaskStatus.fromString(json['status']),
+        data = json['data'];
+}
+
+enum ScheduleTaskType {
+  syncLibrary,
+  scrapeLibrary;
+
+  static ScheduleTaskType fromString(String? name) {
+    return ScheduleTaskType.values.firstWhereOrNull((s) => s.name == name) ?? (throw Exception('Wrong ScheduleTaskType Type of "$name"'));
+  }
+}
+
+enum ScheduleTaskStatus {
+  idle,
+  running,
+  paused,
+  completed,
+  error;
+
+  static ScheduleTaskStatus fromString(String? name) {
+    return ScheduleTaskStatus.values.firstWhereOrNull((s) => s.name == name) ?? (throw Exception('Wrong ScheduleTaskStatus Type of "$name"'));
   }
 }
 

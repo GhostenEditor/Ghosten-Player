@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:animations/animations.dart';
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../../components/async_image.dart';
 import '../../../pages/components/theme_builder.dart';
@@ -57,6 +59,121 @@ class Carousel extends StatelessWidget {
           onFocusChange: onFocusChange,
         ),
       ],
+    );
+  }
+}
+
+class CarouselPlaceholder extends StatelessWidget {
+  const CarouselPlaceholder({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final decoration = BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(4),
+    );
+    return Shimmer.fromColors(
+      baseColor: Theme.of(context).colorScheme.surfaceContainerLow,
+      highlightColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+      child: Column(
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 48, right: 48, top: 48),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Flexible(
+                    flex: 2,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Row(
+                            spacing: 8,
+                            children: List.generate(
+                                5,
+                                (index) => Container(
+                                      width: 36,
+                                      height: 12,
+                                      decoration: decoration,
+                                    ))),
+                        const SizedBox(height: 6),
+                        FractionallySizedBox(
+                          widthFactor: 0.6,
+                          child: Container(
+                            height: 42,
+                            decoration: decoration,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Container(
+                              width: 60,
+                              height: 12,
+                              decoration: decoration,
+                            ),
+                            const SizedBox(width: 20),
+                            const Icon(Icons.star, color: Colors.amber, size: 14),
+                            const SizedBox(width: 4),
+                            Container(
+                              width: 20,
+                              height: 12,
+                              decoration: decoration,
+                            ),
+                            const SizedBox(width: 20),
+                            Container(
+                              width: 36,
+                              height: 12,
+                              decoration: decoration,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 18),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: 7,
+                          children: List.generate(
+                              4,
+                              (index) => FractionallySizedBox(
+                                    widthFactor: Random().nextDouble() * 0.2 + 0.7,
+                                    child: Container(
+                                      height: 12,
+                                      decoration: decoration.copyWith(color: Colors.black87),
+                                    ),
+                                  )),
+                        ),
+                        const SizedBox(height: 24),
+                        TVFilledButton.icon(
+                            onPressed: null, label: Text(AppLocalizations.of(context)!.buttonWatchNow), icon: const Icon(Icons.play_arrow_rounded)),
+                      ],
+                    ),
+                  ),
+                  Flexible(
+                      child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Container(
+                      width: MediaQuery.of(context).size.width / 5,
+                      height: MediaQuery.of(context).size.width / 5 / 2 * 3,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(6),
+                        color: Colors.white,
+                      ),
+                    ),
+                  )),
+                ],
+              ),
+            ),
+          ),
+          CarouselPagination(
+            len: 9,
+            index: 0,
+            onChange: (_) {},
+          ),
+        ],
+      ),
     );
   }
 }
@@ -222,7 +339,10 @@ class CarouselBackground extends StatelessWidget {
               child: src != null
                   ? AsyncImage(key: UniqueKey(), src!)
                   : Image.asset(
-                      'assets/tv/images/bg-pixel.webp',
+                      switch (Theme.of(context).brightness) {
+                        Brightness.dark => 'assets/tv/images/bg-pixel.webp',
+                        Brightness.light => 'assets/tv/images/bg-pixel-light.webp',
+                      },
                       repeat: ImageRepeat.repeat,
                     ),
             ),

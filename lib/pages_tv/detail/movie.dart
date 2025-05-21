@@ -82,7 +82,7 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin {
                   Text(
                     item.displayTitle(),
                     style: Theme.of(context).textTheme.displaySmall,
-                    maxLines: 3,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   RichText(
@@ -163,9 +163,6 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin {
                           const WidgetSpan(child: SizedBox(width: 20)),
                           TextSpan(text: AppLocalizations.of(context)!.seriesStatus(item.status.name)),
                           const WidgetSpan(child: Gap.hSM),
-                          // if (item.fileSize != null) TextSpan(text: item.fileSize!.toSizeDisplay(), style: Theme.of(context).textTheme.labelSmall),
-                          // if (item.fileSize != null) const WidgetSpan(child: Gap.hSM),
-                          // TextSpan(text: '.${item.ext}', style: Theme.of(context).textTheme.labelSmall),
                           if (item.duration != null) const WidgetSpan(child: Gap.hSM),
                           if (item.duration != null) const WidgetSpan(child: Icon(Icons.access_time_rounded, size: 14)),
                           if (item.duration != null) const WidgetSpan(child: SizedBox(width: 4)),
@@ -180,9 +177,25 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin {
                     autofocus: true,
                     leading: const Icon(Icons.play_arrow_rounded),
                     title: Text(AppLocalizations.of(context)!.buttonWatchNow),
-                    onTap: () {
-                      _play(item);
-                    },
+                    trailing: item.fileId != null
+                        ? (item.duration != null && item.lastPlayedTime != null && item.duration!.inSeconds > 0)
+                            ? SizedBox.square(
+                                dimension: 16,
+                                child: CircularProgressIndicator(
+                                  value: item.lastPlayedPosition!.inSeconds / item.duration!.inSeconds,
+                                  backgroundColor: Colors.white,
+                                  strokeAlign: BorderSide.strokeAlignInside,
+                                ),
+                              )
+                            : null
+                        : const SizedBox.square(
+                            dimension: 16,
+                            child: CircularProgressIndicator(
+                              backgroundColor: Colors.white,
+                              strokeAlign: BorderSide.strokeAlignInside,
+                            ),
+                          ),
+                    onTap: () => item.fileId != null ? _play(item) : null,
                   ),
                   ButtonSettingItem(
                     autofocus: true,
@@ -198,7 +211,7 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin {
                           _navigatorKey.currentContext!,
                           Align(
                             alignment: Alignment.topRight,
-                            child: CastCrewSection(mediaCast: item.mediaCast, mediaCrew: item.mediaCrew),
+                            child: CastCrewSection(mediaCast: item.mediaCast, mediaCrew: item.mediaCrew, type: MediaType.movie),
                           ));
                     },
                   ),
@@ -261,7 +274,7 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin {
   Future<void> _play(Movie item) async {
     await toPlayer(
       context,
-      [FromMedia.fromMovie(item)],
+      ([FromMedia.fromMovie(item)], 0),
       theme: item.themeColor,
     );
     setState(() => refresh = true);

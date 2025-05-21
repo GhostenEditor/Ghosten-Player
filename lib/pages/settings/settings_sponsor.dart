@@ -73,7 +73,6 @@ class _SettingsSponsorState extends State<SettingsSponsor> {
                   dense: true,
                   title: Text(AppLocalizations.of(context)!.sponsorThanksMessage, style: Theme.of(context).textTheme.titleMedium),
                   subtitle: Text(AppLocalizations.of(context)!.sponsorTipMessage),
-                  // contentPadding: EdgeInsets.zero,
                 ),
               ),
             )),

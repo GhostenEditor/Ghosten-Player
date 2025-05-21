@@ -14,7 +14,7 @@ abstract class MediaCubit<T> extends Cubit<T?> {
 }
 
 mixin ActionMixin<S extends StatefulWidget> on State<S> {
-  PopupMenuEntry<Never> buildWatchedAction<B extends MediaCubit<T>, T extends MediaBase>(BuildContext context, T item, MediaType type) {
+  PopupMenuEntry<Never> buildWatchedAction<B extends MediaCubit<AsyncSnapshot<T>>, T extends MediaBase>(BuildContext context, T item, MediaType type) {
     return PopupMenuItem(
       padding: EdgeInsets.zero,
       onTap: () async {
@@ -32,7 +32,7 @@ mixin ActionMixin<S extends StatefulWidget> on State<S> {
     );
   }
 
-  PopupMenuEntry<Never> buildFavoriteAction<B extends MediaCubit<T>, T extends MediaBase>(BuildContext context, T item, MediaType type) {
+  PopupMenuEntry<Never> buildFavoriteAction<B extends MediaCubit<AsyncSnapshot<T>>, T extends MediaBase>(BuildContext context, T item, MediaType type) {
     return PopupMenuItem(
       padding: EdgeInsets.zero,
       onTap: () async {
@@ -50,7 +50,7 @@ mixin ActionMixin<S extends StatefulWidget> on State<S> {
     );
   }
 
-  PopupMenuEntry<Never> buildScraperAction<B extends MediaCubit<T>, T extends MediaBase>(BuildContext context, Future<bool?> Function() future) {
+  PopupMenuEntry<Never> buildScraperAction<B extends MediaCubit<AsyncSnapshot<T>>, T extends MediaBase>(BuildContext context, Future<bool?> Function() future) {
     return PopupMenuItem(
       padding: EdgeInsets.zero,
       onTap: () async {
@@ -68,7 +68,8 @@ mixin ActionMixin<S extends StatefulWidget> on State<S> {
     );
   }
 
-  PopupMenuEntry<Never> buildSkipFromStartAction<B extends MediaCubit<T>, T extends MediaBase>(BuildContext context, T item, MediaType type, Duration value) {
+  PopupMenuEntry<Never> buildSkipFromStartAction<B extends MediaCubit<AsyncSnapshot<T>>, T extends MediaBase>(
+      BuildContext context, T item, MediaType type, Duration value) {
     return PopupMenuItem(
       padding: EdgeInsets.zero,
       onTap: () async {
@@ -90,7 +91,8 @@ mixin ActionMixin<S extends StatefulWidget> on State<S> {
     );
   }
 
-  PopupMenuEntry<Never> buildSkipFromEndAction<B extends MediaCubit<T>, T extends MediaBase>(BuildContext context, T item, MediaType type, Duration value) {
+  PopupMenuEntry<Never> buildSkipFromEndAction<B extends MediaCubit<AsyncSnapshot<T>>, T extends MediaBase>(
+      BuildContext context, T item, MediaType type, Duration value) {
     return PopupMenuItem(
       padding: EdgeInsets.zero,
       onTap: () async {

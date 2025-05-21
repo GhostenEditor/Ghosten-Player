@@ -120,7 +120,10 @@ class _DetailScaffoldState<T extends MediaBase> extends State<DetailScaffold<T>>
           AsyncImage(item.backdrop!)
         else
           Image.asset(
-            'assets/tv/images/bg-pixel.webp',
+            switch (Theme.of(context).brightness) {
+              Brightness.dark => 'assets/tv/images/bg-pixel.webp',
+              Brightness.light => 'assets/tv/images/bg-pixel-light.webp',
+            },
             repeat: ImageRepeat.repeat,
           ),
         if (item.logo != null)

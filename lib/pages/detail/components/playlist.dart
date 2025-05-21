@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:video_player/player.dart';
 
+import '../../../components/placeholder.dart';
 import '../../../components/playing_icon.dart';
 import '../../../utils/utils.dart';
 import '../../components/image_card.dart';
@@ -15,11 +16,12 @@ class PlaylistSection extends StatefulWidget {
     this.onTap,
     required this.imageWidth,
     required this.imageHeight,
+    this.placeholderCount,
   });
 
   final double imageWidth;
-
   final double imageHeight;
+  final int? placeholderCount;
 
   final int? activeIndex;
   final List<PlaylistItemDisplay<dynamic>> playlist;
@@ -50,78 +52,107 @@ class _PlaylistSectionState extends State<PlaylistSection> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Text(AppLocalizations.of(context)!.titlePlaylist, style: Theme.of(context).textTheme.titleMedium),
-        ),
-        SizedBox(
-          height: widget.imageHeight + 50,
-          child: ListView.separated(
-            controller: _controller,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            scrollDirection: Axis.horizontal,
-            separatorBuilder: (context, index) => const SizedBox(width: 12),
-            itemCount: widget.playlist.length,
-            itemBuilder: (context, index) {
-              final item = widget.playlist[index];
-              return ImageCard(
-                item.poster,
-                width: widget.imageWidth,
-                height: widget.imageHeight,
-                title: Text(item.title!, style: widget.activeIndex == index ? TextStyle(color: Theme.of(context).colorScheme.primary) : null),
-                subtitle: item.description != null
-                    ? Text(item.description!, style: widget.activeIndex == index ? TextStyle(color: Theme.of(context).colorScheme.primary) : null)
-                    : null,
-                floating: widget.activeIndex == index
-                    ? Material(
-                        shape: RoundedRectangleBorder(
-                          side: widget.activeIndex == index
-                              ? BorderSide(width: 6, color: Theme.of(context).colorScheme.primary, strokeAlign: BorderSide.strokeAlignCenter)
-                              : BorderSide.none,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        color: Theme.of(context).scaffoldBackgroundColor.withAlpha(0x66),
-                        child: SizedBox(
-                          width: widget.imageWidth,
-                          height: widget.imageHeight,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              PlayingIcon(color: Theme.of(context).colorScheme.primary),
-                              if (item.duration != null)
-                                Padding(
-                                  padding: const EdgeInsets.all(4),
-                                  child: Badge(label: Text(item.duration!.toDisplay()), backgroundColor: Theme.of(context).colorScheme.primary),
+    return widget.playlist.isNotEmpty
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(AppLocalizations.of(context)!.titlePlaylist, style: Theme.of(context).textTheme.titleMedium),
+              ),
+              SizedBox(
+                height: widget.imageHeight + 50,
+                child: ListView.separated(
+                  controller: _controller,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  scrollDirection: Axis.horizontal,
+                  separatorBuilder: (context, index) => const SizedBox(width: 12),
+                  itemCount: widget.playlist.length,
+                  itemBuilder: (context, index) {
+                    final item = widget.playlist[index];
+                    return ImageCard(
+                      item.poster,
+                      width: widget.imageWidth,
+                      height: widget.imageHeight,
+                      title: Text(item.title!, style: widget.activeIndex == index ? TextStyle(color: Theme.of(context).colorScheme.primary) : null),
+                      subtitle: item.description != null
+                          ? Text(item.description!, style: widget.activeIndex == index ? TextStyle(color: Theme.of(context).colorScheme.primary) : null)
+                          : null,
+                      floating: widget.activeIndex == index
+                          ? Material(
+                              shape: RoundedRectangleBorder(
+                                side: widget.activeIndex == index
+                                    ? BorderSide(width: 6, color: Theme.of(context).colorScheme.primary, strokeAlign: BorderSide.strokeAlignCenter)
+                                    : BorderSide.none,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              color: Theme.of(context).scaffoldBackgroundColor.withAlpha(0x66),
+                              child: SizedBox(
+                                width: widget.imageWidth,
+                                height: widget.imageHeight,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    PlayingIcon(color: Theme.of(context).colorScheme.primary),
+                                    if (item.duration != null)
+                                      Padding(
+                                        padding: const EdgeInsets.all(4),
+                                        child: Badge(label: Text(item.duration!.toDisplay()), backgroundColor: Theme.of(context).colorScheme.primary),
+                                      ),
+                                  ],
                                 ),
-                            ],
-                          ),
-                        ),
-                      )
-                    : item.duration != null
-                        ? SizedBox(
-                            width: widget.imageWidth,
-                            height: widget.imageHeight,
-                            child: Align(
-                                alignment: Alignment.bottomRight,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(4),
-                                  child: Badge(
-                                      label: Text(item.duration!.toDisplay()),
-                                      backgroundColor:
-                                          widget.activeIndex == index ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.secondary),
-                                )),
-                          )
-                        : null,
-                onTap: widget.onTap == null ? null : () => widget.onTap!(index),
-              );
-            },
-          ),
+                              ),
+                            )
+                          : item.duration != null
+                              ? SizedBox(
+                                  width: widget.imageWidth,
+                                  height: widget.imageHeight,
+                                  child: Align(
+                                      alignment: Alignment.bottomRight,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(4),
+                                        child: Badge(
+                                            label: Text(item.duration!.toDisplay()),
+                                            backgroundColor:
+                                                widget.activeIndex == index ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.secondary),
+                                      )),
+                                )
+                              : null,
+                      onTap: widget.onTap == null ? null : () => widget.onTap!(index),
+                    );
+                  },
+                ),
+              ),
+            ],
+          )
+        : _buildPlaceholder(context);
+  }
+
+  Widget _buildPlaceholder(BuildContext context) {
+    return GPlaceholder(
+      child: IgnorePointer(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const GPlaceholderRect(width: 100, height: 24, padding: EdgeInsets.all(16)),
+            SizedBox(
+              height: widget.imageHeight + 50,
+              child: ListView.separated(
+                controller: _controller,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                scrollDirection: Axis.horizontal,
+                separatorBuilder: (context, index) => const SizedBox(width: 12),
+                itemCount: widget.placeholderCount ?? 10,
+                itemBuilder: (context, index) => ImageCardPlaceholder(
+                  width: widget.imageWidth,
+                  height: widget.imageHeight,
+                ),
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

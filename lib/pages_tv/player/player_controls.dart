@@ -926,7 +926,7 @@ class PlayerInfoView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-        listenable: _controller.index,
+        listenable: Listenable.merge([_controller.index, _controller.fatalError]),
         builder: (context, _) => Padding(
               padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
               child: Row(
