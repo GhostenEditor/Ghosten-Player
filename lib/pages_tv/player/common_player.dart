@@ -48,7 +48,7 @@ class _CommonPlayerPageState<T> extends State<CommonPlayerPage<T>> {
       start: item.start,
       end: item.end,
       url: Uri.parse(data.url).normalize(),
-      subtitles: data.subtitles.map((d) => d.toSubtitle()).toList(),
+      subtitles: data.subtitles.map((d) => d.toSubtitle()).nonNulls.toList(),
       others: data.others,
     );
   }

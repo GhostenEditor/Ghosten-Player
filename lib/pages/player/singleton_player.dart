@@ -47,7 +47,7 @@ class _SingletonPlayerState<T> extends State<SingletonPlayer<T>> {
         poster: item.poster,
         start: item.start,
         end: item.end,
-        subtitles: data.subtitles.map((d) => d.toSubtitle()).toList(),
+        subtitles: data.subtitles.map((d) => d.toSubtitle()).nonNulls.toList(),
       );
     }
   }

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -45,7 +47,8 @@ class _PlaylistSectionState extends State<PlaylistSection> {
   void didUpdateWidget(covariant PlaylistSection oldWidget) {
     final index = widget.activeIndex;
     if (index != oldWidget.activeIndex && index != null && index >= 0 && index < widget.playlist.length) {
-      _controller.animateTo(index * (widget.imageWidth + 12), duration: const Duration(milliseconds: 400), curve: Curves.easeOut);
+      final offset = min(_controller.position.maxScrollExtent, index * (widget.imageWidth + 12));
+      _controller.animateTo(offset, duration: const Duration(milliseconds: 400), curve: Curves.easeOut);
     }
     super.didUpdateWidget(oldWidget);
   }

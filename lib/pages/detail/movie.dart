@@ -62,7 +62,7 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
       start: item.start,
       end: item.end,
       url: Uri.parse(data.url).normalize(),
-      subtitles: data.subtitles.map((d) => d.toSubtitle()).toList(),
+      subtitles: data.subtitles.map((d) => d.toSubtitle()).nonNulls.toList(),
       others: data.others,
     );
   }

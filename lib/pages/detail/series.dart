@@ -67,7 +67,7 @@ class _TVDetailState extends State<TVDetail> with ActionMixin<TVDetail> {
       start: item.start,
       end: item.end,
       url: Uri.parse(data.url).normalize(),
-      subtitles: data.subtitles.map((d) => d.toSubtitle()).toList(),
+      subtitles: data.subtitles.map((d) => d.toSubtitle()).nonNulls.toList(),
       others: data.others,
     );
   }

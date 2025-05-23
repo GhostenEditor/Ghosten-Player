@@ -157,7 +157,7 @@ class TVPlaceholder extends StatelessWidget {
                                             7,
                                             (index) => FractionallySizedBox(
                                                   widthFactor: Random().nextDouble() * 0.2 + 0.7,
-                                                  child: GPlaceholderRect(height: 14),
+                                                  child: const GPlaceholderRect(height: 14),
                                                 )),
                                       )),
                                     ],
