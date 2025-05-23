@@ -48,12 +48,20 @@ extension FromMedia<T> on PlaylistItemDisplay<T> {
 }
 
 extension ConvertSubtitle on SubtitleData {
-  Subtitle toSubtitle() {
+  Subtitle? toSubtitle() {
+    if (url == null) {
+      return null;
+    }
+    final mimeType = SubtitleMimeType.fromString(this.mimeType);
+    if (mimeType == null) {
+      return null;
+    }
     final uri = Uri.parse(url!);
     return Subtitle(
       url: uri.host.isEmpty ? uri.replace(host: Api.baseUrl.host, port: Api.baseUrl.port, scheme: Api.baseUrl.scheme) : uri,
-      mimeType: SubtitleMimeType.fromString(mimeType)!,
+      mimeType: mimeType,
       language: language,
+      label: label,
     );
   }
 }

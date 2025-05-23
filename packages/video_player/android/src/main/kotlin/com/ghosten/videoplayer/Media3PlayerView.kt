@@ -658,6 +658,7 @@ class Media3PlayerView(
                             else -> throw Exception("Unknown Subtitle Mime Type")
                         }
                     )
+                    .setLanguage(it.language)
                     .setLabel(it.label)
                     .setSelectionFlags(
                         if (it.selected) {

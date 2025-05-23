@@ -273,6 +273,9 @@ enum SubtitleMimeType {
   srt;
 
   static SubtitleMimeType? fromString(String? str) {
+    if (str?.toLowerCase() == 'subrip') {
+      return SubtitleMimeType.srt;
+    }
     return SubtitleMimeType.values.firstWhereOrNull((element) => element.name == str);
   }
 }

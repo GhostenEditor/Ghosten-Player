@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:animations/animations.dart';
 import 'package:collection/collection.dart';
@@ -851,7 +852,8 @@ class _PlayerPlaylistViewState<T> extends State<PlayerPlaylistView<T>> {
   void didUpdateWidget(covariant PlayerPlaylistView<T> oldWidget) {
     final index = widget.activeIndex;
     if (index != oldWidget.activeIndex && index != null && index >= 0 && index < widget.playlist.length) {
-      _controller.animateTo(index * (200 + 12), duration: const Duration(milliseconds: 400), curve: Curves.easeOut);
+      final offset = min(_controller.position.maxScrollExtent, index * (200.0 + 12));
+      _controller.animateTo(offset, duration: const Duration(milliseconds: 400), curve: Curves.easeOut);
     }
     super.didUpdateWidget(oldWidget);
   }

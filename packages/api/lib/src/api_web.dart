@@ -20,7 +20,6 @@ class ApiWeb extends ApiPlatform {
 
   /// Session Start
   @override
-  @override
   Future<SessionCreate> sessionCreate() async {
     final data = await client.put('/session/create');
     final id = data['id'];
