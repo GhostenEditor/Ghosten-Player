@@ -61,6 +61,7 @@ class _PlayerControlsState extends State<PlayerControls> {
 
   @override
   void initState() {
+    SharedPreferences.getInstance().then((prefs) => _seekStep = Duration(seconds: PlayerConfig.getFastForwardSpeed(prefs)));
     if (widget.onMediaChange != null) {
       _controller.beforeMediaChanged.addListener(() {
         final data = _controller.beforeMediaChanged.value!;
@@ -295,11 +296,16 @@ class _PlayerControlsState extends State<PlayerControls> {
         child: Navigator(
           key: _navigatorKey,
           onGenerateRoute: (settings) => FadeInPageRoute(
-              builder: (context) => PlayerSettings(
-                    controller: _controller,
-                    actions: widget.actions,
-                    onSeekSpeedChanged: (speed) => _seekStep = Duration(seconds: speed),
-                  ),
+              builder: (context) => FutureBuilderHandler(
+                  future: SharedPreferences.getInstance(),
+                  builder: (context, snapshot) {
+                    return PlayerSettings(
+                      prefs: snapshot.requireData,
+                      controller: _controller,
+                      actions: widget.actions,
+                      onSeekSpeedChanged: (speed) => _seekStep = Duration(seconds: speed),
+                    );
+                  }),
               settings: settings),
         ),
       ),
@@ -528,8 +534,10 @@ class PlayerSettings extends StatelessWidget {
     required this.controller,
     this.actions,
     required this.onSeekSpeedChanged,
+    required this.prefs,
   });
 
+  final SharedPreferences prefs;
   final PlayerController<dynamic> controller;
   final ValueChanged<int> onSeekSpeedChanged;
   final List<Widget> Function(BuildContext)? actions;
@@ -624,102 +632,88 @@ class PlayerSettings extends StatelessWidget {
                     leading: const Icon(Icons.subtitles_outlined),
                     trailing: const Icon(Icons.chevron_right_rounded),
                     onTap: () async {
-                      final initialStyle = SubtitleSettings.fromJson(await PlayerConfig.getSubtitleSettings());
+                      final initialStyle = SubtitleSettings.fromJson(PlayerConfig.getSubtitleSettings(prefs));
                       if (!context.mounted) return;
 
                       final style =
                           await Navigator.of(context).push(FadeInPageRoute(builder: (context) => PlayerSubtitleSettings(subtitleSettings: initialStyle)));
                       if (style != null) {
-                        PlayerConfig.setSubtitleSettings(style);
+                        PlayerConfig.setSubtitleSettings(prefs, style);
                         controller.setSubtitleStyle(style);
                       }
                     },
                   ),
                   const Divider(),
                   StatefulBuilder(builder: (context, setState) {
-                    return FutureBuilder(
-                        future: PlayerConfig.getExtensionRendererMode(),
-                        builder: (context, snapshot) {
-                          return ButtonSettingItem(
-                            title: Text(localizations.extensionRendererModeLabel),
-                            trailing:
-                                Text(localizations.extensionRendererMode(snapshot.data.toString()), textAlign: TextAlign.end, overflow: TextOverflow.ellipsis),
-                            onTap: () async {
-                              await Navigator.of(context).push(FadeInPageRoute(
-                                  builder: (context) => PlayerSubSettings(
-                                        title: localizations.extensionRendererModeLabel,
-                                        items: [0, 1, 2]
-                                            .map((i) => RadioSettingItem(
-                                                  value: i,
-                                                  groupValue: snapshot.data,
-                                                  autofocus: snapshot.data == i,
-                                                  title: Text(localizations.extensionRendererMode(i.toString())),
-                                                  onChanged: (value) async {
-                                                    if (value == null) return;
-                                                    await PlayerConfig.setExtensionRendererMode(value);
-                                                    await PlayerController.setPlayerOption('extensionRendererMode', value);
-                                                    if (context.mounted) {
-                                                      setState(() {});
-                                                      Navigator.of(context).pop();
-                                                    }
-                                                  },
-                                                ))
-                                            .toList(),
-                                      )));
-                              setState(() {});
-                            },
-                          );
-                        });
+                    final data = PlayerConfig.getExtensionRendererMode(prefs);
+                    return ButtonSettingItem(
+                      title: Text(localizations.extensionRendererModeLabel),
+                      trailing: Text(localizations.extensionRendererMode(data.toString()), textAlign: TextAlign.end, overflow: TextOverflow.ellipsis),
+                      onTap: () async {
+                        await Navigator.of(context).push(FadeInPageRoute(
+                            builder: (context) => PlayerSubSettings(
+                                  title: localizations.extensionRendererModeLabel,
+                                  items: [0, 1, 2]
+                                      .map((i) => RadioSettingItem(
+                                            value: i,
+                                            groupValue: data,
+                                            autofocus: data == i,
+                                            title: Text(localizations.extensionRendererMode(i.toString())),
+                                            onChanged: (value) async {
+                                              if (value == null) return;
+                                              PlayerConfig.setExtensionRendererMode(prefs, value);
+                                              await PlayerController.setPlayerOption('extensionRendererMode', value);
+                                              if (context.mounted) {
+                                                setState(() {});
+                                                Navigator.of(context).pop();
+                                              }
+                                            },
+                                          ))
+                                      .toList(),
+                                )));
+                        setState(() {});
+                      },
+                    );
                   }),
                   StatefulBuilder(builder: (context, setState) {
-                    return FutureBuilder(
-                        future: PlayerConfig.getEnableDecoderFallback(),
-                        builder: (context, snapshot) {
-                          return SwitchSettingItem(
-                              title: Text(localizations.playerEnableDecoderFallback),
-                              value: snapshot.data ?? false,
-                              onChanged: (value) async {
-                                await PlayerConfig.setEnableDecoderFallback(value);
-                                await PlayerController.setPlayerOption('enableDecoderFallback', value);
-                                setState(() {});
-                              });
+                    return SwitchSettingItem(
+                        title: Text(localizations.playerEnableDecoderFallback),
+                        value: PlayerConfig.getEnableDecoderFallback(prefs),
+                        onChanged: (value) async {
+                          PlayerConfig.setEnableDecoderFallback(prefs, value);
+                          await PlayerController.setPlayerOption('enableDecoderFallback', value);
+                          setState(() {});
                         });
                   }),
                   const Divider(),
-                  FutureBuilderHandler(
-                    future: SharedPreferences.getInstance(),
-                    builder: (context, snapshot) {
-                      final prefs = snapshot.requireData;
-                      return StatefulBuilder(builder: (context, setState) {
-                        return ButtonSettingItem(
-                          title: Builder(builder: (context) {
-                            return Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(AppLocalizations.of(context)!.playerFastForwardSpeed),
-                                Text('${prefs.getInt('playerConfig.fastForwardSpeed') ?? 30} ${AppLocalizations.of(context)!.second}')
-                              ],
-                            );
-                          }),
-                          subtitle: MediaQuery(
-                              data: const MediaQueryData(navigationMode: NavigationMode.directional),
-                              child: Slider(
-                                value: prefs.getInt('playerConfig.fastForwardSpeed')?.toDouble() ?? 30,
-                                min: 5,
-                                max: 100,
-                                divisions: 19,
-                                label: (prefs.getInt('playerConfig.fastForwardSpeed') ?? 30).toString(),
-                                onChanged: (double value) {
-                                  setState(() {
-                                    prefs.setInt('playerConfig.fastForwardSpeed', value.round());
-                                  });
-                                  onSeekSpeedChanged(value.round());
-                                },
-                              )),
+                  StatefulBuilder(builder: (context, setState) {
+                    return ButtonSettingItem(
+                      title: Builder(builder: (context) {
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(AppLocalizations.of(context)!.playerFastForwardSpeed),
+                            Text('${prefs.getInt('playerConfig.fastForwardSpeed') ?? 30} ${AppLocalizations.of(context)!.second}')
+                          ],
                         );
-                      });
-                    },
-                  ),
+                      }),
+                      subtitle: MediaQuery(
+                          data: const MediaQueryData(navigationMode: NavigationMode.directional),
+                          child: Slider(
+                            value: prefs.getInt('playerConfig.fastForwardSpeed')?.toDouble() ?? 30,
+                            min: 5,
+                            max: 100,
+                            divisions: 19,
+                            label: (prefs.getInt('playerConfig.fastForwardSpeed') ?? 30).toString(),
+                            onChanged: (double value) {
+                              setState(() {
+                                prefs.setInt('playerConfig.fastForwardSpeed', value.round());
+                              });
+                              onSeekSpeedChanged(value.round());
+                            },
+                          )),
+                    );
+                  }),
                   const Divider(),
                   if (actions != null) ...actions!(context),
                   if (actions != null) const Divider(),

@@ -10,9 +10,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/player.dart';
 
 import '../../components/async_image.dart';
+import '../../components/future_builder_handler.dart';
 import '../../components/player_i18n_adaptor.dart';
 import '../../components/playing_icon.dart';
 import '../../platform_api.dart';
@@ -199,10 +201,15 @@ class _PlayerControlsFullState<T> extends State<PlayerControlsFull<T>> with Play
                   child: Navigator(
                     key: _navigatorKey,
                     onGenerateRoute: (settings) => MaterialPageRoute(
-                        builder: (context) => PlayerSettings(
-                              controller: _controller,
-                              actions: (context) => actions(context, _controller),
-                            ),
+                        builder: (context) => FutureBuilderHandler(
+                            future: SharedPreferences.getInstance(),
+                            builder: (context, snapshot) {
+                              return PlayerSettings(
+                                prefs: snapshot.requireData,
+                                controller: _controller,
+                                actions: (context) => actions(context, _controller),
+                              );
+                            }),
                         settings: settings),
                   ),
                 ),

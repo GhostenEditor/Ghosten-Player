@@ -1,48 +1,39 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PlayerConfig {
-  static Future<int> getExtensionRendererMode() async {
-    final prefs = await SharedPreferences.getInstance();
+  static int getExtensionRendererMode(SharedPreferences prefs) {
     return prefs.getInt('playerConfig.extensionRendererMode') ?? 1;
   }
 
-  static setExtensionRendererMode(int mode) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('playerConfig.extensionRendererMode', mode);
+  static void setExtensionRendererMode(SharedPreferences prefs, int mode) {
+    prefs.setInt('playerConfig.extensionRendererMode', mode);
   }
 
-  static Future<int> getFastForwardSpeed() async {
-    final prefs = await SharedPreferences.getInstance();
+  static int getFastForwardSpeed(SharedPreferences prefs) {
     return prefs.getInt('playerConfig.fastForwardSpeed') ?? 30;
   }
 
-  static setFastForwardSpeed(int speed) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('playerConfig.fastForwardSpeed', speed);
+  static void setFastForwardSpeed(SharedPreferences prefs, int speed) {
+    prefs.setInt('playerConfig.fastForwardSpeed', speed);
   }
 
-  static Future<bool> getEnableDecoderFallback() async {
-    final prefs = await SharedPreferences.getInstance();
+  static bool getEnableDecoderFallback(SharedPreferences prefs) {
     return prefs.getBool('playerConfig.enableDecoderFallback') ?? false;
   }
 
-  static setEnableDecoderFallback(bool enableDecoderFallback) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('playerConfig.enableDecoderFallback', enableDecoderFallback);
+  static void setEnableDecoderFallback(SharedPreferences prefs, bool enableDecoderFallback) {
+    prefs.setBool('playerConfig.enableDecoderFallback', enableDecoderFallback);
   }
 
-  static Future<bool> getShowThumbnails() async {
-    final prefs = await SharedPreferences.getInstance();
+  static bool getShowThumbnails(SharedPreferences prefs) {
     return prefs.getBool('playerConfig.showThumbnails') ?? false;
   }
 
-  static setShowThumbnails(bool showThumbnails) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('playerConfig.showThumbnails', showThumbnails);
+  static void setShowThumbnails(SharedPreferences prefs, bool showThumbnails) {
+    prefs.setBool('playerConfig.showThumbnails', showThumbnails);
   }
 
-  static Future<List<int>> getSubtitleSettings() async {
-    final prefs = await SharedPreferences.getInstance();
+  static List<int> getSubtitleSettings(SharedPreferences prefs) {
     return prefs.getString('playerConfig.subtitleSettings')?.split(',').map(int.parse).toList() ??
         [
           0xFFFFFFFF,
@@ -53,8 +44,7 @@ class PlayerConfig {
         ];
   }
 
-  static setSubtitleSettings(List<int> settings) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('playerConfig.subtitleSettings', settings.join(','));
+  static void setSubtitleSettings(SharedPreferences prefs, List<int> settings) {
+    prefs.setString('playerConfig.subtitleSettings', settings.join(','));
   }
 }
