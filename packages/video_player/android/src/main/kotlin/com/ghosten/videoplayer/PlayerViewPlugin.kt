@@ -35,19 +35,16 @@ class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activit
                 when (call.method) {
                     "init" -> {
                         if (mPlayerView == null)
-                            mPlayerView = Media3PlayerView(
+                            mPlayerView = MPVPlayerView(
                                 activity.applicationContext,
                                 activity,
                                 mChannel,
-                                call.argument("extensionRendererMode"),
-                                call.argument("enableDecoderFallback"),
+                                true,
                                 call.argument("language"),
-                                call.argument("subtitleStyle"),
                                 call.argument("width"),
                                 call.argument("height"),
                                 call.argument("top"),
                                 call.argument("left"),
-                                call.argument("autoPip") ?: true,
                             )
                     }
 
