@@ -33,7 +33,7 @@ The project is currently maintained with passion. Consider [sponsoring](#sponsor
     - macOS (Under Development)
 - **Cloud Storage Support**
     - [Aliyun Drive](https://www.alipan.com), [Quark Cloud Drive](https://pan.quark.cn), WebDAV, and local media files
-    - [Emby](https://emby.media) & [Jellyfin](https://jellyfin.org) (Beta)
+  - [Emby](https://emby.media) & [Jellyfin](https://jellyfin.org)
     - Resolution switching (Aliyun Drive)
     - Multi-account login
     - File management for cloud storage
@@ -56,6 +56,7 @@ The project is currently maintained with passion. Consider [sponsoring](#sponsor
     - Light & dark themes
     - Phone-assisted input for TV
     - Customizable UI scaling
+  - Customized buttons on TV
 - **Others**
     - Runs locally, no backend required[^1]
     - Small app size (≈ 15 MB)
