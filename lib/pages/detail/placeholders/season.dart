@@ -2,10 +2,10 @@ import 'dart:math';
 
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../components/async_image.dart';
 import '../../../components/placeholder.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../utils/utils.dart';
 import '../../components/theme_builder.dart';
 import '../components/overview.dart';
@@ -17,14 +17,17 @@ class SeasonPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ThemeBuilder(item?.themeColor,
-        builder: (context) => Scaffold(
-              appBar: AppBar(
-                automaticallyImplyLeading: false,
-                backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                title: item == null
-                    ? const SizedBox()
-                    : Column(
+    return ThemeBuilder(
+      item?.themeColor,
+      builder:
+          (context) => Scaffold(
+            appBar: AppBar(
+              automaticallyImplyLeading: false,
+              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+              title:
+                  item == null
+                      ? const SizedBox()
+                      : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
@@ -37,7 +40,10 @@ class SeasonPlaceholder extends StatelessWidget {
                             child: Text.rich(
                               TextSpan(
                                 children: [
-                                  TextSpan(text: AppLocalizations.of(context)!.seasonNumber(item!.season), style: Theme.of(context).textTheme.bodyMedium),
+                                  TextSpan(
+                                    text: AppLocalizations.of(context)!.seasonNumber(item!.season),
+                                    style: Theme.of(context).textTheme.bodyMedium,
+                                  ),
                                   const WidgetSpan(child: SizedBox(width: 10)),
                                   if (item!.episodeCount != null) ...[
                                     TextSpan(text: item!.episodes.length.toString()),
@@ -50,17 +56,18 @@ class SeasonPlaceholder extends StatelessWidget {
                                 ],
                               ),
                             ),
-                          )
+                          ),
                         ],
                       ),
-                actions: [
-                  const IconButton(onPressed: null, icon: Icon(Icons.more_vert_rounded)),
-                  IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.close)),
-                ],
-              ),
-              body: CustomScrollView(
-                slivers: [
-                  SliverMainAxisGroup(slivers: [
+              actions: [
+                const IconButton(onPressed: null, icon: Icon(Icons.more_vert_rounded)),
+                IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.close)),
+              ],
+            ),
+            body: CustomScrollView(
+              slivers: [
+                SliverMainAxisGroup(
+                  slivers: [
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
@@ -70,7 +77,13 @@ class SeasonPlaceholder extends StatelessWidget {
                             if (item?.poster != null)
                               Padding(
                                 padding: const EdgeInsets.only(right: 16),
-                                child: AsyncImage(item!.poster!, width: 100, height: 150, radius: BorderRadius.circular(4), viewable: true),
+                                child: AsyncImage(
+                                  item!.poster!,
+                                  width: 100,
+                                  height: 150,
+                                  radius: BorderRadius.circular(4),
+                                  viewable: true,
+                                ),
                               )
                             else
                               const SizedBox(),
@@ -79,12 +92,15 @@ class SeasonPlaceholder extends StatelessWidget {
                         ),
                       ),
                     ),
-                  ]),
-                  SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    sliver: SliverSafeArea(
-                      sliver: SliverLayoutBuilder(builder: (context, constraints) {
-                        final childAspectRatio = constraints.crossAxisExtent / (constraints.crossAxisExtent / 616).ceil() / 120;
+                  ],
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  sliver: SliverSafeArea(
+                    sliver: SliverLayoutBuilder(
+                      builder: (context, constraints) {
+                        final childAspectRatio =
+                            constraints.crossAxisExtent / (constraints.crossAxisExtent / 616).ceil() / 120;
                         return SliverGrid.builder(
                           gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                             maxCrossAxisExtent: 600,
@@ -103,10 +119,7 @@ class SeasonPlaceholder extends StatelessWidget {
                                     flex: 2,
                                     child: Padding(
                                       padding: EdgeInsets.all(4),
-                                      child: AspectRatio(
-                                        aspectRatio: 16 / 9,
-                                        child: GPlaceholderImage(),
-                                      ),
+                                      child: AspectRatio(aspectRatio: 16 / 9, child: GPlaceholderImage()),
                                     ),
                                   ),
                                   Flexible(
@@ -116,9 +129,7 @@ class SeasonPlaceholder extends StatelessWidget {
                                       children: [
                                         Row(
                                           children: [
-                                            const Expanded(
-                                              child: GPlaceholderRect(height: 18),
-                                            ),
+                                            const Expanded(child: GPlaceholderRect(height: 18)),
                                             IconButton(
                                               onPressed: null,
                                               icon: const Icon(Icons.more_vert_rounded),
@@ -144,29 +155,29 @@ class SeasonPlaceholder extends StatelessWidget {
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           spacing: 4,
                                           children: List.generate(
-                                              3,
-                                              (index) => FractionallySizedBox(
-                                                    widthFactor: Random().nextDouble() * 0.2 + 0.7,
-                                                    child: Container(
-                                                      height: 12,
-                                                      decoration: GPlaceholderDecoration.lite,
-                                                    ),
-                                                  )),
-                                        )
+                                            3,
+                                            (index) => FractionallySizedBox(
+                                              widthFactor: Random().nextDouble() * 0.2 + 0.7,
+                                              child: Container(height: 12, decoration: GPlaceholderDecoration.lite),
+                                            ),
+                                          ),
+                                        ),
                                       ],
                                     ),
-                                  )
+                                  ),
                                 ],
                               ),
                             );
                           },
                         );
-                      }),
+                      },
                     ),
                   ),
-                  const SliverSafeArea(top: false, sliver: SliverToBoxAdapter()),
-                ],
-              ),
-            ));
+                ),
+                const SliverSafeArea(top: false, sliver: SliverToBoxAdapter()),
+              ],
+            ),
+          ),
+    );
   }
 }

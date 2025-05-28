@@ -25,8 +25,8 @@ class StreamBuilderHandler<T> extends StatelessWidget {
             return snapshot.hasError
                 ? Center(child: ErrorMessage(error: snapshot.error))
                 : snapshot.hasData
-                    ? builder(context, snapshot)
-                    : const SizedBox();
+                ? builder(context, snapshot)
+                : const SizedBox();
         }
       },
     );
@@ -51,16 +51,16 @@ class StreamBuilderSliverHandler<T> extends StatelessWidget {
             return snapshot.hasError
                 ? SliverToBoxAdapter(child: Center(child: ErrorMessage(error: snapshot.error)))
                 : snapshot.hasData
-                    ? builder(context, snapshot)
-                    : const SliverFillRemaining(child: Center(child: CircularProgressIndicator()));
+                ? builder(context, snapshot)
+                : const SliverFillRemaining(child: Center(child: CircularProgressIndicator()));
           case ConnectionState.none:
           case ConnectionState.active:
           case ConnectionState.done:
             return snapshot.hasError
                 ? SliverFillRemaining(child: Center(child: ErrorMessage(error: snapshot.error)))
                 : snapshot.hasData
-                    ? builder(context, snapshot)
-                    : const SliverToBoxAdapter();
+                ? builder(context, snapshot)
+                : const SliverToBoxAdapter();
         }
       },
     );

@@ -41,16 +41,19 @@ class _TVListTileState extends State<TVListTile> {
       autofocus: widget.autofocus ?? false,
       selected: widget.selected,
       selectedColor: Theme.of(context).colorScheme.surfaceContainerLowest,
-      selectedTileColor: _focused ? Theme.of(context).colorScheme.inverseSurface : Theme.of(context).colorScheme.onSurfaceVariant,
+      selectedTileColor:
+          _focused ? Theme.of(context).colorScheme.inverseSurface : Theme.of(context).colorScheme.onSurfaceVariant,
       visualDensity: VisualDensity.compact,
-      iconColor: _focused
-          ? Theme.of(context).colorScheme.surfaceContainerLowest
-          : widget.onTap == null
+      iconColor:
+          _focused
+              ? Theme.of(context).colorScheme.surfaceContainerLowest
+              : widget.onTap == null
               ? Colors.grey
               : null,
-      textColor: _focused
-          ? Theme.of(context).colorScheme.surfaceContainerLowest
-          : widget.onTap == null
+      textColor:
+          _focused
+              ? Theme.of(context).colorScheme.surfaceContainerLowest
+              : widget.onTap == null
               ? Colors.grey
               : null,
       tileColor: _focused ? Theme.of(context).colorScheme.inverseSurface : null,
@@ -113,7 +116,8 @@ class _TVRadioListTileState<T> extends State<TVRadioListTile<T>> {
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(6))),
       autofocus: widget.autofocus ?? false,
       selected: widget.selected,
-      selectedTileColor: _focused ? Theme.of(context).colorScheme.inverseSurface : Theme.of(context).colorScheme.onSurfaceVariant,
+      selectedTileColor:
+          _focused ? Theme.of(context).colorScheme.inverseSurface : Theme.of(context).colorScheme.onSurfaceVariant,
       visualDensity: VisualDensity.compact,
       tileColor: _focused ? Theme.of(context).colorScheme.inverseSurface : null,
       focusNode: widget.focusNode,
@@ -121,12 +125,18 @@ class _TVRadioListTileState<T> extends State<TVRadioListTile<T>> {
         if (_focused != f) setState(() => _focused = f);
         if (widget.onFocusChange != null) widget.onFocusChange!(f);
       },
-      title: widget.title != null
-          ? DefaultTextStyle(
-              style: TextStyle(color: _focused ? Theme.of(context).colorScheme.surfaceContainerLowest : Theme.of(context).colorScheme.onSurface),
-              child: widget.title!,
-            )
-          : null,
+      title:
+          widget.title != null
+              ? DefaultTextStyle(
+                style: TextStyle(
+                  color:
+                      _focused
+                          ? Theme.of(context).colorScheme.surfaceContainerLowest
+                          : Theme.of(context).colorScheme.onSurface,
+                ),
+                child: widget.title!,
+              )
+              : null,
       subtitle: widget.subtitle != null ? Opacity(opacity: 0.75, child: widget.subtitle) : null,
       onChanged: widget.onChanged,
     );
@@ -175,7 +185,8 @@ class _TVSwitchListTileState<T> extends State<TVSwitchListTile<T>> {
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(6))),
       autofocus: widget.autofocus ?? false,
       selected: widget.selected,
-      selectedTileColor: _focused ? Theme.of(context).colorScheme.inverseSurface : Theme.of(context).colorScheme.onSurfaceVariant,
+      selectedTileColor:
+          _focused ? Theme.of(context).colorScheme.inverseSurface : Theme.of(context).colorScheme.onSurfaceVariant,
       visualDensity: VisualDensity.compact,
       tileColor: _focused ? Theme.of(context).colorScheme.inverseSurface : null,
       focusNode: widget.focusNode,
@@ -183,12 +194,18 @@ class _TVSwitchListTileState<T> extends State<TVSwitchListTile<T>> {
         if (_focused != f) setState(() => _focused = f);
         if (widget.onFocusChange != null) widget.onFocusChange!(f);
       },
-      title: widget.title != null
-          ? DefaultTextStyle(
-              style: TextStyle(color: _focused ? Theme.of(context).colorScheme.surfaceContainerLowest : Theme.of(context).colorScheme.onSurface),
-              child: widget.title!,
-            )
-          : null,
+      title:
+          widget.title != null
+              ? DefaultTextStyle(
+                style: TextStyle(
+                  color:
+                      _focused
+                          ? Theme.of(context).colorScheme.surfaceContainerLowest
+                          : Theme.of(context).colorScheme.onSurface,
+                ),
+                child: widget.title!,
+              )
+              : null,
       subtitle: widget.subtitle != null ? Opacity(opacity: 0.75, child: widget.subtitle) : null,
       onChanged: widget.onChanged,
     );

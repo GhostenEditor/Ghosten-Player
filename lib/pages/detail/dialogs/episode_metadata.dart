@@ -1,7 +1,7 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../utils/utils.dart';
 import '../../../validators/validators.dart';
 import '../../utils/notification.dart';
@@ -91,7 +91,11 @@ class _EpisodeMetadataState extends State<EpisodeMetadata> {
               keyboardType: TextInputType.datetime,
               onTap: () async {
                 final date = await showDatePicker(
-                    context: context, initialDate: DateTime.tryParse(_controller3.text), firstDate: DateTime(1900), lastDate: DateTime(2100));
+                  context: context,
+                  initialDate: DateTime.tryParse(_controller3.text),
+                  firstDate: DateTime(1900),
+                  lastDate: DateTime(2100),
+                );
                 if (date != null) {
                   _controller3.text = date.format();
                 }
@@ -134,15 +138,16 @@ class _EpisodeMetadataState extends State<EpisodeMetadata> {
           onPressed: () async {
             if (_formKey.currentState!.validate()) {
               final resp = await showNotification(
-                  context,
-                  Api.tvEpisodeMetadataUpdateById({
-                    'id': widget.episode.id,
-                    'title': _controller1.text,
-                    'episode': int.parse(_controller2.text),
-                    'airDate': _controller3.text,
-                    'overview': _controller4.text,
-                    'duration': int.parse(_controller5.text),
-                  }));
+                context,
+                Api.tvEpisodeMetadataUpdateById({
+                  'id': widget.episode.id,
+                  'title': _controller1.text,
+                  'episode': int.parse(_controller2.text),
+                  'airDate': _controller3.text,
+                  'overview': _controller4.text,
+                  'duration': int.parse(_controller5.text),
+                }),
+              );
               if (resp?.error == null) {
                 if (context.mounted) Navigator.pop(context, true);
               }
@@ -150,10 +155,7 @@ class _EpisodeMetadataState extends State<EpisodeMetadata> {
           },
           child: Text(AppLocalizations.of(context)!.buttonConfirm),
         ),
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(AppLocalizations.of(context)!.buttonCancel),
-        ),
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(AppLocalizations.of(context)!.buttonCancel)),
       ],
     );
   }

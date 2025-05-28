@@ -1,10 +1,10 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../components/async_image.dart';
 import '../../../components/error_message.dart';
 import '../../../components/gap.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../utils/utils.dart';
 import '../../../validators/validators.dart';
 
@@ -77,12 +77,13 @@ class _ScraperDialogState<T extends MediaBase> extends State<ScraperDialog<T>> {
                 isDense: true,
                 labelText: AppLocalizations.of(context)!.formLabelLanguage,
               ),
-              items: AppLocalizations.supportedLocales
-                  .map((locale) => DropdownMenuItem(
-                        value: locale.toLanguageTag(),
-                        child: Text(locale.toLanguageTag()),
-                      ))
-                  .toList(),
+              items:
+                  AppLocalizations.supportedLocales
+                      .map(
+                        (locale) =>
+                            DropdownMenuItem(value: locale.toLanguageTag(), child: Text(locale.toLanguageTag())),
+                      )
+                      .toList(),
               onChanged: (code) {
                 if (code == null) return;
                 setState(() {
@@ -95,18 +96,16 @@ class _ScraperDialogState<T extends MediaBase> extends State<ScraperDialog<T>> {
               onPressed: _search,
               child: Text(AppLocalizations.of(context)!.buttonConfirm),
             ),
-            if (loading)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: LinearProgressIndicator(),
-              ),
+            if (loading) const Padding(padding: EdgeInsets.symmetric(vertical: 16), child: LinearProgressIndicator()),
             if (error != null) ErrorMessage(error: error),
-            ...items.map((item) => _SearchResultItem(
-                  item: item,
-                  onTap: () {
-                    Navigator.of(context).pop((item.id, item.type, languageCode));
-                  },
-                ))
+            ...items.map(
+              (item) => _SearchResultItem(
+                item: item,
+                onTap: () {
+                  Navigator.of(context).pop((item.id, item.type, languageCode));
+                },
+              ),
+            ),
           ],
         ),
       ),
@@ -120,8 +119,18 @@ class _ScraperDialogState<T extends MediaBase> extends State<ScraperDialog<T>> {
       setState(() => loading = true);
       try {
         final data = switch (widget.item) {
-          TVSeries _ => await Api.tvSeriesScraperSearch(widget.item.id, _controller1.text, year: _controller2.text, language: languageCode),
-          Movie _ => await Api.movieScraperSearch(widget.item.id, _controller1.text, year: _controller2.text, language: languageCode),
+          TVSeries _ => await Api.tvSeriesScraperSearch(
+            widget.item.id,
+            _controller1.text,
+            year: _controller2.text,
+            language: languageCode,
+          ),
+          Movie _ => await Api.movieScraperSearch(
+            widget.item.id,
+            _controller1.text,
+            year: _controller2.text,
+            language: languageCode,
+          ),
           _ => throw UnimplementedError(),
         };
         items = data;
@@ -156,7 +165,12 @@ class _SearchResultItem extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(item.title, style: Theme.of(context).textTheme.titleMedium, overflow: TextOverflow.ellipsis),
-                      if (item.originalTitle != null) Text(item.originalTitle!, style: Theme.of(context).textTheme.labelSmall, overflow: TextOverflow.ellipsis),
+                      if (item.originalTitle != null)
+                        Text(
+                          item.originalTitle!,
+                          style: Theme.of(context).textTheme.labelSmall,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                     ],
                   ),
                 ),
@@ -173,19 +187,20 @@ class _SearchResultItem extends StatelessWidget {
                   child: SizedBox(
                     width: 120,
                     height: 180,
-                    child: item.poster != null
-                        ? AsyncImage(
-                            item.poster!,
-                            radius: BorderRadius.circular(4),
-                          )
-                        : Container(
-                            decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary.withAlpha(0x11), borderRadius: BorderRadius.circular(4)),
-                            child: Icon(
-                              Icons.image_not_supported_outlined,
-                              size: 42,
-                              color: Theme.of(context).colorScheme.secondaryContainer,
+                    child:
+                        item.poster != null
+                            ? AsyncImage(item.poster!, radius: BorderRadius.circular(4))
+                            : Container(
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.primary.withAlpha(0x11),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Icon(
+                                Icons.image_not_supported_outlined,
+                                size: 42,
+                                color: Theme.of(context).colorScheme.secondaryContainer,
+                              ),
                             ),
-                          ),
                   ),
                 ),
                 Flexible(
@@ -196,7 +211,7 @@ class _SearchResultItem extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
-                )
+                ),
               ],
             ),
           ],

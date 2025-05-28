@@ -1,9 +1,9 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../dialogs/timer_picker.dart';
 import '../../utils/notification.dart';
 
@@ -14,7 +14,11 @@ abstract class MediaCubit<T> extends Cubit<T?> {
 }
 
 mixin ActionMixin<S extends StatefulWidget> on State<S> {
-  PopupMenuEntry<Never> buildWatchedAction<B extends MediaCubit<AsyncSnapshot<T>>, T extends MediaBase>(BuildContext context, T item, MediaType type) {
+  PopupMenuEntry<Never> buildWatchedAction<B extends MediaCubit<AsyncSnapshot<T>>, T extends MediaBase>(
+    BuildContext context,
+    T item,
+    MediaType type,
+  ) {
     return PopupMenuItem(
       padding: EdgeInsets.zero,
       onTap: () async {
@@ -26,13 +30,21 @@ mixin ActionMixin<S extends StatefulWidget> on State<S> {
       },
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-        title: Text(item.watched ? AppLocalizations.of(context)!.buttonMarkNotPlayed : AppLocalizations.of(context)!.buttonMarkPlayed),
+        title: Text(
+          item.watched
+              ? AppLocalizations.of(context)!.buttonMarkNotPlayed
+              : AppLocalizations.of(context)!.buttonMarkPlayed,
+        ),
         leading: Icon(Icons.check_rounded, color: item.watched ? Theme.of(context).colorScheme.primary : null),
       ),
     );
   }
 
-  PopupMenuEntry<Never> buildFavoriteAction<B extends MediaCubit<AsyncSnapshot<T>>, T extends MediaBase>(BuildContext context, T item, MediaType type) {
+  PopupMenuEntry<Never> buildFavoriteAction<B extends MediaCubit<AsyncSnapshot<T>>, T extends MediaBase>(
+    BuildContext context,
+    T item,
+    MediaType type,
+  ) {
     return PopupMenuItem(
       padding: EdgeInsets.zero,
       onTap: () async {
@@ -44,13 +56,23 @@ mixin ActionMixin<S extends StatefulWidget> on State<S> {
       },
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-        title: Text(item.favorite ? AppLocalizations.of(context)!.buttonUnmarkFavorite : AppLocalizations.of(context)!.buttonMarkFavorite),
-        leading: Icon(Icons.favorite_border_rounded, color: item.favorite ? Theme.of(context).colorScheme.primary : null),
+        title: Text(
+          item.favorite
+              ? AppLocalizations.of(context)!.buttonUnmarkFavorite
+              : AppLocalizations.of(context)!.buttonMarkFavorite,
+        ),
+        leading: Icon(
+          Icons.favorite_border_rounded,
+          color: item.favorite ? Theme.of(context).colorScheme.primary : null,
+        ),
       ),
     );
   }
 
-  PopupMenuEntry<Never> buildScraperAction<B extends MediaCubit<AsyncSnapshot<T>>, T extends MediaBase>(BuildContext context, Future<bool?> Function() future) {
+  PopupMenuEntry<Never> buildScraperAction<B extends MediaCubit<AsyncSnapshot<T>>, T extends MediaBase>(
+    BuildContext context,
+    Future<bool?> Function() future,
+  ) {
     return PopupMenuItem(
       padding: EdgeInsets.zero,
       onTap: () async {
@@ -69,12 +91,19 @@ mixin ActionMixin<S extends StatefulWidget> on State<S> {
   }
 
   PopupMenuEntry<Never> buildSkipFromStartAction<B extends MediaCubit<AsyncSnapshot<T>>, T extends MediaBase>(
-      BuildContext context, T item, MediaType type, Duration value) {
+    BuildContext context,
+    T item,
+    MediaType type,
+    Duration value,
+  ) {
     return PopupMenuItem(
       padding: EdgeInsets.zero,
       onTap: () async {
-        final time =
-            await showDialog(context: context, builder: (context) => TimerPickerDialog(value: value, title: AppLocalizations.of(context)!.buttonSkipFromStart));
+        final time = await showDialog(
+          context: context,
+          builder:
+              (context) => TimerPickerDialog(value: value, title: AppLocalizations.of(context)!.buttonSkipFromStart),
+        );
         if (time != null) {
           await Api.setSkipTime(SkipTimeType.intro, type, item.id, time);
           if (context.mounted) {
@@ -92,12 +121,18 @@ mixin ActionMixin<S extends StatefulWidget> on State<S> {
   }
 
   PopupMenuEntry<Never> buildSkipFromEndAction<B extends MediaCubit<AsyncSnapshot<T>>, T extends MediaBase>(
-      BuildContext context, T item, MediaType type, Duration value) {
+    BuildContext context,
+    T item,
+    MediaType type,
+    Duration value,
+  ) {
     return PopupMenuItem(
       padding: EdgeInsets.zero,
       onTap: () async {
-        final time =
-            await showDialog(context: context, builder: (context) => TimerPickerDialog(value: value, title: AppLocalizations.of(context)!.buttonSkipFromEnd));
+        final time = await showDialog(
+          context: context,
+          builder: (context) => TimerPickerDialog(value: value, title: AppLocalizations.of(context)!.buttonSkipFromEnd),
+        );
         if (time != null) {
           await Api.setSkipTime(SkipTimeType.ending, type, item.id, time);
           if (context.mounted) {
@@ -147,7 +182,12 @@ mixin ActionMixin<S extends StatefulWidget> on State<S> {
   PopupMenuEntry<Never> buildHomeAction(BuildContext context, Uri uri) {
     return PopupMenuItem(
       padding: EdgeInsets.zero,
-      onTap: () => launchUrl(uri, mode: LaunchMode.inAppBrowserView, browserConfiguration: const BrowserConfiguration(showTitle: true)),
+      onTap:
+          () => launchUrl(
+            uri,
+            mode: LaunchMode.inAppBrowserView,
+            browserConfiguration: const BrowserConfiguration(showTitle: true),
+          ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16),
         title: Text(AppLocalizations.of(context)!.buttonHome),

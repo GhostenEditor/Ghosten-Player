@@ -36,78 +36,95 @@ class _DetailScaffoldState<T extends MediaBase> extends State<DetailScaffold<T>>
     return Stack(
       children: [
         if (widget.showSide != null)
-          ListenableBuilder(listenable: widget.showSide!, builder: (context, _) => _buildBackground(context, widget.item, widget.showSide!.value))
+          ListenableBuilder(
+            listenable: widget.showSide!,
+            builder: (context, _) => _buildBackground(context, widget.item, widget.showSide!.value),
+          )
         else
           _buildBackground(context, widget.item, true),
-        ThemeBuilder(widget.item.themeColor, builder: (context) {
-          return Focus(
-            skipTraversal: true,
-            onKeyEvent: (FocusNode node, KeyEvent event) {
-              if (event is KeyDownEvent || event is KeyRepeatEvent) {
-                switch (event.logicalKey) {
-                  case LogicalKeyboardKey.contextMenu:
-                    if (widget.scaffoldKey is GlobalKey<ScaffoldState>) {
-                      final k = widget.scaffoldKey! as GlobalKey<ScaffoldState>;
-                      if (k.currentState?.isEndDrawerOpen == false) {
-                        k.currentState?.openEndDrawer();
-                        return KeyEventResult.handled;
+        ThemeBuilder(
+          widget.item.themeColor,
+          builder: (context) {
+            return Focus(
+              skipTraversal: true,
+              onKeyEvent: (FocusNode node, KeyEvent event) {
+                if (event is KeyDownEvent || event is KeyRepeatEvent) {
+                  switch (event.logicalKey) {
+                    case LogicalKeyboardKey.contextMenu:
+                      if (widget.scaffoldKey is GlobalKey<ScaffoldState>) {
+                        final k = widget.scaffoldKey! as GlobalKey<ScaffoldState>;
+                        if (k.currentState?.isEndDrawerOpen == false) {
+                          k.currentState?.openEndDrawer();
+                          return KeyEventResult.handled;
+                        }
                       }
-                    }
+                  }
                 }
-              }
-              return KeyEventResult.ignored;
-            },
-            child: Scaffold(
-              key: widget.scaffoldKey,
-              backgroundColor: Colors.transparent,
-              endDrawer: widget.endDrawer != null
-                  ? Builder(
-                      builder: (context) => Container(
-                            width: 360,
-                            color: Theme.of(context).colorScheme.surfaceContainerLow,
-                            child: Navigator(
-                                key: widget.drawerNavigatorKey, onGenerateRoute: (settings) => FadeInPageRoute(builder: (context) => widget.endDrawer!)),
-                          ))
-                  : null,
-              body: Row(
-                children: [
-                  Flexible(
+                return KeyEventResult.ignored;
+              },
+              child: Scaffold(
+                key: widget.scaffoldKey,
+                backgroundColor: Colors.transparent,
+                endDrawer:
+                    widget.endDrawer != null
+                        ? Builder(
+                          builder:
+                              (context) => Container(
+                                width: 360,
+                                color: Theme.of(context).colorScheme.surfaceContainerLow,
+                                child: Navigator(
+                                  key: widget.drawerNavigatorKey,
+                                  onGenerateRoute:
+                                      (settings) => FadeInPageRoute(builder: (context) => widget.endDrawer!),
+                                ),
+                              ),
+                        )
+                        : null,
+                body: Row(
+                  children: [
+                    Flexible(
                       flex: 2,
                       child: Padding(
                         padding: const EdgeInsets.only(left: 32, right: 32, top: 32, bottom: 20),
                         child: widget.child,
-                      )),
-                  Flexible(
+                      ),
+                    ),
+                    Flexible(
                       flex: 3,
                       child: Actions(
                         actions: {
-                          DirectionalFocusIntent: CallbackAction<DirectionalFocusIntent>(onInvoke: (indent) {
-                            final currentNode = FocusManager.instance.primaryFocus;
-                            if (currentNode != null) {
-                              final nearestScope = currentNode.nearestScope!;
-                              final focusedChild = nearestScope.focusedChild;
-                              if (focusedChild == null || !focusedChild.focusInDirection(indent.direction)) {
-                                switch (indent.direction) {
-                                  case TraversalDirection.left:
-                                    nearestScope.parent?.focusInDirection(indent.direction);
-                                  default:
+                          DirectionalFocusIntent: CallbackAction<DirectionalFocusIntent>(
+                            onInvoke: (indent) {
+                              final currentNode = FocusManager.instance.primaryFocus;
+                              if (currentNode != null) {
+                                final nearestScope = currentNode.nearestScope!;
+                                final focusedChild = nearestScope.focusedChild;
+                                if (focusedChild == null || !focusedChild.focusInDirection(indent.direction)) {
+                                  switch (indent.direction) {
+                                    case TraversalDirection.left:
+                                      nearestScope.parent?.focusInDirection(indent.direction);
+                                    default:
+                                  }
                                 }
                               }
-                            }
-                            return null;
-                          }),
+                              return null;
+                            },
+                          ),
                         },
                         child: Navigator(
                           key: widget.navigatorKey,
                           requestFocus: false,
-                          onGenerateRoute: (settings) => FadeInPageRoute(builder: (context) => const SizedBox(), settings: settings),
+                          onGenerateRoute:
+                              (settings) => FadeInPageRoute(builder: (context) => const SizedBox(), settings: settings),
                         ),
-                      )),
-                ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          );
-        })
+            );
+          },
+        ),
       ],
     );
   }
@@ -119,13 +136,10 @@ class _DetailScaffoldState<T extends MediaBase> extends State<DetailScaffold<T>>
         if (item.backdrop != null)
           AsyncImage(item.backdrop!)
         else
-          Image.asset(
-            switch (Theme.of(context).brightness) {
-              Brightness.dark => 'assets/tv/images/bg-pixel.webp',
-              Brightness.light => 'assets/tv/images/bg-pixel-light.webp',
-            },
-            repeat: ImageRepeat.repeat,
-          ),
+          Image.asset(switch (Theme.of(context).brightness) {
+            Brightness.dark => 'assets/tv/images/bg-pixel.webp',
+            Brightness.light => 'assets/tv/images/bg-pixel-light.webp',
+          }, repeat: ImageRepeat.repeat),
         if (item.logo != null)
           Align(
             alignment: const Alignment(0.9, -0.8),
@@ -139,17 +153,20 @@ class _DetailScaffoldState<T extends MediaBase> extends State<DetailScaffold<T>>
             ),
           ),
         DecoratedBox(
-          decoration: overlay
-              ? BoxDecoration(color: Theme.of(context).scaffoldBackgroundColor.withAlpha(item.backdrop != null ? 0xDD : 0xAA))
-              : BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Theme.of(context).scaffoldBackgroundColor.withAlpha(item.backdrop != null ? 0xEE : 0xAA),
-                      Theme.of(context).scaffoldBackgroundColor.withAlpha(0x66),
-                    ],
-                    stops: const [0.3, 0.8],
+          decoration:
+              overlay
+                  ? BoxDecoration(
+                    color: Theme.of(context).scaffoldBackgroundColor.withAlpha(item.backdrop != null ? 0xDD : 0xAA),
+                  )
+                  : BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Theme.of(context).scaffoldBackgroundColor.withAlpha(item.backdrop != null ? 0xEE : 0xAA),
+                        Theme.of(context).scaffoldBackgroundColor.withAlpha(0x66),
+                      ],
+                      stops: const [0.3, 0.8],
+                    ),
                   ),
-                ),
         ),
       ],
     );

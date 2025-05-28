@@ -72,40 +72,36 @@ class _NumberPickerState extends State<NumberPicker> {
           }
         });
       },
-      child: (_focusNode.hasFocus || widget.alwaysShow)
-          ? Stack(
-              children: [
-                if (widget.decoration != null)
-                  Center(
-                    child: Container(
-                      decoration: widget.decoration,
-                      height: widget.height,
+      child:
+          (_focusNode.hasFocus || widget.alwaysShow)
+              ? Stack(
+                children: [
+                  if (widget.decoration != null)
+                    Center(child: Container(decoration: widget.decoration, height: widget.height)),
+                  SizedBox(
+                    width: widget.width,
+                    child: ListWheelScrollView.useDelegate(
+                      controller: _scrollController,
+                      itemExtent: widget.height,
+                      diameterRatio: 1.4,
+                      overAndUnderCenterOpacity: widget.overAndUnderCenterOpacity,
+                      physics: const FixedExtentScrollPhysics(),
+                      childDelegate: ListWheelChildBuilderDelegate(
+                        childCount: _count,
+                        builder: (context, index) => Center(child: Text(index.toString())),
+                      ),
+                      onSelectedItemChanged: (index) {
+                        _value = index;
+                        widget.onChanged(_value);
+                      },
                     ),
                   ),
-                SizedBox(
-                  width: widget.width,
-                  child: ListWheelScrollView.useDelegate(
-                    controller: _scrollController,
-                    itemExtent: widget.height,
-                    diameterRatio: 1.4,
-                    overAndUnderCenterOpacity: widget.overAndUnderCenterOpacity,
-                    physics: const FixedExtentScrollPhysics(),
-                    childDelegate: ListWheelChildBuilderDelegate(
-                      childCount: _count,
-                      builder: (context, index) => Center(child: Text(index.toString())),
-                    ),
-                    onSelectedItemChanged: (index) {
-                      _value = index;
-                      widget.onChanged(_value);
-                    },
-                  ),
-                ),
-              ],
-            )
-          : GestureDetector(
-              onTap: _focusNode.requestFocus,
-              child: SizedBox(width: widget.width, child: Text(_value.toString(), textAlign: TextAlign.center)),
-            ),
+                ],
+              )
+              : GestureDetector(
+                onTap: _focusNode.requestFocus,
+                child: SizedBox(width: widget.width, child: Text(_value.toString(), textAlign: TextAlign.center)),
+              ),
     );
   }
 

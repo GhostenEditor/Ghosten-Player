@@ -34,24 +34,32 @@ class _PlayingIconState extends State<PlayingIcon> with SingleTickerProviderStat
       child: SizedBox.square(
         dimension: widget.size,
         child: AnimatedBuilder(
-            animation: animation,
-            builder: (context, child) => Row(
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: spacing,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: array
-                      .map((entry) => Container(
-                            decoration: decoration,
-                            width: width,
-                            height: h(1 + entry.$1, entry.$2),
-                          ))
-                      .toList(),
-                )),
+          animation: animation,
+          builder:
+              (context, child) => Row(
+                mainAxisSize: MainAxisSize.min,
+                spacing: spacing,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children:
+                    array
+                        .map(
+                          (entry) => Container(decoration: decoration, width: width, height: h(1 + entry.$1, entry.$2)),
+                        )
+                        .toList(),
+              ),
+        ),
       ),
     );
   }
 
   double h(double a, double b) {
-    return ((sin(((animation.lastElapsedDuration?.inMilliseconds ?? 0) / Duration.millisecondsPerSecond * a + b) * speed) + 1) * 0.35 + 0.3) * widget.size;
+    return ((sin(
+                      ((animation.lastElapsedDuration?.inMilliseconds ?? 0) / Duration.millisecondsPerSecond * a + b) *
+                          speed,
+                    ) +
+                    1) *
+                0.35 +
+            0.3) *
+        widget.size;
   }
 }

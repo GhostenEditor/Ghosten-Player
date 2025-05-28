@@ -58,8 +58,8 @@ class FutureBuilderSliverHandler<T> extends StatelessWidget {
           return snapshot.hasData
               ? builder(context, snapshot)
               : loadingBuilder != null
-                  ? SliverToBoxAdapter(child: loadingBuilder!(context, snapshot))
-                  : const SliverFillRemaining(hasScrollBody: false, child: Loading());
+              ? SliverToBoxAdapter(child: loadingBuilder!(context, snapshot))
+              : const SliverFillRemaining(hasScrollBody: false, child: Loading());
         }
       },
     );

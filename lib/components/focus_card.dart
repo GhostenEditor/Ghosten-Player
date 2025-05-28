@@ -38,9 +38,7 @@ class _FocusCardState<T> extends State<FocusCard<T>> {
       child: Material(
         type: MaterialType.card,
         surfaceTintColor: Theme.of(context).colorScheme.surfaceTint,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(4),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
         shadowColor: Theme.of(context).cardTheme.shadowColor,
         clipBehavior: Clip.antiAlias,
         child: InkWell(

@@ -37,11 +37,15 @@ class _FocusableState extends State<Focusable> {
       width: widget.width,
       height: widget.height,
       child: Material(
-        color: widget.selected ?? false
-            ? (widget.selectedBackgroundColor ?? Theme.of(context).colorScheme.surfaceContainerHighest)
-            : (widget.backgroundColor ?? Theme.of(context).colorScheme.surfaceContainerLow),
+        color:
+            widget.selected ?? false
+                ? (widget.selectedBackgroundColor ?? Theme.of(context).colorScheme.surfaceContainerHighest)
+                : (widget.backgroundColor ?? Theme.of(context).colorScheme.surfaceContainerLow),
         shape: RoundedRectangleBorder(
-          side: _focused ? BorderSide(width: 4, color: Theme.of(context).colorScheme.inverseSurface, strokeAlign: 2) : BorderSide.none,
+          side:
+              _focused
+                  ? BorderSide(width: 4, color: Theme.of(context).colorScheme.inverseSurface, strokeAlign: 2)
+                  : BorderSide.none,
           borderRadius: BorderRadius.circular(6),
         ),
         child: InkWell(

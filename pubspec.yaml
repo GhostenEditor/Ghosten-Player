@@ -3,7 +3,7 @@ description: "Ghosten Player: A Video Player"
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 2.1.1
 environment:
-  sdk: ^3.6.1
+  sdk: ^3.7.2
 dependencies:
   flutter:
     sdk: flutter
@@ -41,7 +41,7 @@ dependencies:
   video_player:
     path: packages/video_player
   volume_controller: ^3.3.3
-  webview_cookie_manager: ^2.0.0
+  webview_cookie_manager_plus: ^2.0.16
   webview_flutter: ^4.11.0
 
 dev_dependencies:

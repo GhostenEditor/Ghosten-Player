@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:api/api.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:webview_cookie_manager/webview_cookie_manager.dart';
+import 'package:webview_cookie_manager_plus/webview_cookie_manager_plus.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../components/error_message.dart';
 import '../../const.dart';
+import '../../l10n/app_localizations.dart';
 import '../../validators/validators.dart';
 import '../components/filled_button.dart';
 import '../components/input_assistance.dart';
@@ -96,87 +96,111 @@ class _SettingsLoginPageState extends State<SettingsLoginPage> {
       body: Row(
         children: [
           Flexible(
-              flex: 2,
-              fit: FlexFit.tight,
-              child: DecoratedBox(
-                decoration: const BoxDecoration(
-                  image: DecorationImage(image: AssetImage('assets/tv/images/bg-wheat.webp'), repeat: ImageRepeat.repeat),
+            flex: 2,
+            fit: FlexFit.tight,
+            child: DecoratedBox(
+              decoration: const BoxDecoration(
+                image: DecorationImage(image: AssetImage('assets/tv/images/bg-wheat.webp'), repeat: ImageRepeat.repeat),
+              ),
+              child: Container(
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
+                child: InputAssistance(
+                  disabled: switch (_driverType) {
+                    DriverType.webdav || DriverType.alipan => false,
+                    DriverType.quark => true,
+                    _ => throw UnimplementedError(),
+                  },
+                  onData: (data) {
+                    final ctx = FocusManager.instance.primaryFocus?.context;
+                    final textField = ctx?.findAncestorWidgetOfExactType<TextField>();
+                    if (textField?.controller != null) {
+                      textField!.controller!.text += data;
+                    }
+                  },
                 ),
-                child: Container(
-                  clipBehavior: Clip.antiAlias,
-                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
-                  child: InputAssistance(
-                    disabled: switch (_driverType) {
-                      DriverType.webdav || DriverType.alipan => false,
-                      DriverType.quark => true,
-                      _ => throw UnimplementedError(),
-                    },
-                    onData: (data) {
-                      final ctx = FocusManager.instance.primaryFocus?.context;
-                      final textField = ctx?.findAncestorWidgetOfExactType<TextField>();
-                      if (textField?.controller != null) {
-                        textField!.controller!.text += data;
-                      }
-                    },
-                  ),
-                ),
-              )),
+              ),
+            ),
+          ),
           Flexible(
-              flex: 3,
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [DriverType.alipan, DriverType.quark, DriverType.webdav]
-                        .map((ty) => Padding(
+            flex: 3,
+            child: Column(
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children:
+                      [DriverType.alipan, DriverType.quark, DriverType.webdav]
+                          .map(
+                            (ty) => Padding(
                               padding: const EdgeInsets.all(4),
-                              child: _driverType == ty
-                                  ? TVFilledButton(
-                                      onPressed: () => setState(() => _driverType = ty),
-                                      child: Text(AppLocalizations.of(context)!.driverType(ty.name)),
-                                    )
-                                  : TVTextButton(
-                                      onPressed: () => setState(() => _driverType = ty), child: Text(AppLocalizations.of(context)!.driverType(ty.name))),
-                            ))
-                        .toList(),
-                  ),
-                  Expanded(
-                    child: switch (_driverType) {
-                      DriverType.alipan => Center(
-                          child: StepperForm(
-                              key: ValueKey(_alipan),
-                              items: _alipan,
-                              onComplete: (data) async {
-                                data['type'] = DriverType.alipan.name;
-                                final flag = await showDialog<bool>(context: context, builder: (context) => _buildLoginLoading(Api.driverInsert(data)));
-                                if ((flag ?? false) && context.mounted) {
-                                  Navigator.of(context).pop(true);
-                                }
-                              })),
-                      DriverType.webdav => Center(
-                          child: StepperForm(
-                              key: ValueKey(_webdav),
-                              items: _webdav,
-                              onComplete: (data) async {
-                                data['type'] = DriverType.webdav.name;
-                                final flag = await showDialog<bool>(context: context, builder: (context) => _buildLoginLoading(Api.driverInsert(data)));
-                                if ((flag ?? false) && context.mounted) {
-                                  Navigator.of(context).pop(true);
-                                }
-                              })),
-                      DriverType.quark => kIsWeb
+                              child:
+                                  _driverType == ty
+                                      ? TVFilledButton(
+                                        onPressed: () => setState(() => _driverType = ty),
+                                        child: Text(AppLocalizations.of(context)!.driverType(ty.name)),
+                                      )
+                                      : TVTextButton(
+                                        onPressed: () => setState(() => _driverType = ty),
+                                        child: Text(AppLocalizations.of(context)!.driverType(ty.name)),
+                                      ),
+                            ),
+                          )
+                          .toList(),
+                ),
+                Expanded(
+                  child: switch (_driverType) {
+                    DriverType.alipan => Center(
+                      child: StepperForm(
+                        key: ValueKey(_alipan),
+                        items: _alipan,
+                        onComplete: (data) async {
+                          data['type'] = DriverType.alipan.name;
+                          final flag = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => _buildLoginLoading(Api.driverInsert(data)),
+                          );
+                          if ((flag ?? false) && context.mounted) {
+                            Navigator.of(context).pop(true);
+                          }
+                        },
+                      ),
+                    ),
+                    DriverType.webdav => Center(
+                      child: StepperForm(
+                        key: ValueKey(_webdav),
+                        items: _webdav,
+                        onComplete: (data) async {
+                          data['type'] = DriverType.webdav.name;
+                          final flag = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => _buildLoginLoading(Api.driverInsert(data)),
+                          );
+                          if ((flag ?? false) && context.mounted) {
+                            Navigator.of(context).pop(true);
+                          }
+                        },
+                      ),
+                    ),
+                    DriverType.quark =>
+                      kIsWeb
                           ? const SizedBox()
-                          : _QuarkLogin(onComplete: (data) async {
-                              final flag = await showDialog<bool>(context: context, builder: (context) => _buildLoginLoading(Api.driverInsert(data)));
+                          : _QuarkLogin(
+                            onComplete: (data) async {
+                              final flag = await showDialog<bool>(
+                                context: context,
+                                builder: (context) => _buildLoginLoading(Api.driverInsert(data)),
+                              );
                               if ((flag ?? false) && context.mounted) {
                                 Navigator.of(context).pop(true);
                               }
-                            }),
-                      _ => throw UnimplementedError(),
-                    },
-                  ),
-                ],
-              ))
+                            },
+                          ),
+                    _ => throw UnimplementedError(),
+                  },
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -184,32 +208,43 @@ class _SettingsLoginPageState extends State<SettingsLoginPage> {
 
   Widget _buildLoginLoading(Stream<dynamic> stream) {
     return StreamBuilder(
-        stream: stream,
-        builder: (context, snapshot) => PopScope(
+      stream: stream,
+      builder:
+          (context, snapshot) => PopScope(
             canPop: false,
             onPopInvokedWithResult: (didPop, _) {
-              if (!didPop && (snapshot.connectionState == ConnectionState.done || snapshot.connectionState == ConnectionState.none || snapshot.hasData)) {
+              if (!didPop &&
+                  (snapshot.connectionState == ConnectionState.done ||
+                      snapshot.connectionState == ConnectionState.none ||
+                      snapshot.hasData)) {
                 Navigator.of(context).pop();
               }
             },
-            child: Builder(builder: (context) {
-              switch (snapshot.connectionState) {
-                case ConnectionState.waiting:
-                case ConnectionState.active:
-                  return const Loading();
-                case ConnectionState.none:
-                case ConnectionState.done:
-                  if (snapshot.hasError) {
-                    return AlertDialog(
-                      title: Text(AppLocalizations.of(context)!.modalTitleNotification),
-                      content: ErrorMessage(error: snapshot.error, leading: const Icon(Icons.error_outline, size: 60, color: Colors.red)),
-                    );
-                  } else {
-                    Navigator.of(context).pop(true);
-                    return const SizedBox();
-                  }
-              }
-            })));
+            child: Builder(
+              builder: (context) {
+                switch (snapshot.connectionState) {
+                  case ConnectionState.waiting:
+                  case ConnectionState.active:
+                    return const Loading();
+                  case ConnectionState.none:
+                  case ConnectionState.done:
+                    if (snapshot.hasError) {
+                      return AlertDialog(
+                        title: Text(AppLocalizations.of(context)!.modalTitleNotification),
+                        content: ErrorMessage(
+                          error: snapshot.error,
+                          leading: const Icon(Icons.error_outline, size: 60, color: Colors.red),
+                        ),
+                      );
+                    } else {
+                      Navigator.of(context).pop(true);
+                      return const SizedBox();
+                    }
+                }
+              },
+            ),
+          ),
+    );
   }
 }
 
@@ -248,9 +283,11 @@ class _QuarkLoginState extends State<_QuarkLogin> {
   @override
   Widget build(BuildContext context) {
     return WebViewWidget(
-        controller: WebViewController()
-          ..setJavaScriptMode(JavaScriptMode.unrestricted)
-          ..setUserAgent(ua)
-          ..loadRequest(Uri.parse('https://pan.quark.cn')));
+      controller:
+          WebViewController()
+            ..setJavaScriptMode(JavaScriptMode.unrestricted)
+            ..setUserAgent(ua)
+            ..loadRequest(Uri.parse('https://pan.quark.cn')),
+    );
   }
 }

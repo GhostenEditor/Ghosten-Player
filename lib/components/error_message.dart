@@ -1,10 +1,18 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import '../l10n/app_localizations.dart';
 
 class ErrorMessage extends StatelessWidget {
-  const ErrorMessage({super.key, required this.error, this.leading, this.safeArea = true, this.padding, this.minHeight});
+  const ErrorMessage({
+    super.key,
+    required this.error,
+    this.leading,
+    this.safeArea = true,
+    this.padding,
+    this.minHeight,
+  });
 
   final Object? error;
   final Widget? leading;
@@ -21,11 +29,7 @@ class ErrorMessage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (leading != null)
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: leading,
-            ),
+          if (leading != null) Padding(padding: const EdgeInsets.all(8.0), child: leading),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: DefaultTextStyle(
@@ -35,7 +39,8 @@ class ErrorMessage extends StatelessWidget {
                 spacing: 16,
                 children: [
                   Text(exception.code, style: Theme.of(context).textTheme.titleMedium),
-                  if (kDebugMode && (exception.details?.toString().isNotEmpty ?? false)) Text(exception.details.toString()),
+                  if (kDebugMode && (exception.details?.toString().isNotEmpty ?? false))
+                    Text(exception.details.toString()),
                 ],
               ),
             ),
@@ -45,9 +50,7 @@ class ErrorMessage extends StatelessWidget {
     );
     if (safeArea) {
       if (padding != null) {
-        return SingleChildScrollView(
-          child: SafeArea(child: Padding(padding: padding!, child: child)),
-        );
+        return SingleChildScrollView(child: SafeArea(child: Padding(padding: padding!, child: child)));
       } else {
         return SingleChildScrollView(child: SafeArea(child: child));
       }
@@ -63,23 +66,18 @@ class ErrorMessage extends StatelessWidget {
   CommonException _toCommonException(BuildContext context) {
     return switch (error) {
       final PlatformException error => CommonException(
-          code: AppLocalizations.of(context)!.errorCode(error.code, error.message as Object? ?? ''),
-          message: error.message,
-          details: AppLocalizations.of(context)!.errorDetails(error.code, error.message as Object? ?? ''),
-          stackTrace: error.stacktrace == null ? null : StackTrace.fromString(error.stacktrace!),
-        ),
-      _ => CommonException(code: error.toString())
+        code: AppLocalizations.of(context)!.errorCode(error.code, error.message as Object? ?? ''),
+        message: error.message,
+        details: AppLocalizations.of(context)!.errorDetails(error.code, error.message as Object? ?? ''),
+        stackTrace: error.stacktrace == null ? null : StackTrace.fromString(error.stacktrace!),
+      ),
+      _ => CommonException(code: error.toString()),
     };
   }
 }
 
 class CommonException implements Exception {
-  const CommonException({
-    required this.code,
-    this.message,
-    this.details,
-    this.stackTrace,
-  });
+  const CommonException({required this.code, this.message, this.details, this.stackTrace});
 
   final String code;
   final String? message;

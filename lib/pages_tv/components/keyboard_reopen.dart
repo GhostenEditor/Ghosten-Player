@@ -9,12 +9,14 @@ class KeyboardReopen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Actions(
       actions: {
-        ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: (indent) {
-          final context = FocusManager.instance.primaryFocus?.context;
-          final state = context?.findAncestorStateOfType<EditableTextState>();
-          state?.requestKeyboard();
-          return null;
-        }),
+        ActivateIntent: CallbackAction<ActivateIntent>(
+          onInvoke: (indent) {
+            final context = FocusManager.instance.primaryFocus?.context;
+            final state = context?.findAncestorStateOfType<EditableTextState>();
+            state?.requestKeyboard();
+            return null;
+          },
+        ),
       },
       child: child,
     );

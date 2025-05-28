@@ -12,11 +12,11 @@ class ScrollbarListView extends StatefulWidget {
     bool addSemanticIndexes = true,
     this.padding,
   }) : childrenDelegate = SliverChildListDelegate(
-          children,
-          addAutomaticKeepAlives: addAutomaticKeepAlives,
-          addRepaintBoundaries: addRepaintBoundaries,
-          addSemanticIndexes: addSemanticIndexes,
-        );
+         children,
+         addAutomaticKeepAlives: addAutomaticKeepAlives,
+         addRepaintBoundaries: addRepaintBoundaries,
+         addSemanticIndexes: addSemanticIndexes,
+       );
 
   ScrollbarListView.builder({
     super.key,
@@ -29,13 +29,13 @@ class ScrollbarListView extends StatefulWidget {
     bool addSemanticIndexes = true,
     this.padding,
   }) : childrenDelegate = SliverChildBuilderDelegate(
-          itemBuilder,
-          findChildIndexCallback: findChildIndexCallback,
-          childCount: itemCount,
-          addAutomaticKeepAlives: addAutomaticKeepAlives,
-          addRepaintBoundaries: addRepaintBoundaries,
-          addSemanticIndexes: addSemanticIndexes,
-        );
+         itemBuilder,
+         findChildIndexCallback: findChildIndexCallback,
+         childCount: itemCount,
+         addAutomaticKeepAlives: addAutomaticKeepAlives,
+         addRepaintBoundaries: addRepaintBoundaries,
+         addSemanticIndexes: addSemanticIndexes,
+       );
 
   ScrollbarListView.separated({
     super.key,
@@ -49,22 +49,22 @@ class ScrollbarListView extends StatefulWidget {
     bool addSemanticIndexes = true,
     this.padding,
   }) : childrenDelegate = SliverChildBuilderDelegate(
-          (BuildContext context, int index) {
-            final int itemIndex = index ~/ 2;
-            if (index.isEven) {
-              return itemBuilder(context, itemIndex);
-            }
-            return separatorBuilder(context, itemIndex);
-          },
-          findChildIndexCallback: findChildIndexCallback,
-          childCount: _computeActualChildCount(itemCount),
-          addAutomaticKeepAlives: addAutomaticKeepAlives,
-          addRepaintBoundaries: addRepaintBoundaries,
-          addSemanticIndexes: addSemanticIndexes,
-          semanticIndexCallback: (Widget widget, int index) {
-            return index.isEven ? index ~/ 2 : null;
-          },
-        );
+         (BuildContext context, int index) {
+           final int itemIndex = index ~/ 2;
+           if (index.isEven) {
+             return itemBuilder(context, itemIndex);
+           }
+           return separatorBuilder(context, itemIndex);
+         },
+         findChildIndexCallback: findChildIndexCallback,
+         childCount: _computeActualChildCount(itemCount),
+         addAutomaticKeepAlives: addAutomaticKeepAlives,
+         addRepaintBoundaries: addRepaintBoundaries,
+         addSemanticIndexes: addSemanticIndexes,
+         semanticIndexCallback: (Widget widget, int index) {
+           return index.isEven ? index ~/ 2 : null;
+         },
+       );
   final SliverChildDelegate childrenDelegate;
   final Axis scrollDirection;
   final EdgeInsetsGeometry? padding;
@@ -89,12 +89,13 @@ class _ScrollbarListViewState extends State<ScrollbarListView> {
   @override
   Widget build(BuildContext context) {
     return Scrollbar(
+      controller: _scrollController,
+      child: ListView.custom(
         controller: _scrollController,
-        child: ListView.custom(
-          controller: _scrollController,
-          childrenDelegate: widget.childrenDelegate,
-          scrollDirection: widget.scrollDirection,
-          padding: widget.padding,
-        ));
+        childrenDelegate: widget.childrenDelegate,
+        scrollDirection: widget.scrollDirection,
+        padding: widget.padding,
+      ),
+    );
   }
 }

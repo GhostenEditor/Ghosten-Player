@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../const.dart';
+import '../../l10n/app_localizations.dart';
 import '../components/future_builder_handler.dart';
 import '../components/setting.dart';
 
@@ -34,21 +34,18 @@ class SettingsSponsor extends StatelessWidget {
                     elevation: 24,
                     borderRadius: BorderRadius.circular(12),
                     clipBehavior: Clip.antiAlias,
-                    child: Image.asset(
-                      'assets/common/images/sponsor_code.webp',
-                      width: 240,
-                      height: 240,
-                    ),
+                    child: Image.asset('assets/common/images/sponsor_code.webp', width: 240, height: 240),
                   ),
                   Text(
                     AppLocalizations.of(context)!.sponsorMessage,
                     style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                          color: ColorScheme.fromSeed(
+                      color:
+                          ColorScheme.fromSeed(
                             seedColor: const Color(0xFF33281B),
                             brightness: Theme.of(context).brightness,
                           ).onPrimaryContainer,
-                          height: 1.5,
-                        ),
+                      height: 1.5,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -64,27 +61,29 @@ class SettingsSponsor extends StatelessWidget {
                     child: SafeArea(
                       child: ListTile(
                         dense: true,
-                        title: Text(AppLocalizations.of(context)!.sponsorThanksMessage, style: Theme.of(context).textTheme.titleMedium),
+                        title: Text(
+                          AppLocalizations.of(context)!.sponsorThanksMessage,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
                         subtitle: Text(AppLocalizations.of(context)!.sponsorTipMessage),
                       ),
                     ),
                   ),
                   FutureBuilderSliverHandler(
-                      future: _getSponsorList(),
-                      builder: (context, snapshot) {
-                        return SliverList.builder(
-                          itemCount: snapshot.requireData.length,
-                          itemBuilder: (context, index) => ButtonSettingItem(
-                            dense: true,
-                            title: Text(snapshot.requireData[index]),
-                            onTap: () {},
-                          ),
-                        );
-                      }),
+                    future: _getSponsorList(),
+                    builder: (context, snapshot) {
+                      return SliverList.builder(
+                        itemCount: snapshot.requireData.length,
+                        itemBuilder:
+                            (context, index) =>
+                                ButtonSettingItem(dense: true, title: Text(snapshot.requireData[index]), onTap: () {}),
+                      );
+                    },
+                  ),
                   const SliverToBoxAdapter(child: SizedBox(height: 32)),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),

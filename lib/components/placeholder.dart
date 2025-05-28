@@ -17,14 +17,8 @@ class GPlaceholder extends StatelessWidget {
 }
 
 class GPlaceholderDecoration {
-  static const base = BoxDecoration(
-    borderRadius: BorderRadius.all(Radius.circular(4)),
-    color: Colors.white,
-  );
-  static const lite = BoxDecoration(
-    borderRadius: BorderRadius.all(Radius.circular(4)),
-    color: Colors.white60,
-  );
+  static const base = BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(4)), color: Colors.white);
+  static const lite = BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(4)), color: Colors.white60);
 }
 
 class GPlaceholderRect extends StatelessWidget {
@@ -38,11 +32,7 @@ class GPlaceholderRect extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: padding ?? EdgeInsets.zero,
-      child: SizedBox(
-        width: width,
-        height: height,
-        child: const DecoratedBox(decoration: GPlaceholderDecoration.lite),
-      ),
+      child: SizedBox(width: width, height: height, child: const DecoratedBox(decoration: GPlaceholderDecoration.lite)),
     );
   }
 }

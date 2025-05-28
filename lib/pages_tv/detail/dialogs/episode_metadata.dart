@@ -1,8 +1,8 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../components/gap.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../utils/utils.dart';
 import '../../../validators/validators.dart';
 import '../../components/filled_button.dart';
@@ -51,10 +51,7 @@ class _EpisodeMetadataState extends State<EpisodeMetadata> {
                 child: TextFormField(
                   autofocus: true,
                   controller: _controller1,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.formLabelTitle,
-                    isDense: true,
-                  ),
+                  decoration: InputDecoration(labelText: AppLocalizations.of(context)!.formLabelTitle, isDense: true),
                   onEditingComplete: () => FocusScope.of(context).nextFocus(),
                 ),
               ),
@@ -96,7 +93,11 @@ class _EpisodeMetadataState extends State<EpisodeMetadata> {
                   keyboardType: TextInputType.datetime,
                   onTap: () async {
                     final date = await showDatePicker(
-                        context: context, initialDate: DateTime.tryParse(_controller3.text), firstDate: DateTime(1900), lastDate: DateTime(2100));
+                      context: context,
+                      initialDate: DateTime.tryParse(_controller3.text),
+                      firstDate: DateTime(1900),
+                      lastDate: DateTime(2100),
+                    );
                     if (date != null) {
                       _controller3.text = date.format();
                     }

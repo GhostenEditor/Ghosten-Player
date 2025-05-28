@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../components/future_builder_handler.dart';
 import '../../const.dart';
+import '../../l10n/app_localizations.dart';
 
 class SettingsSponsor extends StatefulWidget {
   const SettingsSponsor({super.key});
@@ -16,10 +16,7 @@ class _SettingsSponsorState extends State<SettingsSponsor> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.settingsItemSponsor),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.settingsItemSponsor), centerTitle: true),
       body: Scrollbar(
         child: CustomScrollView(
           slivers: [
@@ -53,12 +50,13 @@ class _SettingsSponsorState extends State<SettingsSponsor> {
                     child: Text(
                       AppLocalizations.of(context)!.sponsorMessage,
                       style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                            color: ColorScheme.fromSeed(
+                        color:
+                            ColorScheme.fromSeed(
                               seedColor: const Color(0xFF33281B),
                               brightness: Theme.of(context).brightness,
                             ).onPrimaryContainer,
-                            height: 1.5,
-                          ),
+                        height: 1.5,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -66,35 +64,37 @@ class _SettingsSponsorState extends State<SettingsSponsor> {
               ),
             ),
             SliverToBoxAdapter(
-                child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 620),
-                child: ListTile(
-                  dense: true,
-                  title: Text(AppLocalizations.of(context)!.sponsorThanksMessage, style: Theme.of(context).textTheme.titleMedium),
-                  subtitle: Text(AppLocalizations.of(context)!.sponsorTipMessage),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 620),
+                  child: ListTile(
+                    dense: true,
+                    title: Text(
+                      AppLocalizations.of(context)!.sponsorThanksMessage,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    subtitle: Text(AppLocalizations.of(context)!.sponsorTipMessage),
+                  ),
                 ),
               ),
-            )),
+            ),
             const SliverToBoxAdapter(child: Divider(height: 24)),
             SliverSafeArea(
               sliver: FutureBuilderSliverHandler(
-                  future: _getSponsorList(),
-                  builder: (context, snapshot) {
-                    return SliverList.builder(
-                      itemCount: snapshot.requireData.length,
-                      itemBuilder: (context, index) => Center(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 620),
-                          child: ListTile(
-                            dense: true,
-                            title: Text(snapshot.requireData[index]),
-                            minTileHeight: 24,
+                future: _getSponsorList(),
+                builder: (context, snapshot) {
+                  return SliverList.builder(
+                    itemCount: snapshot.requireData.length,
+                    itemBuilder:
+                        (context, index) => Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 620),
+                            child: ListTile(dense: true, title: Text(snapshot.requireData[index]), minTileHeight: 24),
                           ),
                         ),
-                      ),
-                    );
-                  }),
+                  );
+                },
+              ),
             ),
           ],
         ),

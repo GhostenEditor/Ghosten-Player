@@ -17,15 +17,17 @@ class StreamBuilderHandler<T> extends StatelessWidget {
       builder: (BuildContext context, AsyncSnapshot<T> snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
-            return snapshot.hasError ? Center(child: ErrorMessage(error: snapshot.error)) : const Center(child: CircularProgressIndicator());
+            return snapshot.hasError
+                ? Center(child: ErrorMessage(error: snapshot.error))
+                : const Center(child: CircularProgressIndicator());
           case ConnectionState.none:
           case ConnectionState.active:
           case ConnectionState.done:
             return snapshot.hasError
                 ? Center(child: ErrorMessage(error: snapshot.error))
                 : snapshot.hasData
-                    ? builder(context, snapshot)
-                    : const SizedBox();
+                ? builder(context, snapshot)
+                : const SizedBox();
         }
       },
     );
@@ -50,16 +52,16 @@ class StreamBuilderSliverHandler<T> extends StatelessWidget {
             return snapshot.hasError
                 ? SliverToBoxAdapter(child: Center(child: ErrorMessage(error: snapshot.error)))
                 : snapshot.hasData
-                    ? builder(context, snapshot)
-                    : const SliverFillRemaining(child: Center(child: CircularProgressIndicator()));
+                ? builder(context, snapshot)
+                : const SliverFillRemaining(child: Center(child: CircularProgressIndicator()));
           case ConnectionState.none:
           case ConnectionState.active:
           case ConnectionState.done:
             return snapshot.hasError
                 ? SliverFillRemaining(child: Center(child: ErrorMessage(error: snapshot.error)))
                 : snapshot.hasData
-                    ? builder(context, snapshot)
-                    : const SliverToBoxAdapter();
+                ? builder(context, snapshot)
+                : const SliverToBoxAdapter();
         }
       },
     );

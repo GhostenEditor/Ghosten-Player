@@ -35,8 +35,8 @@ class FutureBuilderHandler<T> extends StatelessWidget {
           return snapshot.hasData
               ? builder(context, snapshot)
               : loadingBuilder != null
-                  ? loadingBuilder!(context, snapshot)
-                  : const Center(child: Loading());
+              ? loadingBuilder!(context, snapshot)
+              : const Center(child: Loading());
         }
       },
     );
@@ -76,19 +76,19 @@ class FutureBuilderSliverHandler<T> extends StatelessWidget {
                       ? SliverFillRemaining(child: errorBuilder!(context, snapshot))
                       : SliverToBoxAdapter(child: errorBuilder!(context, snapshot))
                   : fillRemaining
-                      ? SliverFillRemaining(child: Center(child: ErrorMessage(error: snapshot.error)))
-                      : SliverToBoxAdapter(child: Center(child: ErrorMessage(error: snapshot.error)))
+                  ? SliverFillRemaining(child: Center(child: ErrorMessage(error: snapshot.error)))
+                  : SliverToBoxAdapter(child: Center(child: ErrorMessage(error: snapshot.error)))
               : builder(context, snapshot);
         } else {
           return snapshot.hasData
               ? builder(context, snapshot)
               : loadingBuilder != null
-                  ? fillRemaining
-                      ? SliverFillRemaining(child: loadingBuilder!(context, snapshot))
-                      : SliverToBoxAdapter(child: loadingBuilder!(context, snapshot))
-                  : fillRemaining
-                      ? SliverFillRemaining(child: Center(child: loading))
-                      : SliverToBoxAdapter(child: Center(child: loading));
+              ? fillRemaining
+                  ? SliverFillRemaining(child: loadingBuilder!(context, snapshot))
+                  : SliverToBoxAdapter(child: loadingBuilder!(context, snapshot))
+              : fillRemaining
+              ? SliverFillRemaining(child: Center(child: loading))
+              : SliverToBoxAdapter(child: Center(child: loading));
         }
       },
     );

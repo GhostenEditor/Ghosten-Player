@@ -41,9 +41,7 @@ class AsyncImage extends StatelessWidget {
   Widget build(BuildContext context) {
     final image = Container(
       clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        borderRadius: radius,
-      ),
+      decoration: BoxDecoration(borderRadius: radius),
       child: CachedNetworkImage(
         imageUrl: _resoleSrc(),
         alignment: alignment,
@@ -52,31 +50,42 @@ class AsyncImage extends StatelessWidget {
         width: width,
         height: height,
         httpHeaders: httpHeaders,
-        errorWidget: (context, url, error) => showErrorWidget
-            ? Center(child: Icon(Icons.broken_image, size: errorIconSize, color: Theme.of(context).colorScheme.error.withAlpha(0x33)))
-            : const SizedBox(),
+        errorWidget:
+            (context, url, error) =>
+                showErrorWidget
+                    ? Center(
+                      child: Icon(
+                        Icons.broken_image,
+                        size: errorIconSize,
+                        color: Theme.of(context).colorScheme.error.withAlpha(0x33),
+                      ),
+                    )
+                    : const SizedBox(),
         placeholder: (context, _) => needLoading ? const _AnimatedLoading() : const SizedBox(),
-        imageBuilder: ink
-            ? (context, imageProvider) {
-                return Padding(
-                  padding: padding,
-                  child: Ink(
-                    width: width,
-                    height: height,
-                    decoration: BoxDecoration(
+        imageBuilder:
+            ink
+                ? (context, imageProvider) {
+                  return Padding(
+                    padding: padding,
+                    child: Ink(
+                      width: width,
+                      height: height,
+                      decoration: BoxDecoration(
                         borderRadius: radius,
-                        image: DecorationImage(
-                          image: imageProvider,
-                          fit: fit,
-                          alignment: alignment,
-                        )),
-                  ),
-                );
-              }
-            : null,
+                        image: DecorationImage(image: imageProvider, fit: fit, alignment: alignment),
+                      ),
+                    ),
+                  );
+                }
+                : null,
       ),
     );
-    return viewable ? GestureDetector(onLongPress: () => navigateTo(navigatorKey.currentContext!, ImageViewer(url: Uri.parse(src))), child: image) : image;
+    return viewable
+        ? GestureDetector(
+          onLongPress: () => navigateTo(navigatorKey.currentContext!, ImageViewer(url: Uri.parse(src))),
+          child: image,
+        )
+        : image;
   }
 
   String _resoleSrc() {
@@ -111,14 +120,16 @@ class _AnimatedLoadingState extends State<_AnimatedLoading> with TickerProviderS
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _animationController,
-      builder: (context, _) => DecoratedBox(
-        decoration: BoxDecoration(
-            color: Color.lerp(
-          Theme.of(context).colorScheme.surface,
-          Theme.of(context).colorScheme.surfaceContainerHigh,
-          _animationController.value,
-        )),
-      ),
+      builder:
+          (context, _) => DecoratedBox(
+            decoration: BoxDecoration(
+              color: Color.lerp(
+                Theme.of(context).colorScheme.surface,
+                Theme.of(context).colorScheme.surfaceContainerHigh,
+                _animationController.value,
+              ),
+            ),
+          ),
     );
   }
 }

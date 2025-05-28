@@ -1,6 +1,7 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import '../../../l10n/app_localizations.dart';
 
 class SeasonMetadata extends StatefulWidget {
   const SeasonMetadata({super.key, required this.season});
@@ -52,7 +53,7 @@ class _SeasonMetadataState extends State<SeasonMetadata> {
                 return null;
               },
               onEditingComplete: () => FocusScope.of(context).nextFocus(),
-            )
+            ),
           ],
         ),
       ),
@@ -65,10 +66,7 @@ class _SeasonMetadataState extends State<SeasonMetadata> {
           },
           child: Text(AppLocalizations.of(context)!.buttonConfirm),
         ),
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(AppLocalizations.of(context)!.buttonCancel),
-        ),
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(AppLocalizations.of(context)!.buttonCancel)),
       ],
     );
   }

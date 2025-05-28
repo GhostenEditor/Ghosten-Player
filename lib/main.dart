@@ -7,13 +7,13 @@ import 'package:api/api.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:scaled_app/scaled_app.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:video_player/player.dart';
 
 import 'const.dart';
+import 'l10n/app_localizations.dart';
 import 'pages/account/account.dart';
 import 'pages/components/updater.dart';
 import 'pages/home.dart';
@@ -40,16 +40,19 @@ void main(List<String> args) async {
     }
     setPreferredOrientations(false);
     final userConfig = await UserConfig.init();
-    ScaledWidgetsFlutterBinding.instance.scaleFactor = (deviceSize) => max(1, deviceSize.width / 1140) * userConfig.displayScale;
+    ScaledWidgetsFlutterBinding.instance.scaleFactor =
+        (deviceSize) => max(1, deviceSize.width / 1140) * userConfig.displayScale;
     Provider.debugCheckInvalidValueType = null;
     if (!kIsWeb && userConfig.shouldCheckUpdate()) {
       Api.checkUpdate(
         updateUrl,
         Version.fromString(appVersion),
-        needUpdate: (data, url) => showModalBottomSheet(
-            context: navigatorKey.currentContext!,
-            constraints: const BoxConstraints(minWidth: double.infinity),
-            builder: (context) => UpdateBottomSheet(data, url: url)),
+        needUpdate:
+            (data, url) => showModalBottomSheet(
+              context: navigatorKey.currentContext!,
+              constraints: const BoxConstraints(minWidth: double.infinity),
+              builder: (context) => UpdateBottomSheet(data, url: url),
+            ),
       );
     }
     runApp(ChangeNotifierProvider(create: (_) => userConfig, child: const MainApp()));
@@ -66,7 +69,8 @@ void player(List<String> args) async {
   ScaledWidgetsFlutterBinding.ensureInitialized();
   PlatformApi.deviceType = DeviceType.fromString(args[0]);
   final userConfig = await UserConfig.init();
-  ScaledWidgetsFlutterBinding.instance.scaleFactor = (deviceSize) => max(1, deviceSize.width / 1140) * userConfig.displayScale;
+  ScaledWidgetsFlutterBinding.instance.scaleFactor =
+      (deviceSize) => max(1, deviceSize.width / 1140) * userConfig.displayScale;
   runApp(ChangeNotifierProvider(create: (_) => userConfig, child: PlayerApp(url: args[1])));
 }
 
@@ -88,10 +92,11 @@ class MainApp extends StatelessWidget {
       navigatorObservers: [routeObserver],
       home: const QuitConfirm(child: HomeView()),
       themeAnimationCurve: Curves.easeOut,
-      builder: (context, widget) => MediaQuery(
-        data: MediaQuery.of(context).scale().copyWith(textScaler: NoScaleTextScaler()),
-        child: widget!,
-      ),
+      builder:
+          (context, widget) => MediaQuery(
+            data: MediaQuery.of(context).scale().copyWith(textScaler: NoScaleTextScaler()),
+            child: widget!,
+          ),
     );
   }
 }
@@ -113,16 +118,10 @@ class PlayerApp extends StatelessWidget {
         ...WidgetsApp.defaultShortcuts,
         const SingleActivator(LogicalKeyboardKey.select): const ActivateIntent(),
       },
-      home: QuitConfirm(
-          child: SingletonPlayer(
-        playlist: [
-          PlaylistItemDisplay(url: Uri.parse(url), source: null),
-        ],
-      )),
-      builder: (context, widget) => MediaQuery(
-        data: MediaQuery.of(context).copyWith(textScaler: NoScaleTextScaler()),
-        child: widget!,
-      ),
+      home: QuitConfirm(child: SingletonPlayer(playlist: [PlaylistItemDisplay(url: Uri.parse(url), source: null)])),
+      builder:
+          (context, widget) =>
+              MediaQuery(data: MediaQuery.of(context).copyWith(textScaler: NoScaleTextScaler()), child: widget!),
     );
   }
 }
@@ -144,32 +143,32 @@ class _QuitConfirmState extends State<QuitConfirm> {
     return kIsWeb
         ? widget.child
         : PopScope(
-            canPop: false,
-            onPopInvokedWithResult: (didPop, _) {
-              if (didPop) {
-                return;
-              }
-              if (Navigator.of(context).canPop()) {
-                return;
-              }
-              if (confirmed) {
-                confirmed = false;
-                SystemNavigator.pop();
-              } else {
-                confirmed = true;
-                final controller = ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(AppLocalizations.of(context)!.confirmTextExit, textAlign: TextAlign.center),
-                    duration: const Duration(seconds: 2),
-                    behavior: SnackBarBehavior.floating,
-                    width: 200,
-                  ),
-                );
-                controller.closed.then((_) => confirmed = false);
-              }
-            },
-            child: widget.child,
-          );
+          canPop: false,
+          onPopInvokedWithResult: (didPop, _) {
+            if (didPop) {
+              return;
+            }
+            if (Navigator.of(context).canPop()) {
+              return;
+            }
+            if (confirmed) {
+              confirmed = false;
+              SystemNavigator.pop();
+            } else {
+              confirmed = true;
+              final controller = ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(AppLocalizations.of(context)!.confirmTextExit, textAlign: TextAlign.center),
+                  duration: const Duration(seconds: 2),
+                  behavior: SnackBarBehavior.floating,
+                  width: 200,
+                ),
+              );
+              controller.closed.then((_) => confirmed = false);
+            }
+          },
+          child: widget.child,
+        );
   }
 }
 
@@ -188,21 +187,26 @@ class UpdateToLatest extends StatelessWidget {
         appBar: AppBar(),
         extendBodyBehindAppBar: true,
         body: Center(
-          child: Builder(builder: (context) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              spacing: 10,
-              children: [
-                Text(AppLocalizations.of(context)!.versionDeprecatedTip, textAlign: TextAlign.center),
-                FilledButton.tonal(
-                  onPressed: () {
-                    launchUrlString('https://github.com/$repoAuthor/$repoName', browserConfiguration: const BrowserConfiguration(showTitle: true));
-                  },
-                  child: Text(AppLocalizations.of(context)!.updateNow),
-                ),
-              ],
-            );
-          }),
+          child: Builder(
+            builder: (context) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                spacing: 10,
+                children: [
+                  Text(AppLocalizations.of(context)!.versionDeprecatedTip, textAlign: TextAlign.center),
+                  FilledButton.tonal(
+                    onPressed: () {
+                      launchUrlString(
+                        'https://github.com/$repoAuthor/$repoName',
+                        browserConfiguration: const BrowserConfiguration(showTitle: true),
+                      );
+                    },
+                    child: Text(AppLocalizations.of(context)!.updateNow),
+                  ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
@@ -234,6 +238,7 @@ Future<void> scanToLogin(String link) async {
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
-    return super.createHttpClient(context)..badCertificateCallback = (X509Certificate cert, String host, int port) => host == 'image.tmdb.org';
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (X509Certificate cert, String host, int port) => host == 'image.tmdb.org';
   }
 }

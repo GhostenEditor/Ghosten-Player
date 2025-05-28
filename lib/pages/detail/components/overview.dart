@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:readmore/readmore.dart';
+
+import '../../../l10n/app_localizations.dart';
 
 class OverviewSection extends StatelessWidget {
   const OverviewSection({super.key, this.trimLines = 2, required this.text});

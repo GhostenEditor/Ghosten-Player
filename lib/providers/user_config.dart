@@ -23,7 +23,10 @@ enum AutoUpdateFrequency {
   never;
 
   static AutoUpdateFrequency fromString(String? str) {
-    return AutoUpdateFrequency.values.firstWhere((element) => element.name == str, orElse: () => AutoUpdateFrequency.everyday);
+    return AutoUpdateFrequency.values.firstWhere(
+      (element) => element.name == str,
+      orElse: () => AutoUpdateFrequency.everyday,
+    );
   }
 }
 
@@ -35,14 +38,14 @@ extension FromString on ThemeMode {
 
 class UserConfig extends ChangeNotifier {
   UserConfig._fromPrefs(this.prefs)
-      : language = SystemLanguage.fromString(prefs.getString('system.language')),
-        themeMode = FromString.fromString(prefs.getString('system.themeMode')),
-        autoUpdateFrequency = AutoUpdateFrequency.fromString(prefs.getString('system.autoUpdateFrequency')),
-        lastCheckUpdateTime = DateTime.tryParse(prefs.getString('system.lastCheckUpdateTime') ?? ''),
-        autoPlay = prefs.getBool('playerConfig.autoPlay') ?? false,
-        autoPip = prefs.getBool('playerConfig.autoPip') ?? false,
-        autoForceLandscape = prefs.getBool('playerConfig.autoForceLandscape') ?? false,
-        displayScale = prefs.getDouble('system.displayScale') ?? 1;
+    : language = SystemLanguage.fromString(prefs.getString('system.language')),
+      themeMode = FromString.fromString(prefs.getString('system.themeMode')),
+      autoUpdateFrequency = AutoUpdateFrequency.fromString(prefs.getString('system.autoUpdateFrequency')),
+      lastCheckUpdateTime = DateTime.tryParse(prefs.getString('system.lastCheckUpdateTime') ?? ''),
+      autoPlay = prefs.getBool('playerConfig.autoPlay') ?? false,
+      autoPip = prefs.getBool('playerConfig.autoPip') ?? false,
+      autoForceLandscape = prefs.getBool('playerConfig.autoForceLandscape') ?? false,
+      displayScale = prefs.getDouble('system.displayScale') ?? 1;
   final SharedPreferences prefs;
   SystemLanguage language;
   ThemeMode themeMode;
