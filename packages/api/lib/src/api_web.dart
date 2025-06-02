@@ -43,7 +43,7 @@ class ApiWeb extends ApiPlatform {
   /// Library Start
 
   @override
-  Future<void> libraryRefreshById(dynamic id, bool incremental, String behavior) async {
+  Future<void> libraryRefreshById(dynamic id, bool incremental) async {
     await Future.delayed(Duration(seconds: 1));
     Stream<double?> s() async* {
       yield 0.2;
@@ -59,7 +59,7 @@ class ApiWeb extends ApiPlatform {
       yield null;
     }
 
-    ApiPlatform.streamController.addStream(s());
+    // ApiPlatform.streamController.addStream(s());
   }
 
   /// Library End
@@ -136,12 +136,22 @@ class Client extends ApiClient {
       '/playlist/query/all' => playlists,
       '/playlist/channels/query/id' => channels,
       '/tv/recommendation' => series.take(6).toList(),
-      '/tv/series/query/all' => series.take(queryParameters?['limit'] ?? 100).toList(),
+      '/tv/series/query/all' => {
+          'limit': queryParameters?['limit'] ?? 100,
+          'offset': 0,
+          'count': series.length,
+          'data': series.take(queryParameters?['limit'] ?? 100).toList(),
+        },
       '/tv/series/nextToPlay/query/all' => episodes.where((item) => item['lastPlayedTime'] != null).toList(),
       '/tv/series/query/id' => series.firstWhere((el) => el['id'] == 61),
       '/tv/season/query/id' => seasons.firstWhere((el) => el['id'] == queryParameters!['id']),
       '/tv/episode/query/id' => episodes.firstWhere((el) => el['id'] == queryParameters!['id']),
-      '/movie/query/all' => movies,
+      '/movie/query/all' => {
+          'limit': queryParameters?['limit'] ?? 100,
+          'offset': 0,
+          'count': movies.length,
+          'data': movies.take(queryParameters?['limit'] ?? 100).toList(),
+        },
       '/movie/nextToPlay/query/all' => movies.take(2).toList(),
       '/movie/recommendation' => movies,
       '/movie/query/id' => movies[0],
@@ -168,6 +178,7 @@ class Client extends ApiClient {
             'type': queryParameters!['type']
           }
         ],
+      '/schedule/task/query/all' => [],
       '/dns/override/query/all' => dns,
       '/log/query/page' => {
           'offset': 0,

@@ -18,7 +18,7 @@
 
     <meta charset="UTF-8">
     <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-    <meta content="Ghosten Player" name="description">
+    <meta content="📺一个视频播放器，支持网盘直连、元数据刮削、IPTV、文件管理等 / A video player that supports direct connection to network disk, metadata scraping, IPTV, file management, etc." name="description">
     <meta content="never" name="referrer">
 
     <!-- iOS meta tags & icons -->
@@ -199,7 +199,7 @@
             position: absolute;
             content: " ";
             width: 160px;
-            height: 23px;
+            height: 32px;
             background-color: #1a1a1b;
             left: 50%;
             top: -1px;
@@ -215,7 +215,7 @@
             height: 5px;
             background-color: #414142;
             left: 50%;
-            top: 4px;
+            top: 8px;
             border-radius: 10px;
             transform: translate(-50%);
             z-index: 2
@@ -282,7 +282,7 @@
 <script>
     {{flutter_js}}
     {{flutter_build_config}}
-    
+
     _flutter.loader.load({
         onEntrypointLoaded: async function (engineInitializer) {
             const engine = await engineInitializer.initializeEngine({
