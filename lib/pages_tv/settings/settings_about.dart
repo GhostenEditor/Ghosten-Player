@@ -38,6 +38,22 @@ class _SettingsAboutPageState extends State<SettingsAboutPage> {
             if ((flag ?? false) && context.mounted) setState(() {});
           },
         ),
+        SwitchSettingItem(
+          value: _userConfig.updatePrerelease,
+          onChanged: (value) {
+            _userConfig.setUpdatePrerelease(value);
+            setState(() {});
+          },
+          title: Text(AppLocalizations.of(context)!.updatePrerelease),
+        ),
+        ButtonSettingItem(
+          title: Text(AppLocalizations.of(context)!.githubProxy),
+          subtitle: Text(_userConfig.githubProxy.isNotEmpty ? _userConfig.githubProxy : AppLocalizations.of(context)!.none),
+          onTap: () async {
+            final flag = await navigateToSlideLeft<bool>(context, const SettingsGithubProxy());
+            if ((flag ?? false) && context.mounted) setState(() {});
+          },
+        ),
         ButtonSettingItem(
           title: const Text(appName),
           subtitle: const Text(appVersion),
@@ -70,7 +86,7 @@ class _SettingsAutoCheckForUpdatesPageState extends State<SettingsAutoCheckForUp
         Navigator.of(context).pop(refresh);
       },
       child: SettingPage(
-        title: AppLocalizations.of(context)!.settingsItemTheme,
+        title: AppLocalizations.of(context)!.autoCheckForUpdates,
         child: ListView(
           padding: const EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 32),
           children: AutoUpdateFrequency.values
@@ -82,6 +98,51 @@ class _SettingsAutoCheckForUpdatesPageState extends State<SettingsAutoCheckForUp
                     onChanged: (item) {
                       if (item != null) {
                         userConfig.setAutoUpdate(item);
+                        refresh = true;
+                        setState(() {});
+                      }
+                    },
+                  ))
+              .toList(),
+        ),
+      ),
+    );
+  }
+}
+
+class SettingsGithubProxy extends StatefulWidget {
+  const SettingsGithubProxy({super.key});
+
+  @override
+  State<SettingsGithubProxy> createState() => _SettingsGithubProxyState();
+}
+
+class _SettingsGithubProxyState extends State<SettingsGithubProxy> {
+  bool refresh = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final userConfig = Provider.of<UserConfig>(context);
+
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        Navigator.of(context).pop(refresh);
+      },
+      child: SettingPage(
+        title: AppLocalizations.of(context)!.githubProxy,
+        child: ListView(
+          padding: const EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 32),
+          children: ['', 'https://gh-proxy.com/']
+              .map((item) => RadioSettingItem(
+                    autofocus: item == userConfig.githubProxy,
+                    value: item,
+                    groupValue: userConfig.githubProxy,
+                    title: Text(item.isNotEmpty ? item : AppLocalizations.of(context)!.none),
+                    onChanged: (item) {
+                      if (item != null) {
+                        userConfig.setGithubProxy(item);
                         refresh = true;
                         setState(() {});
                       }

@@ -11,6 +11,7 @@ import '../../components/no_data.dart';
 import '../../components/playing_icon.dart';
 import '../../models/models.dart';
 import '../components/image_card.dart';
+import '../components/loading.dart';
 import '../player/player_controls_lite.dart';
 import '../utils/notification.dart';
 import 'dialogs/live_edit.dart';
@@ -58,7 +59,7 @@ class _LiveListPageState extends State<LiveListPage> {
                       ),
                       body: BlocBuilder<IptvCubit, List<Playlist>?>(builder: (context, items) {
                         return items == null
-                            ? const Center(child: CircularProgressIndicator())
+                            ? const Loading()
                             : items.isEmpty
                                 ? const NoData()
                                 : LayoutBuilder(builder: (context, constraints) {

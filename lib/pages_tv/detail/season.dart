@@ -68,7 +68,12 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(item.displayTitle(), style: Theme.of(context).textTheme.displaySmall),
+                    Text(
+                      item.displayTitle(),
+                      style: Theme.of(context).textTheme.displaySmall,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     const SizedBox(height: 6),
                     RichText(
                         text: TextSpan(children: [
@@ -313,8 +318,7 @@ class _SeasonPageState extends State<_SeasonPage> {
                     onTap: () async {
                       await toPlayer(
                         navigatorKey.currentContext!,
-                        item.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList(),
-                        index: index,
+                        (item.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList(), index),
                         theme: item.themeColor,
                       );
                       widget.needUpdate();
@@ -333,7 +337,7 @@ class _SeasonPageState extends State<_SeasonPage> {
               CastCrewTitle(mediaCast: item.mediaCast, mediaCrew: item.mediaCrew),
               SliverPadding(
                 padding: const EdgeInsets.all(8),
-                sliver: CastCrewInner(mediaCast: item.mediaCast, mediaCrew: item.mediaCrew),
+                sliver: CastCrewInner(mediaCast: item.mediaCast, mediaCrew: item.mediaCrew, type: MediaType.season),
               ),
             ],
           );

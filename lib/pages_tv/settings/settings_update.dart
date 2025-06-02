@@ -6,9 +6,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:install_plugin/install_plugin.dart';
+import 'package:provider/provider.dart';
 
 import '../../components/error_message.dart';
 import '../../const.dart';
+import '../../providers/user_config.dart';
 import '../../utils/utils.dart';
 
 class SettingsUpdate extends StatefulWidget {
@@ -25,7 +27,7 @@ class _SettingsUpdateState extends State<SettingsUpdate> {
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 60),
         child: FutureBuilder(
-            future: _checkUpdate(),
+            future: _checkUpdate(context),
             builder: (context, snapshot) {
               switch (snapshot.connectionState) {
                 case ConnectionState.waiting:
@@ -66,10 +68,7 @@ class _SettingsUpdateState extends State<SettingsUpdate> {
                 case ConnectionState.none:
                 case ConnectionState.done:
                   if (snapshot.hasData) {
-                    return _SettingsUpdating(
-                      data: snapshot.requireData!,
-                      url: snapshot.requireData!.assets.first.url,
-                    );
+                    return _SettingsUpdating(data: snapshot.requireData!);
                   } else if (snapshot.hasError) {
                     return Row(
                       children: [
@@ -153,30 +152,20 @@ class _SettingsUpdateState extends State<SettingsUpdate> {
     );
   }
 
-  Future<UpdateResp?> _checkUpdate() async {
-    final currentVersion = Version.fromString(appVersion);
-    late final UpdateResp data;
-    if (currentVersion.isPrerelease()) {
-      final res = await Dio(BaseOptions(connectTimeout: const Duration(seconds: 30))).get<List<dynamic>>(updateUrl);
-      data = UpdateResp.fromJson(res.data![0]);
-    } else {
-      final res = await Dio(BaseOptions(connectTimeout: const Duration(seconds: 30))).get('$updateUrl/latest');
-      data = UpdateResp.fromJson(res.data);
-    }
-
-    if (currentVersion < data.tagName) {
-      return data;
-    } else {
-      return null;
-    }
+  Future<UpdateData?> _checkUpdate(BuildContext context) {
+    final userConfig = context.read<UserConfig>();
+    return Api.checkUpdate(
+      '${userConfig.githubProxy}$updateUrl',
+      userConfig.updatePrerelease,
+      Version.fromString(appVersion),
+    );
   }
 }
 
 class _SettingsUpdating extends StatefulWidget {
-  const _SettingsUpdating({required this.data, required this.url});
+  const _SettingsUpdating({required this.data});
 
-  final UpdateResp data;
-  final String url;
+  final UpdateData data;
 
   @override
   State<_SettingsUpdating> createState() => _SettingsUpdatingState();
@@ -218,10 +207,10 @@ class _SettingsUpdatingState extends State<_SettingsUpdating> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                if (_downloading.containsKey(widget.url))
+                if (_downloading.containsKey(widget.data.url))
                   ListenableBuilder(
-                      listenable: _downloading[widget.url]!.progress,
-                      builder: (context, _) => LinearProgressIndicator(value: _downloading[widget.url]!.progress.value))
+                      listenable: _downloading[widget.data.url]!.progress,
+                      builder: (context, _) => LinearProgressIndicator(value: _downloading[widget.data.url]!.progress.value))
                 else
                   const LinearProgressIndicator(value: 1, color: Colors.greenAccent),
                 const SizedBox(height: 12),
@@ -263,13 +252,13 @@ class _SettingsUpdatingState extends State<_SettingsUpdating> {
                 ),
               )),
               ElevatedButton(
-                onPressed: _downloading.containsKey(widget.url) ? null : _download,
+                onPressed: _downloading.containsKey(widget.data.url) ? null : _download,
                 style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 64),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                     backgroundColor: Colors.white,
                     foregroundColor: Colors.black),
-                child: Text(_downloading.containsKey(widget.url) ? AppLocalizations.of(context)!.updating : AppLocalizations.of(context)!.updateNow),
+                child: Text(_downloading.containsKey(widget.data.url) ? AppLocalizations.of(context)!.updating : AppLocalizations.of(context)!.updateNow),
               )
             ],
           ),
@@ -279,8 +268,9 @@ class _SettingsUpdatingState extends State<_SettingsUpdating> {
   }
 
   Future<void> _download() async {
+    final proxy = context.read<UserConfig>().githubProxy;
     await Api.requestStoragePermission();
-    final url = widget.url;
+    final url = widget.data.url;
     final task = _DownloadTask(url);
     setState(() {
       _downloading[url] = task;
@@ -288,7 +278,7 @@ class _SettingsUpdatingState extends State<_SettingsUpdating> {
     });
     final cachePath = '${(await FilePicker.cachePath)!}/$appName-${DateTime.now().millisecondsSinceEpoch}.apk';
     await Dio().download(
-      url,
+      '$proxy$url',
       cachePath,
       onReceiveProgress: (count, total) {
         if (total <= 0) return;

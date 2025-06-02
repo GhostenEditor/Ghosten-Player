@@ -44,7 +44,6 @@ class _ScraperDialogState<T extends MediaBase> extends State<ScraperDialog<T>> {
           mainAxisSize: MainAxisSize.min,
           children: [
             TextFormField(
-              autofocus: true,
               controller: _controller1,
               decoration: InputDecoration(
                 prefixIcon: const Icon(Icons.title),
@@ -57,7 +56,6 @@ class _ScraperDialogState<T extends MediaBase> extends State<ScraperDialog<T>> {
               onEditingComplete: () => FocusScope.of(context).nextFocus(),
             ),
             TextFormField(
-              autofocus: true,
               controller: _controller2,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(

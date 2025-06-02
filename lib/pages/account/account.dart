@@ -9,7 +9,6 @@ import '../../components/focus_card.dart';
 import '../../components/future_builder_handler.dart';
 import '../../components/no_data.dart';
 import '../../utils/utils.dart';
-import '../components/appbar_progress.dart';
 import '../utils/notification.dart';
 import '../viewers/file_viewer.dart';
 import 'account_login.dart';
@@ -34,12 +33,8 @@ class _AccountManageState extends State<AccountManage> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.pageTitleAccount),
-        bottom: const AppbarProgressIndicator(),
-      ),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.pageTitleAccount)),
       body: FutureBuilderHandler<List<DriverAccount>>(
-          initialData: const [],
           future: Api.driverQueryAll(),
           builder: (context, snapshot) {
             return Scrollbar(

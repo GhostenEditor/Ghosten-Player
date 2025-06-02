@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'models.dart';
 import 'player_platform_interface.dart';
@@ -26,6 +27,7 @@ class PlayerController<T> implements PlayerBaseController {
   final ValueNotifier<String> subTitle = ValueNotifier('');
   final ValueNotifier<String?> error = ValueNotifier(null);
   final ValueNotifier<String?> fatalError = ValueNotifier(null);
+  final ValueNotifier<Object?> playlistError = ValueNotifier(null);
   final ValueNotifier<double> playbackSpeed = ValueNotifier(1);
   final ValueNotifier<AspectRatioType> aspectRatio = ValueNotifier(AspectRatioType.auto);
   final ValueNotifier<double> volume = ValueNotifier(1);
@@ -162,24 +164,38 @@ class PlayerController<T> implements PlayerBaseController {
     if (index < 0 || index >= playlist.value.length) return;
     if (index != this.index.value) {
       this.index.value = index;
+      if (error.value != null) {
+        error.value = null;
+      }
+      if (fatalError.value != null) {
+        fatalError.value = null;
+      }
+      if (status.value == PlayerStatus.error) {
+        status.value = PlayerStatus.idle;
+      }
+      await setSource(null);
       if (onPlaybackStatusUpdate != null && _playlistItem.value != null) {
         onPlaybackStatusUpdate!(_playlistItem.value!, PlaybackStatusEvent.stop, position.value, duration.value);
       }
-      if (onGetPlayBackInfo == null) {
-        _playlistItem.value = currentItem!.toItem();
-        await setSource(_playlistItem.value!);
-      } else {
-        _playlistItem.value = await onGetPlayBackInfo!(currentItem!);
-        await setSource(_playlistItem.value!);
+      try {
+        if (onGetPlayBackInfo == null) {
+          _playlistItem.value = currentItem!.toItem();
+          await setSource(_playlistItem.value!);
+        } else {
+          _playlistItem.value = await onGetPlayBackInfo!(currentItem!);
+          await setSource(_playlistItem.value!);
+        }
+        if (onPlaybackStatusUpdate != null) {
+          onPlaybackStatusUpdate!(_playlistItem.value!, PlaybackStatusEvent.start, _playlistItem.value!.start, duration.value);
+        }
+      } on PlatformException catch (e) {
+        status.value = PlayerStatus.error;
+        fatalError.value = 'Code: ${e.code}, Message: ${e.message}';
+      } catch (e) {
+        status.value = PlayerStatus.error;
+        fatalError.value = e.toString();
       }
-      if (onPlaybackStatusUpdate != null) {
-        onPlaybackStatusUpdate!(_playlistItem.value!, PlaybackStatusEvent.start, _playlistItem.value!.start, duration.value);
-      }
-      // PlayerPlatform.instance.next(index);
     }
-    // if (status.value == PlayerStatus.paused || status.value == PlayerStatus.idle) {
-    //   play();
-    // }
   }
 
   Future<void> seekTo(Duration position) async {
@@ -229,8 +245,8 @@ class PlayerController<T> implements PlayerBaseController {
     return PlayerPlatform.instance.updateSource(source.toItem().toSource(), index);
   }
 
-  Future<void> setSource(PlaylistItem playItem) async {
-    return PlayerPlatform.instance.setSource(playItem.toSource());
+  Future<void> setSource(PlaylistItem? playItem) async {
+    return PlayerPlatform.instance.setSource(playItem?.toSource());
   }
 
   void setPlaylist(List<PlaylistItemDisplay<T>> playlist) {
@@ -240,6 +256,10 @@ class PlayerController<T> implements PlayerBaseController {
     }
     this.index.value = null;
     this.playlist.value = playlist;
+  }
+
+  void setPlaylistError(Object? error) {
+    playlistError.value = error;
   }
 
   Future<void> enterFullscreen() {

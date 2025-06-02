@@ -1,6 +1,6 @@
 name: video_player
 description: "Video Player Plugin for Ghosten Player"
-version: 2.0.2
+version: 2.1.1
 
 environment:
   sdk: ^3.6.1

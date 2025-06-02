@@ -11,6 +11,7 @@ import 'package:url_launcher/url_launcher_string.dart';
 import 'const.dart';
 import 'pages_tv/home.dart';
 import 'pages_tv/settings/settings_update.dart';
+import 'providers/shortcut_tv.dart';
 import 'providers/user_config.dart';
 import 'theme.dart';
 import 'utils/utils.dart';
@@ -21,15 +22,27 @@ void main() async {
   if (initialized ?? false) {
     HttpOverrides.global = MyHttpOverrides();
     final userConfig = await UserConfig.init();
+    final shortcutTV = await ShortcutTV.init();
     Provider.debugCheckInvalidValueType = null;
     if (userConfig.shouldCheckUpdate()) {
-      Api.checkUpdate(
-        updateUrl,
-        Version.fromString(appVersion),
-        needUpdate: (data, url) => navigateTo(navigatorKey.currentContext!, const SettingsUpdate()),
-      );
+      Future.microtask(() async {
+        final data = await Api.checkUpdate(
+          '${userConfig.githubProxy}$updateUrl',
+          userConfig.updatePrerelease,
+          Version.fromString(appVersion),
+        );
+        if (data != null) {
+          navigateTo(navigatorKey.currentContext!, const SettingsUpdate());
+        }
+      });
     }
-    runApp(ChangeNotifierProvider(create: (_) => userConfig, child: const MainApp()));
+    runApp(MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => userConfig),
+        ChangeNotifierProvider(create: (_) => shortcutTV),
+      ],
+      child: const MainApp(),
+    ));
   } else {
     runApp(const UpdateToLatest());
   }

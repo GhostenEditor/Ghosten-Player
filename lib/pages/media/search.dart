@@ -6,11 +6,11 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 import '../../components/async_image.dart';
-import '../../components/error_message.dart';
 import '../../components/future_builder_handler.dart';
 import '../../components/no_data.dart';
 import '../../utils/utils.dart';
 import '../components/image_card.dart';
+import '../components/loading.dart';
 import '../detail/movie.dart';
 import '../detail/series.dart';
 
@@ -24,8 +24,10 @@ class SearchPage extends StatefulWidget {
     this.selectedCast = const [],
     this.selectedCrew = const [],
     this.activeTab = 0,
+    this.autofocus = false,
   });
 
+  final bool autofocus;
   final int activeTab;
   final List<FilterType> filterType;
   final List<Genre> selectedGenre;
@@ -98,7 +100,7 @@ class _SearchPageState extends State<SearchPage> {
             ),
           ),
           child: TextField(
-            autofocus: true,
+            autofocus: widget.autofocus,
             focusNode: _focusNode,
             controller: _searchController,
             decoration: InputDecoration(
@@ -934,23 +936,63 @@ class _ItemSearchPage<T> extends StatefulWidget {
 }
 
 class _ItemSearchPageState<T> extends State<_ItemSearchPage<T>> {
-  final _pagingController = PagingController<int, T>(firstPageKey: 0);
+  PagingState<int, T> _state = PagingState();
 
-  @override
-  void initState() {
-    super.initState();
-    _pagingController.addPageRequestListener(_search);
+  Future<void> _fetchNextPage() async {
+    if (_state.isLoading) return;
+
+    await Future.value();
+
+    setState(() {
+      _state = _state.copyWith(isLoading: true, error: null);
+    });
+
+    try {
+      final newKey = (_state.keys?.last ?? -1) + 1;
+      final data = await Api.searchFuzzy(
+        widget.searchType,
+        limit: 30,
+        offset: newKey * 30,
+        filter: widget.params.filter,
+        genres: widget.params.genres.isNotEmpty ? widget.params.genres : null,
+        studios: widget.params.studios.isNotEmpty ? widget.params.studios : null,
+        keywords: widget.params.keywords.isNotEmpty ? widget.params.keywords : null,
+        mediaCast: widget.params.mediaCast.isNotEmpty ? widget.params.mediaCast : null,
+        mediaCrew: widget.params.mediaCrew.isNotEmpty ? widget.params.mediaCrew : null,
+        watched: widget.params.watched,
+        favorite: widget.params.favorite,
+      ).then(widget.dataResolve);
+
+      final hasNextPage = data.offset + data.limit < data.count;
+
+      setState(() {
+        _state = _state.copyWith(
+          pages: [...?_state.pages, data.data],
+          keys: [...?_state.keys, newKey],
+          hasNextPage: hasNextPage,
+          isLoading: false,
+        );
+      });
+    } catch (error) {
+      setState(() {
+        _state = _state.copyWith(
+          error: error,
+          isLoading: false,
+        );
+      });
+    }
   }
 
   @override
   void dispose() {
-    _pagingController.dispose();
     super.dispose();
   }
 
   @override
   void didUpdateWidget(covariant _ItemSearchPage<T> oldWidget) {
-    _pagingController.refresh();
+    setState(() {
+      _state = PagingState();
+    });
     super.didUpdateWidget(oldWidget);
   }
 
@@ -960,45 +1002,33 @@ class _ItemSearchPageState<T> extends State<_ItemSearchPage<T>> {
       sliver: SliverPadding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         sliver: PagedSliverGrid(
+          state: _state,
+          fetchNextPage: _fetchNextPage,
           gridDelegate: widget.gridDelegate,
+          showNewPageProgressIndicatorAsGridChild: false,
+          showNoMoreItemsIndicatorAsGridChild: false,
           builderDelegate: PagedChildBuilderDelegate<T>(
             itemBuilder: widget.itemBuilder,
-            firstPageErrorIndicatorBuilder: (_) => ErrorMessage(error: _pagingController.error),
-            newPageErrorIndicatorBuilder: (_) => ErrorMessage(error: _pagingController.error),
+            noMoreItemsIndicatorBuilder: (context) => const Padding(
+              padding: EdgeInsets.only(top: 16),
+              child: Column(
+                spacing: 16,
+                children: [
+                  FractionallySizedBox(
+                    widthFactor: 0.5,
+                    child: Divider(),
+                  ),
+                  Text('THE END', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold)),
+                ],
+              ),
+            ),
+            firstPageProgressIndicatorBuilder: (context) => const Loading(),
+            newPageProgressIndicatorBuilder: (context) => const Loading(),
             noItemsFoundIndicatorBuilder: (_) => const NoData(),
           ),
-          pagingController: _pagingController,
         ),
       ),
     );
-  }
-
-  Future<void> _search(int page) async {
-    try {
-      final data = await Api.searchFuzzy(
-        widget.searchType,
-        limit: 30,
-        offset: page * 30,
-        filter: widget.params.filter,
-        genres: widget.params.genres.isNotEmpty ? widget.params.genres : null,
-        studios: widget.params.studios.isNotEmpty ? widget.params.studios : null,
-        keywords: widget.params.keywords.isNotEmpty ? widget.params.keywords : null,
-        mediaCast: widget.params.mediaCast.isNotEmpty ? widget.params.mediaCast : null,
-        mediaCrew: widget.params.mediaCrew.isNotEmpty ? widget.params.mediaCrew : null,
-        watched: widget.params.watched,
-        favorite: widget.params.favorite,
-      );
-      final res = widget.dataResolve(data);
-      if (!mounted) return;
-      if (res.offset + res.limit >= res.count) {
-        _pagingController.appendLastPage(res.data);
-      } else {
-        _pagingController.appendPage(res.data, page + 1);
-      }
-    } catch (e) {
-      if (!mounted) return;
-      _pagingController.error = e;
-    }
   }
 }
 

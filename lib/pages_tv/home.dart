@@ -1,9 +1,10 @@
 import 'package:animations/animations.dart';
-import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 
+import '../providers/shortcut_tv.dart';
 import '../utils/utils.dart';
 import 'components/clock.dart';
 import 'components/icon_button.dart';
@@ -34,16 +35,16 @@ class _HomeState extends State<TVHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final shortcuts = context.watch<ShortcutTV>();
     return Focus(
       skipTraversal: true,
       onKeyEvent: (FocusNode node, KeyEvent event) {
         if (event is KeyDownEvent || event is KeyRepeatEvent) {
-          switch (event.logicalKey) {
-            case LogicalKeyboardKey.contextMenu:
-              if (!_scaffoldKey.currentState!.isEndDrawerOpen) {
-                _scaffoldKey.currentState!.openEndDrawer();
-                return KeyEventResult.handled;
-              }
+          if (event.logicalKey == shortcuts.menu) {
+            if (!_scaffoldKey.currentState!.isEndDrawerOpen) {
+              _scaffoldKey.currentState!.openEndDrawer();
+              return KeyEventResult.handled;
+            }
           }
         }
         return KeyEventResult.ignored;
@@ -51,23 +52,6 @@ class _HomeState extends State<TVHomePage> {
       child: Scaffold(
         key: _scaffoldKey,
         extendBodyBehindAppBar: true,
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: StreamBuilder(
-            stream: Api.progress$,
-            builder: (context, snapshot) => switch (snapshot.data) {
-                  null => const SizedBox(),
-                  0 => const LinearProgressIndicator(backgroundColor: Colors.transparent),
-                  -1 => LinearProgressIndicator(color: Theme.of(context).colorScheme.error, value: 1),
-                  _ => TweenAnimationBuilder(
-                      tween: Tween(end: snapshot.data),
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeOut,
-                      builder: (BuildContext context, double value, Widget? child) => LinearProgressIndicator(
-                        value: value,
-                        backgroundColor: Colors.transparent,
-                      ),
-                    )
-                }),
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           surfaceTintColor: Colors.transparent,
@@ -78,12 +62,11 @@ class _HomeState extends State<TVHomePage> {
               alignment: Alignment.centerLeft,
               child: TextButton.icon(
                 label: Text(AppLocalizations.of(context)!.search),
-                onPressed: () => navigateTo(context, const SearchPage()),
+                onPressed: () => navigateTo(context, const SearchPage(autofocus: true)),
                 style: TextButton.styleFrom(
                   backgroundColor: Colors.transparent,
                   iconColor: Colors.white,
                   foregroundColor: Theme.of(context).colorScheme.onSurface,
-                  // textStyle:  TextStyle(color: Theme.of(context).colorScheme.onSurface),
                   visualDensity: VisualDensity.compact,
                 ),
                 icon: const Icon(Icons.search_rounded, size: 20, color: Colors.grey),

@@ -142,10 +142,6 @@ class _EpisodeDetailState extends State<EpisodeDetail> with ActionMixin {
                       fileId: item.fileId,
                       description: RichText(
                           text: TextSpan(children: [
-                        // TextSpan(text: '.', style: Theme.of(context).textTheme.labelSmall),
-                        // const WidgetSpan(child: Gap.hSM),
-                        // if (item.fileSize != null) TextSpan(text: item.fileSize!.toSizeDisplay(), style: Theme.of(context).textTheme.labelSmall),
-                        // if (item.duration != null) const WidgetSpan(child: Gap.hSM),
                         if (item.duration != null) const WidgetSpan(child: Icon(Icons.access_time_rounded, size: 14)),
                         if (item.duration != null) const WidgetSpan(child: SizedBox(width: 4)),
                         if (item.duration != null) TextSpan(text: item.duration!.toDisplay(), style: Theme.of(context).textTheme.labelSmall)
@@ -170,7 +166,7 @@ class _EpisodeDetailState extends State<EpisodeDetail> with ActionMixin {
                             _navigatorKey.currentContext!,
                             Align(
                               alignment: Alignment.topRight,
-                              child: CastCrewSection(mediaCast: item.mediaCast, mediaCrew: item.mediaCrew),
+                              child: CastCrewSection(mediaCast: item.mediaCast, mediaCrew: item.mediaCrew, type: MediaType.episode),
                             ));
                       },
                     ),
@@ -205,7 +201,7 @@ class _EpisodeDetailState extends State<EpisodeDetail> with ActionMixin {
             leading: const Icon(Icons.subtitles_outlined),
             onTap: () => Navigator.of(context).push<SubtitleData>(FadeInPageRoute(builder: (context) => SubtitleListPage(fileId: item.fileId!))),
           ),
-          // buildDownloadAction(context, item.url!),
+          buildDownloadAction(context, item.fileId),
           if (widget.scrapper.id != null)
             buildHomeAction(context, ImdbUri(MediaType.episode, widget.scrapper.id!, season: item.season, episode: item.episode).toUri()),
           const DividerSettingItem(),
@@ -216,12 +212,12 @@ class _EpisodeDetailState extends State<EpisodeDetail> with ActionMixin {
   }
 
   Future<void> _play(TVEpisode item) async {
-    final season = await Api.tvSeasonQueryById(item.seasonId);
-    if (!mounted) return;
     await toPlayer(
       context,
-      season.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList(),
-      index: season.episodes.indexWhere((episode) => episode.id == item.id),
+      Future.microtask(() async {
+        final season = await Api.tvSeasonQueryById(item.seasonId);
+        return (season.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList(), season.episodes.indexWhere((episode) => episode.id == item.id));
+      }),
       theme: item.themeColor,
     );
     setState(() => refresh = true);

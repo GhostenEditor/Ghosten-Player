@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vector_math/vector_math_64.dart' as vm;
 
 import '../player.dart';
@@ -332,13 +333,14 @@ class PlayerLocalizations extends InheritedWidget {
 
 class PlayerSettings extends StatelessWidget {
   final PlayerController<dynamic> controller;
-
+  final SharedPreferences prefs;
   final List<Widget> Function(BuildContext)? actions;
 
   const PlayerSettings({
     super.key,
     required this.controller,
     this.actions,
+    required this.prefs,
   });
 
   @override
@@ -428,12 +430,12 @@ class PlayerSettings extends StatelessWidget {
               leading: const Icon(Icons.subtitles_outlined),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () async {
-                final initialStyle = SubtitleSettings.fromJson(await PlayerConfig.getSubtitleSettings());
+                final initialStyle = SubtitleSettings.fromJson(PlayerConfig.getSubtitleSettings(prefs));
                 if (!context.mounted) return;
 
                 final style = await Navigator.of(context).push(MaterialPageRoute(builder: (context) => PlayerSubtitleSettings(subtitleSettings: initialStyle)));
                 if (style != null) {
-                  PlayerConfig.setSubtitleSettings(style);
+                  PlayerConfig.setSubtitleSettings(prefs, style);
                   controller.setSubtitleStyle(style);
                 }
               },
@@ -441,56 +443,48 @@ class PlayerSettings extends StatelessWidget {
           ),
           SliverToBoxAdapter(child: const Divider()),
           StatefulBuilder(builder: (context, setState) {
-            return FutureBuilder(
-                future: PlayerConfig.getExtensionRendererMode(),
-                builder: (context, snapshot) {
-                  return SliverToBoxAdapter(
-                    child: PopupMenuButton(
-                        offset: const Offset(1, 0),
-                        onSelected: (value) async {
-                          await PlayerConfig.setExtensionRendererMode(value);
-                          await PlayerController.setPlayerOption('extensionRendererMode', value);
-                          setState(() {});
-                        },
-                        itemBuilder: (context) => [0, 1, 2]
-                            .map((i) => CheckedPopupMenuItem(
-                                  value: i,
-                                  checked: i == snapshot.data,
-                                  child: Text(localizations.extensionRendererMode(i.toString())),
-                                ))
-                            .toList(),
-                        child: ListTile(
-                          title: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(localizations.extensionRendererModeLabel),
-                              Expanded(
-                                child: Text(localizations.extensionRendererMode(snapshot.data.toString()),
-                                    textAlign: TextAlign.end, overflow: TextOverflow.ellipsis),
-                              ),
-                            ],
-                          ),
-                        )),
-                  );
-                });
+            final data = PlayerConfig.getExtensionRendererMode(prefs);
+            return SliverToBoxAdapter(
+              child: PopupMenuButton(
+                  offset: const Offset(1, 0),
+                  onSelected: (value) async {
+                    PlayerConfig.setExtensionRendererMode(prefs, value);
+                    await PlayerController.setPlayerOption('extensionRendererMode', value);
+                    setState(() {});
+                  },
+                  itemBuilder: (context) => [0, 1, 2]
+                      .map((i) => CheckedPopupMenuItem(
+                            value: i,
+                            checked: i == data,
+                            child: Text(localizations.extensionRendererMode(i.toString())),
+                          ))
+                      .toList(),
+                  child: ListTile(
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(localizations.extensionRendererModeLabel),
+                        Expanded(
+                          child: Text(localizations.extensionRendererMode(data.toString()), textAlign: TextAlign.end, overflow: TextOverflow.ellipsis),
+                        ),
+                      ],
+                    ),
+                  )),
+            );
           }),
           StatefulBuilder(builder: (context, setState) {
-            return FutureBuilder(
-                future: PlayerConfig.getEnableDecoderFallback(),
-                builder: (context, snapshot) {
-                  return SliverToBoxAdapter(
-                    child: ListTile(
-                      title: Text(localizations.playerEnableDecoderFallback),
-                      trailing: Switch(
-                          value: snapshot.data ?? false,
-                          onChanged: (value) async {
-                            await PlayerConfig.setEnableDecoderFallback(value);
-                            await PlayerController.setPlayerOption('enableDecoderFallback', value);
-                            setState(() {});
-                          }),
-                    ),
-                  );
-                });
+            return SliverToBoxAdapter(
+              child: ListTile(
+                title: Text(localizations.playerEnableDecoderFallback),
+                trailing: Switch(
+                    value: PlayerConfig.getEnableDecoderFallback(prefs),
+                    onChanged: (value) async {
+                      PlayerConfig.setEnableDecoderFallback(prefs, value);
+                      await PlayerController.setPlayerOption('enableDecoderFallback', value);
+                      setState(() {});
+                    }),
+              ),
+            );
           }),
           SliverToBoxAdapter(
             child: SwitchListTile(
@@ -602,6 +596,7 @@ class _PlayerPlatformViewState extends State<PlayerPlatformView> {
       final offset = box.globalToLocal(Offset.zero);
       final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
       final language = Localizations.localeOf(context).languageCode;
+      final prefs = await SharedPreferences.getInstance();
       if (!context.mounted) return;
       await PlayerPlatform.instance.init({
         'language': language,
@@ -610,9 +605,9 @@ class _PlayerPlatformViewState extends State<PlayerPlatformView> {
         'top': (offset.dy * -1 * devicePixelRatio).round(),
         'left': (offset.dx * -1 * devicePixelRatio).round(),
         'autoPip': widget.autoPip,
-        'extensionRendererMode': await PlayerConfig.getExtensionRendererMode(),
-        'enableDecoderFallback': await PlayerConfig.getEnableDecoderFallback(),
-        'subtitleStyle': await PlayerConfig.getSubtitleSettings(),
+        'extensionRendererMode': PlayerConfig.getExtensionRendererMode(prefs),
+        'enableDecoderFallback': PlayerConfig.getEnableDecoderFallback(prefs),
+        'subtitleStyle': PlayerConfig.getSubtitleSettings(prefs),
       });
       widget.initialized?.call();
     });
@@ -971,7 +966,7 @@ class _PlayerProgressViewState extends State<PlayerProgressView> {
                         duration: const Duration(milliseconds: 200),
                         widthFactor: max(_controller.buffered / _controller.duration ?? 0, 0),
                         child: Container(color: Theme.of(context).colorScheme.surfaceContainerHighest)),
-                    if (_controller.status == PlayerStatus.error || _controller.status == PlayerStatus.idle)
+                    if (_controller.status == PlayerStatus.error)
                       Container(color: Theme.of(context).colorScheme.errorContainer)
                     else if (_controller.seeking)
                       AnimatedFractionallySizedBox(

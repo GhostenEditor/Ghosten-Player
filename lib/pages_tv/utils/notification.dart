@@ -81,10 +81,13 @@ Future<bool?> showConfirm(BuildContext context, String confirmText, [String? sub
             child: Stack(
               fit: StackFit.expand,
               children: [
-                const DecoratedBox(
+                DecoratedBox(
                   decoration: BoxDecoration(
                     image: DecorationImage(
-                      image: AssetImage('assets/tv/images/bg-stripe.png'),
+                      image: AssetImage(switch (Theme.of(context).brightness) {
+                        Brightness.dark => 'assets/tv/images/bg-stripe.png',
+                        Brightness.light => 'assets/tv/images/bg-stripe-light.png',
+                      }),
                       repeat: ImageRepeat.repeat,
                     ),
                   ),

@@ -9,7 +9,6 @@ import '../components/filled_button.dart';
 import '../components/future_builder_handler.dart';
 import '../detail/movie.dart';
 import '../media/components/carousel.dart';
-import '../mixins/update.dart';
 import '../settings/settings_library.dart';
 import '../utils/player.dart';
 import '../utils/utils.dart';
@@ -25,7 +24,7 @@ class MovieListPage extends StatefulWidget {
   State<MovieListPage> createState() => _MovieListPageState();
 }
 
-class _MovieListPageState extends State<MovieListPage> with NeedUpdateMixin, ChannelMixin {
+class _MovieListPageState extends State<MovieListPage> {
   final _backdrop = ValueNotifier<String?>(null);
   final _carouselIndex = ValueNotifier<int?>(null);
   final _showBlur = ValueNotifier(false);
@@ -77,6 +76,7 @@ class _MovieListPageState extends State<MovieListPage> with NeedUpdateMixin, Cha
           slivers: [
             FutureBuilderSliverHandler(
                 future: Api.movieRecommendation(),
+                loadingBuilder: (context, _) => const AspectRatio(aspectRatio: 32 / 15, child: CarouselPlaceholder()),
                 builder: (context, snapshot) {
                   Future.microtask(() {
                     if (snapshot.requireData.isNotEmpty) {
@@ -110,11 +110,12 @@ class _MovieListPageState extends State<MovieListPage> with NeedUpdateMixin, Cha
                                     key: ValueKey(item.id),
                                     item: item,
                                     onPressed: () async {
-                                      final movie = await Api.movieQueryById(item.id);
-                                      if (!context.mounted) return;
                                       await toPlayer(
                                         context,
-                                        [FromMedia.fromMovie(movie)],
+                                        Future.microtask(() async {
+                                          final movie = await Api.movieQueryById(item.id);
+                                          return ([FromMedia.fromMovie(movie)], 0);
+                                        }),
                                         theme: item.themeColor,
                                       );
                                       setState(() {});
@@ -145,30 +146,68 @@ class _MovieListPageState extends State<MovieListPage> with NeedUpdateMixin, Cha
               future: Api.movieNextToPlayQueryAll(),
               height: 340,
               builder: (context, item) => _buildRecentMediaItem(context, item, width: 160, height: 160 / 0.67),
+              loadingBuilder: (context) => MediaGridItem(
+                imageWidth: 160,
+                imageHeight: 160 / 0.67,
+                title: Container(
+                  width: 100,
+                  height: 18,
+                  margin: const EdgeInsets.only(bottom: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                subtitle: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      width: 60,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    Container(
+                      width: 20,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
             MediaChannel(
               label: AppLocalizations.of(context)!.tagFavorite,
               future: Api.movieQueryAll(
-                  const MediaSearchQuery(sort: SortConfig(type: SortType.createAt, direction: SortDirection.desc, filter: FilterType.favorite), limit: 8)),
+                      const MediaSearchQuery(sort: SortConfig(type: SortType.createAt, direction: SortDirection.desc, filter: FilterType.favorite), limit: 8))
+                  .then((data) => data.data),
               height: 340,
               builder: (context, item) => _buildMediaItem(context, item, width: 160, height: 160 / 0.67),
             ),
             MediaChannel(
               label: AppLocalizations.of(context)!.tagNewAdd,
-              future: Api.movieQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.createAt, direction: SortDirection.desc), limit: 8)),
+              future: Api.movieQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.createAt, direction: SortDirection.desc), limit: 8))
+                  .then((data) => data.data),
               height: 340,
               builder: (context, item) => _buildMediaItem(context, item, width: 160, height: 160 / 0.67),
             ),
             MediaChannel(
               label: AppLocalizations.of(context)!.tagNewRelease,
-              future: Api.movieQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.airDate, direction: SortDirection.desc), limit: 8)),
+              future: Api.movieQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.airDate, direction: SortDirection.desc), limit: 8))
+                  .then((data) => data.data),
               height: 340,
               builder: (context, item) => _buildMediaItem(context, item, width: 160, height: 160 / 0.67),
             ),
             MediaGridChannel(
               label: AppLocalizations.of(context)!.tagAll,
-              future: Api.movieQueryAll(const MediaSearchQuery(sort: SortConfig(type: SortType.title, direction: SortDirection.asc))),
-              builder: (context, item) => _buildMediaItem(context, item, width: 160, height: 160 / 0.67),
+              onQuery: (index) => Api.movieQueryAll(
+                  MediaSearchQuery(limit: 30, offset: 30 * index, sort: const SortConfig(type: SortType.title, direction: SortDirection.asc))),
+              itemBuilder: (context, item, index) => _buildMediaItem(context, item, width: 160, height: 160 / 0.67),
             ),
           ],
         ),
@@ -211,11 +250,12 @@ class _MovieListPageState extends State<MovieListPage> with NeedUpdateMixin, Cha
             )
           : null,
       onTap: () async {
-        final movie = await Api.movieQueryById(item.id);
-        if (!context.mounted) return;
         await toPlayer(
           context,
-          [FromMedia.fromMovie(movie)],
+          Future.microtask(() async {
+            final movie = await Api.movieQueryById(item.id);
+            return ([FromMedia.fromMovie(movie)], 0);
+          }),
           theme: item.themeColor,
         );
         setState(() {});

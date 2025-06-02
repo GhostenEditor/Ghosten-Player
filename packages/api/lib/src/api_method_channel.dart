@@ -6,7 +6,6 @@ import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rxdart/rxdart.dart';
 
 import 'api_platform_interface.dart';
 import 'errors.dart';
@@ -76,60 +75,32 @@ class MethodChannelApi extends ApiPlatform {
 
   /// Driver End
 
-  /// Library Start
-
-  @override
-  Future<void> libraryRefreshById(dynamic id, bool incremental, String behavior) async {
-    final data = await client.post('/library/refresh/id/cb', data: {
-      'id': id,
-      'incremental': incremental,
-      'behavior': behavior,
-    });
-    final eventChannel = EventChannel('$_pluginNamespace/update/${data['id']}');
-
-    ApiPlatform.streamController.addStream(eventChannel
-        .receiveBroadcastStream()
-        .map((data) => jsonDecode(data)['progress'] as double?)
-        .concatWith([TimerStream<double?>(null, const Duration(seconds: 3))]).distinct());
-  }
-
-  /// Library End
-
   /// Miscellaneous Start
 
   @override
-  Future<bool> checkUpdate(
-    String updateUrl,
-    Version currentVersion, {
-    required Future<void> Function(UpdateResp data, String url) needUpdate,
-  }) async {
+  Future<UpdateData?> checkUpdate(String updateUrl, bool prerelease, Version currentVersion) async {
     if (!Platform.isAndroid) {
-      return true;
+      return null;
     }
-    try {
-      late final UpdateResp data;
-      if (currentVersion.isPrerelease()) {
-        final res = await Dio(BaseOptions(connectTimeout: const Duration(seconds: 30))).get(updateUrl);
-        data = UpdateResp.fromJson(res.data[0]);
-      } else {
-        final res = await Dio(BaseOptions(connectTimeout: const Duration(seconds: 30))).get('$updateUrl/latest');
-        data = UpdateResp.fromJson(res.data);
-      }
+    final res = await Dio(BaseOptions(connectTimeout: const Duration(seconds: 30))).get(updateUrl);
+    final Iterable<UpdateResp> data = (res.data as List<dynamic>).map(UpdateResp.fromJson).where((el) => prerelease ? true : !el.prerelease);
 
-      final suffix = switch (appFlavor) { 'tv' => '-tv', _ => '' };
-      final url = switch (await _methodChannel.invokeMethod('arch')) {
-        'arm64' => data.assets.firstWhereOrNull((item) => item.name == 'app-arm64-v8a$suffix-release.apk'),
-        _ => data.assets.firstWhereOrNull((item) => item.name == 'app-armeabi-v7a$suffix-release.apk'),
-      }
-          ?.url;
-      if (url != null && currentVersion < data.tagName) {
-        await needUpdate(data, url);
-        return false;
-      } else {
-        return true;
-      }
-    } catch (e) {
-      return false;
+    final latest = data.first;
+    final suffix = switch (appFlavor) { 'tv' => '-tv', _ => '' };
+    final url = switch (await _methodChannel.invokeMethod('arch')) {
+      'arm64' => latest.assets.firstWhereOrNull((item) => item.name == 'app-arm64-v8a$suffix-release.apk'),
+      _ => latest.assets.firstWhereOrNull((item) => item.name == 'app-armeabi-v7a$suffix-release.apk'),
+    }
+        ?.url;
+    if (url != null && currentVersion < latest.tagName) {
+      return UpdateData(
+        url: url,
+        tagName: latest.tagName,
+        comment: data.where((el) => el.tagName > currentVersion).map((el) => '## v${el.tagName}\n${el.comment}').join('\n'),
+        createAt: latest.createAt,
+      );
+    } else {
+      return null;
     }
   }
 

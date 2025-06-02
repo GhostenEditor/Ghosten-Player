@@ -4,6 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../utils/utils.dart';
 import '../../../validators/validators.dart';
+import '../../utils/notification.dart';
 
 class MovieMetadata extends StatefulWidget {
   const MovieMetadata({super.key, required this.movie});
@@ -151,17 +152,21 @@ class _MovieMetadataState extends State<MovieMetadata> {
         FilledButton(
           onPressed: () async {
             if (_formKey.currentState!.validate()) {
-              await Api.movieMetadataUpdateById({
-                'id': widget.movie.id,
-                'title': _controller1.text,
-                'originalTitle': _controller2.text,
-                'releaseDate': _controller3.text,
-                'overview': _controller4.text,
-                'voteAverage': double.parse(_controller5.text),
-                'voteCount': int.parse(_controller6.text),
-                'duration': int.parse(_controller7.text),
-              });
-              if (context.mounted) Navigator.pop(context, true);
+              final resp = await showNotification(
+                  context,
+                  Api.movieMetadataUpdateById({
+                    'id': widget.movie.id,
+                    'title': _controller1.text,
+                    'originalTitle': _controller2.text,
+                    'releaseDate': _controller3.text,
+                    'overview': _controller4.text,
+                    'voteAverage': double.parse(_controller5.text),
+                    'voteCount': int.parse(_controller6.text),
+                    'duration': int.parse(_controller7.text),
+                  }));
+              if (resp?.error == null) {
+                if (context.mounted) Navigator.pop(context, true);
+              }
             }
           },
           child: Text(AppLocalizations.of(context)!.buttonConfirm),

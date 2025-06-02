@@ -251,6 +251,7 @@ class _QuarkLoginState extends State<_QuarkLogin> {
         controller: WebViewController()
           ..setJavaScriptMode(JavaScriptMode.unrestricted)
           ..setUserAgent(ua)
+          ..scrollBy(10000, 0)
           ..loadRequest(Uri.parse('https://pan.quark.cn')));
   }
 }

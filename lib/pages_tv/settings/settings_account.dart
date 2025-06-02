@@ -9,7 +9,6 @@ import '../../utils/utils.dart';
 import '../components/future_builder_handler.dart';
 import '../components/icon_button.dart';
 import '../components/setting.dart';
-import '../mixins/update.dart';
 import '../utils/notification.dart';
 import '../utils/utils.dart';
 import '../views/file_viewer.dart';
@@ -59,7 +58,6 @@ class _SettingsAccountPageState extends State<SettingsAccountPage> {
                               final resp = await showNotification(context, Api.driverDeleteById(entry.$2.id));
                               if (resp?.error == null) {
                                 setState(() {});
-                                updateController.add(null);
                               }
                             }
                           },

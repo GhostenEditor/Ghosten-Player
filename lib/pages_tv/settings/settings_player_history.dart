@@ -4,10 +4,10 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../components/async_image.dart';
 import '../../models/models.dart';
-import '../../pages/utils/player.dart';
 import '../../utils/utils.dart';
 import '../components/future_builder_handler.dart';
 import '../components/setting.dart';
+import '../utils/player.dart';
 
 class SystemSettingsPlayerHistory extends StatefulWidget {
   const SystemSettingsPlayerHistory({super.key});
@@ -70,23 +70,26 @@ class _SystemSettingsPlayerHistoryState extends State<SystemSettingsPlayerHistor
                     onTap: () async {
                       switch (entry.$2.mediaType) {
                         case MediaType.movie:
-                          final movie = await Api.movieQueryById(entry.$2.id);
-                          if (!context.mounted) return;
                           await toPlayer(
                             navigatorKey.currentContext!,
-                            [FromMedia.fromMovie(movie)],
-                            theme: movie.themeColor,
+                            Future.microtask(() async {
+                              final movie = await Api.movieQueryById(entry.$2.id);
+                              return ([FromMedia.fromMovie(movie)], 0);
+                            }),
                           );
                           setState(() {});
                         case MediaType.episode:
-                          final episode = await Api.tvEpisodeQueryById(entry.$2.id);
-                          final season = await Api.tvSeasonQueryById(episode.seasonId);
                           if (!context.mounted) return;
                           await toPlayer(
                             navigatorKey.currentContext!,
-                            season.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList(),
-                            index: season.episodes.indexWhere((e) => episode.id == e.id),
-                            theme: season.themeColor,
+                            Future.microtask(() async {
+                              final episode = await Api.tvEpisodeQueryById(entry.$2.id);
+                              final season = await Api.tvSeasonQueryById(episode.seasonId);
+                              return (
+                                season.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList(),
+                                season.episodes.indexWhere((e) => episode.id == e.id)
+                              );
+                            }),
                           );
                           setState(() {});
                         default:

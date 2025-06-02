@@ -16,6 +16,7 @@ import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.*
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import kotlinx.coroutines.*
 import java.io.IOException
 import java.net.InetAddress
 import java.net.NetworkInterface
@@ -30,6 +31,7 @@ class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnec
     private val eventSinkMap: MutableMap<String, EventChannel.EventSink> = mutableMapOf()
     private var methodCallResult: Result? = null
     private var serviceConnected = false
+    private val coroutineScope = CoroutineScope(Dispatchers.Main + Job())
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         binaryMessenger = flutterPluginBinding.binaryMessenger
@@ -85,12 +87,10 @@ class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnec
                 if (apiService == null) {
                     return result.error("50000", "Service Start Failed", null);
                 }
-                Thread {
+                coroutineScope.launch(Dispatchers.Main) {
                     if (call.method.endsWith("/cb")) {
                         val id = UUID.randomUUID().toString()
-                        activity.runOnUiThread {
-                            result.success("{ \"id\": \"$id\" }")
-                        }
+                        result.success("{ \"id\": \"$id\" }")
                         val eventChannel = EventChannel(binaryMessenger, "$PLUGIN_NAMESPACE/update/$id")
                         var finished = false
                         var errorResp: ApiData? = null
@@ -99,16 +99,14 @@ class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnec
                                 if (eventSink != null) {
                                     if (finished) {
                                         if (errorResp != null) {
-                                            activity.runOnUiThread {
-                                                if (errorResp!!.isOk()) {
-                                                    result.success(errorResp!!.msg)
-                                                } else {
-                                                    result.error(
-                                                        errorResp!!.code.toString(),
-                                                        errorResp!!.msg,
-                                                        null
-                                                    )
-                                                }
+                                            if (errorResp!!.isOk()) {
+                                                result.success(errorResp!!.msg)
+                                            } else {
+                                                result.error(
+                                                    errorResp!!.code.toString(),
+                                                    errorResp!!.msg,
+                                                    null
+                                                )
                                             }
                                         }
                                         eventSink.endOfStream()
@@ -119,61 +117,55 @@ class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnec
                             }
 
                             override fun onCancel(args: Any?) {
-                                activity.runOnUiThread {
-                                    eventSinkMap.remove(id)?.endOfStream()
-                                }
+                                eventSinkMap.remove(id)?.endOfStream()
                             }
                         })
 
-                        val data = apiService?.callWithCallback(
-                            call.method,
-                            call.argument<String>("data")!!,
-                            call.argument<String>("params")!!,
-                            object : ApiMethodHandler {
-                                override fun onApiMethodUpdate(data: String) {
-                                    activity.runOnUiThread {
-                                        eventSinkMap[id]?.success(data)
+                        val data = withContext(Dispatchers.IO) {
+                            apiService?.callWithCallback(
+                                call.method,
+                                call.argument<String>("data")!!,
+                                call.argument<String>("params")!!,
+                                object : ApiMethodHandler {
+                                    override fun onApiMethodUpdate(data: String) {
+                                        activity.runOnUiThread {
+                                            eventSinkMap[id]?.success(data)
+                                        }
                                     }
-                                }
-                            })
+                                })
+                        }
                         if (data == null) {
-                            activity.runOnUiThread {
-                                eventSinkMap.remove(id)?.endOfStream()
-                            }
+                            eventSinkMap.remove(id)?.endOfStream()
                         } else {
                             val apiData = ApiData(data)
-                            activity.runOnUiThread {
-                                if (apiData.isOk()) {
-                                    eventSinkMap.remove(id)?.endOfStream()
+                            if (apiData.isOk()) {
+                                eventSinkMap.remove(id)?.endOfStream()
+                            } else {
+                                if (eventSinkMap[id] != null) {
+                                    eventSinkMap[id]?.error(apiData.code.toString(), apiData.msg, null)
                                 } else {
-                                    if (eventSinkMap[id] != null) {
-                                        eventSinkMap[id]?.error(apiData.code.toString(), apiData.msg, null)
-                                    } else {
-                                        errorResp = apiData
-                                    }
-                                    eventSinkMap.remove(id)?.endOfStream()
+                                    errorResp = apiData
                                 }
+                                eventSinkMap.remove(id)?.endOfStream()
                             }
                         }
                         finished = true
                     } else {
-                        val data = apiService?.call(
-                            call.method,
-                            call.argument<String>("data")!!,
-                            call.argument<String>("params")!!,
-                        )
+                        val data = withContext(Dispatchers.IO) {
+                            apiService?.call(
+                                call.method,
+                                call.argument<String>("data")!!,
+                                call.argument<String>("params")!!,
+                            )
+                        }
                         if (data == null) {
-                            activity.runOnUiThread {
-                                result.success(null)
-                            }
+                            result.success(null)
                         } else {
                             val apiData = ApiData(data)
-                            activity.runOnUiThread {
-                                if (apiData.isOk()) {
-                                    result.success(apiData.msg)
-                                } else {
-                                    result.error(apiData.code.toString(), apiData.msg, null)
-                                }
+                            if (apiData.isOk()) {
+                                result.success(apiData.msg)
+                            } else {
+                                result.error(apiData.code.toString(), apiData.msg, null)
                             }
                         }
                     }

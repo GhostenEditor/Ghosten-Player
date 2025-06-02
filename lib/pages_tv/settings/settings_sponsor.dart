@@ -1,8 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 
 import '../../const.dart';
+import '../../providers/user_config.dart';
 import '../components/future_builder_handler.dart';
 import '../components/setting.dart';
 
@@ -66,15 +68,13 @@ class SettingsSponsor extends StatelessWidget {
                         dense: true,
                         title: Text(AppLocalizations.of(context)!.sponsorThanksMessage, style: Theme.of(context).textTheme.titleMedium),
                         subtitle: Text(AppLocalizations.of(context)!.sponsorTipMessage),
-                        // contentPadding: EdgeInsets.zero,
                       ),
                     ),
                   ),
                   FutureBuilderSliverHandler(
-                      future: _getSponsorList(),
+                      future: _getSponsorList(context),
                       builder: (context, snapshot) {
                         return SliverList.builder(
-                          // padding: EdgeInsets.only(right: 32),
                           itemCount: snapshot.requireData.length,
                           itemBuilder: (context, index) => ButtonSettingItem(
                             dense: true,
@@ -93,9 +93,10 @@ class SettingsSponsor extends StatelessWidget {
     );
   }
 
-  Future<List<String>> _getSponsorList() async {
+  Future<List<String>> _getSponsorList(BuildContext context) async {
+    final proxy = context.read<UserConfig>().githubProxy;
     try {
-      final resp = await Dio().get('https://raw.githubusercontent.com/$repoAuthor/$repoName/main/sponsor_list.txt');
+      final resp = await Dio().get('${proxy}https://raw.githubusercontent.com/$repoAuthor/$repoName/main/sponsor_list.txt');
       final data = resp.data as String;
       return data.split('\n').where((s) => s.trim().isNotEmpty).toList();
     } catch (e) {

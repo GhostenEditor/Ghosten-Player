@@ -29,7 +29,6 @@ class _FileInfoSectionState extends State<FileInfoSection> {
         builder: (context, snapshot) {
           final item = snapshot.requireData;
           return Material(
-            // color: Theme.of(context).colorScheme.surfaceContainerHigh,
             shape: RoundedRectangleBorder(
               side: BorderSide(color: Theme.of(context).colorScheme.surfaceContainerHighest),
               borderRadius: BorderRadius.circular(6),

@@ -70,14 +70,17 @@ class FileViewer extends StatelessWidget {
                                 case FileCategory.video:
                                   toPlayer(
                                     navigatorKey.currentContext!,
-                                    [
-                                      PlaylistItemDisplay(
-                                        url: item.url!.normalize(),
-                                        title: item.name,
-                                        description: item.updatedAt?.format(),
-                                        source: null,
-                                      )
-                                    ],
+                                    (
+                                      [
+                                        PlaylistItemDisplay(
+                                          url: item.url!.normalize(),
+                                          title: item.name,
+                                          description: item.updatedAt?.format(),
+                                          source: null,
+                                        )
+                                      ],
+                                      0
+                                    ),
                                   );
                                 default:
                               }

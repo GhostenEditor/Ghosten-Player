@@ -4,6 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../utils/utils.dart';
 import '../../../validators/validators.dart';
+import '../../utils/notification.dart';
 
 class EpisodeMetadata extends StatefulWidget {
   const EpisodeMetadata({super.key, required this.episode});
@@ -132,15 +133,19 @@ class _EpisodeMetadataState extends State<EpisodeMetadata> {
         FilledButton(
           onPressed: () async {
             if (_formKey.currentState!.validate()) {
-              await Api.tvEpisodeMetadataUpdateById({
-                'id': widget.episode.id,
-                'title': _controller1.text,
-                'episode': int.parse(_controller2.text),
-                'airDate': _controller3.text,
-                'overview': _controller4.text,
-                'duration': int.parse(_controller5.text),
-              });
-              if (context.mounted) Navigator.of(context).pop(true);
+              final resp = await showNotification(
+                  context,
+                  Api.tvEpisodeMetadataUpdateById({
+                    'id': widget.episode.id,
+                    'title': _controller1.text,
+                    'episode': int.parse(_controller2.text),
+                    'airDate': _controller3.text,
+                    'overview': _controller4.text,
+                    'duration': int.parse(_controller5.text),
+                  }));
+              if (resp?.error == null) {
+                if (context.mounted) Navigator.pop(context, true);
+              }
             }
           },
           child: Text(AppLocalizations.of(context)!.buttonConfirm),

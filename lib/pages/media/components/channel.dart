@@ -2,32 +2,36 @@ import 'dart:math';
 
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
+import '../../../components/error_message.dart';
+import '../../../components/future_builder_handler.dart';
 import '../../../components/no_data.dart';
+import '../../../components/placeholder.dart';
 import '../../../components/scrollbar.dart';
+import '../../components/loading.dart';
 import '../../components/theme_builder.dart';
 import 'carousel.dart';
 
-class MediaCarousel<B extends StateStreamable<S>, S> extends StatefulWidget {
+class MediaCarousel<S> extends StatefulWidget {
   const MediaCarousel({
     super.key,
     required this.onChanged,
     required this.noDataBuilder,
-    required this.selector,
     required this.itemBuilder,
+    required this.count,
   });
 
+  final int count;
   final ValueChanged<int> onChanged;
   final WidgetBuilder noDataBuilder;
   final NullableIndexedWidgetBuilder itemBuilder;
-  final BlocWidgetSelector<S?, int?> selector;
 
   @override
-  State<MediaCarousel<B, S>> createState() => _MediaCarouselState<B, S>();
+  State<MediaCarousel<S>> createState() => _MediaCarouselState<S>();
 }
 
-class _MediaCarouselState<B extends StateStreamable<S>, S> extends State<MediaCarousel<B, S>> {
+class _MediaCarouselState<S> extends State<MediaCarousel<S>> {
   final _carouselIndex = ValueNotifier<int?>(null);
 
   @override
@@ -38,68 +42,67 @@ class _MediaCarouselState<B extends StateStreamable<S>, S> extends State<MediaCa
 
   @override
   Widget build(BuildContext context) {
-    return BlocSelector<B, S, int?>(
-        selector: widget.selector,
-        builder: (context, count) {
-          if (count != null && count > 0) Future.microtask(() => widget.onChanged(0));
+    if (widget.count > 0) Future.microtask(() => widget.onChanged(0));
 
-          return count != 0
-              ? SliverToBoxAdapter(
-                  child: LayoutBuilder(builder: (context, constraints) {
-                    final height = max(min(constraints.maxWidth / 1.8, 300.0), 200.0);
-                    return ConstrainedBox(
-                      constraints: constraints.copyWith(
-                        maxHeight: height,
-                        minHeight: height,
-                      ),
-                      child: ListenableBuilder(
-                          listenable: _carouselIndex,
-                          builder: (context, _) {
-                            return count != null
-                                ? Carousel(
-                                    index: _carouselIndex.value ?? 0,
-                                    count: count,
-                                    onChange: (index) {
-                                      widget.onChanged(index);
-                                      _carouselIndex.value = index;
-                                    },
-                                    itemBuilder: widget.itemBuilder,
-                                  )
-                                : const SizedBox();
-                          }),
-                    );
-                  }),
-                )
-              : SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Center(child: NoData(action: widget.noDataBuilder(context))),
-                );
-        });
+    return widget.count != 0
+        ? SliverToBoxAdapter(
+            child: LayoutBuilder(builder: (context, constraints) {
+              final height = max(min(constraints.maxWidth / 1.8, 300.0), 200.0);
+              return ConstrainedBox(
+                constraints: constraints.copyWith(
+                  maxHeight: height,
+                  minHeight: height,
+                ),
+                child: ListenableBuilder(
+                    listenable: _carouselIndex,
+                    builder: (context, _) {
+                      return Carousel(
+                        index: _carouselIndex.value ?? 0,
+                        count: widget.count,
+                        onChange: (index) {
+                          widget.onChanged(index);
+                          _carouselIndex.value = index;
+                        },
+                        itemBuilder: widget.itemBuilder,
+                      );
+                    }),
+              );
+            }),
+          )
+        : SliverFillRemaining(
+            hasScrollBody: false,
+            child: Center(child: NoData(action: widget.noDataBuilder(context))),
+          );
   }
 }
 
-class MediaChannel<B extends StateStreamable<S>, S> extends StatelessWidget {
+class MediaChannel<T> extends StatelessWidget {
   const MediaChannel({
     super.key,
     required this.label,
     required this.height,
     required this.builder,
-    required this.selector,
     this.more,
+    required this.future,
+    this.loadingBuilder,
   });
 
+  final Future<List<T>> future;
   final String label;
   final double height;
   final Widget? more;
-  final Widget Function(BuildContext, int) builder;
-  final BlocWidgetSelector<S?, int> selector;
+  final Widget Function(BuildContext, T, int) builder;
+  final Widget Function(BuildContext)? loadingBuilder;
 
   @override
   Widget build(BuildContext context) {
-    return BlocSelector<B, S, int>(
-        selector: selector,
-        builder: (context, count) {
-          return count != 0
+    return FutureBuilderSliverHandler(
+        future: future,
+        errorBuilder: (context, snapshot) => SizedBox(height: height, child: ErrorMessage(error: snapshot.error)),
+        loadingBuilder:
+            loadingBuilder != null ? (context, snapshot) => MediaChannelPlaceholder(label: label, height: height, itemBuilder: loadingBuilder!) : null,
+        builder: (context, snapshot) {
+          return snapshot.requireData.isNotEmpty
               ? SliverMainAxisGroup(
                   slivers: [
                     SliverPadding(
@@ -119,8 +122,8 @@ class MediaChannel<B extends StateStreamable<S>, S> extends StatelessWidget {
                         child: ScrollbarListView.separated(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-                          itemCount: count,
-                          itemBuilder: (context, index) => builder(context, index),
+                          itemCount: snapshot.requireData.length,
+                          itemBuilder: (context, index) => builder(context, snapshot.requireData[index], index),
                           separatorBuilder: (context, _) => const SizedBox(width: 16),
                         ),
                       ),
@@ -132,54 +135,170 @@ class MediaChannel<B extends StateStreamable<S>, S> extends StatelessWidget {
   }
 }
 
-class MediaGridChannel<B extends StateStreamable<S>, S> extends StatelessWidget {
-  const MediaGridChannel({
-    super.key,
-    required this.label,
-    required this.builder,
-    required this.selector,
-  });
+class MediaChannelPlaceholder extends StatelessWidget {
+  const MediaChannelPlaceholder({super.key, required this.height, required this.itemBuilder, required this.label});
 
+  final Widget Function(BuildContext) itemBuilder;
+  final double height;
   final String label;
-  final Widget Function(BuildContext, int) builder;
-  final BlocWidgetSelector<S?, int> selector;
 
   @override
   Widget build(BuildContext context) {
-    return BlocSelector<B, S, int>(
-      selector: selector,
-      builder: (context, count) => SliverMainAxisGroup(
-        slivers: count != 0
-            ? [
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        Text(label, style: Theme.of(context).textTheme.titleMedium),
-                        Text(' ($count)', style: Theme.of(context).textTheme.labelSmall),
-                      ],
-                    ),
-                  ),
-                ),
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  sliver: SliverGrid.builder(
-                    itemCount: count,
-                    addAutomaticKeepAlives: false,
-                    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 120,
-                      childAspectRatio: 0.5,
-                      mainAxisSpacing: 16,
-                      crossAxisSpacing: 16,
-                    ),
-                    itemBuilder: (context, index) => builder(context, index),
-                  ),
-                ),
-                const SliverToBoxAdapter(child: SizedBox(height: 32)),
-              ]
-            : [],
+    return IgnorePointer(
+      child: GPlaceholder(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Container(
+                width: 100,
+                height: 24,
+                decoration: GPlaceholderDecoration.lite,
+              ),
+            ),
+            SizedBox(
+              height: height,
+              child: ListView.separated(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                scrollDirection: Axis.horizontal,
+                itemCount: 10,
+                itemBuilder: (context, _) => itemBuilder(context),
+                separatorBuilder: (BuildContext context, int index) => const SizedBox(width: 16),
+              ),
+            ),
+          ],
+        ),
       ),
+    );
+  }
+}
+
+class MediaGridChannel<T> extends StatefulWidget {
+  const MediaGridChannel({
+    super.key,
+    required this.label,
+    required this.itemBuilder,
+    required this.onQuery,
+  });
+
+  final String label;
+  final ItemWidgetBuilder<T> itemBuilder;
+  final Future<PageData<T>> Function(int) onQuery;
+
+  @override
+  State<MediaGridChannel<T>> createState() => _MediaGridChannelState();
+}
+
+class _MediaGridChannelState<T> extends State<MediaGridChannel<T>> {
+  PagingState<int, T> _state = PagingState();
+  int? _count;
+
+  Future<void> _fetchNextPage() async {
+    if (_state.isLoading) return;
+
+    await Future.value();
+
+    setState(() {
+      _state = _state.copyWith(isLoading: true, error: null);
+    });
+
+    try {
+      final newKey = (_state.keys?.last ?? -1) + 1;
+      final data = await widget.onQuery(newKey);
+      final hasNextPage = data.offset + data.limit < data.count;
+      if (!mounted) return;
+      setState(() {
+        _state = _state.copyWith(
+          pages: [...?_state.pages, data.data],
+          keys: [...?_state.keys, newKey],
+          hasNextPage: hasNextPage,
+          isLoading: false,
+        );
+        _count = data.count;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _state = _state.copyWith(
+          error: error,
+          isLoading: false,
+        );
+      });
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant MediaGridChannel<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverMainAxisGroup(
+      slivers: _count != 0
+          ? [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: _count != null
+                      ? Row(
+                          children: [
+                            Text(widget.label, style: Theme.of(context).textTheme.titleMedium),
+                            if (_count != null) Text(' ($_count)', style: Theme.of(context).textTheme.labelSmall),
+                          ],
+                        )
+                      : GPlaceholder(
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Container(
+                              width: 100,
+                              height: 24,
+                              decoration: GPlaceholderDecoration.base,
+                            ),
+                          ),
+                        ),
+                ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: PagedSliverGrid(
+                  builderDelegate: PagedChildBuilderDelegate<T>(
+                    itemBuilder: widget.itemBuilder,
+                    noMoreItemsIndicatorBuilder: (context) => const Padding(
+                      padding: EdgeInsets.only(top: 16),
+                      child: Column(
+                        spacing: 16,
+                        children: [
+                          FractionallySizedBox(
+                            widthFactor: 0.5,
+                            child: Divider(),
+                          ),
+                          Text('THE END', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ),
+                    firstPageProgressIndicatorBuilder: (context) => const Loading(),
+                    newPageProgressIndicatorBuilder: (context) => const Padding(
+                      padding: EdgeInsets.only(top: 16),
+                      child: Loading(),
+                    ),
+                  ),
+                  showNewPageProgressIndicatorAsGridChild: false,
+                  showNoMoreItemsIndicatorAsGridChild: false,
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 120,
+                    childAspectRatio: 0.5,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                  ),
+                  fetchNextPage: _fetchNextPage,
+                  state: _state,
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 32)),
+            ]
+          : [],
     );
   }
 }

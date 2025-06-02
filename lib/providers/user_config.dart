@@ -39,21 +39,23 @@ class UserConfig extends ChangeNotifier {
         themeMode = FromString.fromString(prefs.getString('system.themeMode')),
         autoUpdateFrequency = AutoUpdateFrequency.fromString(prefs.getString('system.autoUpdateFrequency')),
         lastCheckUpdateTime = DateTime.tryParse(prefs.getString('system.lastCheckUpdateTime') ?? ''),
+        updatePrerelease = prefs.getBool('system.updatePrerelease') ?? false,
+        githubProxy = prefs.getString('system.githubProxy') ?? '',
         autoPlay = prefs.getBool('playerConfig.autoPlay') ?? false,
         autoPip = prefs.getBool('playerConfig.autoPip') ?? false,
         autoForceLandscape = prefs.getBool('playerConfig.autoForceLandscape') ?? false,
-        displayScale = prefs.getDouble('system.displayScale') ?? 1,
-        scraperBehavior = prefs.getString('scraper.behavior') ?? 'exact';
+        displayScale = prefs.getDouble('system.displayScale') ?? 1;
   final SharedPreferences prefs;
   SystemLanguage language;
   ThemeMode themeMode;
   AutoUpdateFrequency autoUpdateFrequency;
+  bool updatePrerelease;
+  String githubProxy;
   DateTime? lastCheckUpdateTime;
   bool autoPlay;
   bool autoForceLandscape;
   bool autoPip;
   double displayScale;
-  String scraperBehavior;
 
   static Future<UserConfig> init() async {
     final prefs = await SharedPreferences.getInstance();
@@ -63,6 +65,16 @@ class UserConfig extends ChangeNotifier {
   void setAutoUpdate(AutoUpdateFrequency f) {
     autoUpdateFrequency = f;
     prefs.setString('system.autoUpdateFrequency', autoUpdateFrequency.name);
+  }
+
+  void setGithubProxy(String proxy) {
+    githubProxy = proxy;
+    prefs.setString('system.githubProxy', githubProxy);
+  }
+
+  void setUpdatePrerelease(bool f) {
+    updatePrerelease = f;
+    prefs.setBool('system.updatePrerelease', updatePrerelease);
   }
 
   void setAutoPlay(bool a) {
@@ -100,13 +112,6 @@ class UserConfig extends ChangeNotifier {
       displayScale = s;
       ScaledWidgetsFlutterBinding.instance.scaleFactor = (deviceSize) => max(1, deviceSize.width / 1140) * displayScale;
       prefs.setDouble('system.displayScale', displayScale);
-    }
-  }
-
-  void setScraperBehavior(String scraperBehavior) {
-    if (this.scraperBehavior != scraperBehavior) {
-      this.scraperBehavior = scraperBehavior;
-      prefs.setString('scraper.behavior', scraperBehavior);
     }
   }
 
