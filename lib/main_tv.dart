@@ -25,11 +25,16 @@ void main() async {
     final shortcutTV = await ShortcutTV.init();
     Provider.debugCheckInvalidValueType = null;
     if (userConfig.shouldCheckUpdate()) {
-      Api.checkUpdate(
-        updateUrl,
-        Version.fromString(appVersion),
-        needUpdate: (data, url) => navigateTo(navigatorKey.currentContext!, const SettingsUpdate()),
-      );
+      Future.microtask(() async {
+        final data = await Api.checkUpdate(
+          '${userConfig.githubProxy}$updateUrl',
+          userConfig.updatePrerelease,
+          Version.fromString(appVersion),
+        );
+        if (data != null) {
+          navigateTo(navigatorKey.currentContext!, const SettingsUpdate());
+        }
+      });
     }
     runApp(MultiProvider(
       providers: [

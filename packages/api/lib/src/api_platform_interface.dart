@@ -580,12 +580,8 @@ abstract class ApiPlatform extends PlatformInterface {
     return PageData.fromJson(data!, (data['data'] as JsonList).map((e) => Log.fromJson(e)));
   }
 
-  Future<bool> checkUpdate(
-    String updateUrl,
-    Version currentVersion, {
-    required Future<void> Function(UpdateResp data, String url) needUpdate,
-  }) {
-    return Future.value(false);
+  Future<UpdateData?> checkUpdate(String updateUrl, bool prerelease, Version currentVersion) {
+    return Future.value();
   }
 
   /// Miscellaneous End

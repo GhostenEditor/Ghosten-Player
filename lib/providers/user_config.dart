@@ -39,6 +39,8 @@ class UserConfig extends ChangeNotifier {
         themeMode = FromString.fromString(prefs.getString('system.themeMode')),
         autoUpdateFrequency = AutoUpdateFrequency.fromString(prefs.getString('system.autoUpdateFrequency')),
         lastCheckUpdateTime = DateTime.tryParse(prefs.getString('system.lastCheckUpdateTime') ?? ''),
+        updatePrerelease = prefs.getBool('system.updatePrerelease') ?? false,
+        githubProxy = prefs.getString('system.githubProxy') ?? '',
         autoPlay = prefs.getBool('playerConfig.autoPlay') ?? false,
         autoPip = prefs.getBool('playerConfig.autoPip') ?? false,
         autoForceLandscape = prefs.getBool('playerConfig.autoForceLandscape') ?? false,
@@ -47,6 +49,8 @@ class UserConfig extends ChangeNotifier {
   SystemLanguage language;
   ThemeMode themeMode;
   AutoUpdateFrequency autoUpdateFrequency;
+  bool updatePrerelease;
+  String githubProxy;
   DateTime? lastCheckUpdateTime;
   bool autoPlay;
   bool autoForceLandscape;
@@ -61,6 +65,16 @@ class UserConfig extends ChangeNotifier {
   void setAutoUpdate(AutoUpdateFrequency f) {
     autoUpdateFrequency = f;
     prefs.setString('system.autoUpdateFrequency', autoUpdateFrequency.name);
+  }
+
+  void setGithubProxy(String proxy) {
+    githubProxy = proxy;
+    prefs.setString('system.githubProxy', githubProxy);
+  }
+
+  void setUpdatePrerelease(bool f) {
+    updatePrerelease = f;
+    prefs.setBool('system.updatePrerelease', updatePrerelease);
   }
 
   void setAutoPlay(bool a) {
