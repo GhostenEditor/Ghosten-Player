@@ -122,6 +122,7 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
                     controller: WebViewController()
                       ..setJavaScriptMode(JavaScriptMode.unrestricted)
                       ..setUserAgent(ua)
+                      ..scrollBy(10000, 0)
                       ..loadRequest(Uri.parse('https://pan.quark.cn')))),
           if (_driverType == DriverType.webdav) Expanded(child: FormGroup(controller: _webdav)),
         ],
