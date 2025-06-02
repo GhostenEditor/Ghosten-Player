@@ -71,6 +71,38 @@ class SystemSettingsUpdaterState extends State<SystemSettingsUpdater> {
                           ],
                         ),
                       )),
+                  SwitchListTile(
+                    value: _userConfig.updatePrerelease,
+                    onChanged: (value) {
+                      _userConfig.setUpdatePrerelease(value);
+                      setState(() {});
+                    },
+                    title: Text(AppLocalizations.of(context)!.updatePrerelease),
+                  ),
+                  PopupMenuButton(
+                      offset: const Offset(1, 0),
+                      tooltip: '',
+                      onSelected: (value) => setState(() => _userConfig.setGithubProxy(value)),
+                      itemBuilder: (context) => ['', 'https://gh-proxy.com/']
+                          .map((value) => CheckedPopupMenuItem(
+                                value: value,
+                                checked: value == _userConfig.githubProxy,
+                                child: Text(value.isNotEmpty ? value : AppLocalizations.of(context)!.none),
+                              ))
+                          .toList(),
+                      child: ListTile(
+                        title: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(AppLocalizations.of(context)!.githubProxy),
+                            Gap.hMD,
+                            Expanded(
+                              child: Text(_userConfig.githubProxy.isNotEmpty ? _userConfig.githubProxy : AppLocalizations.of(context)!.none,
+                                  textAlign: TextAlign.end, overflow: TextOverflow.ellipsis),
+                            ),
+                          ],
+                        ),
+                      )),
                 ],
               ),
             ),
@@ -79,14 +111,18 @@ class SystemSettingsUpdaterState extends State<SystemSettingsUpdater> {
                   ? null
                   : () async {
                       setState(() => _loading = true);
-                      _updated = await Api.checkUpdate(
-                        updateUrl,
+                      final data = await Api.checkUpdate(
+                        '${_userConfig.githubProxy}$updateUrl',
+                        false,
                         Version.fromString(appVersion),
-                        needUpdate: (data, url) => showModalBottomSheet(
-                            context: context,
-                            constraints: const BoxConstraints(minWidth: double.infinity),
-                            builder: (context) => UpdateBottomSheet(data, url: url)),
                       );
+                      if (data != null && context.mounted) {
+                        await showModalBottomSheet(
+                            context: context, constraints: const BoxConstraints(minWidth: double.infinity), builder: (context) => UpdateBottomSheet(data));
+                        _updated = true;
+                      } else {
+                        _updated = false;
+                      }
                       setState(() => _loading = false);
                     },
               child: _loading

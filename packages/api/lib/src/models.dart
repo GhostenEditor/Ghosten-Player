@@ -802,25 +802,41 @@ class SettingScraper {
 }
 
 class UpdateResp {
-  List<UpdateRespAsset> assets;
-  DateTime? createAt;
-  Version tagName;
-  String comment;
+  final List<UpdateRespAsset> assets;
+  final DateTime? createAt;
+  final Version tagName;
+  final String comment;
+  final bool prerelease;
 
-  UpdateResp.fromJson(Json json)
+  UpdateResp.fromJson(dynamic json)
       : assets = List.generate(json['assets'].length, (index) => UpdateRespAsset.fromJson(json['assets'][index])),
         tagName = Version.fromString(json['tag_name'].substring(1)),
         comment = json['body'],
+        prerelease = json['prerelease'],
         createAt = (json['published_at'] as String).toDateTime();
 }
 
 class UpdateRespAsset {
-  String name;
-  String url;
+  final String name;
+  final String url;
 
   UpdateRespAsset.fromJson(Json json)
       : name = json['name'],
         url = json['browser_download_url'];
+}
+
+class UpdateData {
+  final DateTime? createAt;
+  final Version tagName;
+  final String comment;
+  final String url;
+
+  const UpdateData({
+    required this.url,
+    required this.tagName,
+    required this.comment,
+    this.createAt,
+  });
 }
 
 class Version {
