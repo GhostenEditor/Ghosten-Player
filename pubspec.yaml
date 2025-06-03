@@ -40,7 +40,7 @@ dependencies:
   url_launcher: ^6.3.0
   video_player:
     path: packages/video_player
-  volume_controller: ^3.3.3
+  volume_controller: ^3.4.0
   webview_cookie_manager_plus: ^2.0.16
   webview_flutter: ^4.11.0
 
