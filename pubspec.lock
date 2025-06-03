@@ -526,10 +526,10 @@ packages:
     dependency: "direct main"
     description:
       name: screen_brightness
-      sha256: "46d1b448729c1ed67c812f2c97d7fa8308809d91031c7ecdeb216ca65f7660de"
+      sha256: "20b43489fbb12316d64633d5abb731f8d3e2c49871f65c8e434c6225d0f58fcf"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.3"
+    version: "2.1.4"
   screen_brightness_android:
     dependency: transitive
     description:
@@ -542,10 +542,10 @@ packages:
     dependency: transitive
     description:
       name: screen_brightness_ios
-      sha256: bfd9bfd0ac852e7aa170e7e356cc27195b2a75037b72c8c6336cf6fb2115cffb
+      sha256: "2493953340ecfe8f4f13f61db50ce72533a55b0bbd58ba1402893feecf3727f5"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.1"
+    version: "2.1.2"
   screen_brightness_macos:
     dependency: transitive
     description:
