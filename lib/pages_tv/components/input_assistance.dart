@@ -2,9 +2,9 @@ import 'dart:ui';
 
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+import '../../l10n/app_localizations.dart';
 import 'future_builder_handler.dart';
 
 class InputAssistance extends StatelessWidget {
@@ -16,40 +16,41 @@ class InputAssistance extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilderHandler(
-        future: Api.sessionCreate(),
-        builder: (context, sn) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                clipBehavior: Clip.antiAlias,
-                margin: const EdgeInsets.symmetric(horizontal: 72),
-                decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
-                child: ImageFiltered(
-                  imageFilter: disabled ? ImageFilter.blur(sigmaX: 16, sigmaY: 16) : ImageFilter.blur(),
-                  child: QrImageView(
-                    backgroundColor: Colors.white,
-                    data: sn.requireData.uri.toString(),
-                    padding: const EdgeInsets.all(16),
-                    eyeStyle: const QrEyeStyle(
-                      eyeShape: QrEyeShape.circle,
-                      color: Colors.black87,
-                    ),
-                    dataModuleStyle: const QrDataModuleStyle(
-                      dataModuleShape: QrDataModuleShape.circle,
-                      color: Colors.black,
-                    ),
+      future: Api.sessionCreate(),
+      builder: (context, sn) {
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              clipBehavior: Clip.antiAlias,
+              margin: const EdgeInsets.symmetric(horizontal: 72),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
+              child: ImageFiltered(
+                imageFilter: disabled ? ImageFilter.blur(sigmaX: 16, sigmaY: 16) : ImageFilter.blur(),
+                child: QrImageView(
+                  backgroundColor: Colors.white,
+                  data: sn.requireData.uri.toString(),
+                  padding: const EdgeInsets.all(16),
+                  eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.circle, color: Colors.black87),
+                  dataModuleStyle: const QrDataModuleStyle(
+                    dataModuleShape: QrDataModuleShape.circle,
+                    color: Colors.black,
                   ),
                 ),
               ),
-              DefaultTextStyle(
-                style: Theme.of(context).textTheme.titleMedium!.copyWith(height: 3),
-                child: StreamBuilder(
-                    initialData: ' ', stream: _scanStream(context, sn.requireData.id), builder: (context, snapshot) => Text(snapshot.requireData)),
+            ),
+            DefaultTextStyle(
+              style: Theme.of(context).textTheme.titleMedium!.copyWith(height: 3),
+              child: StreamBuilder(
+                initialData: ' ',
+                stream: _scanStream(context, sn.requireData.id),
+                builder: (context, snapshot) => Text(snapshot.requireData),
               ),
-            ],
-          );
-        });
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Stream<String> _scanStream<T>(BuildContext context, String sessionId) async* {

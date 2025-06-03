@@ -12,25 +12,22 @@ class PlayerBackdrop<T extends MediaBase> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MobileBuilder(builder: (context, isMobile, _) {
-      return Stack(
-        fit: StackFit.expand,
-        children: [
-          Container(color: Theme.of(context).colorScheme.primary),
-          if (backdrop != null)
-            Stack(
-              fit: StackFit.expand,
-              children: [
-                AsyncImage(
-                  backdrop!,
-                  alignment: Alignment.topCenter,
-                  showErrorWidget: false,
-                ),
-                Container(color: Colors.black54),
-              ],
-            ),
-          if (logo != null)
-            Positioned(
+    return MobileBuilder(
+      builder: (context, isMobile, _) {
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            Container(color: Theme.of(context).colorScheme.primary),
+            if (backdrop != null)
+              Stack(
+                fit: StackFit.expand,
+                children: [
+                  AsyncImage(backdrop!, alignment: Alignment.topCenter, showErrorWidget: false),
+                  Container(color: Colors.black54),
+                ],
+              ),
+            if (logo != null)
+              Positioned(
                 top: isMobile ? 50 : 20,
                 right: isMobile ? 30 : 60,
                 child: AsyncImage(
@@ -41,10 +38,12 @@ class PlayerBackdrop<T extends MediaBase> extends StatelessWidget {
                   fit: BoxFit.contain,
                   alignment: Alignment.topRight,
                   showErrorWidget: false,
-                )),
-          Container(color: Theme.of(context).colorScheme.surface.withAlpha(0x33)),
-        ],
-      );
-    });
+                ),
+              ),
+            Container(color: Theme.of(context).colorScheme.surface.withAlpha(0x33)),
+          ],
+        );
+      },
+    );
   }
 }

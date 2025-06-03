@@ -5,19 +5,11 @@ const double _defaultGapSizeMd = 12;
 const double _defaultGapSizeLg = 16;
 
 class Gap extends StatelessWidget {
-  const Gap({
-    super.key,
-    this.width,
-    this.height,
-  });
+  const Gap({super.key, this.width, this.height});
 
-  const Gap.vertical({super.key, double size = _defaultGapSizeMd})
-      : width = null,
-        height = size;
+  const Gap.vertical({super.key, double size = _defaultGapSizeMd}) : width = null, height = size;
 
-  const Gap.horizontal({super.key, double size = _defaultGapSizeMd})
-      : width = size,
-        height = null;
+  const Gap.horizontal({super.key, double size = _defaultGapSizeMd}) : width = size, height = null;
   final double? width;
   final double? height;
 

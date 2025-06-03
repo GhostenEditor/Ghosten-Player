@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../const.dart';
+import '../l10n/app_localizations.dart';
 
 class NoData extends StatelessWidget {
   const NoData({super.key, this.action});
@@ -19,11 +19,7 @@ class NoData extends StatelessWidget {
             padding: action == null ? const EdgeInsets.only(bottom: 16) : EdgeInsets.zero,
             child: Text(AppLocalizations.of(context)!.noData),
           ),
-          if (action != null)
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: action,
-            )
+          if (action != null) Padding(padding: const EdgeInsets.all(8), child: action),
         ],
       ),
     );

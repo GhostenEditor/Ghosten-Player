@@ -5,7 +5,10 @@ import '../utils/utils.dart';
 
 extension FromMedia<T> on PlaylistItemDisplay<T> {
   static PlaylistItemDisplay<TVEpisode> fromEpisode(TVEpisode episode) {
-    Duration start = episode.skipIntro > (episode.lastPlayedPosition ?? Duration.zero) ? episode.skipIntro : (episode.lastPlayedPosition ?? Duration.zero);
+    Duration start =
+        episode.skipIntro > (episode.lastPlayedPosition ?? Duration.zero)
+            ? episode.skipIntro
+            : (episode.lastPlayedPosition ?? Duration.zero);
     if (episode.duration != null) {
       if (start > episode.duration! * 0.95) {
         start = episode.skipIntro > episode.duration! * 0.95 ? Duration.zero : episode.skipIntro;
@@ -15,7 +18,8 @@ extension FromMedia<T> on PlaylistItemDisplay<T> {
     return PlaylistItemDisplay(
       fileId: episode.fileId,
       title: episode.displayTitle(),
-      description: '${episode.seriesTitle} S${episode.season} E${episode.episode}${episode.airDate == null ? '' : ' - ${episode.airDate?.format()}'}',
+      description:
+          '${episode.seriesTitle} S${episode.season} E${episode.episode}${episode.airDate == null ? '' : ' - ${episode.airDate?.format()}'}',
       url: Uri(),
       poster: episode.poster,
       start: start,
@@ -58,7 +62,10 @@ extension ConvertSubtitle on SubtitleData {
     }
     final uri = Uri.parse(url!);
     return Subtitle(
-      url: uri.host.isEmpty ? uri.replace(host: Api.baseUrl.host, port: Api.baseUrl.port, scheme: Api.baseUrl.scheme) : uri,
+      url:
+          uri.host.isEmpty
+              ? uri.replace(host: Api.baseUrl.host, port: Api.baseUrl.port, scheme: Api.baseUrl.scheme)
+              : uri,
       mimeType: mimeType,
       language: language,
       label: label,

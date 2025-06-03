@@ -1,8 +1,8 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../providers/user_config.dart';
 import '../../utils/utils.dart';
 import '../utils/notification.dart';
@@ -22,9 +22,7 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.settingsItemOthers),
-      ),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.settingsItemOthers)),
       body: ListView(
         children: [
           ListTile(title: Text(AppLocalizations.of(context)!.settingsItemPlayerSettings), dense: true),
@@ -53,57 +51,67 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Slider(
-                value: userConfig.displayScale,
-                min: 0.75,
-                max: 1.25,
-                divisions: 10,
-                label: '${userConfig.displayScale}x',
-                onChanged: (s) {
-                  userConfig.setDisplayScale(s);
-                  setState(() {});
-                }),
+              value: userConfig.displayScale,
+              min: 0.75,
+              max: 1.25,
+              divisions: 10,
+              label: '${userConfig.displayScale}x',
+              onChanged: (s) {
+                userConfig.setDisplayScale(s);
+                setState(() {});
+              },
+            ),
           ),
           _buildPopupMenuItem(
             title: AppLocalizations.of(context)!.settingsItemLanguage,
             icon: Icons.language,
             trailing: AppLocalizations.of(context)!.systemLanguage(userConfig.language.name),
             onSelected: userConfig.setLanguage,
-            itemBuilder: (BuildContext context) => SystemLanguage.values
-                .map((language) => CheckedPopupMenuItem(
-                      value: language,
-                      checked: userConfig.language == language,
-                      child: Text(AppLocalizations.of(context)!.systemLanguage(language.name)),
-                    ))
-                .toList(),
+            itemBuilder:
+                (BuildContext context) =>
+                    SystemLanguage.values
+                        .map(
+                          (language) => CheckedPopupMenuItem(
+                            value: language,
+                            checked: userConfig.language == language,
+                            child: Text(AppLocalizations.of(context)!.systemLanguage(language.name)),
+                          ),
+                        )
+                        .toList(),
           ),
           _buildPopupMenuItem(
             title: AppLocalizations.of(context)!.settingsItemTheme,
             icon: Icons.light_mode_outlined,
             trailing: AppLocalizations.of(context)!.systemTheme(userConfig.themeMode.name),
             onSelected: userConfig.setTheme,
-            itemBuilder: (BuildContext context) => ThemeMode.values
-                .map((theme) => CheckedPopupMenuItem(
-                      value: theme,
-                      checked: userConfig.themeMode == theme,
-                      child: Text(AppLocalizations.of(context)!.systemTheme(theme.name)),
-                    ))
-                .toList(),
+            itemBuilder:
+                (BuildContext context) =>
+                    ThemeMode.values
+                        .map(
+                          (theme) => CheckedPopupMenuItem(
+                            value: theme,
+                            checked: userConfig.themeMode == theme,
+                            child: Text(AppLocalizations.of(context)!.systemTheme(theme.name)),
+                          ),
+                        )
+                        .toList(),
           ),
           const Divider(),
           FutureBuilder(
-              future: Api.settingScraperQuery(),
-              builder: (context, snapshot) {
-                final data = snapshot.data;
-                return data != null
-                    ? _ScraperSettingSection(
-                        settingScraper: data,
-                        onChanged: (SettingScraper value) async {
-                          await Api.settingScraperUpdate(value);
-                          if (context.mounted) setState(() {});
-                        },
-                      )
-                    : const SizedBox();
-              }),
+            future: Api.settingScraperQuery(),
+            builder: (context, snapshot) {
+              final data = snapshot.data;
+              return data != null
+                  ? _ScraperSettingSection(
+                    settingScraper: data,
+                    onChanged: (SettingScraper value) async {
+                      await Api.settingScraperUpdate(value);
+                      if (context.mounted) setState(() {});
+                    },
+                  )
+                  : const SizedBox();
+            },
+          ),
           ListTile(title: Text(AppLocalizations.of(context)!.settingsItemDataSettings), dense: true),
           ListTile(
             title: Text(AppLocalizations.of(context)!.settingsItemDataSync),
@@ -116,7 +124,11 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
             onTap: () async {
               final flag = await showConfirm(context, AppLocalizations.of(context)!.confirmTextResetData);
               if ((flag ?? false) && context.mounted) {
-                await showNotification(context, Api.resetData(), successText: AppLocalizations.of(context)!.modalNotificationResetSuccessText);
+                await showNotification(
+                  context,
+                  Api.resetData(),
+                  successText: AppLocalizations.of(context)!.modalNotificationResetSuccessText,
+                );
               }
             },
           ),
@@ -191,63 +203,67 @@ class _ScraperSettingSectionState extends State<_ScraperSettingSection> {
           onSelected: (behavior) {
             widget.onChanged(widget.settingScraper.copyWith(behavior: behavior));
           },
-          itemBuilder: (BuildContext context) => ScraperBehavior.values
-              .map((behavior) => CheckedPopupMenuItem(
-                    value: behavior,
-                    checked: widget.settingScraper.behavior == behavior,
-                    child: Text(AppLocalizations.of(context)!.scraperBehavior(behavior.name)),
-                  ))
-              .toList(),
+          itemBuilder:
+              (BuildContext context) =>
+                  ScraperBehavior.values
+                      .map(
+                        (behavior) => CheckedPopupMenuItem(
+                          value: behavior,
+                          checked: widget.settingScraper.behavior == behavior,
+                          child: Text(AppLocalizations.of(context)!.scraperBehavior(behavior.name)),
+                        ),
+                      )
+                      .toList(),
         ),
         SwitchListTile(
-            title: Badge(label: const Text('Alpha'), child: Text(AppLocalizations.of(context)!.settingsItemNfoEnabled)),
-            value: widget.settingScraper.nfoEnabled,
-            onChanged: (nfoEnabled) {
-              widget.onChanged(widget.settingScraper.copyWith(nfoEnabled: nfoEnabled));
-            }),
+          title: Badge(label: const Text('Alpha'), child: Text(AppLocalizations.of(context)!.settingsItemNfoEnabled)),
+          value: widget.settingScraper.nfoEnabled,
+          onChanged: (nfoEnabled) {
+            widget.onChanged(widget.settingScraper.copyWith(nfoEnabled: nfoEnabled));
+          },
+        ),
         SwitchListTile(
-            title: Text(AppLocalizations.of(context)!.settingsItemTmdbEnabled),
-            value: widget.settingScraper.tmdbEnabled,
-            onChanged: (tmdbEnabled) {
-              widget.onChanged(widget.settingScraper.copyWith(tmdbEnabled: tmdbEnabled));
-            }),
+          title: Text(AppLocalizations.of(context)!.settingsItemTmdbEnabled),
+          value: widget.settingScraper.tmdbEnabled,
+          onChanged: (tmdbEnabled) {
+            widget.onChanged(widget.settingScraper.copyWith(tmdbEnabled: tmdbEnabled));
+          },
+        ),
         ListTile(
           title: const Text('TMDB Max Cast Members'),
           trailing: SizedBox(
-              width: 50,
-              child: TextField(
-                controller: _controller1,
-                decoration: const InputDecoration(
-                  isDense: true,
-                  contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                  ),
-                  filled: true,
-                ),
-                keyboardType: TextInputType.number,
-                textAlign: TextAlign.end,
-                onTapOutside: _onTapOutside,
-              )),
+            width: 50,
+            child: TextField(
+              controller: _controller1,
+              decoration: const InputDecoration(
+                isDense: true,
+                contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                border: OutlineInputBorder(borderSide: BorderSide.none),
+                filled: true,
+              ),
+              keyboardType: TextInputType.number,
+              textAlign: TextAlign.end,
+              onTapOutside: _onTapOutside,
+            ),
+          ),
         ),
         ListTile(
           title: const Text('TMDB Max Crew Members'),
           trailing: SizedBox(
-              width: 50,
-              child: TextField(
-                controller: _controller2,
-                decoration: const InputDecoration(
-                  isDense: true,
-                  contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                  ),
-                  filled: true,
-                ),
-                keyboardType: TextInputType.number,
-                textAlign: TextAlign.end,
-                onTapOutside: _onTapOutside,
-              )),
+            width: 50,
+            child: TextField(
+              controller: _controller2,
+              decoration: const InputDecoration(
+                isDense: true,
+                contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                border: OutlineInputBorder(borderSide: BorderSide.none),
+                filled: true,
+              ),
+              keyboardType: TextInputType.number,
+              textAlign: TextAlign.end,
+              onTapOutside: _onTapOutside,
+            ),
+          ),
         ),
         const Divider(),
       ],
@@ -258,10 +274,7 @@ class _ScraperSettingSectionState extends State<_ScraperSettingSection> {
     FocusManager.instance.primaryFocus?.unfocus();
     final tmdbMaxCast = int.tryParse(_controller1.text);
     final tmdbMaxCrew = int.tryParse(_controller2.text);
-    widget.onChanged(widget.settingScraper.copyWith(
-      tmdbMaxCast: tmdbMaxCast,
-      tmdbMaxCrew: tmdbMaxCrew,
-    ));
+    widget.onChanged(widget.settingScraper.copyWith(tmdbMaxCast: tmdbMaxCast, tmdbMaxCrew: tmdbMaxCrew));
   }
 
   Widget _buildPopupMenuItem<T>({

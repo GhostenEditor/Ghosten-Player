@@ -11,7 +11,10 @@ class Loading extends StatefulWidget {
 }
 
 class _LoadingState extends State<Loading> with SingleTickerProviderStateMixin {
-  late final AnimationController _loadingController = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200));
+  late final AnimationController _loadingController = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1200),
+  );
 
   @override
   void dispose() {
@@ -22,13 +25,15 @@ class _LoadingState extends State<Loading> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Center(
-        child: SpinKitFadingCircle(
-      color: widget.color ??
-          switch (Theme.of(context).brightness) {
-            Brightness.dark => Colors.white,
-            Brightness.light => Colors.black,
-          },
-      controller: _loadingController,
-    ));
+      child: SpinKitFadingCircle(
+        color:
+            widget.color ??
+            switch (Theme.of(context).brightness) {
+              Brightness.dark => Colors.white,
+              Brightness.light => Colors.black,
+            },
+        controller: _loadingController,
+      ),
+    );
   }
 }

@@ -52,7 +52,12 @@ class _SingletonPlayerState<T> extends State<SingletonPlayer<T>> {
     }
   }
 
-  Future<void> _onPlaybackStatusUpdate(PlaylistItem item, PlaybackStatusEvent eventType, Duration position, Duration duration) {
+  Future<void> _onPlaybackStatusUpdate(
+    PlaylistItem item,
+    PlaybackStatusEvent eventType,
+    Duration position,
+    Duration duration,
+  ) {
     final source = _controller.currentItem!.source;
     if (source is TVEpisode) {
       return Api.updatePlayedStatus(
@@ -94,13 +99,14 @@ class _SingletonPlayerState<T> extends State<SingletonPlayer<T>> {
     return Stack(
       children: [
         PlayerPlatformView(
-            autoPip: context.read<UserConfig>().autoPip,
-            initialized: () async {
-              await _controller.enterFullscreen();
-              _controller.setPlaylist(widget.playlist);
-              await _controller.next(0);
-              await _controller.play();
-            }),
+          autoPip: context.read<UserConfig>().autoPip,
+          initialized: () async {
+            await _controller.enterFullscreen();
+            _controller.setPlaylist(widget.playlist);
+            await _controller.next(0);
+            await _controller.play();
+          },
+        ),
         PlayerControlsFull(_controller, _progressController, theme: widget.theme),
       ],
     );

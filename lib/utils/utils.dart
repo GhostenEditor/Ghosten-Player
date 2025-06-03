@@ -3,17 +3,20 @@ import 'dart:async';
 import 'package:api/api.dart';
 import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import '../l10n/app_localizations.dart';
 
 Future<T?> navigateTo<T extends Object?>(BuildContext context, Widget page) {
   return Navigator.of(context).push<T>(MaterialPageRoute(builder: (context) => page));
 }
 
 Future<T?> navigateToNoTransition<T extends Object?>(BuildContext context, Widget page) {
-  return Navigator.of(context).push<T>(PageRouteBuilder(
-    pageBuilder: (context, animation, secondaryAnimation) => page,
-    transitionsBuilder: (context, animation, secondaryAnimation, child) => child,
-  ));
+  return Navigator.of(context).push<T>(
+    PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) => child,
+    ),
+  );
 }
 
 extension DateTimeExtension on DateTime {

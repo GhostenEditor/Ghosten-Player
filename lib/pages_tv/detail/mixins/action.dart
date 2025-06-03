@@ -1,8 +1,8 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../components/setting.dart';
 import '../../components/time_picker.dart';
 import '../../utils/notification.dart';
@@ -16,11 +16,15 @@ mixin ActionMixin<S extends StatefulWidget> on State<S> {
       leading: const Icon(Icons.access_time),
       title: Text(AppLocalizations.of(context)!.buttonSkipFromStart),
       onTap: () async {
-        final time = await Navigator.of(context).push(FadeInPageRoute<Duration>(
-            builder: (context) => SettingPage(
+        final time = await Navigator.of(context).push(
+          FadeInPageRoute<Duration>(
+            builder:
+                (context) => SettingPage(
                   title: AppLocalizations.of(context)!.buttonSkipFromStart,
                   child: TimePicker(value: value),
-                )));
+                ),
+          ),
+        );
         if (time != null) {
           Api.setSkipTime(SkipTimeType.intro, type, item.id, time);
           setState(() {});
@@ -34,8 +38,15 @@ mixin ActionMixin<S extends StatefulWidget> on State<S> {
       leading: const Icon(Icons.access_time),
       title: Text(AppLocalizations.of(context)!.buttonSkipFromEnd),
       onTap: () async {
-        final time = await Navigator.of(context).push(FadeInPageRoute<Duration>(
-            builder: (context) => SettingPage(title: AppLocalizations.of(context)!.buttonSkipFromEnd, child: TimePicker(value: value))));
+        final time = await Navigator.of(context).push(
+          FadeInPageRoute<Duration>(
+            builder:
+                (context) => SettingPage(
+                  title: AppLocalizations.of(context)!.buttonSkipFromEnd,
+                  child: TimePicker(value: value),
+                ),
+          ),
+        );
         if (time != null) {
           Api.setSkipTime(SkipTimeType.ending, type, item.id, time);
           setState(() {});
@@ -56,7 +67,12 @@ mixin ActionMixin<S extends StatefulWidget> on State<S> {
     return ButtonSettingItem(
       leading: const Icon(Icons.home_outlined),
       title: Text(AppLocalizations.of(context)!.buttonHome),
-      onTap: () => launchUrl(uri, mode: LaunchMode.inAppBrowserView, browserConfiguration: const BrowserConfiguration(showTitle: true)),
+      onTap:
+          () => launchUrl(
+            uri,
+            mode: LaunchMode.inAppBrowserView,
+            browserConfiguration: const BrowserConfiguration(showTitle: true),
+          ),
     );
   }
 
@@ -65,7 +81,11 @@ mixin ActionMixin<S extends StatefulWidget> on State<S> {
       title: Text(AppLocalizations.of(context)!.buttonDownload),
       leading: const Icon(Icons.download_outlined),
       onTap: () async {
-        final resp = await showNotification(context, Api.downloadTaskCreate(fileId), successText: AppLocalizations.of(context)!.tipsForDownload);
+        final resp = await showNotification(
+          context,
+          Api.downloadTaskCreate(fileId),
+          successText: AppLocalizations.of(context)!.tipsForDownload,
+        );
         if (resp?.error == null) setState(() => refresh = true);
       },
     );

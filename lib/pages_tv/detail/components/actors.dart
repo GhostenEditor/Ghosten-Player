@@ -1,7 +1,7 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../components/focusable_image.dart';
 
 class ActorSection extends StatelessWidget {
@@ -54,8 +54,16 @@ class _ActorListTileState extends State<_ActorListTile> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(mediaCast.name, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.titleMedium!.copyWith(fontWeight: FontWeight.bold)),
-                  if (mediaCast.role != null) Text('${AppLocalizations.of(context)!.actAs} ${mediaCast.role}', style: Theme.of(context).textTheme.bodySmall),
+                  Text(
+                    mediaCast.name,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleMedium!.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  if (mediaCast.role != null)
+                    Text(
+                      '${AppLocalizations.of(context)!.actAs} ${mediaCast.role}',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
                   Text(AppLocalizations.of(context)!.gender(mediaCast.gender.toString())),
                   Container(
                     decoration: BoxDecoration(

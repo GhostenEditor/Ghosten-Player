@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import '../l10n/app_localizations.dart';
 
 String? yearValidator(BuildContext context, String? value) {
   if (value != null && value.isNotEmpty) {

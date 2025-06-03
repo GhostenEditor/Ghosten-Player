@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../components/logo.dart';
+import '../l10n/app_localizations.dart';
 import 'components/mobile_builder.dart';
 import 'media/live_list.dart';
 import 'media/movie_list.dart';
@@ -20,12 +20,12 @@ class _HomeViewState extends State<HomeView> {
   int index = 0;
 
   Widget get child => switch (index) {
-        0 => const TVListPage(),
-        1 => const MovieListPage(),
-        2 => BlocProvider(create: (_) => IptvCubit(), child: const LiveListPage()),
-        3 => const SettingsPage(),
-        _ => const Placeholder(),
-      };
+    0 => const TVListPage(),
+    1 => const MovieListPage(),
+    2 => BlocProvider(create: (_) => IptvCubit(), child: const LiveListPage()),
+    3 => const SettingsPage(),
+    _ => const Placeholder(),
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -36,16 +36,15 @@ class _HomeViewState extends State<HomeView> {
         child: NavigationBar(
           selectedIndex: index,
           onDestinationSelected: (index) => setState(() => this.index = index),
-          destinations: _destinations(context).map(
-            (_TabDestination destination) {
-              return NavigationDestination(
-                label: destination.label,
-                icon: destination.icon,
-                selectedIcon: destination.selectedIcon,
-                tooltip: '',
-              );
-            },
-          ).toList(),
+          destinations:
+              _destinations(context).map((_TabDestination destination) {
+                return NavigationDestination(
+                  label: destination.label,
+                  icon: destination.icon,
+                  selectedIcon: destination.selectedIcon,
+                  tooltip: '',
+                );
+              }).toList(),
         ),
       ),
       backgroundColor: index == 2 ? Colors.transparent : null,
@@ -58,13 +57,16 @@ class _HomeViewState extends State<HomeView> {
                 NavigationRail(
                   leading: const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Logo(size: 36)),
                   labelType: NavigationRailLabelType.all,
-                  destinations: _destinations(context)
-                      .map((destination) => NavigationRailDestination(
-                            label: Text(destination.label),
-                            icon: destination.icon,
-                            selectedIcon: destination.selectedIcon,
-                          ))
-                      .toList(),
+                  destinations:
+                      _destinations(context)
+                          .map(
+                            (destination) => NavigationRailDestination(
+                              label: Text(destination.label),
+                              icon: destination.icon,
+                              selectedIcon: destination.selectedIcon,
+                            ),
+                          )
+                          .toList(),
                   selectedIndex: index,
                   useIndicator: true,
                   onDestinationSelected: (index) => setState(() => this.index = index),
@@ -81,11 +83,7 @@ class _HomeViewState extends State<HomeView> {
 
   List<_TabDestination> _destinations(BuildContext context) {
     return [
-      _TabDestination(
-        AppLocalizations.of(context)!.homeTabTV,
-        const Icon(Icons.tv_outlined),
-        const Icon(Icons.tv),
-      ),
+      _TabDestination(AppLocalizations.of(context)!.homeTabTV, const Icon(Icons.tv_outlined), const Icon(Icons.tv)),
       _TabDestination(
         AppLocalizations.of(context)!.homeTabMovie,
         const Icon(Icons.movie_creation_outlined),

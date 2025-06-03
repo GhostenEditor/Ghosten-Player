@@ -57,16 +57,18 @@ class MediaGridItemState extends State<MediaGridItem> {
           Gap.vSM,
           if (widget.title != null)
             DefaultTextStyle(
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium!
-                  .copyWith(fontWeight: FontWeight.bold, color: _focused ? null : Theme.of(context).colorScheme.onSurfaceVariant),
+              style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                fontWeight: FontWeight.bold,
+                color: _focused ? null : Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
               overflow: TextOverflow.ellipsis,
               child: widget.title!,
             ),
           if (widget.subtitle != null)
             DefaultTextStyle(
-              style: Theme.of(context).textTheme.labelMedium!.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+              style: Theme.of(
+                context,
+              ).textTheme.labelMedium!.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
               overflow: TextOverflow.ellipsis,
               child: widget.subtitle!,
             ),
@@ -74,9 +76,7 @@ class MediaGridItemState extends State<MediaGridItem> {
       ),
     );
     if (widget.floating != null) {
-      return Stack(
-        children: [child, IgnorePointer(child: widget.floating)],
-      );
+      return Stack(children: [child, IgnorePointer(child: widget.floating)]);
     } else {
       return child;
     }

@@ -31,15 +31,23 @@ enum DeviceType {
 class PlatformApi {
   static const _channelNamespace = 'com.ghosten.player';
   static Stream<bool> pipEvent =
-      kIsWeb ? const Stream.empty() : const EventChannel('$_channelNamespace/pip').receiveBroadcastStream().asBroadcastStream().cast();
-  static Stream<String> deeplinkEvent = kIsWeb
-      ? const Stream.empty()
-      : const EventChannel('$_channelNamespace/deeplink').receiveBroadcastStream().asBroadcastStream().cast<String?>().mapNotNull((l) => l).distinct();
-  static Stream<ScreenState> screenEvent = (ReplaySubject<ScreenState>(maxSize: 1)
-        ..addStream(kIsWeb
+      kIsWeb
+          ? const Stream.empty()
+          : const EventChannel('$_channelNamespace/pip').receiveBroadcastStream().asBroadcastStream().cast();
+  static Stream<String> deeplinkEvent =
+      kIsWeb
+          ? const Stream.empty()
+          : const EventChannel(
+            '$_channelNamespace/deeplink',
+          ).receiveBroadcastStream().asBroadcastStream().cast<String?>().mapNotNull((l) => l).distinct();
+  static Stream<ScreenState> screenEvent =
+      (ReplaySubject<ScreenState>(maxSize: 1)..addStream(
+        kIsWeb
             ? Stream.value(ScreenState.on)
-            : const EventChannel('$_channelNamespace/screen').receiveBroadcastStream().cast<String>().map((event) => ScreenState.fromString(event))))
-      .stream;
+            : const EventChannel(
+              '$_channelNamespace/screen',
+            ).receiveBroadcastStream().cast<String>().map((event) => ScreenState.fromString(event)),
+      )).stream;
   static late DeviceType deviceType;
 
   static bool isAndroidPhone() {

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../providers/shortcut_tv.dart';
 import '../components/setting.dart';
 
@@ -18,48 +18,44 @@ class _SystemSettingsShortcutState extends State<SystemSettingsShortcut> {
   Widget build(BuildContext context) {
     final shortcuts = context.watch<ShortcutTV>();
     return SettingPage(
-        title: AppLocalizations.of(context)!.settingsItemShortcuts,
-        child: ListView(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-          children: [
-            _ShortcutButton(
-              autofocus: true,
-              title: Text(AppLocalizations.of(context)!.settingsItemShortcutsKey('menu')),
-              shortcut: shortcuts.menu,
-              onChanged: shortcuts.setMenu,
-            ),
-            _ShortcutButton(
-              title: Text(AppLocalizations.of(context)!.settingsItemShortcutsKey('previousChannel')),
-              shortcut: shortcuts.previousChannel,
-              onChanged: shortcuts.setPreviousChannel,
-            ),
-            _ShortcutButton(
-              title: Text(AppLocalizations.of(context)!.settingsItemShortcutsKey('nextChannel')),
-              shortcut: shortcuts.nextChannel,
-              onChanged: shortcuts.setNextChannel,
-            ),
-            _ShortcutButton(
-              title: Text(AppLocalizations.of(context)!.settingsItemShortcutsKey('switchLinePanel')),
-              shortcut: shortcuts.switchLinePanel,
-              onChanged: shortcuts.setSwitchLinePanel,
-            ),
-            _ShortcutButton(
-              title: Text(AppLocalizations.of(context)!.settingsItemShortcutsKey('channelsPanel')),
-              shortcut: shortcuts.channelsPanel,
-              onChanged: shortcuts.setChannelsPanel,
-            ),
-          ],
-        ));
+      title: AppLocalizations.of(context)!.settingsItemShortcuts,
+      child: ListView(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+        children: [
+          _ShortcutButton(
+            autofocus: true,
+            title: Text(AppLocalizations.of(context)!.settingsItemShortcutsKey('menu')),
+            shortcut: shortcuts.menu,
+            onChanged: shortcuts.setMenu,
+          ),
+          _ShortcutButton(
+            title: Text(AppLocalizations.of(context)!.settingsItemShortcutsKey('previousChannel')),
+            shortcut: shortcuts.previousChannel,
+            onChanged: shortcuts.setPreviousChannel,
+          ),
+          _ShortcutButton(
+            title: Text(AppLocalizations.of(context)!.settingsItemShortcutsKey('nextChannel')),
+            shortcut: shortcuts.nextChannel,
+            onChanged: shortcuts.setNextChannel,
+          ),
+          _ShortcutButton(
+            title: Text(AppLocalizations.of(context)!.settingsItemShortcutsKey('switchLinePanel')),
+            shortcut: shortcuts.switchLinePanel,
+            onChanged: shortcuts.setSwitchLinePanel,
+          ),
+          _ShortcutButton(
+            title: Text(AppLocalizations.of(context)!.settingsItemShortcutsKey('channelsPanel')),
+            shortcut: shortcuts.channelsPanel,
+            onChanged: shortcuts.setChannelsPanel,
+          ),
+        ],
+      ),
+    );
   }
 }
 
 class _ShortcutButton extends StatefulWidget {
-  const _ShortcutButton({
-    this.title,
-    this.autofocus = false,
-    required this.shortcut,
-    required this.onChanged,
-  });
+  const _ShortcutButton({this.title, this.autofocus = false, required this.shortcut, required this.onChanged});
 
   final Widget? title;
   final LogicalKeyboardKey shortcut;
@@ -77,16 +73,17 @@ class _ShortcutButtonState extends State<_ShortcutButton> {
   Widget build(BuildContext context) {
     return Focus(
       skipTraversal: true,
-      onKeyEvent: editing
-          ? (node, event) {
-              if (event is KeyDownEvent) {
-                setState(() => editing = false);
-                widget.onChanged(event.logicalKey);
-                return KeyEventResult.handled;
+      onKeyEvent:
+          editing
+              ? (node, event) {
+                if (event is KeyDownEvent) {
+                  setState(() => editing = false);
+                  widget.onChanged(event.logicalKey);
+                  return KeyEventResult.handled;
+                }
+                return KeyEventResult.ignored;
               }
-              return KeyEventResult.ignored;
-            }
-          : null,
+              : null,
       child: ButtonSettingItem(
         autofocus: widget.autofocus,
         title: widget.title,
@@ -122,17 +119,18 @@ class _AnimatedEditingState extends State<_AnimatedEditing> with TickerProviderS
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _animationController,
-      builder: (context, child) => DecoratedBox(
-        decoration: BoxDecoration(
-          color: Color.lerp(
-            Theme.of(context).colorScheme.inversePrimary,
-            Theme.of(context).colorScheme.inverseSurface,
-            _animationController.value,
+      builder:
+          (context, child) => DecoratedBox(
+            decoration: BoxDecoration(
+              color: Color.lerp(
+                Theme.of(context).colorScheme.inversePrimary,
+                Theme.of(context).colorScheme.inverseSurface,
+                _animationController.value,
+              ),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: child,
           ),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: child,
-      ),
       child: Container(padding: const EdgeInsets.all(8), child: widget.child),
     );
   }

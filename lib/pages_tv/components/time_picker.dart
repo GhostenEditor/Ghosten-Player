@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../components/number_picker.dart';
+import '../../l10n/app_localizations.dart';
 import 'filled_button.dart';
 import 'text_button.dart';
 
@@ -39,10 +39,7 @@ class _TimePickerState extends State<TimePicker> {
                     width: 24,
                     onChanged: (value) => setState(() => _minutes = value),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text(':'),
-                  ),
+                  const Padding(padding: EdgeInsets.all(8.0), child: Text(':')),
                   NumberPicker(
                     value: _seconds,
                     minValue: 0,
@@ -55,25 +52,26 @@ class _TimePickerState extends State<TimePicker> {
             ),
           ),
           Align(
-              alignment: Alignment.bottomRight,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TVFilledButton(
-                    onPressed: () => Navigator.of(context).pop(Duration(seconds: _seconds, minutes: _minutes)),
-                    child: Text(AppLocalizations.of(context)!.buttonConfirm),
-                  ),
-                  TVTextButton(
-                    onPressed: () {
-                      setState(() {
-                        _minutes = 0;
-                        _seconds = 0;
-                      });
-                    },
-                    child: Text(AppLocalizations.of(context)!.buttonReset),
-                  ),
-                ],
-              )),
+            alignment: Alignment.bottomRight,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TVFilledButton(
+                  onPressed: () => Navigator.of(context).pop(Duration(seconds: _seconds, minutes: _minutes)),
+                  child: Text(AppLocalizations.of(context)!.buttonConfirm),
+                ),
+                TVTextButton(
+                  onPressed: () {
+                    setState(() {
+                      _minutes = 0;
+                      _seconds = 0;
+                    });
+                  },
+                  child: Text(AppLocalizations.of(context)!.buttonReset),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

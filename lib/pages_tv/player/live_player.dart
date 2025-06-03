@@ -6,13 +6,13 @@ import 'package:collection/collection.dart';
 import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:video_player/player.dart';
 
 import '../../components/async_image.dart';
 import '../../components/playing_icon.dart';
+import '../../l10n/app_localizations.dart';
 import '../../providers/shortcut_tv.dart';
 import '../../theme.dart';
 import '../../utils/utils.dart';
@@ -40,18 +40,20 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
 
   @override
   void initState() {
-    _subscription = _controlsStream.stream.switchMap((status) {
-      switch (status) {
-        case ControlsStreamStatus.show:
-          return ConcatStream([Stream.value(true), TimerStream(false, const Duration(seconds: 5))]);
-        case ControlsStreamStatus.showInfinite:
-          return Stream.value(true);
-        case ControlsStreamStatus.hide:
-          return Stream.value(false);
-      }
-    }).listen((show) {
-      _isShowControls.value = show;
-    });
+    _subscription = _controlsStream.stream
+        .switchMap((status) {
+          switch (status) {
+            case ControlsStreamStatus.show:
+              return ConcatStream([Stream.value(true), TimerStream(false, const Duration(seconds: 5))]);
+            case ControlsStreamStatus.showInfinite:
+              return Stream.value(true);
+            case ControlsStreamStatus.hide:
+              return Stream.value(false);
+          }
+        })
+        .listen((show) {
+          _isShowControls.value = show;
+        });
     _controller.index.addListener(() => _controlsStream.add(ControlsStreamStatus.show));
     _controlsStream.add(ControlsStreamStatus.show);
     super.initState();
@@ -79,10 +81,8 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
         drawer: Container(
           height: MediaQuery.of(context).size.height,
           decoration: const BoxDecoration(
-              gradient: LinearGradient(
-            colors: [Colors.black87, Colors.transparent],
-            stops: [0.2, 0.8],
-          )),
+            gradient: LinearGradient(colors: [Colors.black87, Colors.transparent], stops: [0.2, 0.8]),
+          ),
           child: _ChannelListGrouped(
             controller: _controller,
             onTap: (index) async {
@@ -96,49 +96,56 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
           ),
         ),
         endDrawer: SizedBox(
-            width: 300,
-            child: SettingPage(
-              title: AppLocalizations.of(context)!.playerBroadcastLine,
-              child: StatefulBuilder(builder: (context, setState) {
+          width: 300,
+          child: SettingPage(
+            title: AppLocalizations.of(context)!.playerBroadcastLine,
+            child: StatefulBuilder(
+              builder: (context, setState) {
                 return ListenableBuilder(
-                    listenable: _controller.index,
-                    builder: (context, _) => ListView.builder(
-                          padding: const EdgeInsets.all(12),
-                          itemCount: _controller.currentItem?.source.links.length ?? 0,
-                          itemBuilder: (context, index) {
-                            final url = _controller.currentItem!.source.links[index];
-                            return RadioSettingItem(
-                              autofocus: _controller.currentItem?.url == url,
-                              groupValue: _controller.currentItem?.url,
-                              value: url,
-                              title: Text('${AppLocalizations.of(context)!.playerBroadcastLine} ${index + 1}'),
-                              onChanged: (_) async {
-                                final currentItem = _controller.currentItem!;
-                                _controller.updateSource(currentItem.copyWith(url: url), _controller.index.value!);
-                                switch (_controller.status.value) {
-                                  case PlayerStatus.paused:
-                                  case PlayerStatus.ended:
-                                  case PlayerStatus.error:
-                                  case PlayerStatus.idle:
-                                    await _controller.play();
-                                  case PlayerStatus.playing:
-                                  case PlayerStatus.buffering:
-                                }
-                                setState(() {});
-                              },
-                            );
-                          },
-                        ));
-              }),
-            )),
+                  listenable: _controller.index,
+                  builder:
+                      (context, _) => ListView.builder(
+                        padding: const EdgeInsets.all(12),
+                        itemCount: _controller.currentItem?.source.links.length ?? 0,
+                        itemBuilder: (context, index) {
+                          final url = _controller.currentItem!.source.links[index];
+                          return RadioSettingItem(
+                            autofocus: _controller.currentItem?.url == url,
+                            groupValue: _controller.currentItem?.url,
+                            value: url,
+                            title: Text('${AppLocalizations.of(context)!.playerBroadcastLine} ${index + 1}'),
+                            onChanged: (_) async {
+                              final currentItem = _controller.currentItem!;
+                              _controller.updateSource(currentItem.copyWith(url: url), _controller.index.value!);
+                              switch (_controller.status.value) {
+                                case PlayerStatus.paused:
+                                case PlayerStatus.ended:
+                                case PlayerStatus.error:
+                                case PlayerStatus.idle:
+                                  await _controller.play();
+                                case PlayerStatus.playing:
+                                case PlayerStatus.buffering:
+                              }
+                              setState(() {});
+                            },
+                          );
+                        },
+                      ),
+                );
+              },
+            ),
+          ),
+        ),
         body: Stack(
           fit: StackFit.expand,
           children: [
-            PlayerPlatformView(initialized: () async {
-              _controller.setPlaylist(widget.playlist);
-              await _controller.next(widget.index);
-              await _controller.play();
-            }),
+            PlayerPlatformView(
+              initialized: () async {
+                _controller.setPlaylist(widget.playlist);
+                await _controller.next(widget.index);
+                await _controller.play();
+              },
+            ),
             PopScope(
               canPop: false,
               onPopInvokedWithResult: (didPop, _) {
@@ -190,7 +197,9 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
                       }
                       return KeyEventResult.handled;
                     } else if (event.logicalKey == shortcuts.channelsPanel) {
-                      if (_controller.index.value != null) _drawerUpdateStream.value = 170 * (_controller.index.value! ~/ 2);
+                      if (_controller.index.value != null) {
+                        _drawerUpdateStream.value = 170 * (_controller.index.value! ~/ 2);
+                      }
                       _scrollController.dispose();
                       _scrollController = ScrollController(initialScrollOffset: _drawerUpdateStream.value.toDouble());
                       _scaffoldKey.currentState!.openDrawer();
@@ -209,61 +218,73 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
                   onTap: _toggleControls,
                   child: ListenableBuilder(
                     listenable: _isShowControls,
-                    builder: (context, child) => PageTransitionSwitcher(
-                      reverse: !_isShowControls.value,
-                      duration: const Duration(milliseconds: 500),
-                      transitionBuilder: (
-                        Widget child,
-                        Animation<double> animation,
-                        Animation<double> secondaryAnimation,
-                      ) {
-                        return SharedAxisTransition(
-                          animation: animation,
-                          secondaryAnimation: secondaryAnimation,
-                          transitionType: SharedAxisTransitionType.vertical,
-                          fillColor: Colors.transparent,
-                          child: child,
-                        );
-                      },
-                      child: _isShowControls.value ? child! : const SizedBox.expand(),
-                    ),
+                    builder:
+                        (context, child) => PageTransitionSwitcher(
+                          reverse: !_isShowControls.value,
+                          duration: const Duration(milliseconds: 500),
+                          transitionBuilder: (
+                            Widget child,
+                            Animation<double> animation,
+                            Animation<double> secondaryAnimation,
+                          ) {
+                            return SharedAxisTransition(
+                              animation: animation,
+                              secondaryAnimation: secondaryAnimation,
+                              transitionType: SharedAxisTransitionType.vertical,
+                              fillColor: Colors.transparent,
+                              child: child,
+                            );
+                          },
+                          child: _isShowControls.value ? child! : const SizedBox.expand(),
+                        ),
                     child: Container(
                       height: MediaQuery.of(context).size.height,
                       padding: const EdgeInsets.symmetric(horizontal: 72, vertical: 12),
                       decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                        colors: [Colors.transparent, Colors.black87],
-                        stops: [0.4, 0.8],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                      )),
+                        gradient: LinearGradient(
+                          colors: [Colors.transparent, Colors.black87],
+                          stops: [0.4, 0.8],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
+                      ),
                       child: Align(
-                          alignment: Alignment.bottomCenter,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              ListenableBuilder(
-                                  listenable: _controller.fatalError,
-                                  builder: (context, _) => _controller.fatalError.value != null
-                                      ? Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                                          child: Text(_controller.fatalError.value!, style: TextStyle(color: Theme.of(context).colorScheme.error), maxLines: 6),
-                                        )
-                                      : const SizedBox()),
-                              _PlayerInfo(controller: _controller),
-                            ],
-                          )),
+                        alignment: Alignment.bottomCenter,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ListenableBuilder(
+                              listenable: _controller.fatalError,
+                              builder:
+                                  (context, _) =>
+                                      _controller.fatalError.value != null
+                                          ? Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                                            child: Text(
+                                              _controller.fatalError.value!,
+                                              style: TextStyle(color: Theme.of(context).colorScheme.error),
+                                              maxLines: 6,
+                                            ),
+                                          )
+                                          : const SizedBox(),
+                            ),
+                            _PlayerInfo(controller: _controller),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
             ListenableBuilder(
-                listenable: _controller.status,
-                builder: (context, _) => switch (_controller.status.value) {
-                      PlayerStatus.buffering => const Loading(),
-                      _ => const SizedBox.expand(),
-                    })
+              listenable: _controller.status,
+              builder:
+                  (context, _) => switch (_controller.status.value) {
+                    PlayerStatus.buffering => const Loading(),
+                    _ => const SizedBox.expand(),
+                  },
+            ),
           ],
         ),
       ),
@@ -291,66 +312,88 @@ class _PlayerInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-        listenable: controller.index,
-        builder: (context, _) => Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (controller.currentItem?.poster != null)
-                  AsyncImage(
-                    controller.currentItem!.poster!,
-                    height: 160,
-                    width: 160,
-                    needLoading: false,
-                    errorIconSize: 56,
-                    fit: BoxFit.contain,
-                  ),
-                const SizedBox(width: 36),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (controller.index.value != null)
-                      Text('${controller.index.value! + 1}'.padLeft(3, '0'),
-                          style: Theme.of(context).textTheme.displayMedium!.copyWith(fontWeight: FontWeight.bold)),
-                    Text(controller.title.value ?? '', style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold)),
-                    Text(controller.currentItem?.description ?? '', style: Theme.of(context).textTheme.titleSmall!.copyWith(color: Colors.grey)),
-                  ],
+      listenable: controller.index,
+      builder:
+          (context, _) => Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (controller.currentItem?.poster != null)
+                AsyncImage(
+                  controller.currentItem!.poster!,
+                  height: 160,
+                  width: 160,
+                  needLoading: false,
+                  errorIconSize: 56,
+                  fit: BoxFit.contain,
                 ),
-                const SizedBox(width: 36),
-                DefaultTextStyle(
-                  style: Theme.of(context).textTheme.labelMedium!,
-                  child: ListenableBuilder(
-                      listenable: controller.mediaInfo,
-                      builder: (context, _) => Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
+              const SizedBox(width: 36),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (controller.index.value != null)
+                    Text(
+                      '${controller.index.value! + 1}'.padLeft(3, '0'),
+                      style: Theme.of(context).textTheme.displayMedium!.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                  Text(
+                    controller.title.value ?? '',
+                    style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    controller.currentItem?.description ?? '',
+                    style: Theme.of(context).textTheme.titleSmall!.copyWith(color: Colors.grey),
+                  ),
+                ],
+              ),
+              const SizedBox(width: 36),
+              DefaultTextStyle(
+                style: Theme.of(context).textTheme.labelMedium!,
+                child: ListenableBuilder(
+                  listenable: controller.mediaInfo,
+                  builder:
+                      (context, _) => Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Row(
                             children: [
-                              Row(
-                                children: [
-                                  const Badge(label: Text('Video'), backgroundColor: Colors.purpleAccent, textColor: Colors.black),
-                                  const SizedBox(width: 12),
-                                  Text(controller.mediaInfo.value?.videoMime ?? ''),
-                                  const SizedBox(width: 12),
-                                  Text(controller.mediaInfo.value?.videoSize ?? ''),
-                                  const SizedBox(width: 12),
-                                  Text('${controller.mediaInfo.value?.videoFPS ?? ''} fps / ${controller.mediaInfo.value?.videoBitrate} bps'),
-                                ],
+                              const Badge(
+                                label: Text('Video'),
+                                backgroundColor: Colors.purpleAccent,
+                                textColor: Colors.black,
                               ),
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  const Badge(label: Text('Audio'), backgroundColor: Colors.greenAccent, textColor: Colors.black),
-                                  const SizedBox(width: 12),
-                                  Text(controller.mediaInfo.value?.audioMime ?? ''),
-                                  const SizedBox(width: 12),
-                                  Text('${controller.mediaInfo.value?.audioBitrate ?? ''} bps'),
-                                ],
+                              const SizedBox(width: 12),
+                              Text(controller.mediaInfo.value?.videoMime ?? ''),
+                              const SizedBox(width: 12),
+                              Text(controller.mediaInfo.value?.videoSize ?? ''),
+                              const SizedBox(width: 12),
+                              Text(
+                                '${controller.mediaInfo.value?.videoFPS ?? ''} fps / ${controller.mediaInfo.value?.videoBitrate} bps',
                               ),
                             ],
-                          )),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Badge(
+                                label: Text('Audio'),
+                                backgroundColor: Colors.greenAccent,
+                                textColor: Colors.black,
+                              ),
+                              const SizedBox(width: 12),
+                              Text(controller.mediaInfo.value?.audioMime ?? ''),
+                              const SizedBox(width: 12),
+                              Text('${controller.mediaInfo.value?.audioBitrate ?? ''} bps'),
+                            ],
+                          ),
+                        ],
+                      ),
                 ),
-              ],
-            ));
+              ),
+            ],
+          ),
+    );
   }
 }
 
@@ -393,89 +436,98 @@ class _ChannelListGroupedState extends State<_ChannelListGrouped> {
   Widget build(BuildContext context) {
     return Actions(
       actions: {
-        DirectionalFocusIntent: CallbackAction<DirectionalFocusIntent>(onInvoke: (indent) {
-          final currentNode = FocusManager.instance.primaryFocus;
-          if (currentNode != null) {
-            final nearestScope = currentNode.nearestScope!;
-            final focusedChild = nearestScope.focusedChild;
-            switch (indent.direction) {
-              case TraversalDirection.left:
-              case TraversalDirection.right:
-                if (focusedChild == null || !focusedChild.focusInDirection(indent.direction)) {
-                  FocusTraversalGroup.of(context).inDirection(nearestScope.parent!, indent.direction);
-                }
-              case TraversalDirection.up:
-              case TraversalDirection.down:
-                focusedChild?.focusInDirection(indent.direction);
+        DirectionalFocusIntent: CallbackAction<DirectionalFocusIntent>(
+          onInvoke: (indent) {
+            final currentNode = FocusManager.instance.primaryFocus;
+            if (currentNode != null) {
+              final nearestScope = currentNode.nearestScope!;
+              final focusedChild = nearestScope.focusedChild;
+              switch (indent.direction) {
+                case TraversalDirection.left:
+                case TraversalDirection.right:
+                  if (focusedChild == null || !focusedChild.focusInDirection(indent.direction)) {
+                    FocusTraversalGroup.of(context).inDirection(nearestScope.parent!, indent.direction);
+                  }
+                case TraversalDirection.up:
+                case TraversalDirection.down:
+                  focusedChild?.focusInDirection(indent.direction);
+              }
             }
-          }
-          return null;
-        }),
+            return null;
+          },
+        ),
       },
       child: Row(
         children: [
           SizedBox(
             width: 200,
             child: ListenableBuilder(
-                listenable: _groupName,
-                builder: (context, _) {
-                  return _ChannelListView(
-                    itemCount: _groupedPlaylist.keys.length,
-                    itemBuilder: (context, index) {
-                      final name = _groupedPlaylist.keys.elementAt(index) ?? AppLocalizations.of(context)!.tagUnknown;
-                      return Material(
-                        type: MaterialType.transparency,
-                        child: ButtonSettingItem(
-                          dense: true,
-                          autofocus: _groupName.value == name,
-                          selected: _groupName.value == name,
-                          title: Text(name),
-                          onTap: () {
-                            _groupName.value = name;
-                            _playlist.value = _groupedPlaylist[name]!;
-                          },
-                        ),
-                      );
-                    },
-                  );
-                }),
+              listenable: _groupName,
+              builder: (context, _) {
+                return _ChannelListView(
+                  itemCount: _groupedPlaylist.keys.length,
+                  itemBuilder: (context, index) {
+                    final name = _groupedPlaylist.keys.elementAt(index) ?? AppLocalizations.of(context)!.tagUnknown;
+                    return Material(
+                      type: MaterialType.transparency,
+                      child: ButtonSettingItem(
+                        dense: true,
+                        autofocus: _groupName.value == name,
+                        selected: _groupName.value == name,
+                        title: Text(name),
+                        onTap: () {
+                          _groupName.value = name;
+                          _playlist.value = _groupedPlaylist[name]!;
+                        },
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
           ),
           const VerticalDivider(),
           SizedBox(
-              width: 320,
-              child: ListenableBuilder(
-                  listenable: Listenable.merge([_playlist, widget.controller.index]),
-                  builder: (context, _) {
-                    return _ChannelListView(
-                      itemCount: _playlist.value.length,
-                      itemBuilder: (context, index) {
-                        final item = _playlist.value.elementAt(index);
-                        return Material(
-                          type: MaterialType.transparency,
-                          child: ButtonSettingItem(
-                            dense: true,
-                            leading: item.poster != null ? AsyncImage(item.poster!, width: 40, showErrorWidget: false) : null,
-                            trailing: item == widget.controller.currentItem ? PlayingIcon(color: Theme.of(context).colorScheme.inversePrimary) : null,
-                            selected: item == widget.controller.currentItem,
-                            autofocus: item == widget.controller.currentItem,
-                            title: Text(item.title ?? ''),
-                            onTap: () {
-                              widget.onTap(widget.controller.playlist.value.indexOf(item));
-                              _updateEpg(item.source.id);
-                            },
-                          ),
-                        );
-                      },
+            width: 320,
+            child: ListenableBuilder(
+              listenable: Listenable.merge([_playlist, widget.controller.index]),
+              builder: (context, _) {
+                return _ChannelListView(
+                  itemCount: _playlist.value.length,
+                  itemBuilder: (context, index) {
+                    final item = _playlist.value.elementAt(index);
+                    return Material(
+                      type: MaterialType.transparency,
+                      child: ButtonSettingItem(
+                        dense: true,
+                        leading:
+                            item.poster != null ? AsyncImage(item.poster!, width: 40, showErrorWidget: false) : null,
+                        trailing:
+                            item == widget.controller.currentItem
+                                ? PlayingIcon(color: Theme.of(context).colorScheme.inversePrimary)
+                                : null,
+                        selected: item == widget.controller.currentItem,
+                        autofocus: item == widget.controller.currentItem,
+                        title: Text(item.title ?? ''),
+                        onTap: () {
+                          widget.onTap(widget.controller.playlist.value.indexOf(item));
+                          _updateEpg(item.source.id);
+                        },
+                      ),
                     );
-                  })),
+                  },
+                );
+              },
+            ),
+          ),
           const VerticalDivider(),
           Expanded(
-              child: ListenableBuilder(
-            listenable: _epg,
-            builder: (context, child) {
-              return _epg.value == null
-                  ? child!
-                  : _ChannelListView(
+            child: ListenableBuilder(
+              listenable: _epg,
+              builder: (context, child) {
+                return _epg.value == null
+                    ? child!
+                    : _ChannelListView(
                       itemCount: _epg.value!.length,
                       itemBuilder: (context, index) {
                         final item = _epg.value![index];
@@ -490,10 +542,12 @@ class _ChannelListGroupedState extends State<_ChannelListGrouped> {
                             onTap: () {},
                           ),
                         );
-                      });
-            },
-            child: const Loading(),
-          )),
+                      },
+                    );
+              },
+              child: const Loading(),
+            ),
+          ),
         ],
       ),
     );
@@ -544,10 +598,8 @@ class _ChannelListViewState extends State<_ChannelListView> {
       child: ListView.separated(
         padding: const EdgeInsets.all(16),
         itemCount: widget.itemCount,
-        itemBuilder: (context, index) => Material(
-          type: MaterialType.transparency,
-          child: widget.itemBuilder(context, index),
-        ),
+        itemBuilder:
+            (context, index) => Material(type: MaterialType.transparency, child: widget.itemBuilder(context, index)),
         separatorBuilder: (context, _) => const SizedBox(height: 2),
       ),
     );

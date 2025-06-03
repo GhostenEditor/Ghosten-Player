@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../components/error_message.dart';
 import '../../components/gap.dart';
+import '../../l10n/app_localizations.dart';
 
 const _errorIcon = Icon(Icons.error_outline, size: 60, color: Colors.red);
 const _successIcon = Icon(Icons.check_circle_outline, size: 60, color: Colors.green);
@@ -39,10 +39,7 @@ class _NotificationLayout<T> extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Padding(
-              padding: EdgeInsets.all(17),
-              child: CircularProgressIndicator(),
-            ),
+            const Padding(padding: EdgeInsets.all(17), child: CircularProgressIndicator()),
             Text(loadingText ?? AppLocalizations.of(context)!.modalNotificationLoadingText),
           ],
         );
@@ -68,10 +65,7 @@ class _NotificationLayout<T> extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Padding(
-                  padding: EdgeInsets.all(17),
-                  child: CircularProgressIndicator(),
-                ),
+                const Padding(padding: EdgeInsets.all(17), child: CircularProgressIndicator()),
                 Text(loadingText ?? AppLocalizations.of(context)!.modalNotificationLoadingText),
               ],
             );
@@ -98,46 +92,52 @@ Future<NotificationResponse<T?>?> showNotification<T>(
   bool? showSuccess,
 }) async {
   return showDialog<NotificationResponse<T?>>(
-      context: context,
-      builder: (_) => AlertDialog(
-            title: Text(AppLocalizations.of(context)!.modalTitleNotification),
-            content: FutureBuilder<T?>(
-                future: future,
-                builder: (context, snapshot) => PopScope(
-                      canPop: false,
-                      onPopInvokedWithResult: (didPop, _) {
-                        if (!didPop && !snapshot.connectionState.isLoading()) {
-                          Navigator.of(context).pop(NotificationResponse(data: snapshot.data, error: snapshot.error));
-                        }
-                      },
-                      child: _NotificationLayout<T?>(
-                        snapshot: snapshot,
-                        loadingText: loadingText,
-                        errorText: errorText,
-                        successText: successText,
-                        showSuccess: showSuccess,
-                      ),
-                    )),
-          ));
+    context: context,
+    builder:
+        (_) => AlertDialog(
+          title: Text(AppLocalizations.of(context)!.modalTitleNotification),
+          content: FutureBuilder<T?>(
+            future: future,
+            builder:
+                (context, snapshot) => PopScope(
+                  canPop: false,
+                  onPopInvokedWithResult: (didPop, _) {
+                    if (!didPop && !snapshot.connectionState.isLoading()) {
+                      Navigator.of(context).pop(NotificationResponse(data: snapshot.data, error: snapshot.error));
+                    }
+                  },
+                  child: _NotificationLayout<T?>(
+                    snapshot: snapshot,
+                    loadingText: loadingText,
+                    errorText: errorText,
+                    successText: successText,
+                    showSuccess: showSuccess,
+                  ),
+                ),
+          ),
+        ),
+  );
 }
 
 Future<bool?> showConfirm(BuildContext context, String confirmText) async {
   return showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-            title: Text(AppLocalizations.of(context)!.modalTitleConfirm),
-            content: Text(confirmText),
-            actions: [
-              FilledButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: Text(AppLocalizations.of(context)!.buttonConfirm),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: Text(AppLocalizations.of(context)!.buttonCancel),
-              ),
-            ],
-          ));
+    context: context,
+    builder:
+        (context) => AlertDialog(
+          title: Text(AppLocalizations.of(context)!.modalTitleConfirm),
+          content: Text(confirmText),
+          actions: [
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(AppLocalizations.of(context)!.buttonConfirm),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(AppLocalizations.of(context)!.buttonCancel),
+            ),
+          ],
+        ),
+  );
 }
 
 extension on ConnectionState {

@@ -1,8 +1,8 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:video_player/player.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../dialogs/timer_picker.dart';
 import '../../utils/notification.dart';
 
@@ -14,8 +14,13 @@ mixin PlayerActionsMixin<S extends StatefulWidget> on State<S> {
           title: Text(AppLocalizations.of(context)!.buttonSkipFromStart),
           onTap: () async {
             final time = await showDialog<Duration>(
-                context: context,
-                builder: (context) => TimerPickerDialog(value: controller.position.value, title: AppLocalizations.of(context)!.buttonSkipFromStart));
+              context: context,
+              builder:
+                  (context) => TimerPickerDialog(
+                    value: controller.position.value,
+                    title: AppLocalizations.of(context)!.buttonSkipFromStart,
+                  ),
+            );
             if (time != null) {
               if (controller.currentItem?.source is TVEpisode) {
                 final episode = await Api.tvEpisodeQueryById((controller.currentItem!.source as TVEpisode).id);
@@ -30,10 +35,16 @@ mixin PlayerActionsMixin<S extends StatefulWidget> on State<S> {
           title: Text(AppLocalizations.of(context)!.buttonSkipFromEnd),
           onTap: () async {
             final time = await showDialog<Duration>(
-                context: context,
-                builder: (context) => TimerPickerDialog(
-                    value: controller.duration.value > controller.position.value ? controller.duration.value - controller.position.value : Duration.zero,
-                    title: AppLocalizations.of(context)!.buttonSkipFromEnd));
+              context: context,
+              builder:
+                  (context) => TimerPickerDialog(
+                    value:
+                        controller.duration.value > controller.position.value
+                            ? controller.duration.value - controller.position.value
+                            : Duration.zero,
+                    title: AppLocalizations.of(context)!.buttonSkipFromEnd,
+                  ),
+            );
             if (time != null) {
               if (controller.currentItem?.source is TVEpisode) {
                 final episode = await Api.tvEpisodeQueryById((controller.currentItem!.source as TVEpisode).id);

@@ -4,11 +4,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ShortcutTV extends ChangeNotifier {
   ShortcutTV._fromPrefs(this.prefs)
-      : menu = LogicalKeyboardKey(prefs.getInt('shortcut.tv.menu') ?? LogicalKeyboardKey.contextMenu.keyId),
-        previousChannel = LogicalKeyboardKey(prefs.getInt('shortcut.tv.previousChannel') ?? LogicalKeyboardKey.arrowDown.keyId),
-        nextChannel = LogicalKeyboardKey(prefs.getInt('shortcut.tv.nextChannel') ?? LogicalKeyboardKey.arrowUp.keyId),
-        switchLinePanel = LogicalKeyboardKey(prefs.getInt('shortcut.tv.switchLinePanel') ?? LogicalKeyboardKey.arrowRight.keyId),
-        channelsPanel = LogicalKeyboardKey(prefs.getInt('shortcut.tv.channelsPanel') ?? LogicalKeyboardKey.arrowLeft.keyId);
+    : menu = LogicalKeyboardKey(prefs.getInt('shortcut.tv.menu') ?? LogicalKeyboardKey.contextMenu.keyId),
+      previousChannel = LogicalKeyboardKey(
+        prefs.getInt('shortcut.tv.previousChannel') ?? LogicalKeyboardKey.arrowDown.keyId,
+      ),
+      nextChannel = LogicalKeyboardKey(prefs.getInt('shortcut.tv.nextChannel') ?? LogicalKeyboardKey.arrowUp.keyId),
+      switchLinePanel = LogicalKeyboardKey(
+        prefs.getInt('shortcut.tv.switchLinePanel') ?? LogicalKeyboardKey.arrowRight.keyId,
+      ),
+      channelsPanel = LogicalKeyboardKey(
+        prefs.getInt('shortcut.tv.channelsPanel') ?? LogicalKeyboardKey.arrowLeft.keyId,
+      );
 
   SharedPreferences prefs;
   LogicalKeyboardKey menu;

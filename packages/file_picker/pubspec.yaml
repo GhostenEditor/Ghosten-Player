@@ -3,7 +3,7 @@ description: "File Picker Plugin for Ghosten Player"
 version: 1.6.0
 
 environment:
-  sdk: ^3.6.1
+  sdk: ^3.8.0
   flutter: '>=3.3.0'
 
 dependencies:

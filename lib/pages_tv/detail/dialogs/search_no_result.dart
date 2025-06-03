@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../validators/validators.dart';
 import '../../components/filled_button.dart';
 import '../../components/keyboard_reopen.dart';
@@ -35,10 +35,7 @@ class _SearchNoResultState extends State<SearchNoResult> {
       children: [
         const DecoratedBox(
           decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/tv/images/bg-stripe.png'),
-              repeat: ImageRepeat.repeat,
-            ),
+            image: DecorationImage(image: AssetImage('assets/tv/images/bg-stripe.png'), repeat: ImageRepeat.repeat),
           ),
         ),
         DecoratedBox(
@@ -63,7 +60,10 @@ class _SearchNoResultState extends State<SearchNoResult> {
                 children: [
                   Flexible(
                     flex: 2,
-                    child: Text(AppLocalizations.of(context)!.searchNoResultTip, style: Theme.of(context).textTheme.titleLarge),
+                    child: Text(
+                      AppLocalizations.of(context)!.searchNoResultTip,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                   ),
                   const SizedBox(width: 64),
                   Flexible(
@@ -122,7 +122,7 @@ class _SearchNoResultState extends State<SearchNoResult> {
                         ],
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),

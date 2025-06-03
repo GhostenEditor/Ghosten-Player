@@ -1,9 +1,9 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:video_player/player.dart';
 
 import '../../../components/gap.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../providers/user_config.dart';
 import '../../../utils/utils.dart';
 import '../../../validators/validators.dart';
@@ -32,8 +32,9 @@ class _SubtitleListPageState extends State<SubtitleListPage> {
     return SettingPage(
       title: AppLocalizations.of(context)!.buttonSubtitle,
       child: FutureBuilderHandler(
-          future: Api.subtitleQueryById(widget.fileId),
-          builder: (context, snapshot) => ListView.builder(
+        future: Api.subtitleQueryById(widget.fileId),
+        builder:
+            (context, snapshot) => ListView.builder(
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
               itemCount: snapshot.requireData.length + 1,
               itemBuilder: (context, index) {
@@ -42,13 +43,14 @@ class _SubtitleListPageState extends State<SubtitleListPage> {
                   return SlidableSettingItem(
                     actions: [
                       TVIconButton(
-                          onPressed: () async {
-                            final confirm = await showConfirm(context, AppLocalizations.of(context)!.deleteConfirmText);
-                            if (confirm != true || !context.mounted) return;
-                            final resp = await showNotification(context, Api.subtitleDeleteById(item.id));
-                            if (resp?.error == null && context.mounted) setState(() {});
-                          },
-                          icon: const Icon(Icons.delete_outline)),
+                        onPressed: () async {
+                          final confirm = await showConfirm(context, AppLocalizations.of(context)!.deleteConfirmText);
+                          if (confirm != true || !context.mounted) return;
+                          final resp = await showNotification(context, Api.subtitleDeleteById(item.id));
+                          if (resp?.error == null && context.mounted) setState(() {});
+                        },
+                        icon: const Icon(Icons.delete_outline),
+                      ),
                     ],
                     leading: Text(item.mimeType ?? ''),
                     trailing: Text(item.language ?? ''),
@@ -71,7 +73,9 @@ class _SubtitleListPageState extends State<SubtitleListPage> {
                     ),
                   );
                 }
-              })),
+              },
+            ),
+      ),
     );
   }
 }
@@ -120,7 +124,10 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
                       suffixIcon: IconButton(
                         icon: const Icon(Icons.folder_open_rounded),
                         onPressed: () async {
-                          final resp = await navigateTo(navigatorKey.currentContext!, const DriverFilePicker(selectableType: FileType.file));
+                          final resp = await navigateTo(
+                            navigatorKey.currentContext!,
+                            const DriverFilePicker(selectableType: FileType.file),
+                          );
                           if (resp is (int, DriverFile)) {
                             final file = resp.$2;
                             final ext = file.name.split('.').lastOrNull;
@@ -150,31 +157,47 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
                 ),
                 Gap.vMD,
                 DropdownButtonFormField(
-                    value: _mimeType,
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.subtitles_outlined),
-                      isDense: true,
-                      labelText: AppLocalizations.of(context)!.subtitleFormItemLabelType,
+                  value: _mimeType,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.subtitles_outlined),
+                    isDense: true,
+                    labelText: AppLocalizations.of(context)!.subtitleFormItemLabelType,
+                  ),
+                  items: [
+                    DropdownMenuItem(
+                      child: Text(
+                        AppLocalizations.of(context)!.formItemNotSelectedHint,
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
                     ),
-                    items: [
-                      DropdownMenuItem(child: Text(AppLocalizations.of(context)!.formItemNotSelectedHint, style: Theme.of(context).textTheme.labelSmall)),
-                      ...SubtitleMimeType.values.map((mime) => DropdownMenuItem(value: mime.name, child: Text(mime.name.toUpperCase())))
-                    ],
-                    validator: (value) => requiredValidator(context, value),
-                    onChanged: (v) => setState(() => _mimeType = v)),
+                    ...SubtitleMimeType.values.map(
+                      (mime) => DropdownMenuItem(value: mime.name, child: Text(mime.name.toUpperCase())),
+                    ),
+                  ],
+                  validator: (value) => requiredValidator(context, value),
+                  onChanged: (v) => setState(() => _mimeType = v),
+                ),
                 Gap.vMD,
                 DropdownButtonFormField(
-                    value: _language,
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.language),
-                      isDense: true,
-                      labelText: AppLocalizations.of(context)!.subtitleFormItemLabelLanguage,
+                  value: _language,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.language),
+                    isDense: true,
+                    labelText: AppLocalizations.of(context)!.subtitleFormItemLabelLanguage,
+                  ),
+                  items: [
+                    DropdownMenuItem(
+                      child: Text(
+                        AppLocalizations.of(context)!.formItemNotSelectedHint,
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
                     ),
-                    items: [
-                      DropdownMenuItem(child: Text(AppLocalizations.of(context)!.formItemNotSelectedHint, style: Theme.of(context).textTheme.labelSmall)),
-                      ...SystemLanguage.values.map((lang) => DropdownMenuItem(value: lang.name, child: Text(lang.name.toUpperCase())))
-                    ],
-                    onChanged: (v) => setState(() => _language = v)),
+                    ...SystemLanguage.values.map(
+                      (lang) => DropdownMenuItem(value: lang.name, child: Text(lang.name.toUpperCase())),
+                    ),
+                  ],
+                  onChanged: (v) => setState(() => _language = v),
+                ),
                 CheckboxListTile(
                   dense: true,
                   title: Text(AppLocalizations.of(context)!.formLabelSelectedByDefault),
@@ -186,13 +209,15 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
                 TVFilledButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate() && _mimeType != null) {
-                      Navigator.of(context).pop(SubtitleData(
-                        url: _controller.text,
-                        mimeType: _mimeType,
-                        language: _language,
-                        label: _filename,
-                        selected: selected,
-                      ));
+                      Navigator.of(context).pop(
+                        SubtitleData(
+                          url: _controller.text,
+                          mimeType: _mimeType,
+                          language: _language,
+                          label: _filename,
+                          selected: selected,
+                        ),
+                      );
                     }
                   },
                   child: Text(AppLocalizations.of(context)!.buttonConfirm),

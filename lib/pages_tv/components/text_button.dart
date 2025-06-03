@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
 
 class TVTextButton extends StatefulWidget {
-  const TVTextButton({
-    super.key,
-    required this.onPressed,
-    required this.child,
-    this.autofocus = false,
-  });
+  const TVTextButton({super.key, required this.onPressed, required this.child, this.autofocus = false});
 
   final VoidCallback? onPressed;
   final Widget child;
@@ -46,7 +41,8 @@ class _TVTextButtonState extends State<TVTextButton> {
       onPressed: widget.onPressed,
       style: TextButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 8),
-        side: _focused ? BorderSide(width: 2, color: Theme.of(context).colorScheme.inverseSurface, strokeAlign: 2) : null,
+        side:
+            _focused ? BorderSide(width: 2, color: Theme.of(context).colorScheme.inverseSurface, strokeAlign: 2) : null,
         visualDensity: VisualDensity.compact,
       ),
       child: widget.child,

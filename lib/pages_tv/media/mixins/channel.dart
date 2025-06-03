@@ -26,58 +26,63 @@ class MediaChannel<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilderSliverHandler(
-        future: future,
-        loadingBuilder: loadingBuilder != null
-            ? (context, snapshot) => Shimmer.fromColors(
-                  baseColor: Theme.of(context).colorScheme.surfaceContainerLow,
-                  highlightColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  child: IgnorePointer(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const GPlaceholderRect(
-                          width: 100,
-                          height: 18,
-                          padding: EdgeInsets.only(left: 48, right: 48, top: 12),
+      future: future,
+      loadingBuilder:
+          loadingBuilder != null
+              ? (context, snapshot) => Shimmer.fromColors(
+                baseColor: Theme.of(context).colorScheme.surfaceContainerLow,
+                highlightColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                child: IgnorePointer(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const GPlaceholderRect(
+                        width: 100,
+                        height: 18,
+                        padding: EdgeInsets.only(left: 48, right: 48, top: 12),
+                      ),
+                      SizedBox(
+                        height: height,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 12),
+                          itemCount: 6,
+                          itemBuilder: (context, index) => loadingBuilder!(context),
+                          separatorBuilder: (context, _) => const SizedBox(width: 16),
                         ),
-                        SizedBox(
-                          height: height,
-                          child: ListView.separated(
-                            scrollDirection: Axis.horizontal,
-                            padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 12),
-                            itemCount: 6,
-                            itemBuilder: (context, index) => loadingBuilder!(context),
-                            separatorBuilder: (context, _) => const SizedBox(width: 16),
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                )
-            : null,
-        builder: (context, snapshot) => SliverToBoxAdapter(
-              child: snapshot.requireData.isNotEmpty
-                  ? Actions(
+                ),
+              )
+              : null,
+      builder:
+          (context, snapshot) => SliverToBoxAdapter(
+            child:
+                snapshot.requireData.isNotEmpty
+                    ? Actions(
                       actions: {
-                        DirectionalFocusIntent: CallbackAction<DirectionalFocusIntent>(onInvoke: (indent) {
-                          final currentNode = FocusManager.instance.primaryFocus;
-                          if (currentNode != null) {
-                            final nearestScope = currentNode.nearestScope!;
-                            final focusedChild = nearestScope.focusedChild;
-                            switch (indent.direction) {
-                              case TraversalDirection.up:
-                              case TraversalDirection.down:
-                                if (focusedChild == null || !focusedChild.focusInDirection(indent.direction)) {
-                                  FocusTraversalGroup.of(context).inDirection(nearestScope.parent!, indent.direction);
-                                }
-                              case TraversalDirection.right:
-                              case TraversalDirection.left:
-                                focusedChild?.focusInDirection(indent.direction);
+                        DirectionalFocusIntent: CallbackAction<DirectionalFocusIntent>(
+                          onInvoke: (indent) {
+                            final currentNode = FocusManager.instance.primaryFocus;
+                            if (currentNode != null) {
+                              final nearestScope = currentNode.nearestScope!;
+                              final focusedChild = nearestScope.focusedChild;
+                              switch (indent.direction) {
+                                case TraversalDirection.up:
+                                case TraversalDirection.down:
+                                  if (focusedChild == null || !focusedChild.focusInDirection(indent.direction)) {
+                                    FocusTraversalGroup.of(context).inDirection(nearestScope.parent!, indent.direction);
+                                  }
+                                case TraversalDirection.right:
+                                case TraversalDirection.left:
+                                  focusedChild?.focusInDirection(indent.direction);
+                              }
                             }
-                          }
-                          return null;
-                        }),
+                            return null;
+                          },
+                        ),
                       },
                       child: FocusScope(
                         onFocusChange: (f) {
@@ -89,10 +94,7 @@ class MediaChannel<T> extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Padding(
-                              padding: const EdgeInsets.only(left: 48, right: 48, top: 12),
-                              child: Text(label),
-                            ),
+                            Padding(padding: const EdgeInsets.only(left: 48, right: 48, top: 12), child: Text(label)),
                             SizedBox(
                               height: height,
                               child: ListView.separated(
@@ -107,18 +109,14 @@ class MediaChannel<T> extends StatelessWidget {
                         ),
                       ),
                     )
-                  : const SizedBox(),
-            ));
+                    : const SizedBox(),
+          ),
+    );
   }
 }
 
 class MediaGridChannel<T> extends StatefulWidget {
-  const MediaGridChannel({
-    super.key,
-    required this.label,
-    required this.itemBuilder,
-    required this.onQuery,
-  });
+  const MediaGridChannel({super.key, required this.label, required this.itemBuilder, required this.onQuery});
 
   final String label;
   final ItemWidgetBuilder<T> itemBuilder;
@@ -157,10 +155,7 @@ class _MediaGridChannelState<T> extends State<MediaGridChannel<T>> {
       });
     } catch (error) {
       setState(() {
-        _state = _state.copyWith(
-          error: error,
-          isLoading: false,
-        );
+        _state = _state.copyWith(error: error, isLoading: false);
       });
     }
   }
@@ -168,43 +163,47 @@ class _MediaGridChannelState<T> extends State<MediaGridChannel<T>> {
   @override
   Widget build(BuildContext context) {
     return SliverMainAxisGroup(
-      slivers: _count != 0
-          ? [
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 48, right: 48, top: 12),
-                  child: Text('${widget.label}${_count != null ? ' ($_count)' : ''}'),
-                ),
-              ),
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 12),
-                sliver: PagedSliverGrid(
-                  showNewPageProgressIndicatorAsGridChild: false,
-                  showNoMoreItemsIndicatorAsGridChild: false,
-                  builderDelegate: PagedChildBuilderDelegate<T>(
-                    itemBuilder: widget.itemBuilder,
-                    noMoreItemsIndicatorBuilder: (context) => const Padding(
-                      padding: EdgeInsets.only(top: 16),
-                      child: Text('THE END', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold)),
-                    ),
-                    firstPageProgressIndicatorBuilder: (context) => const Loading(),
-                    newPageProgressIndicatorBuilder: (context) => const Padding(
-                      padding: EdgeInsets.only(top: 16),
-                      child: Loading(),
-                    ),
+      slivers:
+          _count != 0
+              ? [
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 48, right: 48, top: 12),
+                    child: Text('${widget.label}${_count != null ? ' ($_count)' : ''}'),
                   ),
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 180,
-                    childAspectRatio: 0.5,
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 16,
-                  ),
-                  fetchNextPage: _fetchNextPage,
-                  state: _state,
                 ),
-              ),
-            ]
-          : [],
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 12),
+                  sliver: PagedSliverGrid(
+                    showNewPageProgressIndicatorAsGridChild: false,
+                    showNoMoreItemsIndicatorAsGridChild: false,
+                    builderDelegate: PagedChildBuilderDelegate<T>(
+                      itemBuilder: widget.itemBuilder,
+                      noMoreItemsIndicatorBuilder:
+                          (context) => const Padding(
+                            padding: EdgeInsets.only(top: 16),
+                            child: Text(
+                              'THE END',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                      firstPageProgressIndicatorBuilder: (context) => const Loading(),
+                      newPageProgressIndicatorBuilder:
+                          (context) => const Padding(padding: EdgeInsets.only(top: 16), child: Loading()),
+                    ),
+                    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 180,
+                      childAspectRatio: 0.5,
+                      mainAxisSpacing: 16,
+                      crossAxisSpacing: 16,
+                    ),
+                    fetchNextPage: _fetchNextPage,
+                    state: _state,
+                  ),
+                ),
+              ]
+              : [],
     );
   }
 }
