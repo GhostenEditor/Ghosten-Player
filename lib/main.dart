@@ -44,16 +44,20 @@ void main(List<String> args) async {
         (deviceSize) => max(1, deviceSize.width / 1140) * userConfig.displayScale;
     Provider.debugCheckInvalidValueType = null;
     if (!kIsWeb && userConfig.shouldCheckUpdate()) {
-      Api.checkUpdate(
-        updateUrl,
-        Version.fromString(appVersion),
-        needUpdate:
-            (data, url) => showModalBottomSheet(
-              context: navigatorKey.currentContext!,
-              constraints: const BoxConstraints(minWidth: double.infinity),
-              builder: (context) => UpdateBottomSheet(data, url: url),
-            ),
-      );
+      Future.microtask(() async {
+        final data = await Api.checkUpdate(
+          '${userConfig.githubProxy}$updateUrl',
+          userConfig.updatePrerelease,
+          Version.fromString(appVersion),
+        );
+        if (data != null) {
+          showModalBottomSheet(
+            context: navigatorKey.currentContext!,
+            constraints: const BoxConstraints(minWidth: double.infinity),
+            builder: (context) => UpdateBottomSheet(data),
+          );
+        }
+      });
     }
     runApp(ChangeNotifierProvider(create: (_) => userConfig, child: const MainApp()));
     PlatformApi.deeplinkEvent.listen(scanToLogin);

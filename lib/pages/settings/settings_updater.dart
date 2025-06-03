@@ -48,69 +48,89 @@ class SystemSettingsUpdaterState extends State<SystemSettingsUpdater> {
                   ),
                   const SizedBox(height: 20),
                   PopupMenuButton(
-                    offset: const Offset(1, 0),
-                    tooltip: '',
-                    onSelected: (value) => setState(() => _userConfig.setAutoUpdate(value)),
-                    itemBuilder:
-                        (context) =>
-                            AutoUpdateFrequency.values
-                                .map(
-                                  (e) => CheckedPopupMenuItem(
-                                    value: e,
-                                    checked: e == _userConfig.autoUpdateFrequency,
-                                    child: Text(AppLocalizations.of(context)!.autoUpdateFrequency(e.name)),
-                                  ),
-                                )
-                                .toList(),
-                    child: ListTile(
-                      title: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(AppLocalizations.of(context)!.autoCheckForUpdates),
-                          Gap.hMD,
-                          Expanded(
-                            child: Text(
-                              AppLocalizations.of(context)!.autoUpdateFrequency(_userConfig.autoUpdateFrequency.name),
-                              textAlign: TextAlign.end,
-                              overflow: TextOverflow.ellipsis,
+                      offset: const Offset(1, 0),
+                      tooltip: '',
+                      onSelected: (value) => setState(() => _userConfig.setAutoUpdate(value)),
+                      itemBuilder: (context) => AutoUpdateFrequency.values
+                          .map((e) => CheckedPopupMenuItem(
+                                value: e,
+                                checked: e == _userConfig.autoUpdateFrequency,
+                                child: Text(AppLocalizations.of(context)!.autoUpdateFrequency(e.name)),
+                              ))
+                          .toList(),
+                      child: ListTile(
+                        title: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(AppLocalizations.of(context)!.autoCheckForUpdates),
+                            Gap.hMD,
+                            Expanded(
+                              child: Text(AppLocalizations.of(context)!.autoUpdateFrequency(_userConfig.autoUpdateFrequency.name),
+                                  textAlign: TextAlign.end, overflow: TextOverflow.ellipsis),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
+                          ],
+                        ),
+                      )),
+                  SwitchListTile(
+                    value: _userConfig.updatePrerelease,
+                    onChanged: (value) {
+                      _userConfig.setUpdatePrerelease(value);
+                      setState(() {});
+                    },
+                    title: Text(AppLocalizations.of(context)!.updatePrerelease),
                   ),
+                  PopupMenuButton(
+                      offset: const Offset(1, 0),
+                      tooltip: '',
+                      onSelected: (value) => setState(() => _userConfig.setGithubProxy(value)),
+                      itemBuilder: (context) => ['', 'https://gh-proxy.com/']
+                          .map((value) => CheckedPopupMenuItem(
+                                value: value,
+                                checked: value == _userConfig.githubProxy,
+                                child: Text(value.isNotEmpty ? value : AppLocalizations.of(context)!.none),
+                              ))
+                          .toList(),
+                      child: ListTile(
+                        title: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(AppLocalizations.of(context)!.githubProxy),
+                            Gap.hMD,
+                            Expanded(
+                              child: Text(_userConfig.githubProxy.isNotEmpty ? _userConfig.githubProxy : AppLocalizations.of(context)!.none,
+                                  textAlign: TextAlign.end, overflow: TextOverflow.ellipsis),
+                            ),
+                          ],
+                        ),
+                      )),
                 ],
               ),
             ),
             FilledButton(
-              onPressed:
-                  _loading || _updated
-                      ? null
-                      : () async {
-                        setState(() => _loading = true);
-                        _updated = await Api.checkUpdate(
-                          updateUrl,
-                          Version.fromString(appVersion),
-                          needUpdate:
-                              (data, url) => showModalBottomSheet(
-                                context: context,
-                                constraints: const BoxConstraints(minWidth: double.infinity),
-                                builder: (context) => UpdateBottomSheet(data, url: url),
-                              ),
-                        );
-                        setState(() => _loading = false);
-                      },
-              child:
-                  _loading
-                      ? Row(
-                        mainAxisSize: MainAxisSize.min,
-                        spacing: 12,
-                        children: [
-                          Text(AppLocalizations.of(context)!.checkForUpdates),
-                          const SizedBox(width: 10, height: 10, child: CircularProgressIndicator(strokeWidth: 2)),
-                        ],
-                      )
-                      : _updated
+              onPressed: _loading || _updated
+                  ? null
+                  : () async {
+                      setState(() => _loading = true);
+                      final data = await Api.checkUpdate(
+                        '${_userConfig.githubProxy}$updateUrl',
+                        false,
+                        Version.fromString(appVersion),
+                      );
+                      if (data != null && context.mounted) {
+                        await showModalBottomSheet(
+                            context: context, constraints: const BoxConstraints(minWidth: double.infinity), builder: (context) => UpdateBottomSheet(data));
+                        _updated = true;
+                      } else {
+                        _updated = false;
+                      }
+                      setState(() => _loading = false);
+                    },
+              child: _loading
+                  ? Row(mainAxisSize: MainAxisSize.min, spacing: 12, children: [
+                      Text(AppLocalizations.of(context)!.checkForUpdates),
+                      const SizedBox(width: 10, height: 10, child: CircularProgressIndicator(strokeWidth: 2)),
+                    ])
+                  : _updated
                       ? Text(AppLocalizations.of(context)!.isLatestVersion)
                       : Text(AppLocalizations.of(context)!.checkForUpdates),
             ),

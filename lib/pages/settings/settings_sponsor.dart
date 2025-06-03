@@ -1,9 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../components/future_builder_handler.dart';
 import '../../const.dart';
 import '../../l10n/app_localizations.dart';
+import '../../providers/user_config.dart';
 
 class SettingsSponsor extends StatefulWidget {
   const SettingsSponsor({super.key});
@@ -16,7 +18,10 @@ class _SettingsSponsorState extends State<SettingsSponsor> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context)!.settingsItemSponsor), centerTitle: true),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.settingsItemSponsor),
+        centerTitle: true,
+      ),
       body: Scrollbar(
         child: CustomScrollView(
           slivers: [
@@ -50,13 +55,12 @@ class _SettingsSponsorState extends State<SettingsSponsor> {
                     child: Text(
                       AppLocalizations.of(context)!.sponsorMessage,
                       style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                        color:
-                            ColorScheme.fromSeed(
+                            color: ColorScheme.fromSeed(
                               seedColor: const Color(0xFF33281B),
                               brightness: Theme.of(context).brightness,
                             ).onPrimaryContainer,
-                        height: 1.5,
-                      ),
+                            height: 1.5,
+                          ),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -64,37 +68,35 @@ class _SettingsSponsorState extends State<SettingsSponsor> {
               ),
             ),
             SliverToBoxAdapter(
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 620),
-                  child: ListTile(
-                    dense: true,
-                    title: Text(
-                      AppLocalizations.of(context)!.sponsorThanksMessage,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    subtitle: Text(AppLocalizations.of(context)!.sponsorTipMessage),
-                  ),
+                child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 620),
+                child: ListTile(
+                  dense: true,
+                  title: Text(AppLocalizations.of(context)!.sponsorThanksMessage, style: Theme.of(context).textTheme.titleMedium),
+                  subtitle: Text(AppLocalizations.of(context)!.sponsorTipMessage),
                 ),
               ),
-            ),
+            )),
             const SliverToBoxAdapter(child: Divider(height: 24)),
             SliverSafeArea(
               sliver: FutureBuilderSliverHandler(
-                future: _getSponsorList(),
-                builder: (context, snapshot) {
-                  return SliverList.builder(
-                    itemCount: snapshot.requireData.length,
-                    itemBuilder:
-                        (context, index) => Center(
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 620),
-                            child: ListTile(dense: true, title: Text(snapshot.requireData[index]), minTileHeight: 24),
+                  future: _getSponsorList(),
+                  builder: (context, snapshot) {
+                    return SliverList.builder(
+                      itemCount: snapshot.requireData.length,
+                      itemBuilder: (context, index) => Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 620),
+                          child: ListTile(
+                            dense: true,
+                            title: Text(snapshot.requireData[index]),
+                            minTileHeight: 24,
                           ),
                         ),
-                  );
-                },
-              ),
+                      ),
+                    );
+                  }),
             ),
           ],
         ),
@@ -103,8 +105,9 @@ class _SettingsSponsorState extends State<SettingsSponsor> {
   }
 
   Future<List<String>> _getSponsorList() async {
+    final proxy = context.read<UserConfig>().githubProxy;
     try {
-      final resp = await Dio().get('https://raw.githubusercontent.com/$repoAuthor/$repoName/main/sponsor_list.txt');
+      final resp = await Dio().get('${proxy}https://raw.githubusercontent.com/$repoAuthor/$repoName/main/sponsor_list.txt');
       final data = resp.data as String;
       return data.split('\n').where((s) => s.trim().isNotEmpty).toList();
     } catch (e) {
