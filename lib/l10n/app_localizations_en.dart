@@ -466,6 +466,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get githubProxy => 'Github Proxy';
+
+  @override
   String get hdrSupports => 'HDR Supports';
 
   @override
@@ -1063,6 +1066,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get updateNow => 'Update Now';
+
+  @override
+  String get updatePrerelease => 'Update Prerelease Version';
 
   @override
   String get updating => 'Updating';

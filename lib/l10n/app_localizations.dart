@@ -800,6 +800,12 @@ abstract class AppLocalizations {
   /// **'{gender, select, 1{Female} 2{Male} other{Unknown}}'**
   String gender(String gender);
 
+  /// No description provided for @githubProxy.
+  ///
+  /// In en, this message translates to:
+  /// **'Github Proxy'**
+  String get githubProxy;
+
   /// No description provided for @hdrSupports.
   ///
   /// In en, this message translates to:
@@ -1771,6 +1777,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Update Now'**
   String get updateNow;
+
+  /// No description provided for @updatePrerelease.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Prerelease Version'**
+  String get updatePrerelease;
 
   /// No description provided for @updating.
   ///

@@ -459,6 +459,9 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get githubProxy => 'Github代理';
+
+  @override
   String get hdrSupports => 'HDR 支持情况';
 
   @override
@@ -1043,6 +1046,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get updateNow => '立即更新';
+
+  @override
+  String get updatePrerelease => '更新预览版';
 
   @override
   String get updating => '正在更新';
