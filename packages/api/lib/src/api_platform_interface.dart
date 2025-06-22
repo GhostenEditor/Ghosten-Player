@@ -55,6 +55,8 @@ abstract class ApiPlatform extends PlatformInterface {
 
   Future<void> requestStoragePermission() async {}
 
+  Future<void> requestStorageManagePermission() async {}
+
   /// File Start
   Future<DriverFileInfo> fileInfo(String id) async {
     final data = await client.get<Json>('/file/info', queryParameters: {'id': id});

@@ -25,6 +25,9 @@ class MethodChannelFilePicker extends FilePickerPlatform {
   Future<String?> get cachePath => methodChannel.invokeMethod<String>('cachePath');
 
   @override
+  Future<List<UsbStorage>?> get externalUsbStorages => methodChannel.invokeMethod<List<dynamic>>('externalUsbStorages').then((s) => s?.map(UsbStorage.fromJson).toList());
+
+  @override
   Future<bool> requestStoragePermission() async {
     return await methodChannel.invokeMethod<bool>('requestStoragePermission') ?? false;
   }

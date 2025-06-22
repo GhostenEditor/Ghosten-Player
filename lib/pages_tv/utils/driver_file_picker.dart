@@ -49,86 +49,133 @@ class _DriverFilePickerState extends State<DriverFilePicker> {
                   automaticallyImplyLeading: false,
                 ),
                 Expanded(
-                  child: FutureBuilderHandler<List<DriverAccount>>(
-                    future: Api.driverQueryAll(),
-                    builder:
-                        (context, snapshot) => ListenableBuilder(
-                          listenable: _selectedDriverId,
-                          builder: (context, _) {
-                            return ListView(
-                              padding: const EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 32),
-                              children: [
-                                ...snapshot.requireData.indexed.map(
-                                  (entry) => TVListTile(
-                                    selected: _selectedDriverId.value == entry.$2.id,
-                                    autofocus: entry.$1 == 0,
-                                    title: Text(entry.$2.name),
-                                    subtitle: Text(AppLocalizations.of(context)!.driverType(entry.$2.type.name)),
-                                    leading: AspectRatio(
-                                      aspectRatio: 1,
-                                      child:
-                                          entry.$2.avatar == null
-                                              ? const AspectRatio(
-                                                aspectRatio: 1,
-                                                child: Icon(Icons.account_circle, size: 48),
-                                              )
-                                              : AsyncImage(
-                                                entry.$2.avatar!,
-                                                radius: BorderRadius.circular(6),
-                                                ink: true,
-                                              ),
-                                    ),
-                                    onTap: () async {
-                                      _selectedDriverId.value = entry.$2.id;
-                                      navigateToSlideLeft(
-                                        _navigatorKey.currentContext!,
-                                        _FileListPage(
-                                          driverId: entry.$2.id,
-                                          parentFileId: '/',
-                                          type: widget.fileType,
-                                          selectableType: widget.selectableType,
+                  child: CustomScrollView(
+                    slivers: [
+                      const SliverPadding(padding: EdgeInsets.only(top: 12)),
+                      FutureBuilderSliverHandler<List<DriverAccount>>(
+                        future: Api.driverQueryAll(),
+                        builder:
+                            (context, snapshot) => ListenableBuilder(
+                              listenable: _selectedDriverId,
+                              builder: (context, _) {
+                                return SliverPadding(
+                                  padding:
+                                      snapshot.requireData.isNotEmpty
+                                          ? const EdgeInsets.symmetric(horizontal: 12)
+                                          : EdgeInsets.zero,
+                                  sliver: SliverList.builder(
+                                    itemCount: snapshot.requireData.length,
+                                    itemBuilder: (context, index) {
+                                      final item = snapshot.requireData[index];
+                                      return TVListTile(
+                                        selected: _selectedDriverId.value == item.id,
+                                        autofocus: index == 0,
+                                        title: Text(item.name),
+                                        subtitle: Text(AppLocalizations.of(context)!.driverType(item.type.name)),
+                                        leading: AspectRatio(
+                                          aspectRatio: 1,
+                                          child:
+                                              item.avatar == null
+                                                  ? const AspectRatio(
+                                                    aspectRatio: 1,
+                                                    child: Icon(Icons.account_circle, size: 48),
+                                                  )
+                                                  : AsyncImage(
+                                                    item.avatar!,
+                                                    radius: BorderRadius.circular(6),
+                                                    ink: true,
+                                                  ),
                                         ),
+                                        onTap: () async {
+                                          _selectedDriverId.value = item.id;
+                                          navigateToSlideLeft(
+                                            _navigatorKey.currentContext!,
+                                            _FileListPage(
+                                              driverId: item.id,
+                                              parentFileId: '/',
+                                              type: widget.fileType,
+                                              selectableType: widget.selectableType,
+                                            ),
+                                          );
+                                        },
                                       );
                                     },
                                   ),
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    TVIconButton.filledTonal(
-                                      onPressed: () async {
-                                        await Api.requestStoragePermission();
-                                        final defaultPath = await FilePicker.externalStoragePath ?? '/';
-                                        if (!context.mounted) return;
-                                        navigateToSlideLeft(
-                                          _navigatorKey.currentContext!,
-                                          _FileListPage(
-                                            driverId: 0,
-                                            parentFileId: defaultPath,
-                                            type: widget.fileType,
-                                            selectableType: widget.selectableType,
-                                          ),
-                                        );
-                                      },
-                                      icon: const Icon(Icons.folder_open),
-                                    ),
-                                    TVIconButton(
-                                      autofocus: snapshot.requireData.isEmpty,
-                                      onPressed: () async {
-                                        final flag = await navigateTo<bool>(
-                                          navigatorKey.currentContext!,
-                                          const SettingsLoginPage(),
-                                        );
-                                        if (flag ?? false) setState(() {});
-                                      },
-                                      icon: const Icon(Icons.add),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                );
+                              },
+                            ),
+                      ),
+                      SliverPadding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        sliver: FutureBuilderSliverHandler(
+                          future: FilePicker.externalUsbStorages,
+                          builder: (context, snapshot) {
+                            return SliverList.builder(
+                              itemCount: snapshot.requireData!.length,
+                              itemBuilder: (context, index) {
+                                final item = snapshot.requireData![index];
+                                return TVListTile(
+                                  title: Text(item.desc),
+                                  leading: Icon(_guessStorageTypeByDesc(item.desc)),
+                                  onTap: () async {
+                                    await Api.requestStorageManagePermission();
+                                    if (!context.mounted) return;
+                                    navigateToSlideLeft(
+                                      _navigatorKey.currentContext!,
+                                      _FileListPage(
+                                        driverId: 0,
+                                        parentFileId: item.path,
+                                        type: widget.fileType,
+                                        selectableType: widget.selectableType,
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
                             );
                           },
                         ),
+                      ),
+                      SliverPadding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        sliver: SliverMainAxisGroup(
+                          slivers: [
+                            SliverToBoxAdapter(
+                              child: TVListTile(
+                                title: const Icon(Icons.folder_open),
+                                onTap: () async {
+                                  await Api.requestStoragePermission();
+                                  final defaultPath = await FilePicker.externalStoragePath ?? '/';
+                                  if (!context.mounted) return;
+                                  navigateToSlideLeft(
+                                    _navigatorKey.currentContext!,
+                                    _FileListPage(
+                                      driverId: 0,
+                                      parentFileId: defaultPath,
+                                      type: widget.fileType,
+                                      selectableType: widget.selectableType,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            SliverToBoxAdapter(
+                              child: TVListTile(
+                                title: const Icon(Icons.add),
+                                onTap: () async {
+                                  final flag = await navigateTo<bool>(
+                                    navigatorKey.currentContext!,
+                                    const SettingsLoginPage(),
+                                  );
+                                  if (flag ?? false) setState(() {});
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SliverPadding(padding: EdgeInsets.only(bottom: 32)),
+                    ],
                   ),
                 ),
               ],
@@ -273,5 +320,16 @@ class _FileListPageState extends State<_FileListPage> {
         selectableType: widget.selectableType,
       ),
     );
+  }
+}
+
+IconData _guessStorageTypeByDesc(String desc) {
+  final d = desc.toLowerCase();
+  if (d.contains('usb')) {
+    return Icons.usb_outlined;
+  } else if (d.contains('sd')) {
+    return Icons.sd_card_outlined;
+  } else {
+    return Icons.usb_outlined;
   }
 }

@@ -52,6 +52,14 @@ class MethodChannelApi extends ApiPlatform {
     }
   }
 
+  @override
+  Future<void> requestStorageManagePermission() async {
+    final permit = await _methodChannel.invokeMethod('requestStorageManagePermission');
+    if (permit != true) {
+      throw PlatformException(code: storagePermissionExceptionCode);
+    }
+  }
+
   /// Session Start
 
   @override

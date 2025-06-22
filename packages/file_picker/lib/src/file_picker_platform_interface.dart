@@ -28,6 +28,8 @@ abstract class FilePickerPlatform extends PlatformInterface {
 
   Future<String?> get cachePath => throw UnimplementedError('cachePath() has not been implemented.');
 
+  Future<List<UsbStorage>?> get externalUsbStorages => throw UnimplementedError('externalUsbStorages() has not been implemented.');
+
   Future<bool> requestStoragePermission() {
     throw UnimplementedError('requestStoragePermission() has not been implemented.');
   }
@@ -51,4 +53,11 @@ abstract class FilePickerPlatform extends PlatformInterface {
   }) {
     throw UnimplementedError('showFilePicker() has not been implemented.');
   }
+}
+
+class UsbStorage {
+  final String desc;
+  final String path;
+
+  UsbStorage.fromJson(dynamic json) : desc = json['desc'], path = json['path'];
 }

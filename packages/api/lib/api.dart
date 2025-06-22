@@ -14,6 +14,7 @@ class Api {
   static final resetData = ApiPlatform.instance.resetData;
   static final log = ApiPlatform.instance.log;
   static final requestStoragePermission = ApiPlatform.instance.requestStoragePermission;
+  static final requestStorageManagePermission = ApiPlatform.instance.requestStorageManagePermission;
   static final fileInfo = ApiPlatform.instance.fileInfo;
   static final fileList = ApiPlatform.instance.fileList;
   static final fileRename = ApiPlatform.instance.fileRename;
