@@ -18,7 +18,7 @@ jobs:
 
       - uses: subosito/flutter-action@v1
         with:
-          flutter-version: '3.32.1'
+          flutter-version: '3.32.4'
 
       - run: flutter pub get
 
@@ -78,7 +78,6 @@ jobs:
           --build-number=${{ env.BUILD_NUMBER }} \
           --dart-define=BUILD_DATE=$(date "+%F") \
           --dart-define=BUILD_VERSION=${{ env.VERSION }} \
-          --dart-define=DEFAULT_IPTV_URL=${{ vars.DEFAULT_IPTV_URL }} \
           --flavor=mobile
 
       - name: Build TV apk
@@ -91,7 +90,6 @@ jobs:
           --build-number=${{ env.BUILD_NUMBER }} \
           --dart-define=BUILD_DATE=$(date "+%F") \
           --dart-define=BUILD_VERSION=${{ env.VERSION }} \
-          --dart-define=DEFAULT_IPTV_URL=${{ vars.DEFAULT_IPTV_URL }} \
           --flavor=tv
 
       - name: Rename Android APK
