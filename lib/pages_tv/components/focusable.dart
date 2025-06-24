@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:rxdart/rxdart.dart';
 
 class Focusable extends StatefulWidget {
   const Focusable({
@@ -33,10 +35,33 @@ class Focusable extends StatefulWidget {
 class _FocusableState extends State<Focusable> with SingleTickerProviderStateMixin {
   bool _focused = false;
   late final _animation = AnimationController(vsync: this, duration: const Duration(seconds: 8));
+  final _animationController = StreamController<bool>();
+  late final _animationStream =
+      _animationController.stream.switchMap((s) {
+        if (s) {
+          return Stream.fromFuture(Future.delayed(const Duration(milliseconds: 200))).map((_) => true);
+        } else {
+          return Stream.value(false);
+        }
+      }).distinct();
+  StreamSubscription<bool>? _animationSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationSubscription = _animationStream.listen((flag) {
+      if (flag) {
+        _animation.repeat();
+      } else {
+        _animation.stop();
+      }
+    });
+  }
 
   @override
   void dispose() {
     _animation.dispose();
+    _animationSubscription?.cancel();
     super.dispose();
   }
 
@@ -53,12 +78,8 @@ class _FocusableState extends State<Focusable> with SingleTickerProviderStateMix
                 widget.selected ?? false
                     ? (widget.selectedBackgroundColor ?? Theme.of(context).colorScheme.surfaceContainerHighest)
                     : (widget.backgroundColor ?? Theme.of(context).colorScheme.surfaceContainerLow),
-            // animationDuration: Duration.zero,
             shape: GradientRoundedRectangleBorder(
-              side:
-                  _focused
-                      ? BorderSide(width: 4, color: Theme.of(context).colorScheme.inverseSurface, strokeAlign: 2)
-                      : BorderSide.none,
+              side: _focused ? const BorderSide(width: 4, strokeAlign: 2) : BorderSide.none,
               gradient: SweepGradient(
                 colors: const [
                   Color(0xff7068f8),
@@ -80,11 +101,7 @@ class _FocusableState extends State<Focusable> with SingleTickerProviderStateMix
           autofocus: widget.autofocus ?? false,
           onFocusChange: (f) {
             if (_focused != f) {
-              if (f) {
-                _animation.repeat();
-              } else {
-                _animation.stop();
-              }
+              _animationController.add(f);
               setState(() => _focused = f);
             }
             if (widget.onFocusChange != null) widget.onFocusChange!(f);
@@ -110,7 +127,7 @@ class GradientRoundedRectangleBorder extends RoundedRectangleBorder {
         final g =
             Gradient.lerp(SweepGradient(colors: List.filled(gradient.colors.length, Colors.transparent)), gradient, t)!;
         return GradientRoundedRectangleBorder(
-          side: side,
+          side: BorderSide.lerp(a.side, side, t),
           borderRadius: BorderRadiusGeometry.lerp(a.borderRadius, borderRadius, t)!,
           gradient: g,
         );
