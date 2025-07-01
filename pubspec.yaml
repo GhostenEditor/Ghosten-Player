@@ -33,7 +33,7 @@ dependencies:
   readmore: ^3.0.0
   rxdart: ^0.28.0
   scaled_app: ^2.3.0
-  screen_brightness: ^2.1.4
+  screen_brightness: ^2.1.5
   shared_preferences: ^2.5.3
   shimmer: ^3.0.0
   smooth_page_indicator: ^1.2.0
