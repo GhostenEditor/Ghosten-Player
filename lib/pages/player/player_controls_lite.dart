@@ -257,6 +257,7 @@ class _PlayerControlsLiteState<T> extends State<PlayerControlsLite<T>> {
                               children: [
                                 PlayerPlatformView(
                                   initialized: widget.initialized,
+                                  playerType: context.read<UserConfig>().playerType,
                                   autoPip: context.read<UserConfig>().autoPip,
                                 ),
                                 ListenableBuilder(

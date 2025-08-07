@@ -1,6 +1,7 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:video_player/player.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../providers/user_config.dart';
@@ -41,6 +42,22 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
             title: Text(AppLocalizations.of(context)!.settingsItemAutoPip),
             subtitle: Text(AppLocalizations.of(context)!.settingsItemAutoPipTip),
             onChanged: userConfig.setAutoPip,
+          ),
+          _buildPopupMenuItem(
+            title: '播放器内核',
+            trailing: AppLocalizations.of(context)!.playerType(userConfig.playerType.name),
+            onSelected: userConfig.setPlayerType,
+            itemBuilder:
+                (BuildContext context) =>
+                    PlayerType.values
+                        .map(
+                          (playerType) => CheckedPopupMenuItem(
+                            value: playerType,
+                            checked: userConfig.playerType == playerType,
+                            child: Text(AppLocalizations.of(context)!.playerType(playerType.name)),
+                          ),
+                        )
+                        .toList(),
           ),
           const Divider(),
           ListTile(title: Text(AppLocalizations.of(context)!.settingsItemDisplaySettings), dense: true),
@@ -158,7 +175,7 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
       onSelected: onSelected,
       itemBuilder: itemBuilder,
       child: ListTile(
-        leading: Icon(icon),
+        leading: icon != null ? Icon(icon) : null,
         trailing: Text(trailing),
         title: Text(title),
         subtitle: subtitle != null ? Text(subtitle) : null,

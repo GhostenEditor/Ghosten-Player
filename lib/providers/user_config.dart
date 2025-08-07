@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:scaled_app/scaled_app.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:video_player/player.dart';
 
 import '/utils/utils.dart';
 
@@ -46,12 +47,14 @@ class UserConfig extends ChangeNotifier {
       githubProxy = prefs.getString('system.githubProxy') ?? '',
       autoPlay = prefs.getBool('playerConfig.autoPlay') ?? false,
       autoPip = prefs.getBool('playerConfig.autoPip') ?? false,
+      playerType = PlayerType.fromString(prefs.getString('playerConfig.playerType')),
       autoForceLandscape = prefs.getBool('playerConfig.autoForceLandscape') ?? false,
       displayScale = prefs.getDouble('system.displayScale') ?? 1;
   final SharedPreferences prefs;
   SystemLanguage language;
   ThemeMode themeMode;
   AutoUpdateFrequency autoUpdateFrequency;
+  PlayerType playerType;
   bool updatePrerelease;
   String githubProxy;
   DateTime? lastCheckUpdateTime;
@@ -108,6 +111,12 @@ class UserConfig extends ChangeNotifier {
     this.language = language;
     notifyListeners();
     prefs.setString('system.language', language.name);
+  }
+
+  void setPlayerType(PlayerType playerType) {
+    this.playerType = playerType;
+    notifyListeners();
+    prefs.setString('playerConfig.playerType', playerType.name);
   }
 
   void setDisplayScale(double s) {

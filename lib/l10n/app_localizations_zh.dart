@@ -626,6 +626,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get playerSliceSize => '分片大小';
 
   @override
+  String playerType(String playerType) {
+    String _temp0 = intl.Intl.selectLogic(playerType, {'media3': 'Media 3', 'mpv': 'MPV', 'other': '未知'});
+    return '$_temp0';
+  }
+
+  @override
   String get playerUseHardwareCodec => '使用硬解码';
 
   @override

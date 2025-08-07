@@ -580,8 +580,9 @@ class PlayerSettings extends StatelessWidget {
 class PlayerPlatformView extends StatefulWidget {
   final VoidCallback? initialized;
   final bool autoPip;
+  final PlayerType playerType;
 
-  const PlayerPlatformView({super.key, this.initialized, this.autoPip = false});
+  const PlayerPlatformView({super.key, this.initialized, this.autoPip = false, required this.playerType});
 
   @override
   State<PlayerPlatformView> createState() => _PlayerPlatformViewState();
@@ -599,6 +600,7 @@ class _PlayerPlatformViewState extends State<PlayerPlatformView> {
       final prefs = await SharedPreferences.getInstance();
       if (!context.mounted) return;
       await PlayerPlatform.instance.init({
+        'type': widget.playerType.name,
         'language': language,
         'width': (box.size.width * devicePixelRatio).round(),
         'height': (box.size.height * devicePixelRatio).round(),

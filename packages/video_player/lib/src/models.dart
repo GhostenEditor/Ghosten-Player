@@ -2,6 +2,15 @@ import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
+enum PlayerType {
+  media3,
+  mpv;
+
+  static PlayerType fromString(String? str) {
+    return PlayerType.values.firstWhere((element) => element.name == str, orElse: () => PlayerType.media3);
+  }
+}
+
 enum PlayerStatus {
   playing,
   buffering,

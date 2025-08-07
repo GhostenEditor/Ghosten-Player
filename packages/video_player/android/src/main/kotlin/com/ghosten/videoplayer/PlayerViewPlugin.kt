@@ -35,20 +35,37 @@ class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activit
                 when (call.method) {
                     "init" -> {
                         if (mPlayerView == null)
-                            mPlayerView = Media3PlayerView(
-                                activity.applicationContext,
-                                activity,
-                                mChannel,
-                                call.argument("extensionRendererMode"),
-                                call.argument("enableDecoderFallback"),
-                                call.argument("language"),
-                                call.argument("subtitleStyle"),
-                                call.argument("width"),
-                                call.argument("height"),
-                                call.argument("top"),
-                                call.argument("left"),
-                                call.argument("autoPip") ?: true,
-                            )
+                            when (call.argument("type") as String?) {
+                                "media3" -> {
+                                    mPlayerView = Media3PlayerView(
+                                        activity.applicationContext,
+                                        activity,
+                                        mChannel,
+                                        call.argument("extensionRendererMode"),
+                                        call.argument("enableDecoderFallback"),
+                                        call.argument("language"),
+                                        call.argument("subtitleStyle"),
+                                        call.argument("width"),
+                                        call.argument("height"),
+                                        call.argument("top"),
+                                        call.argument("left"),
+                                        call.argument("autoPip") ?: true,
+                                    )
+                                }
+                                "mpv" -> {
+                                    mPlayerView = MPVPlayerView(
+                                        activity.applicationContext,
+                                        activity,
+                                        mChannel,
+                                        true,
+                                        call.argument("language"),
+                                        call.argument("width"),
+                                        call.argument("height"),
+                                        call.argument("top"),
+                                        call.argument("left"),
+                                    )
+                                }
+                            }
                     }
 
                     else -> {

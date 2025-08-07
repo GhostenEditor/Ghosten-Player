@@ -99,6 +99,7 @@ class _SingletonPlayerState<T> extends State<SingletonPlayer<T>> {
     return Stack(
       children: [
         PlayerPlatformView(
+          playerType: context.read<UserConfig>().playerType,
           autoPip: context.read<UserConfig>().autoPip,
           initialized: () async {
             await _controller.enterFullscreen();

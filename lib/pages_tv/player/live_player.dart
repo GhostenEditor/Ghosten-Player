@@ -14,6 +14,7 @@ import '../../components/async_image.dart';
 import '../../components/playing_icon.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/shortcut_tv.dart';
+import '../../providers/user_config.dart';
 import '../../theme.dart';
 import '../../utils/utils.dart';
 import '../components/loading.dart';
@@ -140,6 +141,7 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
           fit: StackFit.expand,
           children: [
             PlayerPlatformView(
+              playerType: context.read<UserConfig>().playerType,
               initialized: () async {
                 _controller.setPlaylist(widget.playlist);
                 await _controller.next(widget.index);
