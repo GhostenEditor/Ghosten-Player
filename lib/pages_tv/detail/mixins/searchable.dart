@@ -37,9 +37,15 @@ class _SearchResultSelectState extends State<SearchResultSelect> {
     return Stack(
       fit: StackFit.expand,
       children: [
-        const DecoratedBox(
+        DecoratedBox(
           decoration: BoxDecoration(
-            image: DecorationImage(image: AssetImage('assets/tv/images/bg-stripe.png'), repeat: ImageRepeat.repeat),
+            image: DecorationImage(
+              image: AssetImage(switch (Theme.of(context).brightness) {
+                Brightness.dark => 'assets/tv/images/bg-stripe.png',
+                Brightness.light => 'assets/tv/images/bg-stripe-light.png',
+              }),
+              repeat: ImageRepeat.repeat,
+            ),
           ),
         ),
         DecoratedBox(
