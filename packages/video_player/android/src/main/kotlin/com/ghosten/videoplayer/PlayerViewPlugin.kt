@@ -1,9 +1,11 @@
 package com.ghosten.videoplayer
 
 import android.app.Activity
+import android.app.Application
 import android.app.PictureInPictureParams
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Bundle
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -13,7 +15,8 @@ import java.net.InetAddress
 import java.net.NetworkInterface
 import java.util.*
 
-class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware {
+class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware,
+    Application.ActivityLifecycleCallbacks {
     private lateinit var mChannel: MethodChannel
     private lateinit var activity: Activity
     private var mPlayerView: BasePlayerView? = null
@@ -34,7 +37,11 @@ class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activit
             else -> {
                 when (call.method) {
                     "init" -> {
-                        if (mPlayerView == null)
+                        if (mPlayerView == null) {
+                            val autoPip = call.argument("autoPip") ?: true
+                            if (!autoPip) {
+                                activity.registerActivityLifecycleCallbacks(this)
+                            }
                             mPlayerView = Media3PlayerView(
                                 activity.applicationContext,
                                 activity,
@@ -47,8 +54,9 @@ class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activit
                                 call.argument("height"),
                                 call.argument("top"),
                                 call.argument("left"),
-                                call.argument("autoPip") ?: true,
+                                autoPip,
                             )
+                        }
                     }
 
                     else -> {
@@ -69,6 +77,7 @@ class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activit
                             "dispose" -> {
                                 mPlayerView?.dispose()
                                 mPlayerView = null
+                                activity.unregisterActivityLifecycleCallbacks(this)
                             }
 
                             "setTrack" -> mPlayerView?.setTrack(
@@ -153,5 +162,28 @@ class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activit
             }
         }
         return null
+    }
+
+    override fun onActivityCreated(p0: Activity, p1: Bundle?) {
+    }
+
+    override fun onActivityStarted(p0: Activity) {
+    }
+
+    override fun onActivityResumed(p0: Activity) {
+        mPlayerView?.play()
+    }
+
+    override fun onActivityPaused(p0: Activity) {
+        mPlayerView?.pause()
+    }
+
+    override fun onActivityStopped(p0: Activity) {
+    }
+
+    override fun onActivitySaveInstanceState(p0: Activity, p1: Bundle) {
+    }
+
+    override fun onActivityDestroyed(p0: Activity) {
     }
 }
