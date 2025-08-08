@@ -632,6 +632,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get playerParallelsCount => 'Parallels Count';
 
   @override
+  String get playerShowLiteProgressbar => 'Show Playback Progress';
+
+  @override
   String get playerShowThumbnails => 'Show Thumbnails';
 
   @override

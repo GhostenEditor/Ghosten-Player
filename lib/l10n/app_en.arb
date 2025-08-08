@@ -165,6 +165,7 @@
   "playerFastForwardSpeed": "Speed",
   "playerOpenFileWithParallelThreads": "Open File With Parallel Threads",
   "playerParallelsCount": "Parallels Count",
+  "playerShowLiteProgressbar": "Show Playback Progress",
   "playerShowThumbnails": "Show Thumbnails",
   "playerSliceSize": "Slice Size",
   "playerUseHardwareCodec": "Use Hardware Codec",

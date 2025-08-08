@@ -166,6 +166,7 @@
   "playerFastForwardSpeed": "快进速度",
   "playerOpenFileWithParallelThreads": "使用多线程打开文件",
   "playerParallelsCount": "线程数",
+  "playerShowLiteProgressbar": "显示播放进度",
   "playerShowThumbnails": "显示缩略图",
   "playerSliceSize": "分片大小",
   "playerUseHardwareCodec": "使用硬解码",

@@ -283,6 +283,7 @@ class PlayerLocalizations extends InheritedWidget {
   final String videoSettingsNone;
   final String videoSize;
   final String playerEnableDecoderFallback;
+  final String playerShowLiteProgressbar;
   final String tagUnknown;
   final String willSkipEnding;
   final String Function(String) extensionRendererMode;
@@ -306,6 +307,7 @@ class PlayerLocalizations extends InheritedWidget {
     required this.videoSettingsNone,
     required this.videoSize,
     required this.playerEnableDecoderFallback,
+    required this.playerShowLiteProgressbar,
     required this.tagUnknown,
     required this.willSkipEnding,
     required this.extensionRendererMode,
