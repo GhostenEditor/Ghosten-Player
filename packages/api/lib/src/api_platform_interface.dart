@@ -25,11 +25,7 @@ abstract class ApiPlatform extends PlatformInterface {
 
   abstract final ApiClient client;
 
-  Uri baseUrl = Uri(
-    scheme: 'http',
-    host: '127.0.0.1',
-    port: 38916,
-  );
+  Uri baseUrl = Uri(scheme: 'http', host: '127.0.0.1', port: 38916);
 
   Future<String?> databasePath() {
     throw UnimplementedError('databasePath() has not been implemented.');
@@ -65,12 +61,10 @@ abstract class ApiPlatform extends PlatformInterface {
   }
 
   Future<List<DriverFile>> fileList(int driverId, String parentFileId, {FileType? type, String? category}) async {
-    final data = await client.post<JsonList>('/file/list', data: {
-      'driverId': driverId,
-      'type': type?.name,
-      'category': category,
-      'parentFileId': parentFileId,
-    });
+    final data = await client.post<JsonList>(
+      '/file/list',
+      data: {'driverId': driverId, 'type': type?.name, 'category': category, 'parentFileId': parentFileId},
+    );
     return List.generate(data!.length, (index) => DriverFile.fromJson(data[index]));
   }
 
@@ -108,14 +102,17 @@ abstract class ApiPlatform extends PlatformInterface {
   }
 
   Future<void> subtitleInsert(String id, SubtitleData subtitle) {
-    return client.put('/subtitle/update/id', data: {
-      'id': id,
-      'url': subtitle.url?.toString(),
-      'label': subtitle.label,
-      'mimeType': subtitle.mimeType,
-      'language': subtitle.language,
-      'selected': subtitle.selected,
-    });
+    return client.put(
+      '/subtitle/update/id',
+      data: {
+        'id': id,
+        'url': subtitle.url?.toString(),
+        'label': subtitle.label,
+        'mimeType': subtitle.mimeType,
+        'language': subtitle.language,
+        'selected': subtitle.selected,
+      },
+    );
   }
 
   Future<void> subtitleDeleteById(dynamic id) {
@@ -249,19 +246,22 @@ abstract class ApiPlatform extends PlatformInterface {
     required int offset,
     required int limit,
   }) async {
-    final data = await client.post<Json>('/search/fuzzy', data: {
-      'type': type,
-      'filter': filter,
-      'genres': genres,
-      'studios': studios,
-      'keywords': keywords,
-      'mediaCast': mediaCast,
-      'mediaCrew': mediaCrew,
-      'watched': watched,
-      'favorite': favorite,
-      'limit': limit,
-      'offset': offset,
-    });
+    final data = await client.post<Json>(
+      '/search/fuzzy',
+      data: {
+        'type': type,
+        'filter': filter,
+        'genres': genres,
+        'studios': studios,
+        'keywords': keywords,
+        'mediaCast': mediaCast,
+        'mediaCrew': mediaCrew,
+        'watched': watched,
+        'favorite': favorite,
+        'limit': limit,
+        'offset': offset,
+      },
+    );
     return SearchFuzzyResult.fromJson(data!);
   }
 
@@ -361,11 +361,17 @@ abstract class ApiPlatform extends PlatformInterface {
   }
 
   Future<void> movieScraperById(dynamic id, String scraperId, String scraperType, String? language) {
-    return client.post('/movie/scraper/id', data: {'id': id, 'scraperId': scraperId, 'scraperType': scraperType, 'language': language});
+    return client.post(
+      '/movie/scraper/id',
+      data: {'id': id, 'scraperId': scraperId, 'scraperType': scraperType, 'language': language},
+    );
   }
 
   Future<List<SearchResult>> movieScraperSearch(dynamic id, String title, {String? language, String? year}) async {
-    final data = await client.get<JsonList>('/movie/scraper/search', queryParameters: {'id': id, 'title': title, 'year': year, 'language': language});
+    final data = await client.get<JsonList>(
+      '/movie/scraper/search',
+      queryParameters: {'id': id, 'title': title, 'year': year, 'language': language},
+    );
     return data!.map((e) => SearchResult.fromJson(e)).toList();
   }
 
@@ -407,11 +413,17 @@ abstract class ApiPlatform extends PlatformInterface {
   }
 
   Future<void> tvSeriesScraperById(dynamic id, String scraperId, String scraperType, String? language) {
-    return client.post('/tv/series/scraper/id', data: {'id': id, 'scraperId': scraperId, 'scraperType': scraperType, 'scraperLang': language});
+    return client.post(
+      '/tv/series/scraper/id',
+      data: {'id': id, 'scraperId': scraperId, 'scraperType': scraperType, 'scraperLang': language},
+    );
   }
 
   Future<List<SearchResult>> tvSeriesScraperSearch(dynamic id, String title, {String? language, String? year}) async {
-    final data = await client.get<JsonList>('/tv/series/scraper/search', queryParameters: {'id': id, 'title': title, 'year': year, 'language': language});
+    final data = await client.get<JsonList>(
+      '/tv/series/scraper/search',
+      queryParameters: {'id': id, 'title': title, 'year': year, 'language': language},
+    );
     return data!.map((e) => SearchResult.fromJson(e)).toList();
   }
 
@@ -440,8 +452,8 @@ abstract class ApiPlatform extends PlatformInterface {
   }
 
   Future<int> tvSeasonNumberUpdate(TVSeason season, int seasonNum) async {
-    final data = await client.post('/tv/season/number/update', data: {'id': season.id, 'season': seasonNum});
-    return data['id'];
+    final data = await client.post<Json>('/tv/season/number/update', data: {'id': season.id, 'season': seasonNum});
+    return data!['id'];
   }
 
   Future<void> tvSeasonDeleteById(dynamic id) {
@@ -480,20 +492,16 @@ abstract class ApiPlatform extends PlatformInterface {
     required String parentId,
     required String filename,
   }) {
-    return client.put('/library/insert', data: {
-      'type': type.name,
-      'driverId': driverId,
-      'id': id,
-      'parentId': parentId,
-      'filename': filename,
-    }).then((value) => value['id'] as dynamic);
+    return client
+        .put<Json>(
+          '/library/insert',
+          data: {'type': type.name, 'driverId': driverId, 'id': id, 'parentId': parentId, 'filename': filename},
+        )
+        .then((value) => value!['id'] as dynamic);
   }
 
   Future<void> libraryRefreshById(dynamic id, bool incremental) {
-    return client.post('/library/refresh/id', data: {
-      'id': id,
-      'incremental': incremental,
-    });
+    return client.post('/library/refresh/id', data: {'id': id, 'incremental': incremental});
   }
 
   Future<void> libraryDeleteById(dynamic id) {
@@ -549,23 +557,24 @@ abstract class ApiPlatform extends PlatformInterface {
     String? eventType,
     dynamic others,
   }) {
-    return client.post('/playedStatus/update', data: {
-      'type': type.name,
-      'id': id,
-      'position': position.inMilliseconds,
-      'duration': duration.inMilliseconds,
-      'eventType': eventType,
-      'others': others,
-    });
+    return client.post(
+      '/playedStatus/update',
+      data: {
+        'type': type.name,
+        'id': id,
+        'position': position.inMilliseconds,
+        'duration': duration.inMilliseconds,
+        'eventType': eventType,
+        'others': others,
+      },
+    );
   }
 
   Future<void> setSkipTime(SkipTimeType type, MediaType mediaType, dynamic id, Duration time) {
-    return client.post('/skipTime/update', data: {
-      'type': type.name,
-      'mediaType': mediaType.name,
-      'id': id,
-      'time': time.inMilliseconds,
-    });
+    return client.post(
+      '/skipTime/update',
+      data: {'type': type.name, 'mediaType': mediaType.name, 'id': id, 'time': time.inMilliseconds},
+    );
   }
 
   Stream<List<NetworkDiagnotics>> networkDiagnostics() {
@@ -573,12 +582,10 @@ abstract class ApiPlatform extends PlatformInterface {
   }
 
   Future<PageData<Log>> logQueryPage(int limit, int offset, [(int, int)? range]) async {
-    final data = await client.get<Json>('/log/query/page', queryParameters: {
-      'limit': limit,
-      'offset': offset,
-      'start': range?.$1,
-      'end': range?.$2,
-    });
+    final data = await client.get<Json>(
+      '/log/query/page',
+      queryParameters: {'limit': limit, 'offset': offset, 'start': range?.$1, 'end': range?.$2},
+    );
     return PageData.fromJson(data!, (data['data'] as JsonList).map((e) => Log.fromJson(e)));
   }
 
@@ -594,12 +601,7 @@ abstract class ApiPlatform extends PlatformInterface {
   }
 
   Future<void> dlnaSetUri(String id, Uri uri, {String? title, required String playType}) {
-    return client.post('/dlna/setUrl', data: {
-      'id': id,
-      'uri': uri.toString(),
-      'title': title,
-      'playType': playType,
-    });
+    return client.post('/dlna/setUrl', data: {'id': id, 'uri': uri.toString(), 'title': title, 'playType': playType});
   }
 
   Future<void> dlnaPlay(String id) {

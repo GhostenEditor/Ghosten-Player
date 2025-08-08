@@ -19,43 +19,6 @@ abstract class PlayerBaseController {
 enum PlaybackStatusEvent { start, progress, stop }
 
 class PlayerController<T> implements PlayerBaseController {
-  final ValueNotifier<List<PlaylistItemDisplay<T>>> playlist = ValueNotifier([]);
-  final ValueNotifier<int?> index = ValueNotifier(null);
-  final ValueNotifier<bool> isFirst = ValueNotifier(true);
-  final ValueNotifier<bool> isLast = ValueNotifier(true);
-  final ValueNotifier<String?> title = ValueNotifier(null);
-  final ValueNotifier<String> subTitle = ValueNotifier('');
-  final ValueNotifier<String?> error = ValueNotifier(null);
-  final ValueNotifier<String?> fatalError = ValueNotifier(null);
-  final ValueNotifier<Object?> playlistError = ValueNotifier(null);
-  final ValueNotifier<double> playbackSpeed = ValueNotifier(1);
-  final ValueNotifier<AspectRatioType> aspectRatio = ValueNotifier(AspectRatioType.auto);
-  final ValueNotifier<double> volume = ValueNotifier(1);
-  @override
-  final ValueNotifier<Duration> position = ValueNotifier(Duration.zero);
-  @override
-  final ValueNotifier<Duration> duration = ValueNotifier(Duration.zero);
-  final ValueNotifier<int> networkSpeed = ValueNotifier(0);
-  @override
-  final ValueNotifier<Duration> bufferedPosition = ValueNotifier(Duration.zero);
-  @override
-  final ValueNotifier<PlayerStatus> status = ValueNotifier(PlayerStatus.idle);
-  final ValueNotifier<MediaTrackGroup> trackGroup = ValueNotifier(MediaTrackGroup.empty());
-  final ValueNotifier<MediaInfo?> mediaInfo = ValueNotifier(null);
-  final ValueNotifier<dynamic> willSkip = ValueNotifier(null);
-  final ValueNotifier<bool> canPip = ValueNotifier(false);
-  final ValueNotifier<bool> pipMode = ValueNotifier(false);
-  final ValueNotifier<bool> isCasting = ValueNotifier(false);
-  final ValueNotifier<int?> onMediaIndexChanged = ValueNotifier(null);
-  final ValueNotifier<(MediaChange, Duration)?> beforeMediaChanged = ValueNotifier(null);
-  final Future<PlaylistItem> Function(PlaylistItemDisplay<T>)? onGetPlayBackInfo;
-  final Future<void> Function(PlaylistItem, PlaybackStatusEvent, Duration, Duration)? onPlaybackStatusUpdate;
-  final ValueNotifier<PlaylistItem?> _playlistItem = ValueNotifier(null);
-  final _timer = Stream.periodic(Duration(seconds: 10));
-  StreamSubscription<dynamic>? _subscription;
-
-  PlaylistItemDisplay<T>? get currentItem => index.value == null ? null : playlist.value.elementAtOrNull(index.value!);
-
   PlayerController(Function(int, String)? onLog, {this.onGetPlayBackInfo, this.onPlaybackStatusUpdate}) {
     this.index.addListener(() {
       title.value = currentItem?.title;
@@ -128,7 +91,44 @@ class PlayerController<T> implements PlayerBaseController {
     }
   }
 
-  void dispose() async {
+  final ValueNotifier<List<PlaylistItemDisplay<T>>> playlist = ValueNotifier([]);
+  final ValueNotifier<int?> index = ValueNotifier(null);
+  final ValueNotifier<bool> isFirst = ValueNotifier(true);
+  final ValueNotifier<bool> isLast = ValueNotifier(true);
+  final ValueNotifier<String?> title = ValueNotifier(null);
+  final ValueNotifier<String> subTitle = ValueNotifier('');
+  final ValueNotifier<String?> error = ValueNotifier(null);
+  final ValueNotifier<String?> fatalError = ValueNotifier(null);
+  final ValueNotifier<Object?> playlistError = ValueNotifier(null);
+  final ValueNotifier<double> playbackSpeed = ValueNotifier(1);
+  final ValueNotifier<AspectRatioType> aspectRatio = ValueNotifier(AspectRatioType.auto);
+  final ValueNotifier<double> volume = ValueNotifier(1);
+  @override
+  final ValueNotifier<Duration> position = ValueNotifier(Duration.zero);
+  @override
+  final ValueNotifier<Duration> duration = ValueNotifier(Duration.zero);
+  final ValueNotifier<int> networkSpeed = ValueNotifier(0);
+  @override
+  final ValueNotifier<Duration> bufferedPosition = ValueNotifier(Duration.zero);
+  @override
+  final ValueNotifier<PlayerStatus> status = ValueNotifier(PlayerStatus.idle);
+  final ValueNotifier<MediaTrackGroup> trackGroup = ValueNotifier(MediaTrackGroup.empty());
+  final ValueNotifier<MediaInfo?> mediaInfo = ValueNotifier(null);
+  final ValueNotifier<dynamic> willSkip = ValueNotifier(null);
+  final ValueNotifier<bool> canPip = ValueNotifier(false);
+  final ValueNotifier<bool> pipMode = ValueNotifier(false);
+  final ValueNotifier<bool> isCasting = ValueNotifier(false);
+  final ValueNotifier<int?> onMediaIndexChanged = ValueNotifier(null);
+  final ValueNotifier<(MediaChange, Duration)?> beforeMediaChanged = ValueNotifier(null);
+  final Future<PlaylistItem> Function(PlaylistItemDisplay<T>)? onGetPlayBackInfo;
+  final Future<void> Function(PlaylistItem, PlaybackStatusEvent, Duration, Duration)? onPlaybackStatusUpdate;
+  final ValueNotifier<PlaylistItem?> _playlistItem = ValueNotifier(null);
+  final _timer = Stream.periodic(const Duration(seconds: 10));
+  StreamSubscription<dynamic>? _subscription;
+
+  PlaylistItemDisplay<T>? get currentItem => index.value == null ? null : playlist.value.elementAtOrNull(index.value!);
+
+  Future<void> dispose() async {
     if (onPlaybackStatusUpdate != null && _playlistItem.value != null) {
       onPlaybackStatusUpdate!(_playlistItem.value!, PlaybackStatusEvent.stop, position.value, duration.value);
     }
@@ -180,13 +180,18 @@ class PlayerController<T> implements PlayerBaseController {
       try {
         if (onGetPlayBackInfo == null) {
           _playlistItem.value = currentItem!.toItem();
-          await setSource(_playlistItem.value!);
+          await setSource(_playlistItem.value);
         } else {
           _playlistItem.value = await onGetPlayBackInfo!(currentItem!);
-          await setSource(_playlistItem.value!);
+          await setSource(_playlistItem.value);
         }
         if (onPlaybackStatusUpdate != null) {
-          onPlaybackStatusUpdate!(_playlistItem.value!, PlaybackStatusEvent.start, _playlistItem.value!.start, duration.value);
+          onPlaybackStatusUpdate!(
+            _playlistItem.value!,
+            PlaybackStatusEvent.start,
+            _playlistItem.value!.start,
+            duration.value,
+          );
         }
       } on PlatformException catch (e) {
         status.value = PlayerStatus.error;

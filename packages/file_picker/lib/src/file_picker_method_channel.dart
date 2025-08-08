@@ -25,7 +25,9 @@ class MethodChannelFilePicker extends FilePickerPlatform {
   Future<String?> get cachePath => methodChannel.invokeMethod<String>('cachePath');
 
   @override
-  Future<List<UsbStorage>?> get externalUsbStorages => methodChannel.invokeMethod<List<dynamic>>('externalUsbStorages').then((s) => s?.map(UsbStorage.fromJson).toList());
+  Future<List<UsbStorage>?> get externalUsbStorages => methodChannel
+      .invokeMethod<List<Map<String, dynamic>>>('externalUsbStorages')
+      .then((s) => s?.map(UsbStorage.fromJson).toList());
 
   @override
   Future<bool> requestStoragePermission() async {
@@ -46,17 +48,21 @@ class MethodChannelFilePicker extends FilePickerPlatform {
       required ValueChanged<T?> onSubmit,
       required VoidCallback onRefresh,
       T? groupValue,
-    }) childBuilder,
+    })
+    childBuilder,
     required FilePickerType type,
     required Future<List<T>> Function(T? id) onFetch,
   }) {
-    return Navigator.of(context).push<T>(MaterialPageRoute(
+    return Navigator.of(context).push<T>(
+      MaterialPageRoute(
         builder: (context) => FilePickerDialog(
-              title: title,
-              empty: empty,
-              onFetch: onFetch,
-              errorBuilder: errorBuilder,
-              childBuilder: childBuilder,
-            )));
+          title: title,
+          empty: empty,
+          onFetch: onFetch,
+          errorBuilder: errorBuilder,
+          childBuilder: childBuilder,
+        ),
+      ),
+    );
   }
 }

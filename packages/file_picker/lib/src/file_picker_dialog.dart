@@ -5,6 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
 class FilePickerDialog<T> extends StatefulWidget {
+  const FilePickerDialog({
+    super.key,
+    this.title,
+    this.empty = const SizedBox(),
+    required this.onFetch,
+    this.errorBuilder,
+    required this.childBuilder,
+  });
+
   final String? title;
   final Widget? empty;
   final Widget Function(AsyncSnapshot<List<T>>)? errorBuilder;
@@ -15,17 +24,9 @@ class FilePickerDialog<T> extends StatefulWidget {
     required ValueChanged<T?> onSubmit,
     required VoidCallback onRefresh,
     T? groupValue,
-  }) childBuilder;
+  })
+  childBuilder;
   final Future<List<T>> Function(T? item) onFetch;
-
-  const FilePickerDialog({
-    super.key,
-    this.title,
-    this.empty = const SizedBox(),
-    required this.onFetch,
-    this.errorBuilder,
-    required this.childBuilder,
-  });
 
   @override
   State<FilePickerDialog<T>> createState() => _FilePickerDialogState();
@@ -64,55 +65,56 @@ class _FilePickerDialogState<T> extends State<FilePickerDialog<T>> {
         child: RefreshIndicator(
           onRefresh: _refresh,
           child: StreamBuilder<List<T>>(
-              stream: _stream.stream,
-              builder: (context, snapshot) {
-                return PageTransitionSwitcher(
-                  reverse: _reverse,
-                  transitionBuilder: (
-                    Widget child,
-                    Animation<double> primaryAnimation,
-                    Animation<double> secondaryAnimation,
-                  ) {
-                    return SharedAxisTransition(
-                      animation: primaryAnimation,
-                      secondaryAnimation: secondaryAnimation,
-                      transitionType: SharedAxisTransitionType.horizontal,
-                      fillColor: Colors.transparent,
-                      child: child,
-                    );
-                  },
-                  child: switch (snapshot.connectionState) {
-                    ConnectionState.waiting => snapshot.hasError
+            stream: _stream.stream,
+            builder: (context, snapshot) {
+              return PageTransitionSwitcher(
+                reverse: _reverse,
+                transitionBuilder:
+                    (Widget child, Animation<double> primaryAnimation, Animation<double> secondaryAnimation) {
+                      return SharedAxisTransition(
+                        animation: primaryAnimation,
+                        secondaryAnimation: secondaryAnimation,
+                        transitionType: SharedAxisTransitionType.horizontal,
+                        fillColor: Colors.transparent,
+                        child: child,
+                      );
+                    },
+                child: switch (snapshot.connectionState) {
+                  ConnectionState.waiting =>
+                    snapshot.hasError
                         ? widget.errorBuilder != null
-                            ? widget.errorBuilder!(snapshot)
-                            : const SizedBox()
+                              ? widget.errorBuilder!(snapshot)
+                              : const SizedBox()
                         : const _Loading(),
-                    ConnectionState.none || ConnectionState.active || ConnectionState.done => snapshot.hasError
+                  ConnectionState.none || ConnectionState.active || ConnectionState.done =>
+                    snapshot.hasError
                         ? widget.errorBuilder != null
-                            ? widget.errorBuilder!(snapshot)
-                            : const SizedBox()
+                              ? widget.errorBuilder!(snapshot)
+                              : const SizedBox()
                         : snapshot.hasData
-                            ? snapshot.requireData.isEmpty
-                                ? widget.empty!
-                                : _ListViewWithScrollbar(
-                                    key: UniqueKey(),
-                                    itemBuilder: (BuildContext context, int index) {
-                                      final item = snapshot.requireData[index];
-                                      return widget.childBuilder(
-                                        context,
-                                        item,
-                                        groupValue: _selectedFolder,
-                                        onPage: () => _page(item),
-                                        onSubmit: _submit,
-                                        onRefresh: () => _refresh(),
-                                      );
-                                    },
-                                    separatorBuilder: (BuildContext context, int index) => const Divider(height: 1),
-                                    itemCount: snapshot.requireData.length)
-                            : const SizedBox(),
-                  },
-                );
-              }),
+                        ? snapshot.requireData.isEmpty
+                              ? widget.empty!
+                              : _ListViewWithScrollbar(
+                                  key: UniqueKey(),
+                                  itemBuilder: (BuildContext context, int index) {
+                                    final item = snapshot.requireData[index];
+                                    return widget.childBuilder(
+                                      context,
+                                      item,
+                                      groupValue: _selectedFolder,
+                                      onPage: () => _page(item),
+                                      onSubmit: _submit,
+                                      onRefresh: () => _refresh(),
+                                    );
+                                  },
+                                  separatorBuilder: (BuildContext context, int index) => const Divider(height: 1),
+                                  itemCount: snapshot.requireData.length,
+                                )
+                        : const SizedBox(),
+                },
+              );
+            },
+          ),
         ),
       ),
     );
@@ -128,6 +130,7 @@ class _FilePickerDialogState<T> extends State<FilePickerDialog<T>> {
   }
 
   Future<void> _page(T? item, [reverse = false]) async {
+    // TODO(bug): 无法显示加载动画
     try {
       final res = await widget.onFetch(item);
       _reverse = reverse;
@@ -139,7 +142,7 @@ class _FilePickerDialogState<T> extends State<FilePickerDialog<T>> {
     }
   }
 
-  _pageBack() {
+  void _pageBack() {
     if (_routes.length > 1) {
       _routes.removeLast();
       _page(_routes.removeLast(), true);
@@ -156,16 +159,16 @@ class _FilePickerDialogState<T> extends State<FilePickerDialog<T>> {
 }
 
 class _ListViewWithScrollbar extends StatefulWidget {
-  final NullableIndexedWidgetBuilder itemBuilder;
-  final IndexedWidgetBuilder separatorBuilder;
-  final int itemCount;
-
   const _ListViewWithScrollbar({
     super.key,
     required this.itemBuilder,
     required this.separatorBuilder,
     required this.itemCount,
   });
+
+  final NullableIndexedWidgetBuilder itemBuilder;
+  final IndexedWidgetBuilder separatorBuilder;
+  final int itemCount;
 
   @override
   State<_ListViewWithScrollbar> createState() => _ListViewWithScrollbarState();
@@ -183,7 +186,9 @@ class _ListViewWithScrollbarState extends State<_ListViewWithScrollbar> {
   @override
   Widget build(BuildContext context) {
     return Theme(
-      data: Theme.of(context).copyWith(listTileTheme: const ListTileThemeData(contentPadding: EdgeInsetsDirectional.only(start: 16, end: 16))),
+      data: Theme.of(context).copyWith(
+        listTileTheme: const ListTileThemeData(contentPadding: EdgeInsetsDirectional.only(start: 16, end: 16)),
+      ),
       child: Scrollbar(
         controller: _scrollController,
         child: ListView.separated(
@@ -210,25 +215,16 @@ class _Loading extends StatelessWidget {
           itemCount: 20,
           itemBuilder: (context, _) => ListTile(
             leading: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(4),
-              ),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
               width: 60,
             ),
             title: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(4),
-              ),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
               height: 24,
             ),
             subtitle: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              margin: EdgeInsets.only(right: 40),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
+              margin: const EdgeInsets.only(right: 40),
               height: 16,
             ),
           ),
