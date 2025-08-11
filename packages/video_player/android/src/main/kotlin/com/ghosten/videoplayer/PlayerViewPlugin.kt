@@ -37,26 +37,38 @@ class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activit
             else -> {
                 when (call.method) {
                     "init" -> {
-                        if (mPlayerView == null) {
-                            val autoPip = call.argument("autoPip") ?: true
-                            if (!autoPip) {
-                                activity.registerActivityLifecycleCallbacks(this)
+                        if (mPlayerView == null)
+                            when (call.argument("type") as String?) {
+                                "media3" -> {
+                                    mPlayerView = Media3PlayerView(
+                                        activity.applicationContext,
+                                        activity,
+                                        mChannel,
+                                        call.argument("extensionRendererMode"),
+                                        call.argument("enableDecoderFallback"),
+                                        call.argument("language"),
+                                        call.argument("subtitleStyle"),
+                                        call.argument("width"),
+                                        call.argument("height"),
+                                        call.argument("top"),
+                                        call.argument("left"),
+                                        call.argument("autoPip") ?: true,
+                                    )
+                                }
+                                "mpv" -> {
+                                    mPlayerView = MPVPlayerView(
+                                        activity.applicationContext,
+                                        activity,
+                                        mChannel,
+                                        true,
+                                        call.argument("language"),
+                                        call.argument("width"),
+                                        call.argument("height"),
+                                        call.argument("top"),
+                                        call.argument("left"),
+                                    )
+                                }
                             }
-                            mPlayerView = Media3PlayerView(
-                                activity.applicationContext,
-                                activity,
-                                mChannel,
-                                call.argument("extensionRendererMode"),
-                                call.argument("enableDecoderFallback"),
-                                call.argument("language"),
-                                call.argument("subtitleStyle"),
-                                call.argument("width"),
-                                call.argument("height"),
-                                call.argument("top"),
-                                call.argument("left"),
-                                autoPip,
-                            )
-                        }
                     }
 
                     else -> {

@@ -1,6 +1,7 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:video_player/player.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../providers/user_config.dart';
@@ -42,6 +43,25 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
             subtitle: Text(AppLocalizations.of(context)!.settingsItemAutoPipTip),
             onChanged: userConfig.setAutoPip,
           ),
+          _buildPopupMenuItem(
+            title: Badge(
+              label: const Text('Beta'),
+              child: Text(AppLocalizations.of(context)!.settingsItemPlayerKernel),
+            ),
+            trailing: AppLocalizations.of(context)!.playerType(userConfig.playerType.name),
+            onSelected: userConfig.setPlayerType,
+            itemBuilder:
+                (BuildContext context) =>
+                    PlayerType.values
+                        .map(
+                          (playerType) => CheckedPopupMenuItem(
+                            value: playerType,
+                            checked: userConfig.playerType == playerType,
+                            child: Text(AppLocalizations.of(context)!.playerType(playerType.name)),
+                          ),
+                        )
+                        .toList(),
+          ),
           const Divider(),
           ListTile(title: Text(AppLocalizations.of(context)!.settingsItemDisplaySettings), dense: true),
           ListTile(
@@ -63,7 +83,7 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
             ),
           ),
           _buildPopupMenuItem(
-            title: AppLocalizations.of(context)!.settingsItemLanguage,
+            title: Text(AppLocalizations.of(context)!.settingsItemLanguage),
             icon: Icons.language,
             trailing: AppLocalizations.of(context)!.systemLanguage(userConfig.language.name),
             onSelected: userConfig.setLanguage,
@@ -80,7 +100,7 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
                         .toList(),
           ),
           _buildPopupMenuItem(
-            title: AppLocalizations.of(context)!.settingsItemTheme,
+            title: Text(AppLocalizations.of(context)!.settingsItemTheme),
             icon: Icons.light_mode_outlined,
             trailing: AppLocalizations.of(context)!.systemTheme(userConfig.themeMode.name),
             onSelected: userConfig.setTheme,
@@ -145,7 +165,7 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
   }
 
   Widget _buildPopupMenuItem<T>({
-    required String title,
+    required Widget title,
     String? subtitle,
     required String trailing,
     IconData? icon,
@@ -158,9 +178,9 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
       onSelected: onSelected,
       itemBuilder: itemBuilder,
       child: ListTile(
-        leading: Icon(icon),
+        leading: icon != null ? Icon(icon) : null,
         trailing: Text(trailing),
-        title: Text(title),
+        title: title,
         subtitle: subtitle != null ? Text(subtitle) : null,
       ),
     );

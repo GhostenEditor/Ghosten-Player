@@ -641,6 +641,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get playerSliceSize => 'Slice Size';
 
   @override
+  String playerType(String playerType) {
+    String _temp0 = intl.Intl.selectLogic(playerType, {'media3': 'Media 3', 'mpv': 'MPV', 'other': 'Unknown'});
+    return '$_temp0';
+  }
+
+  @override
   String get playerUseHardwareCodec => 'Use Hardware Codec';
 
   @override
@@ -840,6 +846,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsItemPlayerHistory => 'Player History';
+
+  @override
+  String get settingsItemPlayerKernel => 'Player Kernel';
 
   @override
   String get settingsItemPlayerSettings => 'Player Settings';

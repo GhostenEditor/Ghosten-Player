@@ -1,6 +1,7 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:video_player/player.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../providers/user_config.dart';
@@ -30,6 +31,16 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
       child: ListView(
         padding: const EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 32),
         children: [
+          ListTile(title: Text(AppLocalizations.of(context)!.settingsItemPlayerSettings), dense: true),
+          ButtonSettingItem(
+            title: Badge(
+              label: const Text('Beta'),
+              child: Text(AppLocalizations.of(context)!.settingsItemPlayerKernel),
+            ),
+            leading: const Icon(Icons.play_arrow_rounded),
+            trailing: Text(AppLocalizations.of(context)!.playerType(userConfig.playerType.name)),
+            onTap: () => navigateToSlideLeft(context, const SettingsPlayerKernel()),
+          ),
           ListTile(title: Text(AppLocalizations.of(context)!.settingsItemDisplaySettings), dense: true),
           ButtonSettingItem(
             title: Text(AppLocalizations.of(context)!.settingsItemLanguage),
@@ -196,6 +207,35 @@ class SettingsThemePage extends StatelessWidget {
                     title: Text(AppLocalizations.of(context)!.systemTheme(theme.name)),
                     onChanged: (theme) {
                       if (theme != null) userConfig.setTheme(theme);
+                    },
+                  ),
+                )
+                .toList(),
+      ),
+    );
+  }
+}
+
+class SettingsPlayerKernel extends StatelessWidget {
+  const SettingsPlayerKernel({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final userConfig = Provider.of<UserConfig>(context);
+
+    return SettingPage(
+      title: AppLocalizations.of(context)!.settingsItemPlayerKernel,
+      child: ListView(
+        padding: const EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 32),
+        children:
+            PlayerType.values
+                .map(
+                  (playerType) => RadioSettingItem(
+                    value: playerType,
+                    groupValue: userConfig.playerType,
+                    title: Text(AppLocalizations.of(context)!.playerType(playerType.name)),
+                    onChanged: (playerType) {
+                      if (playerType != null) userConfig.setPlayerType(playerType);
                     },
                   ),
                 )
