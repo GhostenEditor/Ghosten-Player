@@ -832,6 +832,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsItemPlayerHistory => '播放历史';
 
   @override
+  String get settingsItemPlayerKernel => '播放器内核';
+
+  @override
   String get settingsItemPlayerSettings => '播放设置';
 
   @override

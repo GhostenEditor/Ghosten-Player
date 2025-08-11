@@ -218,6 +218,7 @@
   "settingsItemNfoEnabled": "NFO 启用",
   "settingsItemOthers": "其他设置",
   "settingsItemPlayerHistory": "播放历史",
+  "settingsItemPlayerKernel": "播放器内核",
   "settingsItemPlayerSettings": "播放设置",
   "settingsItemProxySettings": "代理设置",
   "settingsItemScraperBehavior": "刮削行为",

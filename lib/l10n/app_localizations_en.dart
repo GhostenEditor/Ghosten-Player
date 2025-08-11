@@ -845,6 +845,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsItemPlayerHistory => 'Player History';
 
   @override
+  String get settingsItemPlayerKernel => 'Player Kernel';
+
+  @override
   String get settingsItemPlayerSettings => 'Player Settings';
 
   @override

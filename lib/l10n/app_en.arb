@@ -217,6 +217,7 @@
   "settingsItemNfoEnabled": "NFO Enabled",
   "settingsItemOthers": "Others Settings",
   "settingsItemPlayerHistory": "Player History",
+  "settingsItemPlayerKernel": "Player Kernel",
   "settingsItemPlayerSettings": "Player Settings",
   "settingsItemProxySettings": "Proxy Settings",
   "settingsItemScraperBehavior": "Scraper Behavior",

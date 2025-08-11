@@ -1400,6 +1400,12 @@ abstract class AppLocalizations {
   /// **'Player History'**
   String get settingsItemPlayerHistory;
 
+  /// No description provided for @settingsItemPlayerKernel.
+  ///
+  /// In en, this message translates to:
+  /// **'Player Kernel'**
+  String get settingsItemPlayerKernel;
+
   /// No description provided for @settingsItemPlayerSettings.
   ///
   /// In en, this message translates to:
