@@ -1088,6 +1088,12 @@ abstract class AppLocalizations {
   /// **'Parallels Count'**
   String get playerParallelsCount;
 
+  /// No description provided for @playerShowLiteProgressbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Show Playback Progress'**
+  String get playerShowLiteProgressbar;
+
   /// No description provided for @playerShowThumbnails.
   ///
   /// In en, this message translates to:

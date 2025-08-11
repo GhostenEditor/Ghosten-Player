@@ -620,6 +620,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get playerParallelsCount => '线程数';
 
   @override
+  String get playerShowLiteProgressbar => '显示播放进度';
+
+  @override
   String get playerShowThumbnails => '显示缩略图';
 
   @override

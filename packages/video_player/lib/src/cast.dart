@@ -1,19 +1,16 @@
 import '../player.dart';
 
 abstract class Cast {
-  Stream<List<CastDevice>> discover();
 
   const Cast();
+  Stream<List<CastDevice>> discover();
 }
 
 abstract class CastDevice implements PlayerBaseController {
+
+  const CastDevice({required this.id, required this.friendlyName});
   final String friendlyName;
   final String id;
-
-  const CastDevice({
-    required this.id,
-    required this.friendlyName,
-  });
 
   Future<void> play();
 
