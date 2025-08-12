@@ -59,7 +59,7 @@ abstract class FilePickerPlatform extends PlatformInterface {
 }
 
 class UsbStorage {
-  UsbStorage.fromJson(Map<String, dynamic> json) : desc = json['desc'], path = json['path'];
+  UsbStorage.fromJson(dynamic json) : desc = json['desc'], path = json['path'];
   final String desc;
   final String path;
 }

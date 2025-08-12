@@ -33,12 +33,16 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
         children: [
           ListTile(title: Text(AppLocalizations.of(context)!.settingsItemPlayerSettings), dense: true),
           ButtonSettingItem(
-            title: Badge(
-              label: const Text('Beta'),
-              child: Text(AppLocalizations.of(context)!.settingsItemPlayerKernel),
-            ),
+            title: Text(AppLocalizations.of(context)!.settingsItemPlayerKernel),
             leading: const Icon(Icons.play_arrow_rounded),
-            trailing: Text(AppLocalizations.of(context)!.playerType(userConfig.playerType.name)),
+            trailing:
+                userConfig.playerType == PlayerType.mpv
+                    ? Badge(
+                      label: const Text('Beta'),
+                      offset: const Offset(16, -8),
+                      child: Text(AppLocalizations.of(context)!.playerType(userConfig.playerType.name)),
+                    )
+                    : Text(AppLocalizations.of(context)!.playerType(userConfig.playerType.name)),
             onTap: () => navigateToSlideLeft(context, const SettingsPlayerKernel()),
           ),
           ListTile(title: Text(AppLocalizations.of(context)!.settingsItemDisplaySettings), dense: true),
@@ -233,7 +237,14 @@ class SettingsPlayerKernel extends StatelessWidget {
                   (playerType) => RadioSettingItem(
                     value: playerType,
                     groupValue: userConfig.playerType,
-                    title: Text(AppLocalizations.of(context)!.playerType(playerType.name)),
+                    title:
+                        playerType == PlayerType.mpv
+                            ? Badge(
+                              label: const Text('Beta'),
+                              offset: Offset.zero,
+                              child: Text(AppLocalizations.of(context)!.playerType(playerType.name)),
+                            )
+                            : Text(AppLocalizations.of(context)!.playerType(playerType.name)),
                     onChanged: (playerType) {
                       if (playerType != null) userConfig.setPlayerType(playerType);
                     },
