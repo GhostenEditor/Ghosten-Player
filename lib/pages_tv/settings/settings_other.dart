@@ -38,7 +38,7 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
             trailing:
                 userConfig.playerType == PlayerType.mpv
                     ? Badge(
-                      label: const Text('Beta'),
+                      label: const Text('Alpha'),
                       offset: const Offset(16, -8),
                       child: Text(AppLocalizations.of(context)!.playerType(userConfig.playerType.name)),
                     )
@@ -240,7 +240,7 @@ class SettingsPlayerKernel extends StatelessWidget {
                     title:
                         playerType == PlayerType.mpv
                             ? Badge(
-                              label: const Text('Beta'),
+                              label: const Text('Alpha'),
                               offset: Offset.zero,
                               child: Text(AppLocalizations.of(context)!.playerType(playerType.name)),
                             )

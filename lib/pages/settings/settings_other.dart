@@ -49,7 +49,7 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
                 userConfig.playerType == PlayerType.mpv
 
                     ? Badge(
-                      label: const Text('Beta'),
+                      label: const Text('Alpha'),
                       offset: const Offset(6, -14),
                       child: Text(AppLocalizations.of(context)!.playerType(userConfig.playerType.name)),
                     )
@@ -65,7 +65,7 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
                             child:
                                 playerType == PlayerType.mpv
                                     ? Badge(
-                                      label: const Text('Beta'),
+                                      label: const Text('Alpha'),
                                       offset: const Offset(-20, 0),
                                       child: Text(AppLocalizations.of(context)!.playerType(playerType.name)),
                                     )

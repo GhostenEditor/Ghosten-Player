@@ -70,7 +70,7 @@ class MediaChange {
 }
 
 class MediaInfo {
-  MediaInfo.fromJson(Map<String, dynamic> json)
+  MediaInfo.fromJson(dynamic json)
     : videoCodecs = json['videoCodecs'],
       videoMime = json['videoMime'],
       videoFPS = json['videoFPS'],
