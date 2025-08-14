@@ -620,10 +620,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get playerParallelsCount => '线程数';
 
   @override
+  String get playerShowLiteProgressbar => '显示播放进度';
+
+  @override
   String get playerShowThumbnails => '显示缩略图';
 
   @override
   String get playerSliceSize => '分片大小';
+
+  @override
+  String playerType(String playerType) {
+    String _temp0 = intl.Intl.selectLogic(playerType, {'media3': 'Media 3', 'mpv': 'MPV', 'other': '未知'});
+    return '$_temp0';
+  }
 
   @override
   String get playerUseHardwareCodec => '使用硬解码';
@@ -824,6 +833,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingsItemPlayerHistory => '播放历史';
+
+  @override
+  String get settingsItemPlayerKernel => '播放器内核';
 
   @override
   String get settingsItemPlayerSettings => '播放设置';

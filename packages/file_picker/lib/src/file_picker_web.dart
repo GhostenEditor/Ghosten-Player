@@ -63,25 +63,26 @@ class FilePickerWeb extends FilePickerPlatform {
       required ValueChanged<T?> onSubmit,
       required VoidCallback onRefresh,
       T? groupValue,
-    }) childBuilder,
+    })
+    childBuilder,
     required FilePickerType type,
     required Future<List<T>> Function(T? id) onFetch,
   }) async {
     switch (type) {
       case FilePickerType.remote:
-        return Navigator.of(context).push<T>(MaterialPageRoute(
+        return Navigator.of(context).push<T>(
+          MaterialPageRoute(
             builder: (context) => FilePickerDialog(
-                  title: title,
-                  empty: empty,
-                  onFetch: onFetch,
-                  childBuilder: childBuilder,
-                  errorBuilder: errorBuilder,
-                )));
+              title: title,
+              empty: empty,
+              onFetch: onFetch,
+              childBuilder: childBuilder,
+              errorBuilder: errorBuilder,
+            ),
+          ),
+        );
       case FilePickerType.local:
-        final path = await promiseToFuture<String?>(open(jsify({
-          'directory': true,
-          'defaultPath': rootPath,
-        })));
+        final path = await promiseToFuture<String?>(open(jsify({'directory': true, 'defaultPath': rootPath})));
         if (path != null) {
           throw UnimplementedError();
         } else {

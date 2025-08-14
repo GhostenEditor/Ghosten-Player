@@ -1088,6 +1088,12 @@ abstract class AppLocalizations {
   /// **'Parallels Count'**
   String get playerParallelsCount;
 
+  /// No description provided for @playerShowLiteProgressbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Show Playback Progress'**
+  String get playerShowLiteProgressbar;
+
   /// No description provided for @playerShowThumbnails.
   ///
   /// In en, this message translates to:
@@ -1099,6 +1105,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Slice Size'**
   String get playerSliceSize;
+
+  /// No description provided for @playerType.
+  ///
+  /// In en, this message translates to:
+  /// **'{playerType, select, media3{Media 3} mpv{MPV} other{Unknown}}'**
+  String playerType(String playerType);
 
   /// No description provided for @playerUseHardwareCodec.
   ///
@@ -1393,6 +1405,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Player History'**
   String get settingsItemPlayerHistory;
+
+  /// No description provided for @settingsItemPlayerKernel.
+  ///
+  /// In en, this message translates to:
+  /// **'Player Kernel'**
+  String get settingsItemPlayerKernel;
 
   /// No description provided for @settingsItemPlayerSettings.
   ///

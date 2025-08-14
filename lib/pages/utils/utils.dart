@@ -12,7 +12,6 @@ import '../../components/focus_card.dart';
 import '../../components/future_builder_handler.dart';
 import '../../components/gap.dart';
 import '../../components/no_data.dart';
-import '../../components/scrollbar.dart';
 import '../../l10n/app_localizations.dart';
 import '../../platform_api.dart';
 import '../../providers/user_config.dart';
@@ -94,126 +93,188 @@ Future<(int, DriverFile)?> showDriverFilePicker(
   FileType? fileType,
   FileType? selectableType,
 }) {
+  Future<void> openFilePicker(String defaultPath) async {
+    final file = await _showFilePicker(
+      context,
+      title: title,
+      type: FilePickerType.local,
+      driverId: 0,
+      defaultPath: defaultPath,
+      fileType: fileType,
+      selectableType: selectableType,
+    );
+    if (file != null) {
+      if (context.mounted) Navigator.of(context).pop((0, file));
+    }
+  }
+
   return showModalBottomSheet<(int, DriverFile)>(
     context: context,
     elevation: 0,
     constraints: const BoxConstraints(minWidth: double.infinity),
     builder:
         (context) => SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 16, left: 32, right: 32),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(AppLocalizations.of(context)!.titleSelectAnAccount, style: Theme.of(context).textTheme.titleLarge),
-                SizedBox(
-                  height: 250,
-                  child: StatefulBuilder(
-                    builder: (context, setState) {
-                      return FutureBuilderHandler<List<DriverAccount>>(
-                        future: Api.driverQueryAll(),
-                        builder: (context, snapshot) {
-                          return ScrollbarListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            itemCount: snapshot.requireData.length + 2,
-                            itemBuilder: (context, index) {
-                              if (index == snapshot.requireData.length + 1) {
-                                return Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16),
-                                    child: IconButton.filledTonal(
-                                      onPressed: () async {
-                                        final flag = await navigateTo<bool>(context, const AccountLoginPage());
-                                        if (flag ?? false) setState(() {});
-                                      },
-                                      icon: const Icon(Icons.add),
-                                    ),
-                                  ),
-                                );
-                              } else if (index == snapshot.requireData.length) {
-                                return Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16),
-                                    child: IconButton.filledTonal(
-                                      onPressed: () async {
-                                        await Api.requestStoragePermission();
-                                        final defaultPath = await FilePicker.externalStoragePath ?? '/';
-                                        if (!context.mounted) return;
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            spacing: 8,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 16, left: 32, right: 32),
+                child: Text(
+                  AppLocalizations.of(context)!.titleSelectAnAccount,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              SizedBox(
+                height: 250,
+                child: StatefulBuilder(
+                  builder: (context, setState) {
+                    return Scrollbar(
+                      child: CustomScrollView(
+                        scrollDirection: Axis.horizontal,
+                        slivers: [
+                          FutureBuilderSliverHandler(
+                            future: Api.driverQueryAll(),
+                            builder:
+                                (context, snapshot) => SliverPadding(
+                                  padding:
+                                      snapshot.requireData.isNotEmpty
+                                          ? const EdgeInsets.only(left: 32, right: 32, bottom: 12)
+                                          : const EdgeInsets.only(left: 12),
+                                  sliver: SliverList.builder(
+                                    itemCount: snapshot.requireData.length,
+                                    itemBuilder: (context, index) {
+                                      final item = snapshot.requireData[index];
+                                      return _buildAccountCard(context, item, () async {
                                         final file = await _showFilePicker(
                                           context,
                                           title: title,
-                                          type: FilePickerType.local,
-                                          driverId: 0,
-                                          defaultPath: defaultPath,
+                                          type: FilePickerType.remote,
+                                          driverId: item.id,
+                                          defaultPath: '/',
                                           fileType: fileType,
                                           selectableType: selectableType,
                                         );
                                         if (file != null) {
-                                          if (context.mounted) Navigator.of(context).pop((0, file));
+                                          if (context.mounted) Navigator.of(context).pop((item.id, file));
                                         }
-                                      },
-                                      icon: const Icon(Icons.folder_open),
-                                    ),
+                                      });
+                                    },
                                   ),
-                                );
-                              } else {
-                                final item = snapshot.requireData[index];
-                                return FocusCard(
-                                  width: 160,
-                                  onTap: () async {
-                                    final file = await _showFilePicker(
-                                      context,
-                                      title: title,
-                                      type: FilePickerType.remote,
-                                      driverId: item.id,
-                                      defaultPath: '/',
-                                      fileType: fileType,
-                                      selectableType: selectableType,
-                                    );
-                                    if (file != null) {
-                                      if (context.mounted) Navigator.of(context).pop((item.id, file));
-                                    }
-                                  },
-                                  child: Column(
-                                    children: [
-                                      if (item.avatar == null)
-                                        const Padding(
-                                          padding: EdgeInsets.all(20),
-                                          child: Icon(Icons.account_circle, size: 120),
-                                        )
-                                      else
-                                        AsyncImage(item.avatar!, ink: true, width: 160, height: 160),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                                          child: Column(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              Text(item.name, overflow: TextOverflow.ellipsis),
-                                              Text(AppLocalizations.of(context)!.driverType(item.type.name)),
-                                            ],
+                                ),
+                          ),
+                          FutureBuilderSliverHandler(
+                            future: FilePicker.externalUsbStorages,
+                            builder: (context, snapshot) {
+                              return SliverList.builder(
+                                itemCount: snapshot.requireData!.length,
+                                itemBuilder: (context, index) {
+                                  final item = snapshot.requireData![index];
+                                  return Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        spacing: 4,
+                                        children: [
+                                          const Text(''),
+                                          IconButton.filledTonal(
+                                            onPressed: () async {
+                                              await Api.requestStorageManagePermission();
+                                              if (!context.mounted) return;
+                                              openFilePicker(item.path);
+                                            },
+                                            icon: Icon(_guessStorageTypeByDesc(item.desc)),
                                           ),
-                                        ),
+                                          Text(item.desc, style: Theme.of(context).textTheme.labelMedium),
+                                        ],
                                       ),
-                                    ],
-                                  ),
-                                );
-                              }
+                                    ),
+                                  );
+                                },
+                              );
                             },
-                          );
-                        },
-                      );
-                    },
-                  ),
+                          ),
+                          SliverToBoxAdapter(
+                            child: Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: IconButton.filledTonal(
+                                  onPressed: () async {
+                                    final defaultPath = await FilePicker.externalStoragePath ?? '/';
+                                    await Api.requestStoragePermission();
+                                    if (!context.mounted) return;
+                                    openFilePicker(defaultPath);
+                                  },
+                                  icon: const Icon(Icons.folder_open),
+                                ),
+                              ),
+                            ),
+                          ),
+                          SliverToBoxAdapter(
+                            child: Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: IconButton.filledTonal(
+                                  onPressed: () async {
+                                    final flag = await navigateTo<bool>(context, const AccountLoginPage());
+                                    if (flag ?? false) setState(() {});
+                                  },
+                                  icon: const Icon(Icons.add),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
+              ),
+            ],
+          ),
+        ),
+    isScrollControlled: true,
+  );
+}
+
+IconData _guessStorageTypeByDesc(String desc) {
+  final d = desc.toLowerCase();
+  if (d.contains('usb')) {
+    return Icons.usb_outlined;
+  } else if (d.contains('sd')) {
+    return Icons.sd_card_outlined;
+  } else {
+    return Icons.usb_outlined;
+  }
+}
+
+Widget _buildAccountCard(BuildContext context, DriverAccount item, GestureTapCallback? onTap) {
+  return FocusCard(
+    width: 160,
+    onTap: onTap,
+    child: Column(
+      children: [
+        if (item.avatar == null)
+          const Padding(padding: EdgeInsets.all(20), child: Icon(Icons.account_circle, size: 120))
+        else
+          AsyncImage(item.avatar!, ink: true, width: 160, height: 160),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(item.name, overflow: TextOverflow.ellipsis),
+                Text(AppLocalizations.of(context)!.driverType(item.type.name)),
               ],
             ),
           ),
         ),
-    isScrollControlled: true,
+      ],
+    ),
   );
 }
 

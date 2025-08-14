@@ -21,9 +21,12 @@ class ApiWeb extends ApiPlatform {
   /// Session Start
   @override
   Future<SessionCreate> sessionCreate() async {
-    final data = await client.put('/session/create');
-    final id = data['id'];
-    return SessionCreate(id: id, uri: baseUrl.replace(path: '/session/webpage', queryParameters: {'id': id.toString()}));
+    final data = await client.put<Json>('/session/create');
+    final id = data!['id'];
+    return SessionCreate(
+      id: id,
+      uri: baseUrl.replace(path: '/session/webpage', queryParameters: {'id': id.toString()}),
+    );
   }
 
   /// Session End
@@ -106,27 +109,36 @@ class ApiWeb extends ApiPlatform {
 }
 
 class Client extends ApiClient {
-  late final Dio _client;
-
   Client(Uri baseUrl) {
-    _client = Dio(BaseOptions(
-      connectTimeout: const Duration(seconds: 10),
-      baseUrl: baseUrl.toString(),
-      validateStatus: (status) => status != null && status >= 200 && status < 300 || status == 304,
-    ))
-      ..interceptors.add(InterceptorsWrapper(
-        onRequest: (options, handler) {
-          handler.next(options..headers.putIfAbsent('content-type', () => 'application/json'));
-        },
-        onError: (error, handler) {
-          handler.reject(error);
-        },
-      ))
-      ..interceptors.add(InterceptorsWrapper(onRequest: (RequestOptions options, RequestInterceptorHandler handler) {
-        options.headers['Accept-Language'] = Localizations.localeOf(navigatorKey.currentContext!).languageCode;
-        return handler.next(options);
-      }));
+    _client =
+        Dio(
+            BaseOptions(
+              connectTimeout: const Duration(seconds: 10),
+              baseUrl: baseUrl.toString(),
+              validateStatus: (status) => status != null && status >= 200 && status < 300 || status == 304,
+            ),
+          )
+          ..interceptors.add(
+            InterceptorsWrapper(
+              onRequest: (options, handler) {
+                handler.next(options..headers.putIfAbsent('content-type', () => 'application/json'));
+              },
+              onError: (error, handler) {
+                handler.reject(error);
+              },
+            ),
+          )
+          ..interceptors.add(
+            InterceptorsWrapper(
+              onRequest: (RequestOptions options, RequestInterceptorHandler handler) {
+                options.headers['Accept-Language'] = Localizations.localeOf(navigatorKey.currentContext!).languageCode;
+                return handler.next(options);
+              },
+            ),
+          );
   }
+
+  late final Dio _client;
 
   @override
   Future<T?> delete<T>(String path, {Object? data}) {
@@ -158,21 +170,23 @@ class Client extends ApiClient {
 
   PlatformException convert(DioException exception) {
     return switch (exception.type) {
-      DioExceptionType.connectionTimeout || DioExceptionType.sendTimeout || DioExceptionType.receiveTimeout => PlatformException(
-          code: '40800',
-          message: exception.response?.data.toString() ?? exception.message,
-          stacktrace: exception.stackTrace.toString(),
-        ),
+      DioExceptionType.connectionTimeout ||
+      DioExceptionType.sendTimeout ||
+      DioExceptionType.receiveTimeout => PlatformException(
+        code: '40800',
+        message: exception.response?.data.toString() ?? exception.message,
+        stacktrace: exception.stackTrace.toString(),
+      ),
       DioExceptionType.badCertificate ||
       DioExceptionType.badResponse ||
       DioExceptionType.cancel ||
       DioExceptionType.connectionError ||
-      DioExceptionType.unknown =>
-        PlatformException(
-          code: exception.response?.headers.value('Error-Code') ?? ((exception.response?.statusCode ?? 0) * 100).toString(),
-          message: exception.response?.data.toString() ?? exception.message,
-          stacktrace: exception.stackTrace.toString(),
-        ),
+      DioExceptionType.unknown => PlatformException(
+        code:
+            exception.response?.headers.value('Error-Code') ?? ((exception.response?.statusCode ?? 0) * 100).toString(),
+        message: exception.response?.data.toString() ?? exception.message,
+        stacktrace: exception.stackTrace.toString(),
+      ),
     };
   }
 }

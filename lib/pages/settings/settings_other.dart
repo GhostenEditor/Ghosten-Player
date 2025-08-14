@@ -1,6 +1,7 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:video_player/player.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../providers/user_config.dart';
@@ -42,6 +43,37 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
             subtitle: Text(AppLocalizations.of(context)!.settingsItemAutoPipTip),
             onChanged: userConfig.setAutoPip,
           ),
+          _buildPopupMenuItem(
+            title: Text(AppLocalizations.of(context)!.settingsItemPlayerKernel),
+            trailing:
+                userConfig.playerType == PlayerType.mpv
+
+                    ? Badge(
+                      label: const Text('Alpha'),
+                      offset: const Offset(6, -14),
+                      child: Text(AppLocalizations.of(context)!.playerType(userConfig.playerType.name)),
+                    )
+                    : Text(AppLocalizations.of(context)!.playerType(userConfig.playerType.name)),
+            onSelected: userConfig.setPlayerType,
+            itemBuilder:
+                (BuildContext context) =>
+                    PlayerType.values
+                        .map(
+                          (playerType) => CheckedPopupMenuItem(
+                            value: playerType,
+                            checked: userConfig.playerType == playerType,
+                            child:
+                                playerType == PlayerType.mpv
+                                    ? Badge(
+                                      label: const Text('Alpha'),
+                                      offset: const Offset(-20, 0),
+                                      child: Text(AppLocalizations.of(context)!.playerType(playerType.name)),
+                                    )
+                                    : Text(AppLocalizations.of(context)!.playerType(playerType.name)),
+                          ),
+                        )
+                        .toList(),
+          ),
           const Divider(),
           ListTile(title: Text(AppLocalizations.of(context)!.settingsItemDisplaySettings), dense: true),
           ListTile(
@@ -63,9 +95,9 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
             ),
           ),
           _buildPopupMenuItem(
-            title: AppLocalizations.of(context)!.settingsItemLanguage,
+            title: Text(AppLocalizations.of(context)!.settingsItemLanguage),
             icon: Icons.language,
-            trailing: AppLocalizations.of(context)!.systemLanguage(userConfig.language.name),
+            trailing: Text(AppLocalizations.of(context)!.systemLanguage(userConfig.language.name)),
             onSelected: userConfig.setLanguage,
             itemBuilder:
                 (BuildContext context) =>
@@ -80,9 +112,9 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
                         .toList(),
           ),
           _buildPopupMenuItem(
-            title: AppLocalizations.of(context)!.settingsItemTheme,
+            title: Text(AppLocalizations.of(context)!.settingsItemTheme),
             icon: Icons.light_mode_outlined,
-            trailing: AppLocalizations.of(context)!.systemTheme(userConfig.themeMode.name),
+            trailing: Text(AppLocalizations.of(context)!.systemTheme(userConfig.themeMode.name)),
             onSelected: userConfig.setTheme,
             itemBuilder:
                 (BuildContext context) =>
@@ -145,9 +177,9 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
   }
 
   Widget _buildPopupMenuItem<T>({
-    required String title,
+    required Widget title,
     String? subtitle,
-    required String trailing,
+    required Widget trailing,
     IconData? icon,
     PopupMenuItemSelected<T>? onSelected,
     required PopupMenuItemBuilder<T> itemBuilder,
@@ -158,9 +190,9 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
       onSelected: onSelected,
       itemBuilder: itemBuilder,
       child: ListTile(
-        leading: Icon(icon),
-        trailing: Text(trailing),
-        title: Text(title),
+        leading: icon != null ? Icon(icon) : null,
+        trailing: trailing,
+        title: title,
         subtitle: subtitle != null ? Text(subtitle) : null,
       ),
     );

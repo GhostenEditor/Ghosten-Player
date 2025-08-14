@@ -14,6 +14,7 @@ import '../../components/async_image.dart';
 import '../../components/playing_icon.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/shortcut_tv.dart';
+import '../../providers/user_config.dart';
 import '../../theme.dart';
 import '../../utils/utils.dart';
 import '../components/loading.dart';
@@ -140,6 +141,7 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
           fit: StackFit.expand,
           children: [
             PlayerPlatformView(
+              playerType: context.read<UserConfig>().playerType,
               initialized: () async {
                 _controller.setPlaylist(widget.playlist);
                 await _controller.next(widget.index);
@@ -470,15 +472,18 @@ class _ChannelListGroupedState extends State<_ChannelListGrouped> {
                     final name = _groupedPlaylist.keys.elementAt(index) ?? AppLocalizations.of(context)!.tagUnknown;
                     return Material(
                       type: MaterialType.transparency,
-                      child: ButtonSettingItem(
-                        dense: true,
-                        autofocus: _groupName.value == name,
-                        selected: _groupName.value == name,
-                        title: Text(name),
-                        onTap: () {
-                          _groupName.value = name;
-                          _playlist.value = _groupedPlaylist[name]!;
-                        },
+                      child: Padding(
+                        padding: const EdgeInsets.all(6),
+                        child: ButtonSettingItem(
+                          dense: true,
+                          autofocus: _groupName.value == name,
+                          selected: _groupName.value == name,
+                          title: Text(name),
+                          onTap: () {
+                            _groupName.value = name;
+                            _playlist.value = _groupedPlaylist[name]!;
+                          },
+                        ),
                       ),
                     );
                   },
@@ -498,21 +503,24 @@ class _ChannelListGroupedState extends State<_ChannelListGrouped> {
                     final item = _playlist.value.elementAt(index);
                     return Material(
                       type: MaterialType.transparency,
-                      child: ButtonSettingItem(
-                        dense: true,
-                        leading:
-                            item.poster != null ? AsyncImage(item.poster!, width: 40, showErrorWidget: false) : null,
-                        trailing:
-                            item == widget.controller.currentItem
-                                ? PlayingIcon(color: Theme.of(context).colorScheme.inversePrimary)
-                                : null,
-                        selected: item == widget.controller.currentItem,
-                        autofocus: item == widget.controller.currentItem,
-                        title: Text(item.title ?? ''),
-                        onTap: () {
-                          widget.onTap(widget.controller.playlist.value.indexOf(item));
-                          _updateEpg(item.source.id);
-                        },
+                      child: Padding(
+                        padding: const EdgeInsets.all(6),
+                        child: ButtonSettingItem(
+                          dense: true,
+                          leading:
+                              item.poster != null ? AsyncImage(item.poster!, width: 40, showErrorWidget: false) : null,
+                          trailing:
+                              item == widget.controller.currentItem
+                                  ? PlayingIcon(color: Theme.of(context).colorScheme.inversePrimary)
+                                  : null,
+                          selected: item == widget.controller.currentItem,
+                          autofocus: item == widget.controller.currentItem,
+                          title: Text(item.title ?? ''),
+                          onTap: () {
+                            widget.onTap(widget.controller.playlist.value.indexOf(item));
+                            _updateEpg(item.source.id);
+                          },
+                        ),
                       ),
                     );
                   },
@@ -534,12 +542,15 @@ class _ChannelListGroupedState extends State<_ChannelListGrouped> {
                         final isPlaying = _isPlaying(item);
                         return Material(
                           type: MaterialType.transparency,
-                          child: ButtonSettingItem(
-                            dense: true,
-                            selected: isPlaying,
-                            title: Text(item.title),
-                            subtitle: Text(_epgTimeFormat(item)),
-                            onTap: () {},
+                          child: Padding(
+                            padding: const EdgeInsets.all(6),
+                            child: ButtonSettingItem(
+                              dense: true,
+                              selected: isPlaying,
+                              title: Text(item.title),
+                              subtitle: Text(_epgTimeFormat(item)),
+                              onTap: () {},
+                            ),
                           ),
                         );
                       },
@@ -596,7 +607,7 @@ class _ChannelListViewState extends State<_ChannelListView> {
     return FocusScope(
       skipTraversal: true,
       child: ListView.separated(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
         itemCount: widget.itemCount,
         itemBuilder:
             (context, index) => Material(type: MaterialType.transparency, child: widget.itemBuilder(context, index)),

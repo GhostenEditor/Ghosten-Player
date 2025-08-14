@@ -2,12 +2,14 @@ import 'dart:async';
 
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:video_player/player.dart';
 
 import '../../components/error_message.dart';
 import '../../components/player_i18n_adaptor.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/models.dart';
+import '../../providers/user_config.dart';
 import '../../utils/utils.dart';
 import '../components/focusable_image.dart';
 import '../components/loading.dart';
@@ -88,6 +90,7 @@ class _CommonPlayerPageState<T> extends State<CommonPlayerPage<T>> {
     return Stack(
       children: [
         PlayerPlatformView(
+          playerType: context.read<UserConfig>().playerType,
           initialized: () async {
             try {
               final playlist = await widget.playlist;

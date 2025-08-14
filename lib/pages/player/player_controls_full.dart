@@ -73,6 +73,18 @@ class _PlayerControlsFullState<T> extends State<PlayerControlsFull<T>> with Play
           _isShowLockButton.value = show;
         });
     _controlsStream.add(ControlsStreamStatus.show);
+    _controller.status.addListener(() {
+      switch (_controller.status.value) {
+        case PlayerStatus.playing:
+          if (_isShowControls.value) _controlsStream.add(ControlsStreamStatus.show);
+        case PlayerStatus.paused:
+        case PlayerStatus.ended:
+        case PlayerStatus.error:
+        case PlayerStatus.idle:
+          _controlsStream.add(ControlsStreamStatus.showInfinite);
+        case PlayerStatus.buffering:
+      }
+    });
     setPreferredOrientations(true);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     final autoForceLandscape = context.read<UserConfig>().autoForceLandscape;

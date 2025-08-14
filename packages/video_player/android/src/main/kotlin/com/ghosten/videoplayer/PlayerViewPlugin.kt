@@ -1,9 +1,11 @@
 package com.ghosten.videoplayer
 
 import android.app.Activity
+import android.app.Application
 import android.app.PictureInPictureParams
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Bundle
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -13,7 +15,8 @@ import java.net.InetAddress
 import java.net.NetworkInterface
 import java.util.*
 
-class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware {
+class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware,
+    Application.ActivityLifecycleCallbacks {
     private lateinit var mChannel: MethodChannel
     private lateinit var activity: Activity
     private var mPlayerView: BasePlayerView? = null
@@ -35,20 +38,37 @@ class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activit
                 when (call.method) {
                     "init" -> {
                         if (mPlayerView == null)
-                            mPlayerView = Media3PlayerView(
-                                activity.applicationContext,
-                                activity,
-                                mChannel,
-                                call.argument("extensionRendererMode"),
-                                call.argument("enableDecoderFallback"),
-                                call.argument("language"),
-                                call.argument("subtitleStyle"),
-                                call.argument("width"),
-                                call.argument("height"),
-                                call.argument("top"),
-                                call.argument("left"),
-                                call.argument("autoPip") ?: true,
-                            )
+                            when (call.argument("type") as String?) {
+                                "media3" -> {
+                                    mPlayerView = Media3PlayerView(
+                                        activity.applicationContext,
+                                        activity,
+                                        mChannel,
+                                        call.argument("extensionRendererMode"),
+                                        call.argument("enableDecoderFallback"),
+                                        call.argument("language"),
+                                        call.argument("subtitleStyle"),
+                                        call.argument("width"),
+                                        call.argument("height"),
+                                        call.argument("top"),
+                                        call.argument("left"),
+                                        call.argument("autoPip") ?: true,
+                                    )
+                                }
+                                "mpv" -> {
+                                    mPlayerView = MPVPlayerView(
+                                        activity.applicationContext,
+                                        activity,
+                                        mChannel,
+                                        true,
+                                        call.argument("language"),
+                                        call.argument("width"),
+                                        call.argument("height"),
+                                        call.argument("top"),
+                                        call.argument("left"),
+                                    )
+                                }
+                            }
                     }
 
                     else -> {
@@ -69,6 +89,7 @@ class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activit
                             "dispose" -> {
                                 mPlayerView?.dispose()
                                 mPlayerView = null
+                                activity.unregisterActivityLifecycleCallbacks(this)
                             }
 
                             "setTrack" -> mPlayerView?.setTrack(
@@ -153,5 +174,28 @@ class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activit
             }
         }
         return null
+    }
+
+    override fun onActivityCreated(p0: Activity, p1: Bundle?) {
+    }
+
+    override fun onActivityStarted(p0: Activity) {
+    }
+
+    override fun onActivityResumed(p0: Activity) {
+        mPlayerView?.play()
+    }
+
+    override fun onActivityPaused(p0: Activity) {
+        mPlayerView?.pause()
+    }
+
+    override fun onActivityStopped(p0: Activity) {
+    }
+
+    override fun onActivitySaveInstanceState(p0: Activity, p1: Bundle) {
+    }
+
+    override fun onActivityDestroyed(p0: Activity) {
     }
 }

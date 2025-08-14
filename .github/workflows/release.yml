@@ -18,7 +18,7 @@ jobs:
 
       - uses: subosito/flutter-action@v1
         with:
-          flutter-version: '3.32.1'
+          flutter-version: '3.32.8'
 
       - run: flutter pub get
 
@@ -50,11 +50,19 @@ jobs:
           run-id: ${{ secrets.API_RUN_ID }}
           repository: ${{ secrets.API_REPOSITORY }}
 
+      - name: Download Libraries
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.TOKEN }}
+          run-id: ${{ secrets.MPV_RUN_ID }}
+          repository: ${{ secrets.MPV_REPOSITORY }}
+
       - name: Move Libraries
         run: |
           mkdir android/app/libs
           mv media3-extension/* android/app/libs
           mv api/* android/app/libs
+          mv mpv/* android/app/libs
 
       - name: Extract version from pubspec.yaml
         run: |
@@ -78,7 +86,6 @@ jobs:
           --build-number=${{ env.BUILD_NUMBER }} \
           --dart-define=BUILD_DATE=$(date "+%F") \
           --dart-define=BUILD_VERSION=${{ env.VERSION }} \
-          --dart-define=DEFAULT_IPTV_URL=${{ vars.DEFAULT_IPTV_URL }} \
           --flavor=mobile
 
       - name: Build TV apk
@@ -91,7 +98,6 @@ jobs:
           --build-number=${{ env.BUILD_NUMBER }} \
           --dart-define=BUILD_DATE=$(date "+%F") \
           --dart-define=BUILD_VERSION=${{ env.VERSION }} \
-          --dart-define=DEFAULT_IPTV_URL=${{ vars.DEFAULT_IPTV_URL }} \
           --flavor=tv
 
       - name: Rename Android APK

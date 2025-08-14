@@ -55,15 +55,17 @@ class _PlayerControlsState extends State<PlayerControls> {
   final _controlsStream = StreamController<ControlsStreamStatus>();
   final _navigatorKey = GlobalKey<NavigatorState>();
   final _panelType = ValueNotifier(_PlayerPanelType.none);
+  final _showLiteProgressbar = ValueNotifier(false);
   Duration _seekStep = const Duration(seconds: 30);
   StreamSubscription<bool>? _subscription;
   bool _reverse = false;
 
   @override
   void initState() {
-    SharedPreferences.getInstance().then(
-      (prefs) => _seekStep = Duration(seconds: PlayerConfig.getFastForwardSpeed(prefs)),
-    );
+    SharedPreferences.getInstance().then((prefs) {
+      _seekStep = Duration(seconds: PlayerConfig.getFastForwardSpeed(prefs));
+      _showLiteProgressbar.value = prefs.getBool('playerConfig.showLiteProgressbar') ?? false;
+    });
     if (widget.onMediaChange != null) {
       _controller.beforeMediaChanged.addListener(() {
         final data = _controller.beforeMediaChanged.value!;
@@ -154,6 +156,7 @@ class _PlayerControlsState extends State<PlayerControls> {
     _controlsStream.close();
     _progressController.dispose();
     _panelType.dispose();
+    _showLiteProgressbar.dispose();
     _subscription?.cancel();
     super.dispose();
   }
@@ -288,6 +291,18 @@ class _PlayerControlsState extends State<PlayerControls> {
                         ),
                   ),
                   _buildPanel(context),
+                  ListenableBuilder(
+                    listenable: Listenable.merge([_panelType, _showLiteProgressbar]),
+                    builder: (context, child) {
+                      return (_panelType.value == _PlayerPanelType.none && _showLiteProgressbar.value)
+                          ? child!
+                          : const SizedBox();
+                    },
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: PlayerLiteProgressbar(controller: _progressController),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -318,6 +333,7 @@ class _PlayerControlsState extends State<PlayerControls> {
                           controller: _controller,
                           actions: widget.actions,
                           onSeekSpeedChanged: (speed) => _seekStep = Duration(seconds: speed),
+                          onShowLiteProgressbarChanged: (value) => _showLiteProgressbar.value = value,
                         );
                       },
                     ),
@@ -538,18 +554,55 @@ class _PlayerControlsState extends State<PlayerControls> {
   }
 }
 
+class PlayerLiteProgressbar extends StatefulWidget {
+  const PlayerLiteProgressbar({super.key, required this.controller});
+
+  final PlayerProgressController controller;
+
+  @override
+  State<PlayerLiteProgressbar> createState() => _PlayerLiteProgressbarState();
+}
+
+class _PlayerLiteProgressbarState extends State<PlayerLiteProgressbar> {
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(_update);
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_update);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LinearProgressIndicator(
+      value: widget.controller.position / widget.controller.duration,
+      backgroundColor: Colors.transparent,
+    );
+  }
+
+  void _update() {
+    setState(() {});
+  }
+}
+
 class PlayerSettings extends StatelessWidget {
   const PlayerSettings({
     super.key,
     required this.controller,
     this.actions,
     required this.onSeekSpeedChanged,
+    required this.onShowLiteProgressbarChanged,
     required this.prefs,
   });
 
   final SharedPreferences prefs;
   final PlayerController<dynamic> controller;
   final ValueChanged<int> onSeekSpeedChanged;
+  final ValueChanged<bool> onShowLiteProgressbarChanged;
   final List<Widget> Function(BuildContext)? actions;
 
   @override
@@ -733,6 +786,20 @@ class PlayerSettings extends StatelessWidget {
                         PlayerConfig.setEnableDecoderFallback(prefs, value);
                         await PlayerController.setPlayerOption('enableDecoderFallback', value);
                         setState(() {});
+                      },
+                    );
+                  },
+                ),
+                StatefulBuilder(
+                  builder: (context, setState) {
+                    return SwitchSettingItem(
+                      title: Text(localizations.playerShowLiteProgressbar),
+                      value: prefs.getBool('playerConfig.showLiteProgressbar') ?? false,
+                      onChanged: (value) async {
+                        setState(() {
+                          prefs.setBool('playerConfig.showLiteProgressbar', value);
+                        });
+                        onShowLiteProgressbarChanged(value);
                       },
                     );
                   },

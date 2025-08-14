@@ -3,37 +3,37 @@ import 'package:flutter/services.dart';
 import 'player_platform_interface.dart';
 
 class MethodChannelPlayer extends PlayerPlatform {
-  final MethodChannel _channel = const MethodChannel('com.ghosten.player/player');
-
   MethodChannelPlayer();
 
+  final MethodChannel _channel = const MethodChannel('com.ghosten.player/player');
+
   @override
-  play() {
+  Future<void> play() {
     return _channel.invokeMethod('play');
   }
 
   @override
-  pause() {
+  Future<void> pause() {
     return _channel.invokeMethod('pause');
   }
 
   @override
-  next(int index) {
+  Future<void> next(int index) {
     return _channel.invokeMethod('next', index);
   }
 
   @override
-  seekTo(Duration position) {
+  Future<void> seekTo(Duration position) {
     return _channel.invokeMethod('seekTo', position.inMilliseconds);
   }
 
   @override
-  setPlaybackSpeed(double speed) {
+  Future<void> setPlaybackSpeed(double speed) {
     return _channel.invokeMethod('setPlaybackSpeed', speed);
   }
 
   @override
-  setTrack(String type, String? id) {
+  Future<void> setTrack(String type, String? id) {
     return _channel.invokeMethod('setTrack', {'type': type, 'id': id});
   }
 

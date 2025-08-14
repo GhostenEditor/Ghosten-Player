@@ -9,4 +9,5 @@ class FilePicker {
   static final downloadPath = FilePickerPlatform.instance.downloadPath;
   static final cachePath = FilePickerPlatform.instance.cachePath;
   static final showFilePicker = FilePickerPlatform.instance.showFilePicker;
+  static final externalUsbStorages = FilePickerPlatform.instance.externalUsbStorages;
 }

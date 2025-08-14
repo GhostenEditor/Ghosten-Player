@@ -7,9 +7,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
+import android.os.Environment
 import android.os.IBinder
+import android.provider.Settings
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat.startActivity
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -44,6 +48,7 @@ class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnec
             "arch" -> result.success(arch())
             "getLocalIpAddress" -> result.success(getLocalIpAddress())
             "requestStoragePermission" -> requestStoragePermission(result)
+            "requestStorageManagePermission" -> requestStorageManagePermission(result)
             "databasePath" -> result.success(apiService?.databasePath?.path)
             "initialized" -> {
                 if (serviceConnected) {
@@ -268,6 +273,26 @@ class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnec
             }
         }
         return null
+    }
+
+    fun requestStorageManagePermission(result: Result) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (!Environment.isExternalStorageManager()) {
+                val intent: Intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+                intent.setData(Uri.parse("package:" + activity.getPackageName()))
+                if (intent.resolveActivity(activity.packageManager) != null) {
+                    activity.startActivity(intent)
+                } else {
+                    val fallbackIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                    fallbackIntent.setData(Uri.parse("package:" + activity.getPackageName()))
+                    activity.startActivity(fallbackIntent)
+                }
+            } else {
+                result.success(true)
+            }
+        } else {
+            result.success(true)
+        }
     }
 
     fun requestStoragePermission(result: Result) {
