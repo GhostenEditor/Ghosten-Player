@@ -271,7 +271,7 @@ class MPVPlayerView(
             val commands = mutableListOf(
                 "loadfile",
                 video.url,
-                "append-play",
+                "replace",
                 "0",
                 "start=${video.startPosition / 1000}",
             )
