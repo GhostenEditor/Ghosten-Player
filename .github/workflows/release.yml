@@ -74,7 +74,7 @@ jobs:
           MAJOR=$(echo ${{ env.VERSION }} |  cut -d '.' -f 1)
           MINOR=$(echo ${{ env.VERSION }} |  cut -d '.' -f 2)
           PATCH=$(echo ${{ env.VERSION }} |  cut -d '.' -f 3 | cut -d '-' -f 1)
-          build_number=$((($MAJOR - 1) * 10000 + $MINOR * 100 + $PATCH))
+          build_number=$(($MAJOR * 10000 + $MINOR * 100 + $PATCH))
           echo "BUILD_NUMBER=$build_number" >> $GITHUB_ENV
 
       - name: Build Mobile apk
