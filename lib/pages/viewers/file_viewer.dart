@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,15 +17,17 @@ class FileViewer extends StatelessWidget {
   const FileViewer({
     super.key,
     required this.item,
-    required this.driverId,
     required this.onPage,
     required this.onRefresh,
+    required this.onRename,
+    required this.onRemove,
   });
 
-  final int driverId;
   final DriverFile item;
   final VoidCallback onPage;
   final VoidCallback onRefresh;
+  final Future<void> Function(String) onRename;
+  final Future<void> Function() onRemove;
 
   @override
   Widget build(BuildContext context) {
@@ -32,26 +36,6 @@ class FileViewer extends StatelessWidget {
       tooltip: '',
       itemBuilder:
           (context) => [
-            PopupMenuItem(
-              padding: EdgeInsets.zero,
-              onTap: () async {
-                final filename = await showDialog<String>(
-                  context: context,
-                  builder: (context) => _FileNameDialog(dialogTitle: AppLocalizations.of(context)!.buttonNewFolder),
-                );
-                if (filename != null && context.mounted) {
-                  final resp = await showNotification(context, Api.fileMkdir(driverId, item.parentId, filename));
-                  if (resp?.error == null) {
-                    onRefresh();
-                  }
-                }
-              },
-              child: ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                leading: const Icon(Icons.folder_open_rounded),
-                title: Text(AppLocalizations.of(context)!.buttonNewFolder),
-              ),
-            ),
             if (item.viewable())
               PopupMenuItem(
                 padding: EdgeInsets.zero,
@@ -85,10 +69,10 @@ class FileViewer extends StatelessWidget {
                   context: context,
                   builder:
                       (context) =>
-                          _FileNameDialog(dialogTitle: AppLocalizations.of(context)!.buttonRename, filename: item.name),
+                          FileNameDialog(dialogTitle: AppLocalizations.of(context)!.buttonRename, filename: item.name),
                 );
                 if (filename != null && context.mounted) {
-                  final resp = await showNotification(context, Api.fileRename(driverId, item.id, filename));
+                  final resp = await showNotification(context, onRename(filename));
                   if (resp?.error == null) {
                     onRefresh();
                   }
@@ -105,7 +89,7 @@ class FileViewer extends StatelessWidget {
               onTap: () async {
                 final flag = await showConfirm(context, AppLocalizations.of(context)!.deleteConfirmText);
                 if ((flag ?? false) && context.mounted) {
-                  final resp = await showNotification(context, Api.fileRemove(driverId, item.id));
+                  final resp = await showNotification(context, onRemove());
                   if (resp?.error == null) {
                     onRefresh();
                   }
@@ -142,7 +126,8 @@ class FileViewer extends StatelessWidget {
                 : null,
         child: ListTile(
           leading: Icon(item.icon()),
-          title: Text(item.name, overflow: TextOverflow.ellipsis),
+          title: Text(item.name),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
           subtitle: RichText(
             text: TextSpan(
               style: Theme.of(context).textTheme.bodySmall,
@@ -163,17 +148,17 @@ class FileViewer extends StatelessWidget {
   }
 }
 
-class _FileNameDialog extends StatefulWidget {
-  const _FileNameDialog({required this.dialogTitle, this.filename});
+class FileNameDialog extends StatefulWidget {
+  const FileNameDialog({required this.dialogTitle, this.filename});
 
   final String dialogTitle;
   final String? filename;
 
   @override
-  State<_FileNameDialog> createState() => _FileNameDialogState();
+  State<FileNameDialog> createState() => _FileNameDialogState();
 }
 
-class _FileNameDialogState extends State<_FileNameDialog> {
+class _FileNameDialogState extends State<FileNameDialog> {
   late final _controller = TextEditingController(text: widget.filename);
   final _formKey = GlobalKey<FormState>();
 

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
+import '../file_picker.dart';
 import 'file_picker_method_channel.dart';
 import 'models.dart';
 
@@ -38,21 +40,18 @@ abstract class FilePickerPlatform extends PlatformInterface {
 
   Future<T?> showFilePicker<T>(
     BuildContext context, {
-    String? title,
-    Widget? empty,
-    String? rootPath,
-    Widget Function(AsyncSnapshot<List<T>>)? errorBuilder,
-    required Widget Function(
-      BuildContext context,
-      T item, {
-      required VoidCallback onPage,
-      required ValueChanged<T?> onSubmit,
-      required VoidCallback onRefresh,
-      T? groupValue,
-    })
-    childBuilder,
-    required FilePickerType type,
-    required Future<List<T>> Function(T? id) onFetch,
+        String? rootPath,
+        required FilePickerType type,
+        Widget? defaultTitle,
+        required Widget Function(T?) titleBuilder,
+        required List<Widget> actions,
+        required Future<PageData<T>> Function(int) fetchData,
+        required ItemWidgetBuilder<T> itemBuilder,
+        required FileViewerController<T> controller,
+        WidgetBuilder? firstPageProgressIndicatorBuilder,
+        WidgetBuilder? newPageProgressIndicatorBuilder,
+        WidgetBuilder? noItemsFoundIndicatorBuilder,
+        WidgetBuilder? firstPageErrorIndicatorBuilder,
   }) {
     throw UnimplementedError('showFilePicker() has not been implemented.');
   }
