@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:scaled_app/scaled_app.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
+import 'components/quit_confirm.dart';
 import 'const.dart';
 import 'l10n/app_localizations.dart';
 import 'pages_tv/home.dart';
@@ -70,7 +71,7 @@ class MainApp extends StatelessWidget {
         ...WidgetsApp.defaultShortcuts,
         const SingleActivator(LogicalKeyboardKey.select): const ActivateIntent(),
       },
-      home: const TVHomePage(),
+      home: const QuitConfirm(child: TVHomePage()),
       themeAnimationCurve: Curves.easeOut,
       builder: (context, widget) {
         return FocusTraversalGroup(
