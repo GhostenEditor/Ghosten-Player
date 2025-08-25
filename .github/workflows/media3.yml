@@ -30,8 +30,8 @@ jobs:
         with:
           cmake-version: '3.16.x'
 
-      # - working-directory: media
-        # run: ./gradlew :lib-decode-av1:build
+      - working-directory: media
+        run: ./gradlew :lib-decode-av1:build
 
       - run: git clone https://github.com/FFmpeg/FFmpeg
 
