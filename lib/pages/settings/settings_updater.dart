@@ -141,9 +141,8 @@ class SystemSettingsUpdaterState extends State<SystemSettingsUpdater> {
                             constraints: const BoxConstraints(minWidth: double.infinity),
                             builder: (context) => UpdateBottomSheet(data),
                           );
-                          _updated = true;
                         } else {
-                          _updated = false;
+                          _updated = true;
                         }
                         setState(() => _loading = false);
                       },
