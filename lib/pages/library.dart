@@ -286,20 +286,24 @@ class _LibraryItem extends StatelessWidget {
                     ? Container(
                       color: Theme.of(context).colorScheme.onSurface.withAlpha(0x11),
                       padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        spacing: 12,
-                        children: [
-                          switch (type) {
-                            LibraryType.tv => const Icon(Icons.tv, size: 36),
-                            LibraryType.movie => const Icon(Icons.movie_creation_outlined, size: 36),
-                          },
-                          Text(
-                            item.filename,
+                      child: Align(
+                        child: RichText(
+                          overflow: TextOverflow.ellipsis,
+                          text: TextSpan(
                             style: Theme.of(context).textTheme.titleLarge,
-                            overflow: TextOverflow.ellipsis,
+                            children: [
+                              WidgetSpan(
+                                alignment: PlaceholderAlignment.middle,
+                                child: switch (type) {
+                                  LibraryType.tv => const Icon(Icons.tv, size: 36),
+                                  LibraryType.movie => const Icon(Icons.movie_creation_outlined, size: 36),
+                                },
+                              ),
+                              const WidgetSpan(child: SizedBox(width: 12)),
+                              TextSpan(text: item.filename),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     )
                     : AsyncImage(item.poster!, ink: true),

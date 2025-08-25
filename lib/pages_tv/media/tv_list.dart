@@ -280,7 +280,8 @@ class _TVListPageState extends State<TVListPage> {
                     padding: const EdgeInsets.symmetric(horizontal: 6),
                     child: LinearProgressIndicator(
                       value: item.lastPlayedPosition!.inSeconds / item.duration!.inSeconds,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onSurface,
+                      backgroundColor: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(3),
                       minHeight: 3,
                     ),

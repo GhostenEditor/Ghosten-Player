@@ -66,7 +66,7 @@ class SettingsPage extends StatelessWidget {
           const DividerSettingItem(),
           ButtonSettingItem(
             title: Text(AppLocalizations.of(context)!.settingsItemServer),
-            leading: const Icon(Icons.storage_outlined),
+            leading: const Icon(Icons.public_rounded),
             onTap: () => navigateToSlideLeft(context, const SystemSettingsServer()),
           ),
           ButtonSettingItem(

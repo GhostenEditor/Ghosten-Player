@@ -52,9 +52,7 @@ class FocusableImage extends StatelessWidget {
                 ink: true,
                 radius: BorderRadius.circular(6),
               )
-              : Center(
-                child: Icon(placeholderIcon, size: 50, color: Theme.of(context).colorScheme.surfaceContainerHigh),
-              ),
+              : SizedBox(),
     );
   }
 }
