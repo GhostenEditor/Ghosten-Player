@@ -8,7 +8,7 @@ jobs:
       - run: git clone https://github.com/androidx/media.git
 
       - working-directory: media
-        run: git checkout tags/1.6.1
+        run: git checkout tags/1.8.0
 
       - working-directory: media/libraries/decoder_av1/src/main/jni
         run: git clone https://github.com/google/cpu_features
@@ -30,8 +30,8 @@ jobs:
         with:
           cmake-version: '3.16.x'
 
-      - working-directory: media
-        run: ./gradlew :lib-decode-av1:build
+#      - working-directory: media
+#        run: ./gradlew :lib-decode-av1:build
 
       - run: git clone https://github.com/FFmpeg/FFmpeg
 
@@ -61,7 +61,7 @@ jobs:
         run: |
           mkdir artifacts
           cp media/libraries/decoder_ffmpeg/buildout/outputs/aar/lib-decoder-ffmpeg-release.aar artifacts/
-          cp media/libraries/decoder_av1/buildout/outputs/aar/lib-decoder-av1-release.aar artifacts/
+#          cp media/libraries/decoder_av1/buildout/outputs/aar/lib-decoder-av1-release.aar artifacts/
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
