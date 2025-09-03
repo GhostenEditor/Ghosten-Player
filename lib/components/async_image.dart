@@ -49,7 +49,10 @@ class AsyncImage extends StatelessWidget {
         filterQuality: FilterQuality.medium,
         width: width,
         height: height,
-        httpHeaders: httpHeaders,
+        httpHeaders:
+            src.startsWith('https://media.themoviedb.org')
+                ? httpHeaders ?? const {'referer': 'https://www.themoviedb.org/'}
+                : httpHeaders,
         errorWidget:
             (context, url, error) =>
                 showErrorWidget
