@@ -1358,6 +1358,12 @@ abstract class AppLocalizations {
   /// **'Feedback'**
   String get settingsItemFeedback;
 
+  /// No description provided for @settingsItemHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get settingsItemHelp;
+
   /// No description provided for @settingsItemInfo.
   ///
   /// In en, this message translates to:

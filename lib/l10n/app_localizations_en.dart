@@ -824,6 +824,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsItemFeedback => 'Feedback';
 
   @override
+  String get settingsItemHelp => 'Help';
+
+  @override
   String get settingsItemInfo => 'Info';
 
   @override
