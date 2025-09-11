@@ -25,12 +25,14 @@ class TVHomePage extends StatefulWidget {
 class _HomeState extends State<TVHomePage> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _navigatorKey = GlobalKey<NavigatorState>();
+  final _scrollController = ScrollController();
   int tabIndex = 0;
   bool reverse = false;
 
   @override
-  void initState() {
-    super.initState();
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -52,33 +54,11 @@ class _HomeState extends State<TVHomePage> {
       child: Scaffold(
         key: _scaffoldKey,
         extendBodyBehindAppBar: true,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          surfaceTintColor: Colors.transparent,
-          leadingWidth: 160,
-          leading: Padding(
-            padding: const EdgeInsets.only(left: 32),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                label: Text(AppLocalizations.of(context)!.search),
-                onPressed: () => navigateTo(context, const SearchPage(autofocus: true)),
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  iconColor: Colors.white,
-                  foregroundColor: Theme.of(context).colorScheme.onSurface,
-                  visualDensity: VisualDensity.compact,
-                ),
-                icon: const Icon(Icons.search_rounded, size: 20, color: Colors.grey),
-              ),
-            ),
-          ),
-          title: _HomeTabs(
-            tabs: [
-              AppLocalizations.of(context)!.homeTabTV,
-              AppLocalizations.of(context)!.homeTabMovie,
-              AppLocalizations.of(context)!.homeTabLive,
-            ],
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(56),
+          child: _HomeAppbar(
+            scaffoldKey: _scaffoldKey,
+            scrollController: _scrollController,
             onTabChange: (index) {
               setState(() {
                 reverse = true;
@@ -86,17 +66,6 @@ class _HomeState extends State<TVHomePage> {
               });
             },
           ),
-          actions: [
-            TVIconButton(
-              onPressed: () {
-                _scaffoldKey.currentState!.openEndDrawer();
-              },
-              icon: const Icon(Icons.settings_outlined),
-            ),
-            const SizedBox(width: 12),
-            const Clock(),
-            const SizedBox(width: 48),
-          ],
         ),
         endDrawer: NavigatorPopHandler(
           onPopWithResult: (_) => _navigatorKey.currentState!.maybePop(),
@@ -122,8 +91,8 @@ class _HomeState extends State<TVHomePage> {
                 child: child,
               ),
           child: switch (tabIndex) {
-            0 => TVListPage(endDrawerNavigatorKey: _navigatorKey),
-            1 => MovieListPage(endDrawerNavigatorKey: _navigatorKey),
+            0 => TVListPage(endDrawerNavigatorKey: _navigatorKey, scrollController: _scrollController),
+            1 => MovieListPage(endDrawerNavigatorKey: _navigatorKey, scrollController: _scrollController),
             2 => const LiveListPage(),
             _ => const SizedBox(),
           },
@@ -137,7 +106,7 @@ class _HomeTabs extends StatefulWidget {
   const _HomeTabs({required this.tabs, required this.onTabChange});
 
   final List<String> tabs;
-  final Function(int) onTabChange;
+  final ValueChanged<int> onTabChange;
 
   @override
   State<_HomeTabs> createState() => _HomeTabsState();
@@ -258,5 +227,107 @@ class _HomeTabsState extends State<_HomeTabs> {
     final offset = box.globalToLocal(Offset.zero, ancestor: box.parent?.parent?.parent?.parent);
     _lineWidth = box.size.width;
     _lineOffset = -offset.dx;
+  }
+}
+
+class _HomeAppbar extends StatefulWidget {
+  const _HomeAppbar({required this.onTabChange, required this.scaffoldKey, required this.scrollController});
+
+  final ValueChanged<int> onTabChange;
+  final GlobalKey<ScaffoldState> scaffoldKey;
+  final ScrollController scrollController;
+
+  @override
+  State<_HomeAppbar> createState() => _HomeAppbarState();
+}
+
+class _HomeAppbarState extends State<_HomeAppbar> {
+  bool _show = true;
+  double _offset = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.scrollController.addListener(_scrollListener);
+  }
+
+  @override
+  void dispose() {
+    widget.scrollController.removeListener(_scrollListener);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PageTransitionSwitcher(
+      reverse: _show,
+      duration: const Duration(milliseconds: 600),
+      transitionBuilder: (Widget child, Animation<double> animation, Animation<double> secondaryAnimation) {
+        return SharedAxisTransition(
+          animation: animation,
+          secondaryAnimation: secondaryAnimation,
+          transitionType: SharedAxisTransitionType.vertical,
+          fillColor: Colors.transparent,
+          child: child,
+        );
+      },
+      child:
+          _show
+              ? AppBar(
+                backgroundColor: Colors.transparent,
+                surfaceTintColor: Colors.transparent,
+                leadingWidth: 160,
+                leading: Padding(
+                  padding: const EdgeInsets.only(left: 32),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton.icon(
+                      label: Text(AppLocalizations.of(context)!.search),
+                      onPressed: () => navigateTo(context, const SearchPage(autofocus: true)),
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        iconColor: Colors.white,
+                        foregroundColor: Theme.of(context).colorScheme.onSurface,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      icon: const Icon(Icons.search_rounded, size: 20, color: Colors.grey),
+                    ),
+                  ),
+                ),
+                title: _HomeTabs(
+                  tabs: [
+                    AppLocalizations.of(context)!.homeTabTV,
+                    AppLocalizations.of(context)!.homeTabMovie,
+                    AppLocalizations.of(context)!.homeTabLive,
+                  ],
+                  onTabChange: widget.onTabChange,
+                ),
+                actions: [
+                  TVIconButton(
+                    onPressed: () {
+                      widget.scaffoldKey.currentState!.openEndDrawer();
+                    },
+                    icon: const Icon(Icons.settings_outlined),
+                  ),
+                  const SizedBox(width: 12),
+                  const Clock(),
+                  const SizedBox(width: 48),
+                ],
+              )
+              : const SizedBox(),
+    );
+  }
+
+  void _scrollListener() {
+    if (widget.scrollController.offset > 300) {
+      if (_show) {
+        setState(() => _show = false);
+      }
+    } else {
+      if (!_show) {
+        setState(() => _show = true);
+      }
+    }
+    _offset = widget.scrollController.offset;
   }
 }

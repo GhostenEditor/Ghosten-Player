@@ -16,9 +16,10 @@ import 'components/media_grid_item.dart';
 import 'mixins/channel.dart';
 
 class MovieListPage extends StatefulWidget {
-  const MovieListPage({super.key, required this.endDrawerNavigatorKey});
+  const MovieListPage({super.key, required this.endDrawerNavigatorKey, required this.scrollController});
 
   final GlobalKey<NavigatorState> endDrawerNavigatorKey;
+  final ScrollController scrollController;
 
   @override
   State<MovieListPage> createState() => _MovieListPageState();
@@ -28,14 +29,11 @@ class _MovieListPageState extends State<MovieListPage> {
   final _backdrop = ValueNotifier<String?>(null);
   final _carouselIndex = ValueNotifier<int?>(null);
   final _showBlur = ValueNotifier(false);
-  final _controller = ScrollController();
+  late final halfHeight = MediaQuery.of(context).size.height / 2;
 
   @override
   void initState() {
-    _controller.addListener(() {
-      final halfHeight = MediaQuery.of(context).size.height / 2;
-      _showBlur.value = _controller.offset > halfHeight;
-    });
+    widget.scrollController.addListener(_scrollListener);
     super.initState();
   }
 
@@ -43,7 +41,7 @@ class _MovieListPageState extends State<MovieListPage> {
   void dispose() {
     _backdrop.dispose();
     _carouselIndex.dispose();
-    _controller.dispose();
+    widget.scrollController.removeListener(_scrollListener);
     super.dispose();
   }
 
@@ -73,7 +71,7 @@ class _MovieListPageState extends State<MovieListPage> {
           ),
         ),
         CustomScrollView(
-          controller: _controller,
+          controller: widget.scrollController,
           slivers: [
             FutureBuilderSliverHandler(
               future: Api.movieRecommendation(),
@@ -103,7 +101,7 @@ class _MovieListPageState extends State<MovieListPage> {
                                   len: snapshot.requireData.length,
                                   onFocusChange: (f) {
                                     if (f) {
-                                      _controller.animateTo(
+                                      widget.scrollController.animateTo(
                                         0,
                                         duration: const Duration(milliseconds: 400),
                                         curve: Curves.easeOut,
@@ -308,5 +306,9 @@ class _MovieListPageState extends State<MovieListPage> {
     if ((flag ?? false) && mounted) {
       setState(() {});
     }
+  }
+
+  void _scrollListener() {
+    _showBlur.value = widget.scrollController.offset > halfHeight;
   }
 }

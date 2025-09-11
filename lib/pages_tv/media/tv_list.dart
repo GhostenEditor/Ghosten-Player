@@ -18,9 +18,10 @@ import 'components/media_grid_item.dart';
 import 'mixins/channel.dart';
 
 class TVListPage extends StatefulWidget {
-  const TVListPage({super.key, required this.endDrawerNavigatorKey});
+  const TVListPage({super.key, required this.endDrawerNavigatorKey, required this.scrollController});
 
   final GlobalKey<NavigatorState> endDrawerNavigatorKey;
+  final ScrollController scrollController;
 
   @override
   State<TVListPage> createState() => _TVListPageState();
@@ -30,21 +31,18 @@ class _TVListPageState extends State<TVListPage> {
   final _backdrop = ValueNotifier<String?>(null);
   final _carouselIndex = ValueNotifier<int?>(null);
   final _showBlur = ValueNotifier(false);
-  final _controller = ScrollController();
+  late final halfHeight = MediaQuery.of(context).size.height / 2;
 
   @override
   void initState() {
-    _controller.addListener(() {
-      final halfHeight = MediaQuery.of(context).size.height / 2;
-      _showBlur.value = _controller.offset > halfHeight;
-    });
+    widget.scrollController.addListener(_scrollListener);
     super.initState();
   }
 
   @override
   void dispose() {
     _backdrop.dispose();
-    _controller.dispose();
+    widget.scrollController.removeListener(_scrollListener);
     super.dispose();
   }
 
@@ -74,7 +72,7 @@ class _TVListPageState extends State<TVListPage> {
           ),
         ),
         CustomScrollView(
-          controller: _controller,
+          controller: widget.scrollController,
           slivers: [
             FutureBuilderSliverHandler(
               future: Api.tvRecommendation(),
@@ -104,7 +102,7 @@ class _TVListPageState extends State<TVListPage> {
                                   len: snapshot.requireData.length,
                                   onFocusChange: (f) {
                                     if (f) {
-                                      _controller.animateTo(
+                                      widget.scrollController.animateTo(
                                         0,
                                         duration: const Duration(milliseconds: 400),
                                         curve: Curves.easeOut,
@@ -318,5 +316,9 @@ class _TVListPageState extends State<TVListPage> {
   Future<void> _onMediaTap(TVSeries item) async {
     final flag = await navigateTo<bool>(context, TVDetail(initialData: item));
     if ((flag ?? false) && mounted) setState(() {});
+  }
+
+  void _scrollListener() {
+    _showBlur.value = widget.scrollController.offset > halfHeight;
   }
 }
