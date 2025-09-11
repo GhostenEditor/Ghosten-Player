@@ -28,6 +28,7 @@ class _HomeState extends State<TVHomePage> {
   final _scrollController = ScrollController();
   int tabIndex = 0;
   bool reverse = false;
+  bool confirmed = false;
 
   @override
   void dispose() {
@@ -38,67 +39,102 @@ class _HomeState extends State<TVHomePage> {
   @override
   Widget build(BuildContext context) {
     final shortcuts = context.watch<ShortcutTV>();
-    return Focus(
-      skipTraversal: true,
-      onKeyEvent: (FocusNode node, KeyEvent event) {
-        if (event is KeyDownEvent || event is KeyRepeatEvent) {
-          if (event.logicalKey == shortcuts.menu) {
-            if (!_scaffoldKey.currentState!.isEndDrawerOpen) {
-              _scaffoldKey.currentState!.openEndDrawer();
-              return KeyEventResult.handled;
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: _onPopInvokedWithResult,
+      child: Focus(
+        skipTraversal: true,
+        onKeyEvent: (FocusNode node, KeyEvent event) {
+          if (event is KeyDownEvent || event is KeyRepeatEvent) {
+            if (event.logicalKey == shortcuts.menu) {
+              if (!_scaffoldKey.currentState!.isEndDrawerOpen) {
+                _scaffoldKey.currentState!.openEndDrawer();
+                return KeyEventResult.handled;
+              }
             }
           }
-        }
-        return KeyEventResult.ignored;
-      },
-      child: Scaffold(
-        key: _scaffoldKey,
-        extendBodyBehindAppBar: true,
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(56),
-          child: _HomeAppbar(
-            scaffoldKey: _scaffoldKey,
-            scrollController: _scrollController,
-            onTabChange: (index) {
-              setState(() {
-                reverse = true;
-                tabIndex = index;
-              });
+          return KeyEventResult.ignored;
+        },
+        child: Scaffold(
+          key: _scaffoldKey,
+          extendBodyBehindAppBar: true,
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(kToolbarHeight),
+            child: _HomeAppbar(
+              scaffoldKey: _scaffoldKey,
+              scrollController: _scrollController,
+              onTabChange: (index) {
+                setState(() {
+                  reverse = true;
+                  tabIndex = index;
+                });
+              },
+            ),
+          ),
+          endDrawer: NavigatorPopHandler(
+            onPopWithResult: (_) => _navigatorKey.currentState!.maybePop(),
+            child: Container(
+              width: 360,
+              color: Theme.of(context).colorScheme.surfaceContainerLow,
+              child: Navigator(
+                key: _navigatorKey,
+                onGenerateRoute:
+                    (settings) => FadeInPageRoute(builder: (context) => const SettingsPage(), settings: settings),
+              ),
+            ),
+          ),
+          body: PageTransitionSwitcher(
+            reverse: reverse,
+            duration: const Duration(milliseconds: 800),
+            transitionBuilder:
+                (child, primaryAnimation, secondaryAnimation) => SharedAxisTransition(
+                  animation: primaryAnimation,
+                  secondaryAnimation: secondaryAnimation,
+                  transitionType: SharedAxisTransitionType.horizontal,
+                  fillColor: Colors.transparent,
+                  child: child,
+                ),
+            child: switch (tabIndex) {
+              0 => TVListPage(endDrawerNavigatorKey: _navigatorKey, scrollController: _scrollController),
+              1 => MovieListPage(endDrawerNavigatorKey: _navigatorKey, scrollController: _scrollController),
+              2 => const LiveListPage(),
+              _ => const SizedBox(),
             },
           ),
         ),
-        endDrawer: NavigatorPopHandler(
-          onPopWithResult: (_) => _navigatorKey.currentState!.maybePop(),
-          child: Container(
-            width: 360,
-            color: Theme.of(context).colorScheme.surfaceContainerLow,
-            child: Navigator(
-              key: _navigatorKey,
-              onGenerateRoute:
-                  (settings) => FadeInPageRoute(builder: (context) => const SettingsPage(), settings: settings),
-            ),
-          ),
-        ),
-        body: PageTransitionSwitcher(
-          reverse: reverse,
-          duration: const Duration(milliseconds: 800),
-          transitionBuilder:
-              (child, primaryAnimation, secondaryAnimation) => SharedAxisTransition(
-                animation: primaryAnimation,
-                secondaryAnimation: secondaryAnimation,
-                transitionType: SharedAxisTransitionType.horizontal,
-                fillColor: Colors.transparent,
-                child: child,
-              ),
-          child: switch (tabIndex) {
-            0 => TVListPage(endDrawerNavigatorKey: _navigatorKey, scrollController: _scrollController),
-            1 => MovieListPage(endDrawerNavigatorKey: _navigatorKey, scrollController: _scrollController),
-            2 => const LiveListPage(),
-            _ => const SizedBox(),
-          },
-        ),
       ),
     );
+  }
+
+  Future<void> _onPopInvokedWithResult(bool didPop, dynamic _) async {
+    if (didPop) {
+      return;
+    }
+    if (Navigator.of(context).canPop()) {
+      if (_scaffoldKey.currentState!.isEndDrawerOpen) {
+        _scaffoldKey.currentState!.closeEndDrawer();
+      }
+      return;
+    }
+    if (_scrollController.offset > 300) {
+      _scrollController.animateTo(0, duration: const Duration(milliseconds: 400), curve: Curves.easeOut);
+      return;
+    }
+    if (confirmed) {
+      confirmed = false;
+      SystemNavigator.pop();
+    } else {
+      confirmed = true;
+      final controller = ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.confirmTextExit, textAlign: TextAlign.center),
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          width: 200,
+        ),
+      );
+      controller.closed.then((_) => confirmed = false);
+    }
   }
 }
 
@@ -243,7 +279,6 @@ class _HomeAppbar extends StatefulWidget {
 
 class _HomeAppbarState extends State<_HomeAppbar> {
   bool _show = true;
-  double _offset = 0;
 
   @override
   void initState() {
@@ -328,6 +363,5 @@ class _HomeAppbarState extends State<_HomeAppbar> {
         setState(() => _show = true);
       }
     }
-    _offset = widget.scrollController.offset;
   }
 }

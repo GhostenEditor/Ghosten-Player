@@ -432,7 +432,9 @@ class _EpisodeListTile extends StatelessWidget {
                       BadgeTheme(
                         data: BadgeTheme.of(context).copyWith(backgroundColor: Colors.black87, textColor: Colors.white),
                         child: IconTheme(
-                          data: IconTheme.of(context).copyWith(size: 12,color: Theme.of(context).colorScheme.onInverseSurface),
+                          data: IconTheme.of(
+                            context,
+                          ).copyWith(size: 12, color: Theme.of(context).colorScheme.onInverseSurface),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             spacing: 4,
@@ -440,7 +442,7 @@ class _EpisodeListTile extends StatelessWidget {
                               if (episode.watched) const Badge(label: Icon(Icons.check_circle)),
                               if (episode.favorite) const Badge(label: Icon(Icons.favorite_rounded)),
                               if (episode.downloaded) const Badge(label: Icon(Icons.download_rounded)),
-                              if (episode.duration != null)
+                              if (episode.duration != null && episode.duration != Duration.zero)
                                 IconTheme(
                                   data: IconThemeData(color: Theme.of(context).colorScheme.onInverseSurface, size: 14),
                                   child: Badge(
