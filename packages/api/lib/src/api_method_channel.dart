@@ -97,7 +97,7 @@ class MethodChannelApi extends ApiPlatform {
       return null;
     }
     final res = await Dio(BaseOptions(connectTimeout: const Duration(seconds: 30))).get(updateUrl);
-    final Iterable<UpdateResp> data = (res.data as List<dynamic>)
+    final Iterable<UpdateResp> data = (res.data as List<Json>)
         .map(UpdateResp.fromJson)
         .where((el) => prerelease || !el.prerelease);
 

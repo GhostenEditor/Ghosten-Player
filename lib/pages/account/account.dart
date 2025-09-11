@@ -154,7 +154,7 @@ class _AccountManageState extends State<AccountManage> {
                   onTap: () async {
                     final filename = await showDialog<String>(
                       context: context,
-                      builder: (context) => FileNameDialog(dialogTitle: AppLocalizations.of(context)!.buttonNewFolder),
+                      builder: (context) => FilenameDialog(dialogTitle: AppLocalizations.of(context)!.buttonNewFolder),
                     );
                     if (filename != null && context.mounted) {
                       final resp = await showNotification(

@@ -744,8 +744,11 @@ class SettingScraper {
 }
 
 class UpdateResp {
-  UpdateResp.fromJson(dynamic json)
-    : assets = List.generate(json['assets'].length, (index) => UpdateRespAsset.fromJson(json['assets'][index])),
+  UpdateResp.fromJson(Json json)
+    : assets = List.generate(
+        (json['assets'] as JsonList).length,
+        (index) => UpdateRespAsset.fromJson((json['assets'] as JsonList).elementAt(index)),
+      ),
       tagName = Version.fromString((json['tag_name'] as String).substring(1)),
       comment = json['body'],
       prerelease = json['prerelease'],

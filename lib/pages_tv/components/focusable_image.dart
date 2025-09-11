@@ -52,7 +52,7 @@ class FocusableImage extends StatelessWidget {
                 ink: true,
                 radius: BorderRadius.circular(6),
               )
-              : SizedBox(),
+              : const SizedBox(),
     );
   }
 }

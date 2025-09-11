@@ -4,7 +4,6 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import '../file_picker.dart';
 import 'file_picker_method_channel.dart';
-import 'models.dart';
 
 abstract class FilePickerPlatform extends PlatformInterface {
   FilePickerPlatform() : super(token: _token);

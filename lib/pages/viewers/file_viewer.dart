@@ -69,7 +69,7 @@ class FileViewer extends StatelessWidget {
                   context: context,
                   builder:
                       (context) =>
-                          FileNameDialog(dialogTitle: AppLocalizations.of(context)!.buttonRename, filename: item.name),
+                          FilenameDialog(dialogTitle: AppLocalizations.of(context)!.buttonRename, filename: item.name),
                 );
                 if (filename != null && context.mounted) {
                   final resp = await showNotification(context, onRename(filename));
@@ -148,17 +148,17 @@ class FileViewer extends StatelessWidget {
   }
 }
 
-class FileNameDialog extends StatefulWidget {
-  const FileNameDialog({required this.dialogTitle, this.filename});
+class FilenameDialog extends StatefulWidget {
+  const FilenameDialog({super.key, required this.dialogTitle, this.filename});
 
   final String dialogTitle;
   final String? filename;
 
   @override
-  State<FileNameDialog> createState() => _FileNameDialogState();
+  State<FilenameDialog> createState() => _FilenameDialogState();
 }
 
-class _FileNameDialogState extends State<FileNameDialog> {
+class _FilenameDialogState extends State<FilenameDialog> {
   late final _controller = TextEditingController(text: widget.filename);
   final _formKey = GlobalKey<FormState>();
 

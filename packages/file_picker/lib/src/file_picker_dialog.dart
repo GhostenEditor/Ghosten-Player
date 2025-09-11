@@ -54,7 +54,7 @@ class _FilePickerDialogState<T> extends State<FilePickerDialog<T>> {
         WidgetsBinding.instance.endOfFrame.then((_) {
           _scrollController.animateTo(
             _scrollController.position.maxScrollExtent,
-            duration: Duration(milliseconds: 300),
+            duration: const Duration(milliseconds: 300),
             curve: Curves.easeOut,
           );
         });
