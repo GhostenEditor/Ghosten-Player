@@ -92,7 +92,7 @@ class _LiveEditState extends State<LiveEdit> {
                   widget.item == null
                       ? AppLocalizations.of(context)!.pageTitleAdd
                       : AppLocalizations.of(context)!.pageTitleEdit,
-                  style: Theme.of(context).textTheme.displaySmall!.copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.displaySmall,
                 ),
                 StepperForm(
                   items: _items,

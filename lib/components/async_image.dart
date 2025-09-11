@@ -21,6 +21,7 @@ class AsyncImage extends StatelessWidget {
     this.httpHeaders,
     this.viewable = false,
     this.showErrorWidget = true,
+    this.errorWidget,
   });
 
   final String src;
@@ -36,6 +37,7 @@ class AsyncImage extends StatelessWidget {
   final Map<String, String>? httpHeaders;
   final bool viewable;
   final bool showErrorWidget;
+  final LoadingErrorWidgetBuilder? errorWidget;
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +56,7 @@ class AsyncImage extends StatelessWidget {
                 ? httpHeaders ?? const {'referer': 'https://www.themoviedb.org/'}
                 : httpHeaders,
         errorWidget:
+            errorWidget ??
             (context, url, error) =>
                 showErrorWidget
                     ? Center(

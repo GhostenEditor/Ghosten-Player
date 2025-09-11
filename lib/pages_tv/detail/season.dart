@@ -422,36 +422,54 @@ class _EpisodeListTile extends StatelessWidget {
               fit: StackFit.expand,
               children: [
                 FocusableImage(autofocus: autofocus, poster: episode.poster, onTap: onTap),
-                Align(
-                  alignment: const Alignment(0.95, 0.9),
-                  child: BadgeTheme(
-                    data: BadgeTheme.of(context).copyWith(backgroundColor: Colors.black87, textColor: Colors.white),
-                    child: IconTheme(
-                      data: IconTheme.of(context).copyWith(size: 12),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        spacing: 4,
-                        children: [
-                          if (episode.watched) const Badge(label: Icon(Icons.check)),
-                          if (episode.favorite) const Badge(label: Icon(Icons.favorite_rounded)),
-                          if (episode.downloaded) const Badge(label: Icon(Icons.download_rounded)),
-                          if (episode.duration != null)
-                            IconTheme(
-                              data: IconThemeData(color: Theme.of(context).colorScheme.onInverseSurface, size: 14),
-                              child: Badge(
-                                label: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  spacing: 2,
-                                  children: [
-                                    const Icon(Icons.access_time_rounded),
-                                    Text(episode.duration!.toDisplay()),
-                                  ],
+                Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    spacing: 4,
+                    children: [
+                      BadgeTheme(
+                        data: BadgeTheme.of(context).copyWith(backgroundColor: Colors.black87, textColor: Colors.white),
+                        child: IconTheme(
+                          data: IconTheme.of(context).copyWith(size: 12,color: Theme.of(context).colorScheme.onInverseSurface),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            spacing: 4,
+                            children: [
+                              if (episode.watched) const Badge(label: Icon(Icons.check_circle)),
+                              if (episode.favorite) const Badge(label: Icon(Icons.favorite_rounded)),
+                              if (episode.downloaded) const Badge(label: Icon(Icons.download_rounded)),
+                              if (episode.duration != null)
+                                IconTheme(
+                                  data: IconThemeData(color: Theme.of(context).colorScheme.onInverseSurface, size: 14),
+                                  child: Badge(
+                                    label: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      spacing: 2,
+                                      children: [
+                                        const Icon(Icons.access_time_filled_rounded),
+                                        Text(episode.duration!.toDisplay()),
+                                      ],
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                        ],
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
+                      if (episode.duration != null &&
+                          episode.duration != Duration.zero &&
+                          episode.lastPlayedPosition != null &&
+                          episode.lastPlayedPosition != Duration.zero)
+                        LinearProgressIndicator(
+                          value: episode.lastPlayedPosition!.inSeconds / episode.duration!.inSeconds,
+                          color: Theme.of(context).colorScheme.onSurface,
+                          backgroundColor: Theme.of(context).colorScheme.surface,
+                          borderRadius: BorderRadius.circular(3),
+                          minHeight: 3,
+                        ),
+                    ],
                   ),
                 ),
               ],
