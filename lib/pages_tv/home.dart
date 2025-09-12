@@ -112,7 +112,9 @@ class _HomeState extends State<TVHomePage> {
     }
     if (Navigator.of(context).canPop()) {
       if (_scaffoldKey.currentState!.isEndDrawerOpen) {
-        _scaffoldKey.currentState!.closeEndDrawer();
+        if (!_navigatorKey.currentState!.canPop()) {
+          _scaffoldKey.currentState!.closeEndDrawer();
+        }
       }
       return;
     }
