@@ -77,6 +77,7 @@ class PlayerController<T> implements PlayerBaseController {
           willSkip.value = UniqueKey();
         case 'log':
           if (onLog != null) {
+            // ignore: avoid_dynamic_calls
             onLog(call.arguments['level'], call.arguments['message']);
           }
       }
@@ -261,10 +262,6 @@ class PlayerController<T> implements PlayerBaseController {
     }
     this.index.value = null;
     this.playlist.value = playlist;
-  }
-
-  void setPlaylistError(Object? error) {
-    playlistError.value = error;
   }
 
   Future<void> enterFullscreen() {

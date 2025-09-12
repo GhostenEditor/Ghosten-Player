@@ -480,7 +480,7 @@ class _TVDetailState extends State<TVDetail> with ActionMixin<TVDetail> {
         }
       }
     } catch (e) {
-      _controller.setPlaylistError(e);
+      _controller.playlistError.value = e;
       _controller.setPlaylist([]);
     }
   }

@@ -39,25 +39,25 @@ abstract class FilePickerPlatform extends PlatformInterface {
 
   Future<T?> showFilePicker<T>(
     BuildContext context, {
-        String? rootPath,
-        required FilePickerType type,
-        Widget? defaultTitle,
-        required Widget Function(T?) titleBuilder,
-        required List<Widget> actions,
-        required Future<PageData<T>> Function(int) fetchData,
-        required ItemWidgetBuilder<T> itemBuilder,
-        required FileViewerController<T> controller,
-        WidgetBuilder? firstPageProgressIndicatorBuilder,
-        WidgetBuilder? newPageProgressIndicatorBuilder,
-        WidgetBuilder? noItemsFoundIndicatorBuilder,
-        WidgetBuilder? firstPageErrorIndicatorBuilder,
+    String? rootPath,
+    required FilePickerType type,
+    Widget? defaultTitle,
+    required Widget Function(T?) titleBuilder,
+    required List<Widget> actions,
+    required Future<PageData<T>> Function(int) fetchData,
+    required ItemWidgetBuilder<T> itemBuilder,
+    required FileViewerController<T> controller,
+    WidgetBuilder? firstPageProgressIndicatorBuilder,
+    WidgetBuilder? newPageProgressIndicatorBuilder,
+    WidgetBuilder? noItemsFoundIndicatorBuilder,
+    WidgetBuilder? firstPageErrorIndicatorBuilder,
   }) {
     throw UnimplementedError('showFilePicker() has not been implemented.');
   }
 }
 
 class UsbStorage {
-  UsbStorage.fromJson(dynamic json) : desc = json['desc'], path = json['path'];
+  UsbStorage.fromJson(Map<String, dynamic> json) : desc = json['desc'], path = json['path'];
   final String desc;
   final String path;
 }
