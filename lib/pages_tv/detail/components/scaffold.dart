@@ -65,6 +65,7 @@ class _DetailScaffoldState<T extends MediaBase> extends State<DetailScaffold<T>>
               child: Scaffold(
                 key: widget.scaffoldKey,
                 backgroundColor: Colors.transparent,
+                resizeToAvoidBottomInset: false,
                 endDrawer:
                     widget.endDrawer != null
                         ? Builder(

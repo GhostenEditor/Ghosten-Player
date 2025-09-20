@@ -72,7 +72,7 @@ class SettingsSponsor extends StatelessWidget {
                     ),
                   ),
                   SliverPadding(
-                    padding: EdgeInsets.symmetric(horizontal: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
                     sliver: FutureBuilderSliverHandler(
                       future: _getSponsorList(context),
                       builder: (context, snapshot) {

@@ -25,126 +25,89 @@ class TVHomePage extends StatefulWidget {
 class _HomeState extends State<TVHomePage> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _navigatorKey = GlobalKey<NavigatorState>();
-  final _scrollController = ScrollController();
   int tabIndex = 0;
   bool reverse = false;
   bool confirmed = false;
 
   @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final shortcuts = context.watch<ShortcutTV>();
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: _onPopInvokedWithResult,
-      child: Focus(
-        skipTraversal: true,
-        onKeyEvent: (FocusNode node, KeyEvent event) {
-          if (event is KeyDownEvent || event is KeyRepeatEvent) {
-            if (event.logicalKey == shortcuts.menu) {
-              if (!_scaffoldKey.currentState!.isEndDrawerOpen) {
-                _scaffoldKey.currentState!.openEndDrawer();
-                return KeyEventResult.handled;
-              }
+    return Focus(
+      skipTraversal: true,
+      onKeyEvent: (FocusNode node, KeyEvent event) {
+        if (event is KeyDownEvent || event is KeyRepeatEvent) {
+          if (event.logicalKey == shortcuts.menu) {
+            if (!_scaffoldKey.currentState!.isEndDrawerOpen) {
+              _scaffoldKey.currentState!.openEndDrawer();
+              return KeyEventResult.handled;
             }
           }
-          return KeyEventResult.ignored;
-        },
-        child: Scaffold(
-          key: _scaffoldKey,
-          extendBodyBehindAppBar: true,
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(kToolbarHeight),
-            child: _HomeAppbar(
-              scaffoldKey: _scaffoldKey,
-              scrollController: _scrollController,
-              onTabChange: (index) {
-                setState(() {
-                  reverse = true;
-                  tabIndex = index;
-                });
-              },
+        }
+        return KeyEventResult.ignored;
+      },
+      child: Scaffold(
+        key: _scaffoldKey,
+        extendBodyBehindAppBar: true,
+        appBar: _HomeAppbar(
+          activeIndex: tabIndex,
+          popScopePredicate: () {
+            final canPop = Navigator.of(context).canPop();
+            if (canPop) {
+              if (_scaffoldKey.currentState!.isEndDrawerOpen) {
+                if (!_navigatorKey.currentState!.canPop()) {
+                  _scaffoldKey.currentState!.closeEndDrawer();
+                }
+              }
+            }
+            return !canPop;
+          },
+          onTabChange:
+              (index) => setState(() {
+                reverse = true;
+                tabIndex = index;
+              }),
+        ),
+        endDrawer: NavigatorPopHandler(
+          onPopWithResult: (_) => _navigatorKey.currentState!.maybePop(),
+          child: Container(
+            width: 360,
+            color: Theme.of(context).colorScheme.surfaceContainerLow,
+            child: Navigator(
+              key: _navigatorKey,
+              onGenerateRoute:
+                  (settings) => FadeInPageRoute(builder: (context) => const SettingsPage(), settings: settings),
             ),
           ),
-          endDrawer: NavigatorPopHandler(
-            onPopWithResult: (_) => _navigatorKey.currentState!.maybePop(),
-            child: Container(
-              width: 360,
-              color: Theme.of(context).colorScheme.surfaceContainerLow,
-              child: Navigator(
-                key: _navigatorKey,
-                onGenerateRoute:
-                    (settings) => FadeInPageRoute(builder: (context) => const SettingsPage(), settings: settings),
+        ),
+        body: PageTransitionSwitcher(
+          reverse: reverse,
+          duration: const Duration(milliseconds: 800),
+          transitionBuilder:
+              (child, primaryAnimation, secondaryAnimation) => SharedAxisTransition(
+                animation: primaryAnimation,
+                secondaryAnimation: secondaryAnimation,
+                transitionType: SharedAxisTransitionType.horizontal,
+                fillColor: Colors.transparent,
+                child: child,
               ),
-            ),
-          ),
-          body: PageTransitionSwitcher(
-            reverse: reverse,
-            duration: const Duration(milliseconds: 800),
-            transitionBuilder:
-                (child, primaryAnimation, secondaryAnimation) => SharedAxisTransition(
-                  animation: primaryAnimation,
-                  secondaryAnimation: secondaryAnimation,
-                  transitionType: SharedAxisTransitionType.horizontal,
-                  fillColor: Colors.transparent,
-                  child: child,
-                ),
-            child: switch (tabIndex) {
-              0 => TVListPage(endDrawerNavigatorKey: _navigatorKey, scrollController: _scrollController),
-              1 => MovieListPage(endDrawerNavigatorKey: _navigatorKey, scrollController: _scrollController),
-              2 => const LiveListPage(),
-              _ => const SizedBox(),
-            },
-          ),
+          child: switch (tabIndex) {
+            0 => TVListPage(endDrawerNavigatorKey: _navigatorKey),
+            1 => MovieListPage(endDrawerNavigatorKey: _navigatorKey),
+            2 => const LiveListPage(),
+            _ => const SizedBox(),
+          },
         ),
       ),
     );
   }
-
-  Future<void> _onPopInvokedWithResult(bool didPop, dynamic _) async {
-    if (didPop) {
-      return;
-    }
-    if (Navigator.of(context).canPop()) {
-      if (_scaffoldKey.currentState!.isEndDrawerOpen) {
-        if (!_navigatorKey.currentState!.canPop()) {
-          _scaffoldKey.currentState!.closeEndDrawer();
-        }
-      }
-      return;
-    }
-    if (_scrollController.offset > 300) {
-      _scrollController.animateTo(0, duration: const Duration(milliseconds: 400), curve: Curves.easeOut);
-      return;
-    }
-    if (confirmed) {
-      confirmed = false;
-      SystemNavigator.pop();
-    } else {
-      confirmed = true;
-      final controller = ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context)!.confirmTextExit, textAlign: TextAlign.center),
-          duration: const Duration(seconds: 2),
-          behavior: SnackBarBehavior.floating,
-          width: 200,
-        ),
-      );
-      controller.closed.then((_) => confirmed = false);
-    }
-  }
 }
 
 class _HomeTabs extends StatefulWidget {
-  const _HomeTabs({required this.tabs, required this.onTabChange});
+  const _HomeTabs({required this.tabs, required this.onTabChange, this.activeIndex});
 
   final List<String> tabs;
   final ValueChanged<int> onTabChange;
+  final int? activeIndex;
 
   @override
   State<_HomeTabs> createState() => _HomeTabsState();
@@ -154,8 +117,17 @@ class _HomeTabsState extends State<_HomeTabs> {
   double _lineWidth = 0;
   double _lineOffset = 0;
   bool _tabFocused = false;
-  int _active = 0;
+  late int _active = widget.activeIndex ?? 0;
   late final tabKeys = List.generate(widget.tabs.length, (_) => GlobalKey());
+
+  @override
+  void didUpdateWidget(covariant _HomeTabs oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.activeIndex != _active && widget.activeIndex != null) {
+      _active = widget.activeIndex!;
+      setState(() {});
+    }
+  }
 
   @override
   void didChangeDependencies() {
@@ -268,102 +240,152 @@ class _HomeTabsState extends State<_HomeTabs> {
   }
 }
 
-class _HomeAppbar extends StatefulWidget {
-  const _HomeAppbar({required this.onTabChange, required this.scaffoldKey, required this.scrollController});
+class _HomeAppbar extends StatefulWidget implements PreferredSizeWidget {
+  const _HomeAppbar({required this.onTabChange, required this.popScopePredicate, this.activeIndex});
 
+  final int? activeIndex;
   final ValueChanged<int> onTabChange;
-  final GlobalKey<ScaffoldState> scaffoldKey;
-  final ScrollController scrollController;
+  final bool Function() popScopePredicate;
 
   @override
   State<_HomeAppbar> createState() => _HomeAppbarState();
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
 
 class _HomeAppbarState extends State<_HomeAppbar> {
   bool _show = true;
+  bool confirmed = false;
+  ScrollNotificationObserverState? _scrollNotificationObserver;
 
   @override
-  void initState() {
-    super.initState();
-    widget.scrollController.addListener(_scrollListener);
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _scrollNotificationObserver?.removeListener(_handleScrollNotification);
+    final scaffoldState = Scaffold.maybeOf(context);
+
+    if (scaffoldState != null && (scaffoldState.isDrawerOpen || scaffoldState.isEndDrawerOpen)) {
+      return;
+    }
+    _scrollNotificationObserver = ScrollNotificationObserver.maybeOf(context);
+    _scrollNotificationObserver?.addListener(_handleScrollNotification);
   }
 
   @override
   void dispose() {
-    widget.scrollController.removeListener(_scrollListener);
+    if (_scrollNotificationObserver != null) {
+      _scrollNotificationObserver!.removeListener(_handleScrollNotification);
+      _scrollNotificationObserver = null;
+    }
     super.dispose();
+  }
+
+  void _handleScrollNotification(ScrollNotification notification) {
+    if (notification is ScrollUpdateNotification) {
+      final oldShow = _show;
+      final metrics = notification.metrics;
+      switch (metrics.axisDirection) {
+        case AxisDirection.up:
+        case AxisDirection.down:
+          _show = metrics.extentBefore < 100;
+        case AxisDirection.right:
+        case AxisDirection.left:
+          break;
+      }
+      if (_show != oldShow) {
+        setState(() {});
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return PageTransitionSwitcher(
-      reverse: _show,
-      duration: const Duration(milliseconds: 600),
-      transitionBuilder: (Widget child, Animation<double> animation, Animation<double> secondaryAnimation) {
-        return SharedAxisTransition(
-          animation: animation,
-          secondaryAnimation: secondaryAnimation,
-          transitionType: SharedAxisTransitionType.vertical,
-          fillColor: Colors.transparent,
-          child: child,
-        );
-      },
-      child:
-          _show
-              ? AppBar(
-                backgroundColor: Colors.transparent,
-                surfaceTintColor: Colors.transparent,
-                leadingWidth: 160,
-                leading: Padding(
-                  padding: const EdgeInsets.only(left: 32),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: TextButton.icon(
-                      label: Text(AppLocalizations.of(context)!.search),
-                      onPressed: () => navigateTo(context, const SearchPage(autofocus: true)),
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        iconColor: Colors.white,
-                        foregroundColor: Theme.of(context).colorScheme.onSurface,
-                        visualDensity: VisualDensity.compact,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: _onPopInvokedWithResult,
+      child: PageTransitionSwitcher(
+        reverse: _show,
+        duration: const Duration(milliseconds: 600),
+        transitionBuilder: (Widget child, Animation<double> animation, Animation<double> secondaryAnimation) {
+          return SharedAxisTransition(
+            animation: animation,
+            secondaryAnimation: secondaryAnimation,
+            transitionType: SharedAxisTransitionType.vertical,
+            fillColor: Colors.transparent,
+            child: child,
+          );
+        },
+        child:
+            _show
+                ? Padding(
+                  padding: const EdgeInsets.only(left: 36, right: 48),
+                  child: Row(
+                    children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton.icon(
+                          label: Text(AppLocalizations.of(context)!.search),
+                          onPressed: () => navigateTo(context, const SearchPage(autofocus: true)),
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            iconColor: Colors.white,
+                            foregroundColor: Theme.of(context).colorScheme.onSurface,
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          icon: const Icon(Icons.search_rounded, size: 20, color: Colors.grey),
+                        ),
                       ),
-                      icon: const Icon(Icons.search_rounded, size: 20, color: Colors.grey),
-                    ),
+                      const SizedBox(width: 60),
+                      _HomeTabs(
+                        activeIndex: widget.activeIndex,
+                        tabs: [
+                          AppLocalizations.of(context)!.homeTabTV,
+                          AppLocalizations.of(context)!.homeTabMovie,
+                          AppLocalizations.of(context)!.homeTabLive,
+                        ],
+                        onTabChange: widget.onTabChange,
+                      ),
+                      const Spacer(),
+                      TVIconButton(
+                        onPressed: () => Scaffold.of(context).openEndDrawer(),
+                        icon: const Icon(Icons.settings_outlined),
+                      ),
+                      const SizedBox(width: 12),
+                      const Clock(),
+                    ],
                   ),
-                ),
-                title: _HomeTabs(
-                  tabs: [
-                    AppLocalizations.of(context)!.homeTabTV,
-                    AppLocalizations.of(context)!.homeTabMovie,
-                    AppLocalizations.of(context)!.homeTabLive,
-                  ],
-                  onTabChange: widget.onTabChange,
-                ),
-                actions: [
-                  TVIconButton(
-                    onPressed: () {
-                      widget.scaffoldKey.currentState!.openEndDrawer();
-                    },
-                    icon: const Icon(Icons.settings_outlined),
-                  ),
-                  const SizedBox(width: 12),
-                  const Clock(),
-                  const SizedBox(width: 48),
-                ],
-              )
-              : const SizedBox(),
+                )
+                : const SizedBox(),
+      ),
     );
   }
 
-  void _scrollListener() {
-    if (widget.scrollController.offset > 300) {
-      if (_show) {
-        setState(() => _show = false);
-      }
+  Future<void> _onPopInvokedWithResult(bool didPop, dynamic _) async {
+    if (didPop) {
+      return;
+    }
+    if (!widget.popScopePredicate()) {
+      return;
+    }
+    // if (_scrollController.offset > 300) {
+    //   _scrollController.animateTo(0, duration: const Duration(milliseconds: 400), curve: Curves.easeOut);
+    //   return;
+    // }
+    if (confirmed) {
+      confirmed = false;
+      SystemNavigator.pop();
     } else {
-      if (!_show) {
-        setState(() => _show = true);
-      }
+      confirmed = true;
+      final controller = ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.confirmTextExit, textAlign: TextAlign.center),
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          width: 200,
+        ),
+      );
+      controller.closed.then((_) => confirmed = false);
     }
   }
 }

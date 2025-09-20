@@ -18,10 +18,9 @@ import 'components/media_grid_item.dart';
 import 'mixins/channel.dart';
 
 class TVListPage extends StatefulWidget {
-  const TVListPage({super.key, required this.endDrawerNavigatorKey, required this.scrollController});
+  const TVListPage({super.key, required this.endDrawerNavigatorKey});
 
   final GlobalKey<NavigatorState> endDrawerNavigatorKey;
-  final ScrollController scrollController;
 
   @override
   State<TVListPage> createState() => _TVListPageState();
@@ -31,18 +30,20 @@ class _TVListPageState extends State<TVListPage> {
   final _backdrop = ValueNotifier<String?>(null);
   final _carouselIndex = ValueNotifier<int?>(null);
   final _showBlur = ValueNotifier(false);
+  final _scrollController = ScrollController();
   late final halfHeight = MediaQuery.of(context).size.height / 2;
 
   @override
   void initState() {
-    widget.scrollController.addListener(_scrollListener);
+    _scrollController.addListener(_scrollListener);
     super.initState();
   }
 
   @override
   void dispose() {
     _backdrop.dispose();
-    widget.scrollController.removeListener(_scrollListener);
+    _scrollController.removeListener(_scrollListener);
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -72,7 +73,7 @@ class _TVListPageState extends State<TVListPage> {
           ),
         ),
         CustomScrollView(
-          controller: widget.scrollController,
+          controller: _scrollController,
           slivers: [
             FutureBuilderSliverHandler(
               future: Api.tvRecommendation(),
@@ -100,15 +101,6 @@ class _TVListPageState extends State<TVListPage> {
                                   key: ValueKey(snapshot.requireData.length),
                                   index: _carouselIndex.value ?? 0,
                                   len: snapshot.requireData.length,
-                                  onFocusChange: (f) {
-                                    if (f) {
-                                      widget.scrollController.animateTo(
-                                        0,
-                                        duration: const Duration(milliseconds: 400),
-                                        curve: Curves.easeOut,
-                                      );
-                                    }
-                                  },
                                   onChange: (index) {
                                     _backdrop.value = snapshot.requireData[index].backdrop;
                                     _carouselIndex.value = index;
@@ -319,6 +311,6 @@ class _TVListPageState extends State<TVListPage> {
   }
 
   void _scrollListener() {
-    _showBlur.value = widget.scrollController.offset > halfHeight;
+    _showBlur.value = _scrollController.offset > halfHeight;
   }
 }

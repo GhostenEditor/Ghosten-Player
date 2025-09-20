@@ -16,10 +16,9 @@ import 'components/media_grid_item.dart';
 import 'mixins/channel.dart';
 
 class MovieListPage extends StatefulWidget {
-  const MovieListPage({super.key, required this.endDrawerNavigatorKey, required this.scrollController});
+  const MovieListPage({super.key, required this.endDrawerNavigatorKey});
 
   final GlobalKey<NavigatorState> endDrawerNavigatorKey;
-  final ScrollController scrollController;
 
   @override
   State<MovieListPage> createState() => _MovieListPageState();
@@ -29,11 +28,12 @@ class _MovieListPageState extends State<MovieListPage> {
   final _backdrop = ValueNotifier<String?>(null);
   final _carouselIndex = ValueNotifier<int?>(null);
   final _showBlur = ValueNotifier(false);
+  final _scrollController = ScrollController();
   late final halfHeight = MediaQuery.of(context).size.height / 2;
 
   @override
   void initState() {
-    widget.scrollController.addListener(_scrollListener);
+    _scrollController.addListener(_scrollListener);
     super.initState();
   }
 
@@ -41,7 +41,8 @@ class _MovieListPageState extends State<MovieListPage> {
   void dispose() {
     _backdrop.dispose();
     _carouselIndex.dispose();
-    widget.scrollController.removeListener(_scrollListener);
+    _scrollController.removeListener(_scrollListener);
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -71,7 +72,7 @@ class _MovieListPageState extends State<MovieListPage> {
           ),
         ),
         CustomScrollView(
-          controller: widget.scrollController,
+          controller: _scrollController,
           slivers: [
             FutureBuilderSliverHandler(
               future: Api.movieRecommendation(),
@@ -99,15 +100,6 @@ class _MovieListPageState extends State<MovieListPage> {
                                   key: ValueKey(snapshot.requireData.length),
                                   index: _carouselIndex.value ?? 0,
                                   len: snapshot.requireData.length,
-                                  onFocusChange: (f) {
-                                    if (f) {
-                                      widget.scrollController.animateTo(
-                                        0,
-                                        duration: const Duration(milliseconds: 400),
-                                        curve: Curves.easeOut,
-                                      );
-                                    }
-                                  },
                                   onChange: (index) {
                                     _backdrop.value = snapshot.requireData[index].backdrop;
                                     _carouselIndex.value = index;
@@ -309,6 +301,6 @@ class _MovieListPageState extends State<MovieListPage> {
   }
 
   void _scrollListener() {
-    _showBlur.value = widget.scrollController.offset > halfHeight;
+    _showBlur.value = _scrollController.offset > halfHeight;
   }
 }
