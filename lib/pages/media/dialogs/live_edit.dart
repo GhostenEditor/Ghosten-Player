@@ -1,7 +1,7 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../validators/validators.dart';
 import '../../components/form_group.dart';
 import '../../utils/notification.dart';
@@ -34,7 +34,11 @@ class _LiveEditPageState extends State<LiveEditPage> {
       suffixIcon: IconButton(
         icon: const Icon(Icons.folder_open_rounded),
         onPressed: () async {
-          final res = await showDriverFilePicker(context, AppLocalizations.of(context)!.titleEditM3U, selectableType: FileType.file);
+          final res = await showDriverFilePicker(
+            context,
+            AppLocalizations.of(context)!.titleEditM3U,
+            selectableType: FileType.file,
+          );
           if (res != null) {
             final file = res.$2;
             _controller.text = 'driver://${res.$1}/${file.id}';
@@ -57,12 +61,10 @@ class _LiveEditPageState extends State<LiveEditPage> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(widget.item == null ? AppLocalizations.of(context)!.pageTitleAdd : AppLocalizations.of(context)!.pageTitleEdit),
-      content: SizedBox(
-        width: 600,
-        height: 160,
-        child: FormGroup(controller: _formGroup),
+      title: Text(
+        widget.item == null ? AppLocalizations.of(context)!.pageTitleAdd : AppLocalizations.of(context)!.pageTitleEdit,
       ),
+      content: SizedBox(width: 600, height: 160, child: FormGroup(controller: _formGroup)),
       actions: [
         IconButton(icon: const Icon(Icons.check), onPressed: () => _onSubmit(context)),
         IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
@@ -76,7 +78,10 @@ class _LiveEditPageState extends State<LiveEditPage> {
         final resp = await showNotification(context, Api.playlistInsert(_formGroup.data));
         if (resp?.error == null && context.mounted) Navigator.of(context).pop(true);
       } else {
-        final resp = await showNotification(context, Api.playlistUpdateById({..._formGroup.data, 'id': widget.item?.id}));
+        final resp = await showNotification(
+          context,
+          Api.playlistUpdateById({..._formGroup.data, 'id': widget.item?.id}),
+        );
         if (resp?.error == null && context.mounted) Navigator.of(context).pop(true);
       }
     }

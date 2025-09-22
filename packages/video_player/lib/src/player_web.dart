@@ -7,8 +7,6 @@ import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'player_platform_interface.dart';
 
 class PlayerWeb extends PlayerPlatform {
-  static Function(MethodCall call)? handler;
-
   PlayerWeb() {
     bool coreIdle = false;
     bool pause = false;
@@ -18,16 +16,16 @@ class PlayerWeb extends PlayerPlatform {
       handler?.call(const MethodCall('isInitialized'));
     });
     listen('position', (data) {
-      handler?.call(MethodCall('position', data * 1000));
+      handler?.call(MethodCall('position', (data as int) * 1000));
     });
     listen('duration', (data) {
-      handler?.call(MethodCall('duration', data * 1000));
+      handler?.call(MethodCall('duration', (data as int) * 1000));
     });
     listen('buffer', (data) {
-      handler?.call(MethodCall('bufferingUpdate', data * 1000));
+      handler?.call(MethodCall('bufferingUpdate', (data as int) * 1000));
     });
     listen('tracksChanged', (data) {
-      dynamic mediaInfo = {};
+      final mediaInfo = {};
       for (final track in data) {
         if (track['selected']) {
           switch (track['type']) {
@@ -81,6 +79,8 @@ class PlayerWeb extends PlayerPlatform {
     });
   }
 
+  static Function(MethodCall call)? handler;
+
   static void registerWith(Registrar registrar) {
     PlayerPlatform.instance = PlayerWeb();
   }
@@ -90,7 +90,7 @@ class PlayerWeb extends PlayerPlatform {
     return context['__TAURI__']?.callMethod('invoke', [method, ar].nonNulls.toList()) as Future<T>?;
   }
 
-  listen(String event, void Function(dynamic data) callback) {
+  void listen(String event, void Function(dynamic data) callback) {
     context['__TAURI__']?['event']?.callMethod('listen', [
       event,
       (JsObject data) {
@@ -100,19 +100,19 @@ class PlayerWeb extends PlayerPlatform {
         } else {
           callback(payload);
         }
-      }
+      },
     ]);
   }
 
-  updateStatus(bool coreIdle, bool pause, bool seeking, bool pausedForCache) {
-    handler?.call(MethodCall(
-        'updateStatus',
-        switch ((coreIdle, pause, seeking, pausedForCache)) {
-          (false, _, _, _) => 'playing',
-          (true, true, _, _) => 'paused',
-          (true, false, true, _) => 'buffering',
-          (_, _, _, _) => 'idle'
-        }));
+  void updateStatus(bool coreIdle, bool pause, bool seeking, bool pausedForCache) {
+    handler?.call(
+      MethodCall('updateStatus', switch ((coreIdle, pause, seeking, pausedForCache)) {
+        (false, _, _, _) => 'playing',
+        (true, true, _, _) => 'paused',
+        (true, false, true, _) => 'buffering',
+        (_, _, _, _) => 'idle',
+      }),
+    );
   }
 
   @override

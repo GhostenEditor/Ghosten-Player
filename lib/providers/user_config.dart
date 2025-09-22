@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:scaled_app/scaled_app.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:video_player/player.dart';
 
 import '/utils/utils.dart';
 
@@ -23,7 +24,10 @@ enum AutoUpdateFrequency {
   never;
 
   static AutoUpdateFrequency fromString(String? str) {
-    return AutoUpdateFrequency.values.firstWhere((element) => element.name == str, orElse: () => AutoUpdateFrequency.everyday);
+    return AutoUpdateFrequency.values.firstWhere(
+      (element) => element.name == str,
+      orElse: () => AutoUpdateFrequency.everyday,
+    );
   }
 }
 
@@ -35,20 +39,22 @@ extension FromString on ThemeMode {
 
 class UserConfig extends ChangeNotifier {
   UserConfig._fromPrefs(this.prefs)
-      : language = SystemLanguage.fromString(prefs.getString('system.language')),
-        themeMode = FromString.fromString(prefs.getString('system.themeMode')),
-        autoUpdateFrequency = AutoUpdateFrequency.fromString(prefs.getString('system.autoUpdateFrequency')),
-        lastCheckUpdateTime = DateTime.tryParse(prefs.getString('system.lastCheckUpdateTime') ?? ''),
-        updatePrerelease = prefs.getBool('system.updatePrerelease') ?? false,
-        githubProxy = prefs.getString('system.githubProxy') ?? '',
-        autoPlay = prefs.getBool('playerConfig.autoPlay') ?? false,
-        autoPip = prefs.getBool('playerConfig.autoPip') ?? false,
-        autoForceLandscape = prefs.getBool('playerConfig.autoForceLandscape') ?? false,
-        displayScale = prefs.getDouble('system.displayScale') ?? 1;
+    : language = SystemLanguage.fromString(prefs.getString('system.language')),
+      themeMode = FromString.fromString(prefs.getString('system.themeMode')),
+      autoUpdateFrequency = AutoUpdateFrequency.fromString(prefs.getString('system.autoUpdateFrequency')),
+      lastCheckUpdateTime = DateTime.tryParse(prefs.getString('system.lastCheckUpdateTime') ?? ''),
+      updatePrerelease = prefs.getBool('system.updatePrerelease') ?? false,
+      githubProxy = prefs.getString('system.githubProxy') ?? '',
+      autoPlay = prefs.getBool('playerConfig.autoPlay') ?? false,
+      autoPip = prefs.getBool('playerConfig.autoPip') ?? false,
+      playerType = PlayerType.fromString(prefs.getString('playerConfig.playerType')),
+      autoForceLandscape = prefs.getBool('playerConfig.autoForceLandscape') ?? false,
+      displayScale = prefs.getDouble('system.displayScale') ?? 1;
   final SharedPreferences prefs;
   SystemLanguage language;
   ThemeMode themeMode;
   AutoUpdateFrequency autoUpdateFrequency;
+  PlayerType playerType;
   bool updatePrerelease;
   String githubProxy;
   DateTime? lastCheckUpdateTime;
@@ -105,6 +111,12 @@ class UserConfig extends ChangeNotifier {
     this.language = language;
     notifyListeners();
     prefs.setString('system.language', language.name);
+  }
+
+  void setPlayerType(PlayerType playerType) {
+    this.playerType = playerType;
+    notifyListeners();
+    prefs.setString('playerConfig.playerType', playerType.name);
   }
 
   void setDisplayScale(double s) {

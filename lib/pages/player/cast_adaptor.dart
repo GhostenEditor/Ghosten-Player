@@ -18,10 +18,7 @@ class CastAdaptor extends Cast {
 }
 
 class CastDeviceAdaptor extends CastDevice {
-  CastDeviceAdaptor({
-    required super.id,
-    required super.friendlyName,
-  });
+  CastDeviceAdaptor({required super.id, required super.friendlyName});
 
   factory CastDeviceAdaptor.fromJson(dynamic data) {
     // ignore: avoid_dynamic_calls
@@ -29,23 +26,29 @@ class CastDeviceAdaptor extends CastDevice {
   }
 
   late final Stream<(int, int)> _stream = PlatformApi.screenEvent
-      .switchMap((value) => switch (value) {
-            ScreenState.on || ScreenState.off => Stream.periodic(const Duration(seconds: 1)),
-            ScreenState.present => Stream.periodic(const Duration(seconds: 1)).switchMap((_) => Stream.fromFuture(Future.microtask(() async {
-                  try {
-                    final data = await Api.dlnaGetPositionInfo(id) as Json;
-                    final duration = data['duration'];
-                    final position = data['position'];
-                    if (duration is int && position is int) {
-                      return (position, duration);
-                    } else {
-                      return null;
-                    }
-                  } catch (e) {
+      .switchMap(
+        (value) => switch (value) {
+          ScreenState.on || ScreenState.off => Stream.periodic(const Duration(seconds: 1)),
+          ScreenState.present => Stream.periodic(const Duration(seconds: 1)).switchMap(
+            (_) => Stream.fromFuture(
+              Future.microtask(() async {
+                try {
+                  final data = await Api.dlnaGetPositionInfo(id) as Json;
+                  final duration = data['duration'];
+                  final position = data['position'];
+                  if (duration is int && position is int) {
+                    return (position, duration);
+                  } else {
                     return null;
                   }
-                })))
-          })
+                } catch (e) {
+                  return null;
+                }
+              }),
+            ),
+          ),
+        },
+      )
       .mapNotNull((e) => e);
 
   @override
@@ -79,11 +82,13 @@ class CastDeviceAdaptor extends CastDevice {
     try {
       await Api.dlnaSetUri(id, uri, title: title, playType: playType);
     } catch (error) {
-      ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(SnackBar(
-        backgroundColor: Colors.black87,
-        content: ErrorMessage(error: error, safeArea: false, minHeight: 0),
-        behavior: SnackBarBehavior.floating,
-      ));
+      ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.black87,
+          content: ErrorMessage(error: error, safeArea: false, minHeight: 0),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
       rethrow;
     }
   }

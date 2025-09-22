@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 const bluetoothConnectTimeoutException = '60003';
@@ -13,27 +14,35 @@ class Bluetooth {
   static const EventChannel _connectedChannel = EventChannel('$namespace/connected');
 
   static Future<bool> requestEnable() async {
-    return await methodChannel.invokeMethod('requestEnable').catchError((error) => throw PlatformException(code: bluetoothNonAdaptorException)) ?? false;
+    return await methodChannel
+            .invokeMethod('requestEnable')
+            .catchError((error) => throw PlatformException(code: bluetoothNonAdaptorException)) ??
+        false;
   }
 
   static Stream<BluetoothDevice> startServer() async* {
     await methodChannel.invokeMethod('startServer');
     late StreamSubscription<dynamic> subscription;
-    final controller = StreamController(onCancel: () {
-      subscription.cancel();
-    });
+    final controller = StreamController(
+      onCancel: () {
+        subscription.cancel();
+      },
+    );
 
     subscription = _connectedChannel.receiveBroadcastStream().listen(
-          controller.add,
-          onError: controller.addError,
-          onDone: controller.close,
-        );
+      controller.add,
+      onError: controller.addError,
+      onDone: controller.close,
+    );
 
     yield* controller.stream.map((data) => BluetoothDevice.fromMap(data));
   }
 
   static Future<bool> connect(String address) async {
-    return await methodChannel.invokeMethod('connect', address).catchError((error) => throw PlatformException(code: bluetoothConnectTimeoutException)) ?? false;
+    return await methodChannel
+            .invokeMethod('connect', address)
+            .catchError((error) => throw PlatformException(code: bluetoothConnectTimeoutException)) ??
+        false;
   }
 
   static Future<int> requestDiscoverable(Duration duration) async {
@@ -46,36 +55,43 @@ class Bluetooth {
   }
 
   static Future<bool> requestPermission() async {
-    return await methodChannel.invokeMethod('requestPermission').catchError((error) => throw PlatformException(code: bluetoothNonAdaptorException)) ?? false;
+    return await methodChannel
+            .invokeMethod('requestPermission')
+            .catchError((error) => throw PlatformException(code: bluetoothNonAdaptorException)) ??
+        false;
   }
 
   static Stream<BluetoothDevice> startDiscovery() async* {
     await methodChannel.invokeMethod('startDiscovery');
     late StreamSubscription<dynamic> subscription;
-    final controller = StreamController(onCancel: () {
-      subscription.cancel();
-    });
+    final controller = StreamController(
+      onCancel: () {
+        subscription.cancel();
+      },
+    );
 
     subscription = _discoveryChannel.receiveBroadcastStream().listen(
-          controller.add,
-          onError: controller.addError,
-          onDone: controller.close,
-        );
+      controller.add,
+      onError: controller.addError,
+      onDone: controller.close,
+    );
 
     yield* controller.stream.map((data) => BluetoothDevice.fromMap(data));
   }
 
   static Stream<BluetoothMessage> connection() async* {
     late StreamSubscription<dynamic> subscription;
-    final controller = StreamController(onCancel: () {
-      subscription.cancel();
-    });
+    final controller = StreamController(
+      onCancel: () {
+        subscription.cancel();
+      },
+    );
 
     subscription = _connectionChannel.receiveBroadcastStream().listen(
-          controller.add,
-          onError: controller.addError,
-          onDone: controller.close,
-        );
+      controller.add,
+      onError: controller.addError,
+      onDone: controller.close,
+    );
 
     yield* controller.stream.map((data) => BluetoothMessage.fromChannel(data));
   }
@@ -146,7 +162,14 @@ enum BluetoothDeviceBondState {
   }
 }
 
+@immutable
 class BluetoothDevice {
+  BluetoothDevice.fromMap(Map<dynamic, dynamic> map)
+    : name = map['name'],
+      address = map['address'],
+      isConnected = map['isConnected'],
+      type = BluetoothDeviceType.fromInt(map['type']),
+      bondState = BluetoothDeviceBondState.fromInt(map['bondState']);
   final String? name;
   final String address;
   final BluetoothDeviceType type;
@@ -155,15 +178,8 @@ class BluetoothDevice {
 
   bool get bonded => bondState == BluetoothDeviceBondState.bonded;
 
-  BluetoothDevice.fromMap(Map<dynamic, dynamic> map)
-      : name = map['name'],
-        address = map['address'],
-        isConnected = map['isConnected'],
-        type = BluetoothDeviceType.fromInt(map['type']),
-        bondState = BluetoothDeviceBondState.fromInt(map['bondState']);
-
   @override
-  operator ==(Object other) {
+  bool operator ==(Object other) {
     return other is BluetoothDevice && other.address == address;
   }
 
@@ -185,18 +201,11 @@ enum BlueToothMessageType {
 }
 
 class BluetoothMessage {
+  BluetoothMessage.fromChannel(List<dynamic> d) : type = BlueToothMessageType.fromInt(d[0]), data = d[1];
+
+  BluetoothMessage.text(String text) : type = BlueToothMessageType.text, data = text;
+
+  BluetoothMessage.file(String filePath) : type = BlueToothMessageType.file, data = filePath;
   final BlueToothMessageType type;
   final String data;
-
-  BluetoothMessage.fromChannel(dynamic d)
-      : type = BlueToothMessageType.fromInt(d[0]),
-        data = d[1];
-
-  BluetoothMessage.text(String text)
-      : type = BlueToothMessageType.text,
-        data = text;
-
-  BluetoothMessage.file(String filePath)
-      : type = BlueToothMessageType.file,
-        data = filePath;
 }

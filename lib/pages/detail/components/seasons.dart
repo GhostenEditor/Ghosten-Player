@@ -1,7 +1,7 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../components/image_card.dart';
 
 class SeasonsSection extends StatelessWidget {
@@ -34,11 +34,19 @@ class SeasonsSection extends StatelessWidget {
                 height: 180,
                 onTap: () => onTap(item),
                 title: RichText(
-                  text: TextSpan(children: [
-                    TextSpan(text: item.title ?? AppLocalizations.of(context)!.seasonNumber(item.season), style: Theme.of(context).textTheme.titleSmall),
-                    if (item.episodeCount != null)
-                      TextSpan(text: ' / ${AppLocalizations.of(context)!.episodeCount(item.episodeCount!)}', style: Theme.of(context).textTheme.labelMedium),
-                  ]),
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: item.title ?? AppLocalizations.of(context)!.seasonNumber(item.season),
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      if (item.episodeCount != null)
+                        TextSpan(
+                          text: ' / ${AppLocalizations.of(context)!.episodeCount(item.episodeCount!)}',
+                          style: Theme.of(context).textTheme.labelMedium,
+                        ),
+                    ],
+                  ),
                   textAlign: TextAlign.center,
                   overflow: TextOverflow.ellipsis,
                 ),

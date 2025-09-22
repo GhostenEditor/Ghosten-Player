@@ -1,9 +1,9 @@
 name: ghosten_player
 description: "Ghosten Player: A Video Player"
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-version: 2.1.2
+version: 2.2.1
 environment:
-  sdk: ^3.6.1
+  sdk: ^3.7.2
 dependencies:
   flutter:
     sdk: flutter
@@ -25,7 +25,7 @@ dependencies:
   flutter_markdown: ^0.7.7
   flutter_slidable: ^4.0.0
   flutter_spinkit: ^5.2.0
-  infinite_scroll_pagination: ^5.0.0
+  infinite_scroll_pagination: ^5.1.0
   install_plugin: ^2.1.0
   photo_view: ^0.15.0
   provider: ^6.1.5
@@ -33,16 +33,16 @@ dependencies:
   readmore: ^3.0.0
   rxdart: ^0.28.0
   scaled_app: ^2.3.0
-  screen_brightness: ^2.1.0
+  screen_brightness: ^2.1.5
   shared_preferences: ^2.5.3
   shimmer: ^3.0.0
   smooth_page_indicator: ^1.2.0
-  url_launcher: ^6.3.0
+  url_launcher: ^6.3.2
   video_player:
     path: packages/video_player
-  volume_controller: ^3.3.3
-  webview_cookie_manager: ^2.0.0
-  webview_flutter: ^4.11.0
+  volume_controller: ^3.4.0
+  webview_cookie_manager_plus: ^2.0.16
+  webview_flutter: ^4.13.0
 
 dev_dependencies:
   flutter_test:

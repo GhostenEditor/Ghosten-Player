@@ -2,6 +2,15 @@ import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
+enum PlayerType {
+  media3,
+  mpv;
+
+  static PlayerType fromString(String? str) {
+    return PlayerType.values.firstWhere((element) => element.name == str, orElse: () => PlayerType.media3);
+  }
+}
+
 enum PlayerStatus {
   playing,
   buffering,
@@ -16,19 +25,33 @@ enum PlayerStatus {
 }
 
 class MediaTrack {
+  MediaTrack.fromJson(dynamic json)
+    : label = json['label'],
+      id = json['id'],
+      type = json['type'],
+      selected = json['selected'];
   String? label;
   String? id;
   String type;
   bool selected;
-
-  MediaTrack.fromJson(dynamic json)
-      : label = json['label'],
-        id = json['id'],
-        type = json['type'],
-        selected = json['selected'];
 }
 
 class MediaTrackGroup {
+  MediaTrackGroup({required this.video, required this.sub, required this.audio}) {
+    selectedVideo = video.firstWhereOrNull((e) => e.selected)?.id;
+    selectedAudio = audio.firstWhereOrNull((e) => e.selected)?.id;
+    selectedSub = sub.firstWhereOrNull((e) => e.selected)?.id;
+  }
+
+  MediaTrackGroup.empty() : video = [], sub = [], audio = [];
+
+  MediaTrackGroup.fromTracks(List<MediaTrack> tracks)
+    : audio = tracks.where((track) => track.type == 'audio').toList(),
+      video = tracks.where((track) => track.type == 'video').toList(),
+      sub = tracks.where((track) => track.type == 'sub').toList(),
+      selectedVideo = tracks.firstWhereOrNull((track) => track.type == 'video' && track.selected)?.id,
+      selectedAudio = tracks.firstWhereOrNull((track) => track.type == 'audio' && track.selected)?.id,
+      selectedSub = tracks.firstWhereOrNull((track) => track.type == 'sub' && track.selected)?.id;
   final List<MediaTrack> video;
   final List<MediaTrack> audio;
   final List<MediaTrack> sub;
@@ -36,37 +59,26 @@ class MediaTrackGroup {
   dynamic selectedVideo;
   dynamic selectedAudio;
   dynamic selectedSub;
-
-  MediaTrackGroup({required this.video, required this.sub, required this.audio}) {
-    selectedVideo = video.firstWhereOrNull((e) => e.selected)?.id;
-    selectedAudio = audio.firstWhereOrNull((e) => e.selected)?.id;
-    selectedSub = sub.firstWhereOrNull((e) => e.selected)?.id;
-  }
-
-  MediaTrackGroup.empty()
-      : video = [],
-        sub = [],
-        audio = [];
-
-  MediaTrackGroup.fromTracks(List<MediaTrack> tracks)
-      : audio = tracks.where((track) => track.type == 'audio').toList(),
-        video = tracks.where((track) => track.type == 'video').toList(),
-        sub = tracks.where((track) => track.type == 'sub').toList(),
-        selectedVideo = tracks.firstWhereOrNull((track) => track.type == 'video' && track.selected)?.id,
-        selectedAudio = tracks.firstWhereOrNull((track) => track.type == 'audio' && track.selected)?.id,
-        selectedSub = tracks.firstWhereOrNull((track) => track.type == 'sub' && track.selected)?.id;
 }
 
 class MediaChange {
+  MediaChange.fromJson(Map<String, dynamic> json)
+    : index = json['index'],
+      position = Duration(milliseconds: json['position']);
   final int index;
   final Duration position;
-
-  MediaChange.fromJson(dynamic json)
-      : index = json['index'],
-        position = Duration(milliseconds: json['position']);
 }
 
 class MediaInfo {
+  MediaInfo.fromJson(dynamic json)
+    : videoCodecs = json['videoCodecs'],
+      videoMime = json['videoMime'],
+      videoFPS = json['videoFPS'],
+      videoSize = json['videoSize'],
+      videoBitrate = json['videoBitrate'],
+      audioCodecs = json['audioCodecs'],
+      audioMime = json['audioMime'],
+      audioBitrate = json['audioBitrate'];
   final String? videoCodecs;
   final String? videoMime;
   final double? videoFPS;
@@ -75,16 +87,6 @@ class MediaInfo {
   final String? audioCodecs;
   final String? audioMime;
   final int? audioBitrate;
-
-  MediaInfo.fromJson(dynamic json)
-      : videoCodecs = json['videoCodecs'],
-        videoMime = json['videoMime'],
-        videoFPS = json['videoFPS'],
-        videoSize = json['videoSize'],
-        videoBitrate = json['videoBitrate'],
-        audioCodecs = json['audioCodecs'],
-        audioMime = json['audioMime'],
-        audioBitrate = json['audioBitrate'];
 }
 
 enum AspectRatioType {
@@ -116,15 +118,6 @@ enum AspectRatioType {
 }
 
 class PlaylistItemDisplay<T> extends Equatable {
-  final String? title;
-  final String? description;
-  final String? poster;
-  final String? fileId;
-  final Uri? url;
-  final T source;
-  final Duration start;
-  final Duration end;
-
   const PlaylistItemDisplay({
     required this.source,
     this.fileId,
@@ -135,6 +128,15 @@ class PlaylistItemDisplay<T> extends Equatable {
     this.start = Duration.zero,
     this.end = Duration.zero,
   });
+
+  final String? title;
+  final String? description;
+  final String? poster;
+  final String? fileId;
+  final Uri? url;
+  final T source;
+  final Duration start;
+  final Duration end;
 
   PlaylistItemDisplay<T> copyWith({
     String? poster,
@@ -158,10 +160,7 @@ class PlaylistItemDisplay<T> extends Equatable {
     );
   }
 
-  PlaylistItem toItem({
-    Uri? url,
-    List<Subtitle> subtitles = const [],
-  }) {
+  PlaylistItem toItem({Uri? url, List<Subtitle> subtitles = const []}) {
     return PlaylistItem(
       poster: poster,
       title: title,
@@ -178,16 +177,6 @@ class PlaylistItemDisplay<T> extends Equatable {
 }
 
 class PlaylistItem extends Equatable {
-  final String? poster;
-  final String? title;
-  final String? description;
-  final String? mimeType;
-  final Uri url;
-  final Duration start;
-  final Duration end;
-  final List<Subtitle>? subtitles;
-  final dynamic others;
-
   const PlaylistItem({
     required this.url,
     this.mimeType,
@@ -199,6 +188,16 @@ class PlaylistItem extends Equatable {
     this.end = Duration.zero,
     this.others,
   });
+
+  final String? poster;
+  final String? title;
+  final String? description;
+  final String? mimeType;
+  final Uri url;
+  final Duration start;
+  final Duration end;
+  final List<Subtitle>? subtitles;
+  final dynamic others;
 
   PlaylistItem copyWith({
     String? poster,
@@ -234,7 +233,7 @@ class PlaylistItem extends Equatable {
       'poster': poster,
       'start': start.inMilliseconds,
       'end': end.inMilliseconds,
-      'subtitle': subtitles?.map((e) => e.toJson()).toList()
+      'subtitle': subtitles?.map((e) => e.toJson()).toList(),
     };
   }
 
@@ -281,19 +280,13 @@ enum SubtitleMimeType {
 }
 
 class Subtitle {
+  const Subtitle({required this.url, required this.mimeType, this.language, this.label, this.selected = false});
+
   final Uri url;
   final SubtitleMimeType mimeType;
   final String? language;
   final String? label;
   final bool selected;
-
-  const Subtitle({
-    required this.url,
-    required this.mimeType,
-    this.language,
-    this.label,
-    this.selected = false,
-  });
 
   Map<String, dynamic> toJson() {
     return {
@@ -307,11 +300,6 @@ class Subtitle {
 }
 
 class SubtitleSettings extends Equatable {
-  final Color foregroundColor;
-  final Color backgroundColor;
-  final Color windowColor;
-  final Color edgeColor;
-
   const SubtitleSettings({
     required this.foregroundColor,
     required this.backgroundColor,
@@ -319,16 +307,20 @@ class SubtitleSettings extends Equatable {
     required this.edgeColor,
   });
 
+  SubtitleSettings.fromJson(List<int> json)
+    : foregroundColor = Color(json[0]),
+      backgroundColor = Color(json[1]),
+      windowColor = Color(json[2]),
+      edgeColor = Color(json[3]);
+  final Color foregroundColor;
+  final Color backgroundColor;
+  final Color windowColor;
+  final Color edgeColor;
+
   List<int> toJson() {
     // ignore: deprecated_member_use
     return [foregroundColor, backgroundColor, windowColor, edgeColor].map((c) => c.value).toList();
   }
-
-  SubtitleSettings.fromJson(List<int> json)
-      : foregroundColor = Color(json[0]),
-        backgroundColor = Color(json[1]),
-        windowColor = Color(json[2]),
-        edgeColor = Color(json[3]);
 
   @override
   List<Object?> get props => [foregroundColor, backgroundColor, windowColor, edgeColor];

@@ -10,7 +10,10 @@ class ThemeBuilder extends StatelessWidget {
   Widget build(BuildContext context) {
     return Theme(
       data: Theme.of(context).copyWith(
-        colorScheme: themeColor == null ? null : ColorScheme.fromSeed(seedColor: Color(themeColor!), brightness: Theme.of(context).brightness),
+        colorScheme:
+            themeColor == null
+                ? null
+                : ColorScheme.fromSeed(seedColor: Color(themeColor!), brightness: Theme.of(context).brightness),
       ),
       child: Builder(builder: builder),
     );

@@ -6,11 +6,11 @@ import 'dart:ui_web';
 import 'package:api/api.dart';
 import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:scaled_app/scaled_app.dart';
 
 import 'const.dart';
+import 'l10n/app_localizations.dart';
 import 'pages/home.dart';
 import 'pages_tv/home.dart';
 import 'platform_api.dart';
@@ -125,28 +125,28 @@ class MainApp extends StatelessWidget {
       themeAnimationCurve: Curves.easeOut,
       builder: (context, widget) => MediaQuery(
         data: MediaQuery.of(context).scale().copyWith(
-              textScaler: NoScaleTextScaler(),
-              padding: index != 2 ? const EdgeInsets.only(top: 36, bottom: 12) : null,
-            ),
+          textScaler: NoScaleTextScaler(),
+          padding: index != 2 ? const EdgeInsets.only(top: 36, bottom: 12) : null,
+        ),
         child: widget!,
       ),
     );
     return index != 2
         ? Directionality(
-            textDirection: TextDirection.ltr,
-            child: Stack(
-              children: [
-                child,
-                IgnorePointer(
-                    child: MaterialApp(
-                  debugShowCheckedModeBanner: false,
-                  darkTheme: ThemeData.dark(),
-                  themeMode: context.watch<UserConfig>().themeMode,
-                  home: const StatusBar(),
-                )),
-              ],
-            ),
-          )
+      textDirection: TextDirection.ltr,
+      child: Stack(
+        children: [
+          child,
+          IgnorePointer(
+              child: MaterialApp(
+                debugShowCheckedModeBanner: false,
+                darkTheme: ThemeData.dark(),
+                themeMode: context.watch<UserConfig>().themeMode,
+                home: const StatusBar(),
+              )),
+        ],
+      ),
+    )
         : child;
   }
 }
@@ -179,7 +179,6 @@ class StatusBar extends StatelessWidget {
           alignment: Alignment.topCenter,
           child: Row(
             spacing: 4,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(),
               DefaultTextStyle(

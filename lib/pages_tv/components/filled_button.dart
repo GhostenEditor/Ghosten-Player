@@ -1,27 +1,10 @@
 import 'package:flutter/material.dart';
 
 class TVFilledButton extends StatefulWidget {
-  const TVFilledButton({
-    super.key,
-    required this.onPressed,
-    this.child,
-    this.icon,
-    this.autofocus,
-    this.focusNode,
-  });
+  const TVFilledButton({super.key, required this.onPressed, this.child, this.icon, this.autofocus, this.focusNode});
 
-  factory TVFilledButton.icon({
-    Key? key,
-    required VoidCallback? onPressed,
-    Widget? icon,
-    required Widget label,
-  }) {
-    return TVFilledButton(
-      key: key,
-      onPressed: onPressed,
-      icon: icon,
-      child: label,
-    );
+  factory TVFilledButton.icon({Key? key, required VoidCallback? onPressed, Widget? icon, required Widget label}) {
+    return TVFilledButton(key: key, onPressed: onPressed, icon: icon, child: label);
   }
 
   final VoidCallback? onPressed;
@@ -42,7 +25,10 @@ class _TVFilledButtonState extends State<TVFilledButton> {
     return Material(
       color: Theme.of(context).colorScheme.inverseSurface,
       shape: StadiumBorder(
-        side: _focused ? BorderSide(width: 2, color: Theme.of(context).colorScheme.inverseSurface, strokeAlign: 3) : BorderSide.none,
+        side:
+            _focused
+                ? BorderSide(width: 2, color: Theme.of(context).colorScheme.inverseSurface, strokeAlign: 3)
+                : BorderSide.none,
       ),
       textStyle: TextStyle(color: Theme.of(context).colorScheme.onInverseSurface),
       child: InkWell(
@@ -57,16 +43,20 @@ class _TVFilledButtonState extends State<TVFilledButton> {
         onTap: widget.onPressed,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 8),
-          child: widget.icon == null
-              ? widget.child
-              : Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconTheme.merge(data: IconThemeData(color: Theme.of(context).colorScheme.onInverseSurface), child: widget.icon!),
-                    const SizedBox(width: 6),
-                    if (widget.child != null) widget.child!,
-                  ],
-                ),
+          child:
+              widget.icon == null
+                  ? widget.child
+                  : Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconTheme.merge(
+                        data: IconThemeData(color: Theme.of(context).colorScheme.onInverseSurface),
+                        child: widget.icon!,
+                      ),
+                      const SizedBox(width: 6),
+                      if (widget.child != null) widget.child!,
+                    ],
+                  ),
         ),
       ),
     );

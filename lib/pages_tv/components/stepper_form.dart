@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../l10n/app_localizations.dart';
 import 'filled_button.dart';
 import 'keyboard_reopen.dart';
 import 'text_field_focus.dart';
@@ -48,7 +48,8 @@ class _StepperFormState extends State<StepperForm> {
         child: Stepper(
           currentStep: _currentStep,
           steps: [
-            ...widget.items.indexed.map((entry) => Step(
+            ...widget.items.indexed.map(
+              (entry) => Step(
                 title: Text(entry.$2.labelText),
                 isActive: _currentStep == entry.$1,
                 state: _stepState(entry.$2, entry.$1),
@@ -62,7 +63,10 @@ class _StepperFormState extends State<StepperForm> {
                       suffixIcon: entry.$2.suffixIcon,
                       helperText: entry.$2.helperText,
                       border: const OutlineInputBorder(),
-                      errorText: _dirties[entry.$1] && entry.$2.validator != null ? entry.$2.validator!(widget.items[entry.$1].controller.text) : null,
+                      errorText:
+                          _dirties[entry.$1] && entry.$2.validator != null
+                              ? entry.$2.validator!(widget.items[entry.$1].controller.text)
+                              : null,
                     ),
                     obscureText: entry.$2.obscureText,
                     onEditingComplete: () {
@@ -72,7 +76,9 @@ class _StepperFormState extends State<StepperForm> {
                       });
                     },
                   ),
-                ))),
+                ),
+              ),
+            ),
             Step(
               title: Text(AppLocalizations.of(context)!.buttonComplete),
               isActive: _currentStep == 2,
@@ -84,12 +90,17 @@ class _StepperFormState extends State<StepperForm> {
                     focusNode: _focusNodes.last,
                     child: Text(AppLocalizations.of(context)!.buttonSubmit),
                     onPressed: () {
-                      if (!widget.items.indexed
-                          .any((entry) => entry.$2.validator != null && entry.$2.validator!(widget.items[entry.$1].controller.text) != null)) {
-                        widget.onComplete(widget.items.indexed.fold({}, (acc, entry) {
-                          acc[entry.$2.name] = widget.items[entry.$1].controller.text;
-                          return acc;
-                        }));
+                      if (!widget.items.indexed.any(
+                        (entry) =>
+                            entry.$2.validator != null &&
+                            entry.$2.validator!(widget.items[entry.$1].controller.text) != null,
+                      )) {
+                        widget.onComplete(
+                          widget.items.indexed.fold({}, (acc, entry) {
+                            acc[entry.$2.name] = widget.items[entry.$1].controller.text;
+                            return acc;
+                          }),
+                        );
                       } else {
                         for (int i = 0; i < _dirties.length; i++) {
                           _dirties[i] = true;

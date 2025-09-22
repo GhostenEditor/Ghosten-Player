@@ -2,8 +2,8 @@ import 'dart:math';
 
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../utils/utils.dart';
 import '../../components/focusable_image.dart';
 import '../../media/search.dart';
@@ -18,35 +18,43 @@ class CastCrewInner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliverGrid.builder(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          mainAxisExtent: 160,
-          mainAxisSpacing: 16,
-          crossAxisSpacing: 16,
-        ),
-        itemCount: max(mediaCast.length, mediaCrew.length) * 2,
-        itemBuilder: (context, index) {
-          final int i = (index / 2).floor();
-          if (index.isEven) {
-            return i < mediaCast.length
-                ? _CastListTile(
-                    mediaCast: mediaCast[i],
-                    autofocus: index == 0,
-                    onTap: () {
-                      navigateTo(navigatorKey.currentContext!, SearchPage(activeTab: type == MediaType.movie ? 1 : 0, selectedCast: [mediaCast[i]]));
-                    })
-                : const SizedBox();
-          } else {
-            return i < mediaCrew.length
-                ? _CrewListTile(
-                    mediaCrew: mediaCrew[i],
-                    onTap: () {
-                      navigateTo(navigatorKey.currentContext!, SearchPage(activeTab: type == MediaType.movie ? 1 : 0, selectedCrew: [mediaCrew[i]]));
-                    },
-                  )
-                : const SizedBox();
-          }
-        });
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisExtent: 160,
+        mainAxisSpacing: 16,
+        crossAxisSpacing: 16,
+      ),
+      itemCount: max(mediaCast.length, mediaCrew.length) * 2,
+      itemBuilder: (context, index) {
+        final int i = (index / 2).floor();
+        if (index.isEven) {
+          return i < mediaCast.length
+              ? _CastListTile(
+                mediaCast: mediaCast[i],
+                autofocus: index == 0,
+                onTap: () {
+                  navigateTo(
+                    navigatorKey.currentContext!,
+                    SearchPage(activeTab: type == MediaType.movie ? 1 : 0, selectedCast: [mediaCast[i]]),
+                  );
+                },
+              )
+              : const SizedBox();
+        } else {
+          return i < mediaCrew.length
+              ? _CrewListTile(
+                mediaCrew: mediaCrew[i],
+                onTap: () {
+                  navigateTo(
+                    navigatorKey.currentContext!,
+                    SearchPage(activeTab: type == MediaType.movie ? 1 : 0, selectedCrew: [mediaCrew[i]]),
+                  );
+                },
+              )
+              : const SizedBox();
+        }
+      },
+    );
   }
 }
 
@@ -60,18 +68,22 @@ class CastCrewTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return DefaultTextStyle(
       style: Theme.of(context).textTheme.titleMedium!.copyWith(fontWeight: FontWeight.bold),
-      child: SliverCrossAxisGroup(slivers: [
-        SliverToBoxAdapter(
+      child: SliverCrossAxisGroup(
+        slivers: [
+          SliverToBoxAdapter(
             child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: mediaCast.isNotEmpty ? Text(AppLocalizations.of(context)!.titleCast) : null,
-        )),
-        SliverToBoxAdapter(
+              padding: const EdgeInsets.all(8.0),
+              child: mediaCast.isNotEmpty ? Text(AppLocalizations.of(context)!.titleCast) : null,
+            ),
+          ),
+          SliverToBoxAdapter(
             child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: mediaCrew.isNotEmpty ? Text(AppLocalizations.of(context)!.titleCrew) : null,
-        )),
-      ]),
+              padding: const EdgeInsets.all(8.0),
+              child: mediaCrew.isNotEmpty ? Text(AppLocalizations.of(context)!.titleCrew) : null,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -89,7 +101,10 @@ class CastCrewSection extends StatelessWidget {
       slivers: [
         const SliverToBoxAdapter(child: SizedBox(height: 32)),
         CastCrewTitle(mediaCast: mediaCast, mediaCrew: mediaCrew),
-        SliverPadding(padding: const EdgeInsets.all(8), sliver: CastCrewInner(mediaCast: mediaCast, mediaCrew: mediaCrew, type: type)),
+        SliverPadding(
+          padding: const EdgeInsets.all(8),
+          sliver: CastCrewInner(mediaCast: mediaCast, mediaCrew: mediaCrew, type: type),
+        ),
         const SliverToBoxAdapter(child: SizedBox(height: 32)),
       ],
     );
@@ -124,8 +139,16 @@ class _CastListTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: 2,
               children: [
-                Text(mediaCast.name, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.titleMedium!.copyWith(fontWeight: FontWeight.bold)),
-                if (mediaCast.role != null) Text('${AppLocalizations.of(context)!.actAs} ${mediaCast.role}', style: Theme.of(context).textTheme.bodySmall),
+                Text(
+                  mediaCast.name,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(fontWeight: FontWeight.bold),
+                ),
+                if (mediaCast.role != null)
+                  Text(
+                    '${AppLocalizations.of(context)!.actAs} ${mediaCast.role}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                 Text(AppLocalizations.of(context)!.gender(mediaCast.gender.toString())),
                 if (mediaCast.episodeCount != null && mediaCast.episodeCount! > 0) Text('${mediaCast.episodeCount}集'),
                 if (mediaCast.scrapper.type == 'tmdb') const _IMDBTag() else const _NfoTag(),
@@ -164,8 +187,13 @@ class _CrewListTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: 2,
               children: [
-                Text(mediaCrew.name, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.titleMedium!.copyWith(fontWeight: FontWeight.bold)),
-                if (mediaCrew.department != null) Text(mediaCrew.department!, style: Theme.of(context).textTheme.bodySmall),
+                Text(
+                  mediaCrew.name,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(fontWeight: FontWeight.bold),
+                ),
+                if (mediaCrew.department != null)
+                  Text(mediaCrew.department!, style: Theme.of(context).textTheme.bodySmall),
                 if (mediaCrew.job != null) Text(mediaCrew.job!, style: Theme.of(context).textTheme.bodySmall),
                 Text(AppLocalizations.of(context)!.gender(mediaCrew.gender.toString())),
                 if (mediaCrew.episodeCount != null && mediaCrew.episodeCount! > 0) Text('${mediaCrew.episodeCount}集'),

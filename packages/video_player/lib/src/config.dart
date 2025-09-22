@@ -34,14 +34,7 @@ class PlayerConfig {
   }
 
   static List<int> getSubtitleSettings(SharedPreferences prefs) {
-    return prefs.getString('playerConfig.subtitleSettings')?.split(',').map(int.parse).toList() ??
-        [
-          0xFFFFFFFF,
-          0xFF000000,
-          0,
-          0,
-          0xFFFFFFFF,
-        ];
+    return prefs.getString('playerConfig.subtitleSettings')?.split(',').map(int.parse).toList() ?? [0xFFFFFFFF, 0xFF000000, 0, 0, 0xFFFFFFFF];
   }
 
   static void setSubtitleSettings(SharedPreferences prefs, List<int> settings) {

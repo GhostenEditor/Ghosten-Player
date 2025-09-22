@@ -1,8 +1,8 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../components/future_builder_handler.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../utils/utils.dart';
 import '../../components/loading.dart';
 
@@ -26,72 +26,72 @@ class _FileInfoSectionState extends State<FileInfoSection> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilderHandler(
-        future: future,
-        loadingBuilder: (context, _) => const Padding(padding: EdgeInsets.all(8.0), child: Loading()),
-        builder: (context, snapshot) {
-          final item = snapshot.requireData;
-          return Padding(
-            padding: const EdgeInsets.all(16),
-            child: Material(
-              color: Theme.of(context).colorScheme.surfaceContainerHigh,
-              shape: RoundedRectangleBorder(
-                side: BorderSide(color: Theme.of(context).colorScheme.surfaceContainerHighest),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: DefaultTextStyle(
-                  style: Theme.of(context).textTheme.labelSmall!.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
-                  child: Table(
-                    border: TableBorder.all(width: 0, color: Colors.transparent),
-                    columnWidths: const <int, TableColumnWidth>{
-                      0: IntrinsicColumnWidth(),
-                      1: FlexColumnWidth(),
-                    },
-                    defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                    children: <TableRow>[
-                      TableRow(
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2),
-                            child: Text(AppLocalizations.of(context)!.filePropertyDriverType),
-                          ),
-                          Text(AppLocalizations.of(context)!.driverType(item.driverType.name)),
-                        ],
-                      ),
-                      TableRow(
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2),
-                            child: Text(AppLocalizations.of(context)!.filePropertyFilename),
-                          ),
-                          Text(item.filename),
-                        ],
-                      ),
-                      TableRow(
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2),
-                            child: Text(AppLocalizations.of(context)!.filePropertySize),
-                          ),
-                          Text(item.size.toSizeDisplay()),
-                        ],
-                      ),
-                      TableRow(
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2),
-                            child: Text(AppLocalizations.of(context)!.filePropertyCreateAt),
-                          ),
-                          Text(item.createdAt.formatFull()),
-                        ],
-                      ),
-                    ],
-                  ),
+      future: future,
+      loadingBuilder: (context, _) => const Padding(padding: EdgeInsets.all(8.0), child: Loading()),
+      builder: (context, snapshot) {
+        final item = snapshot.requireData;
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: Material(
+            color: Theme.of(context).colorScheme.surfaceContainerHigh,
+            shape: RoundedRectangleBorder(
+              side: BorderSide(color: Theme.of(context).colorScheme.surfaceContainerHighest),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: DefaultTextStyle(
+                style: Theme.of(
+                  context,
+                ).textTheme.labelSmall!.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                child: Table(
+                  border: TableBorder.all(width: 0, color: Colors.transparent),
+                  columnWidths: const <int, TableColumnWidth>{0: IntrinsicColumnWidth(), 1: FlexColumnWidth()},
+                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                  children: <TableRow>[
+                    TableRow(
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2),
+                          child: Text(AppLocalizations.of(context)!.filePropertyDriverType),
+                        ),
+                        Text(AppLocalizations.of(context)!.driverType(item.driverType.name)),
+                      ],
+                    ),
+                    TableRow(
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2),
+                          child: Text(AppLocalizations.of(context)!.filePropertyFilename),
+                        ),
+                        Text(item.filename),
+                      ],
+                    ),
+                    TableRow(
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2),
+                          child: Text(AppLocalizations.of(context)!.filePropertySize),
+                        ),
+                        Text(item.size.toSizeDisplay()),
+                      ],
+                    ),
+                    TableRow(
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2),
+                          child: Text(AppLocalizations.of(context)!.filePropertyCreateAt),
+                        ),
+                        Text(item.createdAt.formatFull()),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),
-          );
-        });
+          ),
+        );
+      },
+    );
   }
 }

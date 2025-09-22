@@ -1,8 +1,9 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:video_player/player.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../providers/user_config.dart';
 import '../../utils/utils.dart';
 import '../components/setting.dart';
@@ -30,6 +31,20 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
       child: ListView(
         padding: const EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 32),
         children: [
+          ListTile(title: Text(AppLocalizations.of(context)!.settingsItemPlayerSettings), dense: true),
+          ButtonSettingItem(
+            title: Text(AppLocalizations.of(context)!.settingsItemPlayerKernel),
+            leading: const Icon(Icons.play_arrow_rounded),
+            trailing:
+                userConfig.playerType == PlayerType.mpv
+                    ? Badge(
+                      label: const Text('Alpha'),
+                      offset: const Offset(16, -8),
+                      child: Text(AppLocalizations.of(context)!.playerType(userConfig.playerType.name)),
+                    )
+                    : Text(AppLocalizations.of(context)!.playerType(userConfig.playerType.name)),
+            onTap: () => navigateToSlideLeft(context, const SettingsPlayerKernel()),
+          ),
           ListTile(title: Text(AppLocalizations.of(context)!.settingsItemDisplaySettings), dense: true),
           ButtonSettingItem(
             title: Text(AppLocalizations.of(context)!.settingsItemLanguage),
@@ -45,19 +60,20 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
           ),
           const DividerSettingItem(),
           FutureBuilder(
-              future: Api.settingScraperQuery(),
-              builder: (context, snapshot) {
-                final data = snapshot.data;
-                return data != null
-                    ? _ScraperSettingSection(
-                        settingScraper: data,
-                        onChanged: (SettingScraper value) async {
-                          await Api.settingScraperUpdate(value);
-                          if (context.mounted) setState(() {});
-                        },
-                      )
-                    : const SizedBox();
-              }),
+            future: Api.settingScraperQuery(),
+            builder: (context, snapshot) {
+              final data = snapshot.data;
+              return data != null
+                  ? _ScraperSettingSection(
+                    settingScraper: data,
+                    onChanged: (SettingScraper value) async {
+                      await Api.settingScraperUpdate(value);
+                      if (context.mounted) setState(() {});
+                    },
+                  )
+                  : const SizedBox();
+            },
+          ),
           ListTile(title: Text(AppLocalizations.of(context)!.settingsItemDataSettings), dense: true),
           ButtonSettingItem(
             title: Text(AppLocalizations.of(context)!.settingsItemDataSync),
@@ -70,7 +86,11 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
             onTap: () async {
               final flag = await showConfirm(context, AppLocalizations.of(context)!.confirmTextResetData);
               if ((flag ?? false) && context.mounted) {
-                await showNotification(context, Api.resetData(), successText: AppLocalizations.of(context)!.modalNotificationResetSuccessText);
+                await showNotification(
+                  context,
+                  Api.resetData(),
+                  successText: AppLocalizations.of(context)!.modalNotificationResetSuccessText,
+                );
               }
             },
           ),
@@ -117,9 +137,11 @@ class _SettingsScraperBehaviorPageState extends State<SettingsScraperBehaviorPag
       child: SettingPage(
         title: AppLocalizations.of(context)!.settingsItemScraperBehavior,
         child: ListView(
-            padding: const EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 32),
-            children: ScraperBehavior.values
-                .map((be) => RadioSettingItem(
+          padding: const EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 32),
+          children:
+              ScraperBehavior.values
+                  .map(
+                    (be) => RadioSettingItem(
                       autofocus: behavior == be,
                       value: be,
                       groupValue: behavior,
@@ -130,8 +152,10 @@ class _SettingsScraperBehaviorPageState extends State<SettingsScraperBehaviorPag
                           setState(() {});
                         }
                       },
-                    ))
-                .toList()),
+                    ),
+                  )
+                  .toList(),
+        ),
       ),
     );
   }
@@ -147,9 +171,11 @@ class SettingsLanguagePage extends StatelessWidget {
     return SettingPage(
       title: AppLocalizations.of(context)!.settingsItemLanguage,
       child: ListView(
-          padding: const EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 32),
-          children: SystemLanguage.values
-              .map((language) => RadioSettingItem(
+        padding: const EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 32),
+        children:
+            SystemLanguage.values
+                .map(
+                  (language) => RadioSettingItem(
                     autofocus: language == userConfig.language,
                     value: language,
                     groupValue: userConfig.language,
@@ -157,8 +183,10 @@ class SettingsLanguagePage extends StatelessWidget {
                     onChanged: (language) {
                       if (language != null) userConfig.setLanguage(language);
                     },
-                  ))
-              .toList()),
+                  ),
+                )
+                .toList(),
+      ),
     );
   }
 }
@@ -174,16 +202,55 @@ class SettingsThemePage extends StatelessWidget {
       title: AppLocalizations.of(context)!.settingsItemTheme,
       child: ListView(
         padding: const EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 32),
-        children: ThemeMode.values
-            .map((theme) => RadioSettingItem(
-                  value: theme,
-                  groupValue: userConfig.themeMode,
-                  title: Text(AppLocalizations.of(context)!.systemTheme(theme.name)),
-                  onChanged: (theme) {
-                    if (theme != null) userConfig.setTheme(theme);
-                  },
-                ))
-            .toList(),
+        children:
+            ThemeMode.values
+                .map(
+                  (theme) => RadioSettingItem(
+                    value: theme,
+                    groupValue: userConfig.themeMode,
+                    title: Text(AppLocalizations.of(context)!.systemTheme(theme.name)),
+                    onChanged: (theme) {
+                      if (theme != null) userConfig.setTheme(theme);
+                    },
+                  ),
+                )
+                .toList(),
+      ),
+    );
+  }
+}
+
+class SettingsPlayerKernel extends StatelessWidget {
+  const SettingsPlayerKernel({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final userConfig = Provider.of<UserConfig>(context);
+
+    return SettingPage(
+      title: AppLocalizations.of(context)!.settingsItemPlayerKernel,
+      child: ListView(
+        padding: const EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 32),
+        children:
+            PlayerType.values
+                .map(
+                  (playerType) => RadioSettingItem(
+                    value: playerType,
+                    groupValue: userConfig.playerType,
+                    title:
+                        playerType == PlayerType.mpv
+                            ? Badge(
+                              label: const Text('Alpha'),
+                              offset: Offset.zero,
+                              child: Text(AppLocalizations.of(context)!.playerType(playerType.name)),
+                            )
+                            : Text(AppLocalizations.of(context)!.playerType(playerType.name)),
+                    onChanged: (playerType) {
+                      if (playerType != null) userConfig.setPlayerType(playerType);
+                    },
+                  ),
+                )
+                .toList(),
       ),
     );
   }
@@ -220,63 +287,72 @@ class _ScraperSettingSectionState extends State<_ScraperSettingSection> {
         ButtonSettingItem(
           title: Text(AppLocalizations.of(context)!.settingsItemScraperSettings),
           subtitle: Text(AppLocalizations.of(context)!.settingsItemScraperBehaviorDescription),
-          trailing: Text(AppLocalizations.of(context)!.scraperBehavior(ScraperBehavior.fromString(widget.settingScraper.behavior.name).name)),
+          trailing: Text(
+            AppLocalizations.of(
+              context,
+            )!.scraperBehavior(ScraperBehavior.fromString(widget.settingScraper.behavior.name).name),
+          ),
           onTap: () async {
-            final behavior = await navigateToSlideLeft<ScraperBehavior>(context, SettingsScraperBehaviorPage(behavior: widget.settingScraper.behavior));
-            if (context.mounted && behavior != null) widget.onChanged(widget.settingScraper.copyWith(behavior: behavior));
+            final behavior = await navigateToSlideLeft<ScraperBehavior>(
+              context,
+              SettingsScraperBehaviorPage(behavior: widget.settingScraper.behavior),
+            );
+            if (context.mounted && behavior != null) {
+              widget.onChanged(widget.settingScraper.copyWith(behavior: behavior));
+            }
           },
         ),
         SwitchSettingItem(
-            title: Badge(label: const Text('Alpha'), child: Text(AppLocalizations.of(context)!.settingsItemNfoEnabled)),
-            value: widget.settingScraper.nfoEnabled,
-            onChanged: (nfoEnabled) {
-              widget.onChanged(widget.settingScraper.copyWith(nfoEnabled: nfoEnabled));
-            }),
+          title: Badge(label: const Text('Alpha'), child: Text(AppLocalizations.of(context)!.settingsItemNfoEnabled)),
+          value: widget.settingScraper.nfoEnabled,
+          onChanged: (nfoEnabled) {
+            widget.onChanged(widget.settingScraper.copyWith(nfoEnabled: nfoEnabled));
+          },
+        ),
         SwitchSettingItem(
-            title: Text(AppLocalizations.of(context)!.settingsItemTmdbEnabled),
-            value: widget.settingScraper.tmdbEnabled,
-            onChanged: (tmdbEnabled) {
-              widget.onChanged(widget.settingScraper.copyWith(tmdbEnabled: tmdbEnabled));
-            }),
+          title: Text(AppLocalizations.of(context)!.settingsItemTmdbEnabled),
+          value: widget.settingScraper.tmdbEnabled,
+          onChanged: (tmdbEnabled) {
+            widget.onChanged(widget.settingScraper.copyWith(tmdbEnabled: tmdbEnabled));
+          },
+        ),
         ButtonSettingItem(
           title: const Text('TMDB Max Cast Members'),
           trailing: SizedBox(
-              width: 50,
-              child: TextFieldFocus(
-                child: TextField(
-                  controller: _controller1,
-                  decoration: const InputDecoration(
-                    isDense: true,
-                    contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,
-                    ),
-                    filled: true,
-                  ),
-                  keyboardType: TextInputType.number,
-                  textAlign: TextAlign.end,
+            width: 50,
+            child: TextFieldFocus(
+              child: TextField(
+                controller: _controller1,
+                decoration: const InputDecoration(
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                  border: OutlineInputBorder(borderSide: BorderSide.none),
+                  filled: true,
                 ),
-              )),
+                keyboardType: TextInputType.number,
+                textAlign: TextAlign.end,
+              ),
+            ),
+          ),
         ),
         ButtonSettingItem(
           title: const Text('TMDB Max Crew Members'),
           trailing: SizedBox(
-              width: 50,
-              child: TextFieldFocus(
-                child: TextField(
-                  controller: _controller2,
-                  decoration: const InputDecoration(
-                    isDense: true,
-                    contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,
-                    ),
-                    filled: true,
-                  ),
-                  keyboardType: TextInputType.number,
-                  textAlign: TextAlign.end,
+            width: 50,
+            child: TextFieldFocus(
+              child: TextField(
+                controller: _controller2,
+                decoration: const InputDecoration(
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                  border: OutlineInputBorder(borderSide: BorderSide.none),
+                  filled: true,
                 ),
-              )),
+                keyboardType: TextInputType.number,
+                textAlign: TextAlign.end,
+              ),
+            ),
+          ),
         ),
         const DividerSettingItem(),
       ],

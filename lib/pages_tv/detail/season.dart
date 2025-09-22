@@ -1,7 +1,7 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../models/models.dart';
 import '../../pages/detail/utils/tmdb_uri.dart';
 import '../../utils/utils.dart';
@@ -52,43 +52,52 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
         }
       },
       child: FutureBuilderHandler(
-          initialData: widget.initialData,
-          future: Api.tvSeriesQueryById(widget.initialData.id),
-          builder: (context, snapshot) {
-            final item = snapshot.requireData;
-            if (item.seasons.isNotEmpty) {
-              _switchSeason(item.seasons.firstWhere((it) => currentSeason.value == null || it.id == currentSeason.value?.id), widget.initialData.scrapper);
-            }
-            return DetailScaffold(
-                item: item,
-                navigatorKey: _navigatorKey,
-                scaffoldKey: _scaffoldKey,
-                drawerNavigatorKey: _drawerNavigatorKey,
-                endDrawer: _buildEndDrawer(context),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.displayTitle(),
-                      style: Theme.of(context).textTheme.displaySmall,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 6),
-                    RichText(
-                        text: TextSpan(children: [
+        initialData: widget.initialData,
+        future: Api.tvSeriesQueryById(widget.initialData.id),
+        builder: (context, snapshot) {
+          final item = snapshot.requireData;
+          if (item.seasons.isNotEmpty) {
+            _switchSeason(
+              item.seasons.firstWhere((it) => currentSeason.value == null || it.id == currentSeason.value?.id),
+              widget.initialData.scrapper,
+            );
+          }
+          return DetailScaffold(
+            item: item,
+            navigatorKey: _navigatorKey,
+            scaffoldKey: _scaffoldKey,
+            drawerNavigatorKey: _drawerNavigatorKey,
+            endDrawer: _buildEndDrawer(context),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.displayTitle(),
+                  style: Theme.of(context).textTheme.displaySmall,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 6),
+                RichText(
+                  text: TextSpan(
+                    children: [
                       TextSpan(text: AppLocalizations.of(context)!.seasonCount(item.seasons.length)),
                       const TextSpan(text: ' ・ '),
                       TextSpan(text: item.firstAirDate?.format()),
-                    ], style: Theme.of(context).textTheme.labelSmall)),
-                    const SizedBox(height: 18),
-                    Expanded(
-                      child: CustomScrollView(
-                        slivers: [
-                          ListenableBuilder(
-                              listenable: currentSeason,
-                              builder: (context, _) => SliverMainAxisGroup(
-                                      slivers: item.seasons.asMap().entries.map((entry) {
+                    ],
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Expanded(
+                  child: CustomScrollView(
+                    slivers: [
+                      ListenableBuilder(
+                        listenable: currentSeason,
+                        builder:
+                            (context, _) => SliverMainAxisGroup(
+                              slivers:
+                                  item.seasons.asMap().entries.map((entry) {
                                     final item = entry.value;
                                     return SliverToBoxAdapter(
                                       child: Padding(
@@ -97,19 +106,28 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
                                           autofocus: entry.key == 0,
                                           selected: currentSeason.value?.id == entry.value.id,
                                           title: Text(AppLocalizations.of(context)!.seasonNumber(item.season)),
-                                          subtitle: (item.title != null || item.airDate != null)
-                                              ? Row(
-                                                  children: [
-                                                    if (item.title != null) Text(item.title!),
-                                                    if (item.title != null) const SizedBox(width: 12),
-                                                    if (item.airDate != null) Text(item.airDate!.format(), style: const TextStyle(fontSize: 12)),
-                                                    if (item.airDate != null) const SizedBox(width: 6),
-                                                    if (item.episodeCount != null)
-                                                      Text(AppLocalizations.of(context)!.episodeCount(item.episodeCount!),
-                                                          style: const TextStyle(fontSize: 12)),
-                                                  ],
-                                                )
-                                              : null,
+                                          subtitle:
+                                              (item.title != null || item.airDate != null)
+                                                  ? Row(
+                                                    children: [
+                                                      if (item.title != null) Text(item.title!),
+                                                      if (item.title != null) const SizedBox(width: 12),
+                                                      if (item.airDate != null)
+                                                        Text(
+                                                          item.airDate!.format(),
+                                                          style: const TextStyle(fontSize: 12),
+                                                        ),
+                                                      if (item.airDate != null) const SizedBox(width: 6),
+                                                      if (item.episodeCount != null)
+                                                        Text(
+                                                          AppLocalizations.of(
+                                                            context,
+                                                          )!.episodeCount(item.episodeCount!),
+                                                          style: const TextStyle(fontSize: 12),
+                                                        ),
+                                                    ],
+                                                  )
+                                                  : null,
                                           trailing: Row(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
@@ -122,28 +140,32 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
                                         ),
                                       ),
                                     );
-                                  }).toList())),
-                          SliverFillRemaining(
-                            hasScrollBody: false,
-                            child: Align(
-                              alignment: Alignment.bottomCenter,
-                              child: ButtonSettingItem(
-                                leading: const Icon(Icons.more_horiz_rounded),
-                                title: Text(AppLocalizations.of(context)!.buttonMore),
-                                onTap: () {
-                                  if (currentSeason.value != null) {
-                                    _scaffoldKey.currentState!.openEndDrawer();
-                                  }
-                                },
-                              ),
+                                  }).toList(),
                             ),
-                          ),
-                        ],
                       ),
-                    )
-                  ],
-                ));
-          }),
+                      SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: Align(
+                          alignment: Alignment.bottomCenter,
+                          child: ButtonSettingItem(
+                            leading: const Icon(Icons.more_horiz_rounded),
+                            title: Text(AppLocalizations.of(context)!.buttonMore),
+                            onTap: () {
+                              if (currentSeason.value != null) {
+                                _scaffoldKey.currentState!.openEndDrawer();
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -152,14 +174,17 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
     currentSeason.value = item;
     Future.microtask(() {
       Navigator.of(_navigatorKey.currentContext!).pushAndRemoveUntil(
-          FadeInPageRoute(
-              builder: (context) => _SeasonPage(
-                    key: ValueKey(item.id),
-                    seasonId: item.id,
-                    scrapper: scrapper,
-                    needUpdate: () => refresh = true,
-                  )),
-          (_) => false);
+        FadeInPageRoute(
+          builder:
+              (context) => _SeasonPage(
+                key: ValueKey(item.id),
+                seasonId: item.id,
+                scrapper: scrapper,
+                needUpdate: () => refresh = true,
+              ),
+        ),
+        (_) => false,
+      );
     });
   }
 
@@ -168,33 +193,53 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
       title: AppLocalizations.of(context)!.buttonMore,
       child: ListenableBuilder(
         listenable: currentSeason,
-        builder: (context, _) => currentSeason.value != null
-            ? ListView(
-                padding: const EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 32),
-                children: [
-                  buildSkipIntroAction(context, currentSeason.value!, MediaType.season, currentSeason.value!.skipIntro),
-                  buildSkipIntroAction(context, currentSeason.value!, MediaType.season, currentSeason.value!.skipEnding),
-                  const Divider(),
-                  buildEditMetadataAction(context, () async {
-                    final newSeason =
-                        await Navigator.of(context).push<int>(FadeInPageRoute(builder: (context) => SeasonMetadata(season: currentSeason.value!)));
-                    if (newSeason != null) {
-                      final newId = await Api.tvSeasonNumberUpdate(currentSeason.value!, newSeason);
-                      refresh = true;
-                      if (newId == currentSeason.value!.id) {
-                        setState(() {});
-                      } else if (context.mounted) {
-                        Navigator.of(context).pop(refresh);
-                      }
-                    }
-                  }),
-                  if (widget.initialData.scrapper.id != null)
-                    buildHomeAction(context, ImdbUri(MediaType.season, widget.initialData.scrapper.id!, season: currentSeason.value!.season).toUri()),
-                  const Divider(),
-                  buildDeleteAction(context, () => Api.tvSeasonDeleteById(currentSeason.value!.id)),
-                ],
-              )
-            : const SizedBox(),
+        builder:
+            (context, _) =>
+                currentSeason.value != null
+                    ? ListView(
+                      padding: const EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 32),
+                      children: [
+                        buildSkipIntroAction(
+                          context,
+                          currentSeason.value!,
+                          MediaType.season,
+                          currentSeason.value!.skipIntro,
+                        ),
+                        buildSkipIntroAction(
+                          context,
+                          currentSeason.value!,
+                          MediaType.season,
+                          currentSeason.value!.skipEnding,
+                        ),
+                        const Divider(),
+                        buildEditMetadataAction(context, () async {
+                          final newSeason = await Navigator.of(context).push<int>(
+                            FadeInPageRoute(builder: (context) => SeasonMetadata(season: currentSeason.value!)),
+                          );
+                          if (newSeason != null) {
+                            final newId = await Api.tvSeasonNumberUpdate(currentSeason.value!, newSeason);
+                            refresh = true;
+                            if (newId == currentSeason.value!.id) {
+                              setState(() {});
+                            } else if (context.mounted) {
+                              Navigator.of(context).pop(refresh);
+                            }
+                          }
+                        }),
+                        if (widget.initialData.scrapper.id != null)
+                          buildHomeAction(
+                            context,
+                            ImdbUri(
+                              MediaType.season,
+                              widget.initialData.scrapper.id!,
+                              season: currentSeason.value!.season,
+                            ).toUri(),
+                          ),
+                        const Divider(),
+                        buildDeleteAction(context, () => Api.tvSeasonDeleteById(currentSeason.value!.id)),
+                      ],
+                    )
+                    : const SizedBox(),
       ),
     );
   }
@@ -215,37 +260,35 @@ class _SeasonPageState extends State<_SeasonPage> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilderHandler(
-        future: Api.tvSeasonQueryById(widget.seasonId),
-        builder: (context, snapshot) {
-          final item = snapshot.requireData;
-          return CustomScrollView(
-            cacheExtent: 1000,
-            slivers: [
-              SliverPadding(
-                padding: const EdgeInsets.only(top: 32, left: 8, right: 8, bottom: 16),
-                sliver: SliverToBoxAdapter(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 16,
-                    children: [
-                      FocusableImage(
-                        poster: item.poster,
-                        width: 120,
-                        height: 180,
-                        onTap: () {},
-                      ),
-                      Expanded(
-                          child: Column(
+      future: Api.tvSeasonQueryById(widget.seasonId),
+      builder: (context, snapshot) {
+        final item = snapshot.requireData;
+        return CustomScrollView(
+          cacheExtent: 1000,
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.only(top: 32, left: 8, right: 8, bottom: 16),
+              sliver: SliverToBoxAdapter(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 16,
+                  children: [
+                    FocusableImage(poster: item.poster, width: 120, height: 180, onTap: () {}),
+                    Expanded(
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Row(
                             children: [
                               if (item.episodeCount != null)
-                                Text('${item.episodes.length} / ${AppLocalizations.of(context)!.episodeCount(item.episodeCount!)}')
+                                Text(
+                                  '${item.episodes.length} / ${AppLocalizations.of(context)!.episodeCount(item.episodeCount!)}',
+                                )
                               else
                                 Text(AppLocalizations.of(context)!.episodeCount(item.episodes.length)),
                               const SizedBox(width: 16),
-                              if (item.airDate != null) Text(item.airDate!.format(), style: Theme.of(context).textTheme.labelSmall),
+                              if (item.airDate != null)
+                                Text(item.airDate!.format(), style: Theme.of(context).textTheme.labelSmall),
                               const Spacer(),
                               if (item.watched)
                                 TVIconButton.filledTonal(
@@ -301,47 +344,52 @@ class _SeasonPageState extends State<_SeasonPage> {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ],
-                      )),
-                    ],
-                  ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              SliverPadding(
-                padding: const EdgeInsets.all(8),
-                sliver: SliverList.separated(
-                  itemCount: item.episodes.length,
-                  itemBuilder: (context, index) => _EpisodeListTile(
-                    key: UniqueKey(),
-                    autofocus: index == 0,
-                    episode: item.episodes[index],
-                    scrapper: widget.scrapper,
-                    onTap: () async {
-                      await toPlayer(
-                        navigatorKey.currentContext!,
-                        (item.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList(), index),
-                        theme: item.themeColor,
-                      );
-                      widget.needUpdate();
-                    },
-                    onTapMore: () async {
-                      final resp = await navigateTo(navigatorKey.currentContext!, EpisodeDetail(item.episodes[index], scrapper: widget.scrapper));
-                      if (resp == true) {
-                        setState(() {});
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.all(8),
+              sliver: SliverList.separated(
+                itemCount: item.episodes.length,
+                itemBuilder:
+                    (context, index) => _EpisodeListTile(
+                      key: UniqueKey(),
+                      autofocus: index == 0,
+                      episode: item.episodes[index],
+                      scrapper: widget.scrapper,
+                      onTap: () async {
+                        await toPlayer(navigatorKey.currentContext!, (
+                          item.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList(),
+                          index,
+                        ), theme: item.themeColor);
                         widget.needUpdate();
-                      }
-                    },
-                  ),
-                  separatorBuilder: (context, index) => const SizedBox(height: 16),
-                ),
+                      },
+                      onTapMore: () async {
+                        final resp = await navigateTo(
+                          navigatorKey.currentContext!,
+                          EpisodeDetail(item.episodes[index], scrapper: widget.scrapper),
+                        );
+                        if (resp == true) {
+                          setState(() {});
+                          widget.needUpdate();
+                        }
+                      },
+                    ),
+                separatorBuilder: (context, index) => const SizedBox(height: 16),
               ),
-              CastCrewTitle(mediaCast: item.mediaCast, mediaCrew: item.mediaCrew),
-              SliverPadding(
-                padding: const EdgeInsets.all(8),
-                sliver: CastCrewInner(mediaCast: item.mediaCast, mediaCrew: item.mediaCrew, type: MediaType.season),
-              ),
-            ],
-          );
-        });
+            ),
+            CastCrewTitle(mediaCast: item.mediaCast, mediaCrew: item.mediaCrew),
+            SliverPadding(
+              padding: const EdgeInsets.all(8),
+              sliver: CastCrewInner(mediaCast: item.mediaCast, mediaCrew: item.mediaCrew, type: MediaType.season),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 
@@ -373,18 +421,11 @@ class _EpisodeListTile extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                FocusableImage(
-                  autofocus: autofocus,
-                  poster: episode.poster,
-                  onTap: onTap,
-                ),
+                FocusableImage(autofocus: autofocus, poster: episode.poster, onTap: onTap),
                 Align(
                   alignment: const Alignment(0.95, 0.9),
                   child: BadgeTheme(
-                    data: BadgeTheme.of(context).copyWith(
-                      backgroundColor: Colors.black87,
-                      textColor: Colors.white,
-                    ),
+                    data: BadgeTheme.of(context).copyWith(backgroundColor: Colors.black87, textColor: Colors.white),
                     child: IconTheme(
                       data: IconTheme.of(context).copyWith(size: 12),
                       child: Row(
@@ -398,20 +439,21 @@ class _EpisodeListTile extends StatelessWidget {
                             IconTheme(
                               data: IconThemeData(color: Theme.of(context).colorScheme.onInverseSurface, size: 14),
                               child: Badge(
-                                  label: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                spacing: 2,
-                                children: [
-                                  const Icon(Icons.access_time_rounded),
-                                  Text(episode.duration!.toDisplay()),
-                                ],
-                              )),
+                                label: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  spacing: 2,
+                                  children: [
+                                    const Icon(Icons.access_time_rounded),
+                                    Text(episode.duration!.toDisplay()),
+                                  ],
+                                ),
+                              ),
                             ),
                         ],
                       ),
                     ),
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -430,7 +472,8 @@ class _EpisodeListTile extends StatelessWidget {
                       const TextSpan(text: ' · '),
                       TextSpan(text: AppLocalizations.of(context)!.episodeNumber(episode.episode)),
                       const WidgetSpan(child: SizedBox(width: 10)),
-                      if (episode.airDate != null) TextSpan(text: episode.airDate?.format() ?? AppLocalizations.of(context)!.tagUnknown),
+                      if (episode.airDate != null)
+                        TextSpan(text: episode.airDate?.format() ?? AppLocalizations.of(context)!.tagUnknown),
                     ],
                   ),
                 ),
@@ -451,14 +494,10 @@ class _EpisodeListTile extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  episode.overview ?? '',
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                Text(episode.overview ?? '', maxLines: 3, overflow: TextOverflow.ellipsis),
               ],
             ),
-          )
+          ),
         ],
       ),
     );

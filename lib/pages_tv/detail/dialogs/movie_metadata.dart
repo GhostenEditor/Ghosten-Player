@@ -1,8 +1,8 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../components/gap.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../utils/utils.dart';
 import '../../../validators/validators.dart';
 import '../../components/filled_button.dart';
@@ -55,10 +55,7 @@ class _MovieMetadataState extends State<MovieMetadata> {
                 child: TextFormField(
                   autofocus: true,
                   controller: _controller1,
-                  decoration: InputDecoration(
-                    isDense: true,
-                    labelText: AppLocalizations.of(context)!.formLabelTitle,
-                  ),
+                  decoration: InputDecoration(isDense: true, labelText: AppLocalizations.of(context)!.formLabelTitle),
                   validator: (value) => requiredValidator(context, value),
                   onEditingComplete: () => FocusScope.of(context).nextFocus(),
                 ),
@@ -88,7 +85,11 @@ class _MovieMetadataState extends State<MovieMetadata> {
                   keyboardType: TextInputType.datetime,
                   onTap: () async {
                     final date = await showDatePicker(
-                        context: context, initialDate: DateTime.tryParse(_controller3.text), firstDate: DateTime(1900), lastDate: DateTime(2100));
+                      context: context,
+                      initialDate: DateTime.tryParse(_controller3.text),
+                      firstDate: DateTime(1900),
+                      lastDate: DateTime(2100),
+                    );
                     if (date != null) {
                       _controller3.text = date.format();
                     }

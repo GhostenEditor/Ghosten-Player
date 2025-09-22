@@ -1,8 +1,8 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../components/future_builder_handler.dart';
+import '../../l10n/app_localizations.dart';
 import '../../validators/validators.dart';
 import '../components/filled_button.dart';
 import '../components/icon_button.dart';
@@ -25,85 +25,95 @@ class _SystemSettingsServerState extends State<SystemSettingsServer> {
     return SettingPage(
       title: AppLocalizations.of(context)!.settingsItemServer,
       child: FutureBuilderHandler(
-          future: Api.serverQueryAll(),
-          builder: (context, snapshot) => ListView(
-                padding: const EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 32),
-                children: [
-                  ...snapshot.requireData.map((item) => item.active
-                      ? ButtonSettingItem(
-                          leading: const Icon(Icons.check_rounded),
-                          trailing: item.invalid
-                              ? Container(
-                                  padding: const EdgeInsets.all(2),
-                                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(50), color: Colors.red),
-                                  child: const Icon(Icons.close, color: Colors.white, size: 12),
-                                )
-                              : null,
-                          autofocus: item.active,
-                          title: Text(item.host),
-                          subtitle: Row(
-                            spacing: 8,
-                            children: [
-                              Text(item.type.name),
-                              if (item.username != null) Text(item.username!),
-                            ],
-                          ),
-                          onTap: () {},
-                        )
-                      : SlidableSettingItem(
-                          actions: [
-                            if (!item.active)
-                              TVIconButton(
-                                onPressed: () async {
-                                  final resp = await showNotification(context, Api.serverActiveById(item.id));
-                                  if (resp?.error == null && context.mounted) {
-                                    setState(() {});
-                                  }
-                                },
-                                icon: const Icon(Icons.check_rounded),
-                              ),
-                            if (!item.active && item.id != 0)
-                              TVIconButton(
-                                onPressed: () async {
-                                  final confirmed = await showConfirm(context, AppLocalizations.of(context)!.deleteConfirmText);
-                                  if (confirmed ?? false) {
-                                    await Api.serverDeleteById(item.id);
-                                    if (context.mounted) {
+        future: Api.serverQueryAll(),
+        builder:
+            (context, snapshot) => ListView(
+              padding: const EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 32),
+              children: [
+                ...snapshot.requireData.map(
+                  (item) =>
+                      item.active
+                          ? ButtonSettingItem(
+                            leading: const Icon(Icons.check_rounded),
+                            trailing:
+                                item.invalid
+                                    ? Container(
+                                      padding: const EdgeInsets.all(2),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(50),
+                                        color: Colors.red,
+                                      ),
+                                      child: const Icon(Icons.close, color: Colors.white, size: 12),
+                                    )
+                                    : null,
+                            autofocus: item.active,
+                            title: Text(item.host),
+                            subtitle: Row(
+                              spacing: 8,
+                              children: [Text(item.type.name), if (item.username != null) Text(item.username!)],
+                            ),
+                            onTap: () {},
+                          )
+                          : SlidableSettingItem(
+                            actions: [
+                              if (!item.active)
+                                TVIconButton(
+                                  onPressed: () async {
+                                    final resp = await showNotification(context, Api.serverActiveById(item.id));
+                                    if (resp?.error == null && context.mounted) {
                                       setState(() {});
                                     }
-                                  }
-                                },
-                                icon: const Icon(Icons.delete_outline_rounded),
-                              ),
-                          ],
-                          leading: Icon(item.active ? Icons.check_rounded : null),
-                          trailing: item.invalid
-                              ? Container(
-                                  padding: const EdgeInsets.all(2),
-                                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(50), color: Colors.red),
-                                  child: const Icon(Icons.close, color: Colors.white, size: 12),
-                                )
-                              : null,
-                          subtitle: Row(
-                            spacing: 8,
-                            children: [
-                              Text(item.type.name),
-                              if (item.username != null) Text(item.username!),
+                                  },
+                                  icon: const Icon(Icons.check_rounded),
+                                ),
+                              if (!item.active && item.id != 0)
+                                TVIconButton(
+                                  onPressed: () async {
+                                    final confirmed = await showConfirm(
+                                      context,
+                                      AppLocalizations.of(context)!.deleteConfirmText,
+                                    );
+                                    if (confirmed ?? false) {
+                                      await Api.serverDeleteById(item.id);
+                                      if (context.mounted) {
+                                        setState(() {});
+                                      }
+                                    }
+                                  },
+                                  icon: const Icon(Icons.delete_outline_rounded),
+                                ),
                             ],
+                            leading: Icon(item.active ? Icons.check_rounded : null),
+                            trailing:
+                                item.invalid
+                                    ? Container(
+                                      padding: const EdgeInsets.all(2),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(50),
+                                        color: Colors.red,
+                                      ),
+                                      child: const Icon(Icons.close, color: Colors.white, size: 12),
+                                    )
+                                    : null,
+                            subtitle: Row(
+                              spacing: 8,
+                              children: [Text(item.type.name), if (item.username != null) Text(item.username!)],
+                            ),
+                            title: Text(item.host),
                           ),
-                          title: Text(item.host),
-                        )),
-                  const GapSettingItem(height: 12),
-                  IconButtonSettingItem(
-                    autofocus: snapshot.requireData.isEmpty,
-                    icon: const Icon(Icons.add),
-                    onPressed: () async {
-                      final flag = await navigateToSlideLeft<bool>(context, const _SystemSettingsAdd());
-                      if (flag ?? false) setState(() {});
-                    },
-                  ),
-                ],
-              )),
+                ),
+                const GapSettingItem(height: 12),
+                IconButtonSettingItem(
+                  autofocus: snapshot.requireData.isEmpty,
+                  icon: const Icon(Icons.add),
+                  onPressed: () async {
+                    final flag = await navigateToSlideLeft<bool>(context, const _SystemSettingsAdd());
+                    if (flag ?? false) setState(() {});
+                  },
+                ),
+              ],
+            ),
+      ),
     );
   }
 }
@@ -218,14 +228,15 @@ class _SystemSettingsAddState extends State<_SystemSettingsAdd> {
                     if (_formKey.currentState!.validate()) {
                       final userAgent = _userAgent.text.trim();
                       final resp = await showNotification(
-                          context,
-                          Api.serverInsert({
-                            'type': _type,
-                            'host': _serverAddress.text.trim(),
-                            'username': _username.text.trim(),
-                            'userPassword': _userPassword.text.trim(),
-                            'userAgent': userAgent.isNotEmpty ? userAgent : null,
-                          }));
+                        context,
+                        Api.serverInsert({
+                          'type': _type,
+                          'host': _serverAddress.text.trim(),
+                          'username': _username.text.trim(),
+                          'userPassword': _userPassword.text.trim(),
+                          'userAgent': userAgent.isNotEmpty ? userAgent : null,
+                        }),
+                      );
                       if (resp?.error == null && context.mounted) {
                         Navigator.of(context).pop(true);
                       }

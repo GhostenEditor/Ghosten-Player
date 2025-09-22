@@ -1,7 +1,7 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../utils/utils.dart';
 import '../../validators/validators.dart';
 import '../components/input_assistance.dart';
@@ -36,7 +36,10 @@ class _LiveEditState extends State<LiveEdit> {
       suffixIcon: IconButton(
         icon: const Icon(Icons.folder_open_rounded),
         onPressed: () async {
-          final resp = await navigateTo(navigatorKey.currentContext!, const DriverFilePicker(selectableType: FileType.file));
+          final resp = await navigateTo(
+            navigatorKey.currentContext!,
+            const DriverFilePicker(selectableType: FileType.file),
+          );
           if (resp is (int, DriverFile)) {
             final file = resp.$2;
             _controller.text = 'driver://${resp.$1}/${file.id}';
@@ -63,41 +66,52 @@ class _LiveEditState extends State<LiveEdit> {
       body: Row(
         children: [
           Flexible(
-              flex: 2,
-              fit: FlexFit.tight,
-              child: DecoratedBox(
-                decoration: const BoxDecoration(
-                  image: DecorationImage(image: AssetImage('assets/tv/images/bg-wheat.webp'), repeat: ImageRepeat.repeat),
-                ),
-                child: InputAssistance(onData: (data) {
+            flex: 2,
+            fit: FlexFit.tight,
+            child: DecoratedBox(
+              decoration: const BoxDecoration(
+                image: DecorationImage(image: AssetImage('assets/tv/images/bg-wheat.webp'), repeat: ImageRepeat.repeat),
+              ),
+              child: InputAssistance(
+                onData: (data) {
                   final ctx = FocusManager.instance.primaryFocus?.context;
                   final textField = ctx?.findAncestorWidgetOfExactType<TextField>();
                   if (textField?.controller != null) {
                     textField!.controller!.text += data;
                   }
-                }),
-              )),
+                },
+              ),
+            ),
+          ),
           Flexible(
-              flex: 3,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(widget.item == null ? AppLocalizations.of(context)!.pageTitleAdd : AppLocalizations.of(context)!.pageTitleEdit,
-                      style: Theme.of(context).textTheme.displaySmall!.copyWith(fontWeight: FontWeight.bold)),
-                  StepperForm(
-                    items: _items,
-                    onComplete: (data) async {
-                      if (widget.item == null) {
-                        final resp = await showNotification(context, Api.playlistInsert(data));
-                        if (resp?.error == null && context.mounted) Navigator.of(context).pop(true);
-                      } else {
-                        final resp = await showNotification(context, Api.playlistUpdateById({...data, 'id': widget.item?.id}));
-                        if (resp?.error == null && context.mounted) Navigator.of(context).pop(true);
-                      }
-                    },
-                  ),
-                ],
-              )),
+            flex: 3,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  widget.item == null
+                      ? AppLocalizations.of(context)!.pageTitleAdd
+                      : AppLocalizations.of(context)!.pageTitleEdit,
+                  style: Theme.of(context).textTheme.displaySmall!.copyWith(fontWeight: FontWeight.bold),
+                ),
+                StepperForm(
+                  items: _items,
+                  onComplete: (data) async {
+                    if (widget.item == null) {
+                      final resp = await showNotification(context, Api.playlistInsert(data));
+                      if (resp?.error == null && context.mounted) Navigator.of(context).pop(true);
+                    } else {
+                      final resp = await showNotification(
+                        context,
+                        Api.playlistUpdateById({...data, 'id': widget.item?.id}),
+                      );
+                      if (resp?.error == null && context.mounted) Navigator.of(context).pop(true);
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

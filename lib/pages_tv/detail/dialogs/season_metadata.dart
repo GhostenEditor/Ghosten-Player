@@ -1,8 +1,8 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../components/gap.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../components/filled_button.dart';
 import '../../components/keyboard_reopen.dart';
 import '../../components/setting.dart';

@@ -3,9 +3,9 @@ import 'dart:math';
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../components/async_image.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../utils/utils.dart';
 import '../../utils/utils.dart';
 import 'file_info.dart';
@@ -39,7 +39,10 @@ class _OverviewSectionState<T extends MediaBase> extends State<OverviewSection<T
       color: Colors.transparent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(6),
-        side: _focused ? BorderSide(width: 4, color: Theme.of(context).colorScheme.inverseSurface, strokeAlign: 2) : BorderSide.none,
+        side:
+            _focused
+                ? BorderSide(width: 4, color: Theme.of(context).colorScheme.inverseSurface, strokeAlign: 2)
+                : BorderSide.none,
       ),
       child: InkWell(
         onTap: () => _showFull(context),
@@ -53,7 +56,9 @@ class _OverviewSectionState<T extends MediaBase> extends State<OverviewSection<T
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
           child: Text(
             widget.item.overview ?? AppLocalizations.of(context)!.noOverview,
-            style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).textTheme.bodyMedium?.color?.withAlpha(0xB3)),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium!.copyWith(color: Theme.of(context).textTheme.bodyMedium?.color?.withAlpha(0xB3)),
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
           ),
@@ -63,19 +68,21 @@ class _OverviewSectionState<T extends MediaBase> extends State<OverviewSection<T
   }
 
   void _showFull(BuildContext context) {
-    Navigator.pushAndRemoveUntil(widget.navigatorKey.currentContext!, FadeInPageRoute(builder: (context) {
-      return Align(
-        alignment: Alignment.topRight,
-        child: FractionallySizedBox(
-          widthFactor: 0.8,
-          child: Overview(
-            item: widget.item,
-            description: widget.description,
-            fileId: widget.fileId,
-          ),
-        ),
-      );
-    }), (_) => false);
+    Navigator.pushAndRemoveUntil(
+      widget.navigatorKey.currentContext!,
+      FadeInPageRoute(
+        builder: (context) {
+          return Align(
+            alignment: Alignment.topRight,
+            child: FractionallySizedBox(
+              widthFactor: 0.8,
+              child: Overview(item: widget.item, description: widget.description, fileId: widget.fileId),
+            ),
+          );
+        },
+      ),
+      (_) => false,
+    );
     if (widget.onTap != null) widget.onTap!();
   }
 }
@@ -146,16 +153,26 @@ class _OverviewState<T extends MediaBase> extends State<Overview<T>> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   spacing: 16,
                   children: [
-                    if (widget.item.poster != null) AsyncImage(widget.item.poster!, width: 140, radius: const BorderRadius.all(Radius.circular(8))),
+                    if (widget.item.poster != null)
+                      AsyncImage(widget.item.poster!, width: 140, radius: const BorderRadius.all(Radius.circular(8))),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           if (widget.item.title != null)
-                            Text(widget.item.title!, style: Theme.of(context).textTheme.titleLarge!.copyWith(height: 2, fontWeight: FontWeight.bold)),
+                            Text(
+                              widget.item.title!,
+                              style: Theme.of(
+                                context,
+                              ).textTheme.titleLarge!.copyWith(height: 2, fontWeight: FontWeight.bold),
+                            ),
                           if (widget.item.airDate != null)
-                            Text(widget.item.airDate!.format(),
-                                style: Theme.of(context).textTheme.labelSmall!.copyWith(height: 2, fontWeight: FontWeight.bold)),
+                            Text(
+                              widget.item.airDate!.format(),
+                              style: Theme.of(
+                                context,
+                              ).textTheme.labelSmall!.copyWith(height: 2, fontWeight: FontWeight.bold),
+                            ),
                           if (widget.description != null) widget.description!,
                         ],
                       ),
@@ -164,7 +181,10 @@ class _OverviewState<T extends MediaBase> extends State<Overview<T>> {
                 ),
               ),
             ),
-            const SliverPadding(padding: EdgeInsets.symmetric(horizontal: 32), sliver: SliverToBoxAdapter(child: Divider(height: 48))),
+            const SliverPadding(
+              padding: EdgeInsets.symmetric(horizontal: 32),
+              sliver: SliverToBoxAdapter(child: Divider(height: 48)),
+            ),
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
               sliver: SliverToBoxAdapter(
@@ -176,11 +196,12 @@ class _OverviewState<T extends MediaBase> extends State<Overview<T>> {
             ),
             if (widget.fileId != null)
               SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: Align(alignment: Alignment.bottomCenter, child: FileInfoSection(fileId: widget.fileId!)),
-                  )),
+                hasScrollBody: false,
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Align(alignment: Alignment.bottomCenter, child: FileInfoSection(fileId: widget.fileId!)),
+                ),
+              ),
             const SliverToBoxAdapter(child: SafeArea(child: SizedBox())),
           ],
         ),
