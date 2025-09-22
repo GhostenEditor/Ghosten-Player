@@ -1,6 +1,6 @@
 name: api
 description: "Api Plugin for Ghosten Player"
-version: 2.1.2
+version: 2.3.0
 
 environment:
   sdk: ^3.8.0

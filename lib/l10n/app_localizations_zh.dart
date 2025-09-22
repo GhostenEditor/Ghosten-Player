@@ -268,6 +268,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get downloaderDeleteFileConfirmText => '是否同时删除文件？';
 
   @override
+  String get downloaderLabelDownloadFailed => '下载失败';
+
+  @override
   String get downloaderLabelDownloaded => '已下载';
 
   @override

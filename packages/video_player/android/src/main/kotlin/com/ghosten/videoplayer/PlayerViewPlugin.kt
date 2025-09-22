@@ -55,18 +55,24 @@ class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activit
                                         call.argument("autoPip") ?: true,
                                     )
                                 }
+
                                 "mpv" -> {
-                                    mPlayerView = MPVPlayerView(
-                                        activity.applicationContext,
-                                        activity,
-                                        mChannel,
-                                        true,
-                                        call.argument("language"),
-                                        call.argument("width"),
-                                        call.argument("height"),
-                                        call.argument("top"),
-                                        call.argument("left"),
-                                    )
+                                    try {
+                                        mPlayerView = MPVPlayerView(
+                                            activity.applicationContext,
+                                            activity,
+                                            mChannel,
+                                            true,
+                                            call.argument("language"),
+                                            call.argument("width"),
+                                            call.argument("height"),
+                                            call.argument("top"),
+                                            call.argument("left"),
+                                            call.argument("mpvVersion") ?: "",
+                                        )
+                                    } catch (e: Exception) {
+                                        return result.error(e.toString(), e.message, null)
+                                    }
                                 }
                             }
                     }

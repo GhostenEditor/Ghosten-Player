@@ -218,7 +218,7 @@ class _SettingsUpdatingState extends State<_SettingsUpdating> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      AppLocalizations.of(context)!.latestVersion(widget.data.tagName),
+                      AppLocalizations.of(context)!.latestVersion(widget.data.version),
                       style: Theme.of(context).textTheme.displaySmall,
                       overflow: TextOverflow.ellipsis,
                     ),

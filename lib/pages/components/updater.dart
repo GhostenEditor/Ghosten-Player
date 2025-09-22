@@ -47,7 +47,7 @@ class _UpdateBottomSheetState extends State<UpdateBottomSheet> {
                     style: Theme.of(context).textTheme.labelSmall,
                     children: [
                       const TextSpan(text: ' '),
-                      TextSpan(text: widget.data.tagName.toString(), style: const TextStyle(fontSize: 10)),
+                      TextSpan(text: widget.data.version.toString(), style: const TextStyle(fontSize: 10)),
                     ],
                   ),
                 ),

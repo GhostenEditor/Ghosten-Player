@@ -113,6 +113,7 @@ class _PlayerControlsLiteState<T> extends State<PlayerControlsLite<T>> {
 
   @override
   Widget build(BuildContext context) {
+    final userConfig = context.read<UserConfig>();
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
@@ -257,8 +258,10 @@ class _PlayerControlsLiteState<T> extends State<PlayerControlsLite<T>> {
                               children: [
                                 PlayerPlatformView(
                                   initialized: widget.initialized,
-                                  playerType: context.read<UserConfig>().playerType,
-                                  autoPip: context.read<UserConfig>().autoPip,
+                                  initializeFailed: (e) => widget.controller.fatalError.value = e.message,
+                                  playerType: userConfig.playerType,
+                                  mpvVersion: userConfig.mpvVersion,
+                                  autoPip: userConfig.autoPip,
                                 ),
                                 ListenableBuilder(
                                   listenable: _isShowControls,

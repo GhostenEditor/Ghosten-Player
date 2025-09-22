@@ -275,6 +275,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get downloaderDeleteFileConfirmText => 'Whether to delete files at the same time?';
 
   @override
+  String get downloaderLabelDownloadFailed => 'Download Failed';
+
+  @override
   String get downloaderLabelDownloaded => 'Downloaded';
 
   @override

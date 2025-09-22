@@ -578,6 +578,12 @@ abstract class AppLocalizations {
   /// **'Whether to delete files at the same time?'**
   String get downloaderDeleteFileConfirmText;
 
+  /// No description provided for @downloaderLabelDownloadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Failed'**
+  String get downloaderLabelDownloadFailed;
+
   /// No description provided for @downloaderLabelDownloaded.
   ///
   /// In en, this message translates to:

@@ -21,6 +21,7 @@ dependencies:
   dio: ^5.7.0
   file_picker:
     path: packages/file_picker
+  flutter_archive: ^6.0.3
   flutter_bloc: ^9.1.0
   flutter_markdown: ^0.7.7
   flutter_slidable: ^4.0.0

@@ -48,6 +48,7 @@ class UserConfig extends ChangeNotifier {
       autoPlay = prefs.getBool('playerConfig.autoPlay') ?? false,
       autoPip = prefs.getBool('playerConfig.autoPip') ?? false,
       playerType = PlayerType.fromString(prefs.getString('playerConfig.playerType')),
+      mpvVersion = prefs.getString('playerConfig.mpvVersion'),
       autoForceLandscape = prefs.getBool('playerConfig.autoForceLandscape') ?? false,
       displayScale = prefs.getDouble('system.displayScale') ?? 1;
   final SharedPreferences prefs;
@@ -55,6 +56,7 @@ class UserConfig extends ChangeNotifier {
   ThemeMode themeMode;
   AutoUpdateFrequency autoUpdateFrequency;
   PlayerType playerType;
+  String? mpvVersion;
   bool updatePrerelease;
   String githubProxy;
   DateTime? lastCheckUpdateTime;
@@ -117,6 +119,16 @@ class UserConfig extends ChangeNotifier {
     this.playerType = playerType;
     notifyListeners();
     prefs.setString('playerConfig.playerType', playerType.name);
+  }
+
+  void setMpvVersion(String? mpvVersion) {
+    this.mpvVersion = mpvVersion;
+    notifyListeners();
+    if (mpvVersion != null) {
+      prefs.setString('playerConfig.mpvVersion', mpvVersion);
+    } else {
+      prefs.remove('playerConfig.mpvVersion');
+    }
   }
 
   void setDisplayScale(double s) {

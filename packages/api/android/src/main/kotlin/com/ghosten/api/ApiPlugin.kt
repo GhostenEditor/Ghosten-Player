@@ -252,10 +252,10 @@ class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnec
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun arch(): String {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && Build.SUPPORTED_ABIS.contains("arm64-v8a")) {
-            "arm64"
+        if (Build.SUPPORTED_ABIS.size > 0) {
+            return Build.SUPPORTED_ABIS[0]
         } else {
-            "arm"
+            return "unknown"
         }
     }
 

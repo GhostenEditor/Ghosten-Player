@@ -12,6 +12,7 @@ import android.view.SurfaceView
 import android.widget.FrameLayout
 import com.ghosten.videoplayer.MPVLib.mpvFormat.*
 import io.flutter.plugin.common.MethodChannel
+import org.json.JSONArray
 import java.io.*
 
 class MPVPlayerView(
@@ -24,6 +25,7 @@ class MPVPlayerView(
     private val height: Int?,
     private val top: Int?,
     private val left: Int?,
+    private val version: String,
 ) : SurfaceView(context), SurfaceHolder.Callback, BasePlayerView, MPVLib.EventObserver {
     companion object {
         private const val TAG = "mpv"
@@ -50,51 +52,51 @@ class MPVPlayerView(
     private var isFullscreen = width == null && height == null
 
     init {
-        val assetManager = context.assets
-        val configDir = context.filesDir.path
-        var ins: InputStream? = null
-        var out: OutputStream? = null
-        val filename = "subfont.ttf"
-        try {
-            ins = assetManager.open(filename, AssetManager.ACCESS_STREAMING)
-            val outFile = File("$configDir/$filename")
-            if (outFile.length() == ins.available().toLong()) {
-                Log.v(TAG, "Skipping copy of asset file (exists same size): $filename")
-            }
-            out = FileOutputStream(outFile)
-            ins.copyTo(out)
-            Log.w(TAG, "Copied asset file: $filename")
-        } catch (e: IOException) {
-            Log.e(TAG, "Failed to copy asset file: $filename", e)
-        } finally {
-            ins?.close()
-            out?.close()
+        if (mpvLibsDownloaded(version)) {
+            loadMpvLibs()
+
+            MPVLib.create(context)
+
+            initOptions(language)
+
+            MPVLib.init()
+
+            MPVLib.setOptionString("save-position-on-quit", "no")
+            MPVLib.setOptionString("force-window", "no")
+            MPVLib.setOptionString("idle", "yes")
+
+            holder.addCallback(this)
+            observeProperties()
+
+            mRootView.addView(this, 0)
+            addObserver(this)
+            mChannel.invokeMethod("isInitialized", null)
+
+            fullscreen(false)
         }
+    }
 
+    private fun loadMpvLibs() {
+        val dir = File(context.filesDir.path.plus("/mpv/$version"))
+        val manifest = File(dir, "manifest.json")
+        if (!manifest.exists()) {
+            throw FileNotFoundException("MPV is not installed")
+        }
+        val libs = manifest.bufferedReader().use { JSONArray(it.readText()) }
+        for (i in 0..<libs.length()) {
+            val lib = libs.getString(i)
+            System.load(File(dir, "$lib.so").path);
+        }
+    }
 
-        MPVLib.create(context)
-
-        initOptions(language)
-
-        MPVLib.init()
-
-        MPVLib.setOptionString("save-position-on-quit", "no")
-        MPVLib.setOptionString("force-window", "no")
-        MPVLib.setOptionString("idle", "yes")
-
-        holder.addCallback(this)
-        observeProperties()
-
-        mRootView.addView(this, 0)
-        addObserver(this)
-        mChannel.invokeMethod("isInitialized", null)
-
-        fullscreen(false)
+    private fun mpvLibsDownloaded(version: String): Boolean {
+        val dir = File(context.filesDir.path.plus("/mpv/$version"))
+        return dir.exists()
     }
 
     fun initOptions(language: String?) {
         MPVLib.setOptionString("config", "yes")
-        MPVLib.setOptionString("config-dir", context.filesDir.path)
+        MPVLib.setOptionString("config-dir", context.filesDir.path.plus("/mpv/$version"))
         for (opt in arrayOf("gpu-shader-cache-dir", "icc-cache-dir"))
             MPVLib.setOptionString(opt, context.cacheDir.path)
 

@@ -187,6 +187,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_archive:
+    dependency: "direct main"
+    description:
+      name: flutter_archive
+      sha256: "5ca235f304c12bf468979235f400f79846d204169d715939e39197106f5fc970"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.0.3"
   flutter_bloc:
     dependency: "direct main"
     description:

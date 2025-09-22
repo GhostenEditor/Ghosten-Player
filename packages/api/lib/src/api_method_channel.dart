@@ -33,6 +33,11 @@ class MethodChannelApi extends ApiPlatform {
   }
 
   @override
+  Future<String?> arch() async {
+    return _methodChannel.invokeMethod('arch');
+  }
+
+  @override
   Future<void> syncData(String filePath) => _methodChannel.invokeMethod('syncData', filePath);
 
   @override
@@ -97,7 +102,8 @@ class MethodChannelApi extends ApiPlatform {
       return null;
     }
     final res = await Dio(BaseOptions(connectTimeout: const Duration(seconds: 30))).get(updateUrl);
-    final Iterable<UpdateResp> data = (res.data as List<dynamic>).cast<Json>()
+    final Iterable<UpdateResp> data = (res.data as List<dynamic>)
+        .cast<Json>()
         .map(UpdateResp.fromJson)
         .where((el) => prerelease || !el.prerelease);
 
@@ -106,17 +112,15 @@ class MethodChannelApi extends ApiPlatform {
       'tv' => '-tv',
       _ => '',
     };
-    final url = switch (await _methodChannel.invokeMethod('arch')) {
-      'arm64' => latest.assets.firstWhereOrNull((item) => item.name == 'app-arm64-v8a$suffix-release.apk'),
-      _ => latest.assets.firstWhereOrNull((item) => item.name == 'app-armeabi-v7a$suffix-release.apk'),
-    }?.url;
-    if (url != null && currentVersion < latest.tagName) {
+    final arch = await this.arch();
+    final url = latest.assets.firstWhereOrNull((item) => item.name == 'app-$arch$suffix-release.apk')?.url;
+    if (url != null && currentVersion < latest.version) {
       return UpdateData(
         url: url,
-        tagName: latest.tagName,
+        version: latest.version,
         comment: data
-            .where((el) => el.tagName > currentVersion)
-            .map((el) => '## v${el.tagName}\n${el.comment}')
+            .where((el) => el.version > currentVersion)
+            .map((el) => '## v${el.version}\n${el.comment}')
             .join('\n'),
         createAt: latest.createAt,
       );

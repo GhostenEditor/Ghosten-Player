@@ -751,13 +751,15 @@ class UpdateResp {
         (json['assets'] as JsonList).length,
         (index) => UpdateRespAsset.fromJson((json['assets'] as JsonList).elementAt(index)),
       ),
-      tagName = Version.fromString((json['tag_name'] as String).substring(1)),
+      version = Version.fromString((json['tag_name'] as String).substring(1)),
+      tagName = json['tag_name'],
       comment = json['body'],
       prerelease = json['prerelease'],
       createAt = (json['published_at'] as String).toDateTime();
   final List<UpdateRespAsset> assets;
   final DateTime? createAt;
-  final Version tagName;
+  final Version version;
+  final String tagName;
   final String comment;
   final bool prerelease;
 }
@@ -769,10 +771,10 @@ class UpdateRespAsset {
 }
 
 class UpdateData {
-  const UpdateData({required this.url, required this.tagName, required this.comment, this.createAt});
+  const UpdateData({required this.url, required this.version, required this.comment, this.createAt});
 
   final DateTime? createAt;
-  final Version tagName;
+  final Version version;
   final String comment;
   final String url;
 }

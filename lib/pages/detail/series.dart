@@ -507,7 +507,11 @@ class _PlaylistSidebarState extends State<_PlaylistSidebar> {
   @override
   void didUpdateWidget(covariant _PlaylistSidebar oldWidget) {
     final index = widget.activeIndex;
-    if (index != oldWidget.activeIndex && index != null && index >= 0 && index < widget.playlist.length) {
+    if (index != oldWidget.activeIndex &&
+        index != null &&
+        index >= 0 &&
+        index < widget.playlist.length &&
+        _controller.hasClients) {
       _controller.animateTo(
         index * (imageHeight + 12),
         duration: const Duration(milliseconds: 400),

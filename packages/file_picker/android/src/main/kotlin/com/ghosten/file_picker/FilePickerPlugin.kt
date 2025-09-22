@@ -37,6 +37,7 @@ class FilePickerPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
             )
 
             "cachePath" -> result.success(context.cacheDir.path)
+            "filePath" -> result.success(context.filesDir.path)
             "externalUsbStorages" -> result.success(getUniversalUSBPath())
             else -> result.notImplemented()
         }
