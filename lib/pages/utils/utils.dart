@@ -12,6 +12,7 @@ import '../../components/focus_card.dart';
 import '../../components/future_builder_handler.dart';
 import '../../components/gap.dart';
 import '../../components/no_data.dart';
+import '../../const.dart';
 import '../../l10n/app_localizations.dart';
 import '../../platform_api.dart';
 import '../../providers/user_config.dart';
@@ -135,31 +136,55 @@ Future<(int, DriverFile)?> showDriverFilePicker(
                         scrollDirection: Axis.horizontal,
                         slivers: [
                           FutureBuilderSliverHandler(
-                            future: Api.driverQueryAll(),
+                            future: Api.driverQueryAll().then(
+                              (items) => items..sort((a, b) => b.type == DriverType.openlist ? -1 : 0),
+                            ),
                             builder:
                                 (context, snapshot) => SliverPadding(
-                                  padding:
-                                      snapshot.requireData.isNotEmpty
-                                          ? const EdgeInsets.only(left: 32, right: 32, bottom: 12)
-                                          : const EdgeInsets.only(left: 12),
+                                  padding: const EdgeInsets.only(left: 12, top: 12, bottom: 12),
                                   sliver: SliverList.builder(
                                     itemCount: snapshot.requireData.length,
                                     itemBuilder: (context, index) {
                                       final item = snapshot.requireData[index];
-                                      return _buildAccountCard(context, item, () async {
-                                        final file = await _showFilePicker(
-                                          context,
-                                          title: title,
-                                          type: FilePickerType.remote,
-                                          driverId: item.id,
-                                          defaultPath: '/',
-                                          fileType: fileType,
-                                          selectableType: selectableType,
+                                      if (item.type != DriverType.openlist) {
+                                        return _buildAccountCard(context, item, () async {
+                                          final file = await _showFilePicker(
+                                            context,
+                                            title: title,
+                                            type: FilePickerType.remote,
+                                            driverId: item.id,
+                                            defaultPath: '/',
+                                            fileType: fileType,
+                                            selectableType: selectableType,
+                                          );
+                                          if (file != null) {
+                                            if (context.mounted) Navigator.of(context).pop((item.id, file));
+                                          }
+                                        });
+                                      } else {
+                                        return Center(
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(left: 32, right: 16),
+                                            child: IconButton.filled(
+                                              onPressed: () async {
+                                                final file = await _showFilePicker(
+                                                  context,
+                                                  title: title,
+                                                  type: FilePickerType.remote,
+                                                  driverId: item.id,
+                                                  defaultPath: '/',
+                                                  fileType: fileType,
+                                                  selectableType: selectableType,
+                                                );
+                                                if (file != null) {
+                                                  if (context.mounted) Navigator.of(context).pop((4, file));
+                                                }
+                                              },
+                                              icon: Image.asset(assetsOpenlistLogo, width: 22),
+                                            ),
+                                          ),
                                         );
-                                        if (file != null) {
-                                          if (context.mounted) Navigator.of(context).pop((item.id, file));
-                                        }
-                                      });
+                                      }
                                     },
                                   ),
                                 ),
@@ -267,7 +292,7 @@ Widget _buildAccountCard(BuildContext context, DriverAccount item, GestureTapCal
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(item.name, overflow: TextOverflow.ellipsis),
+                if (item.name != null) Text(item.name!, overflow: TextOverflow.ellipsis),
                 Text(AppLocalizations.of(context)!.driverType(item.type.name)),
               ],
             ),

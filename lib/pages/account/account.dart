@@ -7,8 +7,10 @@ import '../../components/error_message.dart';
 import '../../components/focus_card.dart';
 import '../../components/future_builder_handler.dart';
 import '../../components/no_data.dart';
+import '../../const.dart';
 import '../../l10n/app_localizations.dart';
 import '../../utils/utils.dart';
+import '../openlist/home.dart';
 import '../utils/notification.dart';
 import '../viewers/file_viewer.dart';
 import 'account_login.dart';
@@ -73,10 +75,20 @@ class _AccountManageState extends State<AccountManage> {
                               title: Text(AppLocalizations.of(context)!.pageTitleFileViewer),
                             ),
                           ),
-                          if (item.type != DriverType.webdav)
+                          if (item.type != DriverType.webdav && item.type != DriverType.openlist)
                             PopupMenuItem(
                               padding: EdgeInsets.zero,
                               onTap: () => navigateTo(context, AccountPreference(account: item)),
+                              child: ListTile(
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                                leading: const Icon(Icons.edit_outlined),
+                                title: Text(AppLocalizations.of(context)!.buttonEdit),
+                              ),
+                            ),
+                          if (item.type == DriverType.openlist)
+                            PopupMenuItem(
+                              padding: EdgeInsets.zero,
+                              onTap: () => navigateTo(context, const OpenlistHome()),
                               child: ListTile(
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                                 leading: const Icon(Icons.edit_outlined),
@@ -109,7 +121,12 @@ class _AccountManageState extends State<AccountManage> {
                           aspectRatio: 1,
                           child:
                               item.avatar == null
-                                  ? const Icon(Icons.account_circle, size: 160)
+                                  ? item.type == DriverType.openlist
+                                      ? Padding(
+                                        padding: const EdgeInsets.all(36),
+                                        child: Image.asset(assetsOpenlistLogo),
+                                      )
+                                      : const Icon(Icons.account_circle, size: 160)
                                   : AsyncImage(item.avatar!, ink: true, radius: BorderRadius.circular(4)),
                         ),
                         Expanded(
@@ -118,7 +135,7 @@ class _AccountManageState extends State<AccountManage> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text(item.name, overflow: TextOverflow.ellipsis),
+                                if (item.name != null) Text(item.name!, overflow: TextOverflow.ellipsis),
                                 Text(AppLocalizations.of(context)!.driverType(item.type.name)),
                               ],
                             ),

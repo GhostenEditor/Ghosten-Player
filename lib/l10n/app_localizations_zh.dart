@@ -282,6 +282,7 @@ class AppLocalizationsZh extends AppLocalizations {
       'webdav': 'Webdav',
       'emby': 'Emby',
       'jellyfin': 'Jellyfin',
+      'openlist': 'Openlist',
       'local': '本地',
       'other': '未知',
     });

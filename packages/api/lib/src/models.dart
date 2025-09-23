@@ -538,7 +538,7 @@ class DriverAccount {
       avatar = json['avatar'];
   int id;
   DriverType type;
-  String name;
+  String? name;
   String? avatar;
 }
 
@@ -946,10 +946,12 @@ enum DriverType {
   webdav,
   emby,
   jellyfin,
-  local;
+  local,
+  openlist,
+  unknown;
 
   static DriverType fromString(String? name) {
-    return DriverType.values.firstWhere((s) => s.name == name);
+    return DriverType.values.firstWhere((s) => s.name == name, orElse: () => DriverType.unknown);
   }
 }
 

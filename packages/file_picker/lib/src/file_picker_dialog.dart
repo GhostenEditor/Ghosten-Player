@@ -296,6 +296,7 @@ class _FileViewerState<T> extends State<_FileViewer<T>> {
         );
       });
     } catch (error) {
+      if (!mounted) return;
       setState(() {
         _state = _state.copyWith(error: error, isLoading: false);
         widget.controller.error = error;

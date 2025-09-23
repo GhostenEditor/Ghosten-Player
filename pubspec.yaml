@@ -28,6 +28,8 @@ dependencies:
   infinite_scroll_pagination: ^5.1.0
   install_plugin: ^2.1.0
   markdown_widget: ^2.3.2+8
+  openlist:
+    path: packages/openlist
   photo_view: ^0.15.0
   provider: ^6.1.5
   qr_flutter: ^4.1.0
@@ -55,6 +57,8 @@ flutter:
   generate: true
   assets:
     - assets/common/images/
+    - assets/common/openlist_i18n/zh-CN/
+    - assets/common/openlist_i18n/en-US/
     - path: assets/tv/images/
       flavors:
         - tv

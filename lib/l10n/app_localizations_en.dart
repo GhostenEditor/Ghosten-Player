@@ -289,6 +289,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'webdav': 'Webdav',
       'emby': 'Emby',
       'jellyfin': 'Jellyfin',
+      'openlist': 'Openlist',
       'local': 'Local',
       'other': 'Unknown',
     });

@@ -593,7 +593,7 @@ abstract class AppLocalizations {
   /// No description provided for @driverType.
   ///
   /// In en, this message translates to:
-  /// **'{driverType, select, alipan{Alipan} quark{Quark} quarktv{Quark TV} webdav{Webdav} emby{Emby} jellyfin{Jellyfin} local{Local} other{Unknown}}'**
+  /// **'{driverType, select, alipan{Alipan} quark{Quark} quarktv{Quark TV} webdav{Webdav} emby{Emby} jellyfin{Jellyfin} openlist{Openlist} local{Local} other{Unknown}}'**
   String driverType(String driverType);
 
   /// No description provided for @episodeCount.

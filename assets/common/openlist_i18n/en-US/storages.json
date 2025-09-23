@@ -1,0 +1,55 @@
+{
+  "common": {
+    "mount_path": "Mount Path",
+    "mount_path-tips": "The path you want to mount to, it is unique and cannot be repeated",
+    "driver": "Driver",
+    "order": "Order",
+    "order-tips": "Use to sort",
+    "status": "Status",
+    "remark": "Remark",
+    "cache_expiration": "Cache Expiration",
+    "cache_expiration-tips": "The cache expiration time for this storage(minutes)",
+    "down_proxy_url": "Download proxy URL",
+    "disable_proxy_sign": "Disable proxy sign",
+    "disable_proxy_sign-tips": "Disable sign for Download proxy URL",
+    "web_proxy": "Web proxy",
+    "webdav_policy": "WebDAV policy",
+    "proxy_range": "Proxy Range",
+    "proxy_range-tips": "Need to enable proxy",
+    "webdav_policys": {
+      "302_redirect": "302 redirect",
+      "use_proxy_url": "use proxy URL",
+      "native_proxy": "native proxy"
+    },
+    "order_by": "Order by",
+    "order_bys": {
+      "name": "Name",
+      "size": "Size",
+      "modified": "Modified"
+    },
+    "order_direction": "Order direction",
+    "order_directions": {
+      "asc": "Ascending",
+      "desc": "Descending"
+    },
+    "extract_folder": "Extract folder",
+    "extract_folders": {
+      "front": "Extract to front",
+      "back": "Extract to back"
+    },
+    "enable_sign": "Enable sign",
+    "disable_index": "Disable index"
+  },
+  "table_fields": {
+    "status": {
+      "work": "Work",
+      "disabled": "Disabled"
+    }
+  },
+  "other": {
+    "start_load_success": "Start loading",
+    "load_all": "Reload All",
+    "filter_by_driver": "Filter by driver",
+    "table_layout": "Table layout"
+  }
+}

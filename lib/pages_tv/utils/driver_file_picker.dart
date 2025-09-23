@@ -70,7 +70,7 @@ class _DriverFilePickerState extends State<DriverFilePicker> {
                                       return TVListTile(
                                         selected: _selectedDriverId.value == item.id,
                                         autofocus: index == 0,
-                                        title: Text(item.name),
+                                        title: item.name != null ? Text(item.name!) : null,
                                         subtitle: Text(AppLocalizations.of(context)!.driverType(item.type.name)),
                                         leading: AspectRatio(
                                           aspectRatio: 1,

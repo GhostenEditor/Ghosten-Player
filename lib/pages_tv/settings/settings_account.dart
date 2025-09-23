@@ -36,7 +36,7 @@ class _SettingsAccountPageState extends State<SettingsAccountPage> {
               ...snapshot.requireData.indexed.map(
                 (entry) => SlidableSettingItem(
                   autofocus: entry.$1 == 0,
-                  title: Text(entry.$2.name),
+                  title: entry.$2.name != null ? Text(entry.$2.name!) : null,
                   subtitle: Text(AppLocalizations.of(context)!.driverType(entry.$2.type.name)),
                   leading: AspectRatio(
                     aspectRatio: 1,
