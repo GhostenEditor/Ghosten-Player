@@ -91,20 +91,24 @@ class PlayerWeb extends PlayerPlatform {
     final ar = arg is Map ? arg.jsify() : arg;
     final core = globalContext.getProperty<JSObject?>('__TAURI__'.toJS)?.getProperty<JSObject?>('core'.toJS);
     if (ar == null) {
-      return core?.callMethod<JSPromise>('invoke'.toJS, method.jsify()).toDart.then((data) => data?.dartify() as T);
+      return core?.callMethod<JSPromise>('invoke'.toJS, method.jsify()).toDart.then((data) => data.dartify() as T);
     } else {
-      return core?.callMethod<JSPromise>('invoke'.toJS, method.jsify(), ar).toDart.then((data) => data?.dartify() as T);
+      return core?.callMethod<JSPromise>('invoke'.toJS, method.jsify(), ar).toDart.then((data) => data.dartify() as T);
     }
   }
 
-  listen(String event, void Function(dynamic data) callback) {
-    globalContext.getProperty<JSObject?>('__TAURI__'.toJS)?.getProperty<JSObject?>('event'.toJS)?.callMethod(
-        'listen'.toJS,
-        event.toJS,
-        (JSObject data) {
-          final payload = data.getProperty('payload'.toJS);
-          callback(payload?.dartify());
-        }.toJS);
+  void listen(String event, void Function(dynamic data) callback) {
+    globalContext
+        .getProperty<JSObject?>('__TAURI__'.toJS)
+        ?.getProperty<JSObject?>('event'.toJS)
+        ?.callMethod(
+          'listen'.toJS,
+          event.toJS,
+          (JSObject data) {
+            final payload = data.getProperty('payload'.toJS);
+            callback(payload.dartify());
+          }.toJS,
+        );
   }
 
   void updateStatus(bool coreIdle, bool pause, bool seeking, bool pausedForCache) {
@@ -154,16 +158,6 @@ class PlayerWeb extends PlayerPlatform {
   }
 
   @override
-  Future<void> setSkipPosition(String type, List<int> list) {
-    throw UnimplementedError('setSkipPosition() has not been implemented.');
-  }
-
-  @override
-  Future<void> setSources(List<Map<String, dynamic>> playlist, int index) async {
-    invoke('set_sources', {'playlist': playlist, 'index': index});
-  }
-
-  @override
   Future<String?> getVideoThumbnail(int position) async {
     return null;
   }
@@ -172,6 +166,9 @@ class PlayerWeb extends PlayerPlatform {
   Future<bool?> canPip() async {
     return false;
   }
+
+  @override
+  Future<void> setTransform(List<double> matrix) async {}
 
   @override
   Future<void> enterFullscreen() async {
@@ -197,4 +194,24 @@ class PlayerWeb extends PlayerPlatform {
   Future<void> dispose() async {
     invoke('dispose');
   }
+
+  @override
+  Future<void> setAspectRatio(double? aspectRatio) async {}
+
+  @override
+  Future<void> setSource(Map<String, dynamic>? item) async {}
+
+  @override
+  Future<void> updateSource(Map<String, dynamic> source, int index) async {}
+
+  @override
+  Future<String> getLocalIpAddress() async {
+    return '';
+  }
+
+  @override
+  Future<void> setPlayerOption(String optionName, dynamic optionValue) async {}
+
+  @override
+  Future<void> setSubtitleStyle(List<int> style) async {}
 }

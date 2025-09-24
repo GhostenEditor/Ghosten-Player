@@ -6,6 +6,7 @@ import android.app.PictureInPictureParams
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import androidx.media3.common.util.UnstableApi
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -13,7 +14,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import java.net.InetAddress
 import java.net.NetworkInterface
-import java.util.*
+import java.util.Collections
 
 class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware,
     Application.ActivityLifecycleCallbacks {
@@ -29,6 +30,7 @@ class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activit
         mChannel.setMethodCallHandler(null)
     }
 
+    @UnstableApi
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "canPip" -> result.success(activity.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE))
@@ -83,11 +85,7 @@ class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activit
                             "pause" -> mPlayerView?.pause()
                             "next" -> mPlayerView?.next(call.arguments as Int)
                             "seekTo" -> mPlayerView?.seekTo((call.arguments as Int).toLong())
-                            "updateSource" -> mPlayerView?.updateSource(
-                                call.argument("source")!!,
-                                call.argument("index")!!
-                            )
-
+                            "updateSource" -> mPlayerView?.updateSource(call.argument("source")!!)
                             "setSource" -> mPlayerView?.setSource(call.arguments as HashMap<String, Any>?)
                             "setTransform" -> mPlayerView?.setTransform(call.argument("matrix")!!)
                             "setAspectRatio" -> mPlayerView?.setAspectRatio((call.arguments as Double?)?.toFloat())
@@ -146,7 +144,7 @@ class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activit
         }
     }
 
-    fun requestPip(): Boolean {
+    private fun requestPip(): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (!activity.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
                 return false

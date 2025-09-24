@@ -842,7 +842,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsItemMovie => 'Movie Folder';
 
   @override
-  String get settingsItemNetworkDiagnotics => 'Network Diagnotics';
+  String get settingsItemNetworkDiagnostics => 'Network Diagnostics';
 
   @override
   String get settingsItemNfoEnabled => 'NFO Enabled';

@@ -5,12 +5,9 @@ import android.os.Build
 import android.os.Environment
 import android.os.storage.StorageManager
 import android.os.storage.StorageVolume
-import androidx.annotation.RequiresApi
-import io.flutter.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
-import io.flutter.plugin.common.PluginRegistry
 
 class FilePickerPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
     private lateinit var channel: MethodChannel
@@ -43,10 +40,10 @@ class FilePickerPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         }
     }
 
-    fun getUniversalUSBPath(): List<HashMap<String, String>> {
+    private fun getUniversalUSBPath(): List<HashMap<String, String>> {
         val storageManager = context.getSystemService(Context.STORAGE_SERVICE) as StorageManager
         val storageVolumes: List<StorageVolume> = storageManager.getStorageVolumes()
-        var list = mutableListOf<HashMap<String, String>>();
+        val list = mutableListOf<HashMap<String, String>>()
 
         for (volume in storageVolumes) {
             if (volume.isRemovable && volume.state == Environment.MEDIA_MOUNTED) {

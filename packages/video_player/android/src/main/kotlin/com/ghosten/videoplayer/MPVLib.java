@@ -4,6 +4,7 @@ package com.ghosten.videoplayer;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.view.Surface;
+
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 
@@ -17,7 +18,7 @@ public class MPVLib {
     private static final List<EventObserver> observers = new ArrayList<>();
     private static final List<LogObserver> log_observers = new ArrayList<>();
 
-    public static native void create(Context appctx);
+    public static native void create(Context context);
 
     public static native void init();
 

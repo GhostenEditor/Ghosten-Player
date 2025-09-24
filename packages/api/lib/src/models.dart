@@ -859,31 +859,31 @@ class Version {
   }
 }
 
-enum NetworkDiagnoticsStatus {
+enum NetworkDiagnosticsStatus {
   success,
   fail;
 
-  static NetworkDiagnoticsStatus fromString(String s) {
-    return NetworkDiagnoticsStatus.values.firstWhere((e) => e.name == s);
+  static NetworkDiagnosticsStatus fromString(String s) {
+    return NetworkDiagnosticsStatus.values.firstWhere((e) => e.name == s);
   }
 }
 
 @immutable
-class NetworkDiagnotics {
-  NetworkDiagnotics.fromJson(Json json)
-    : status = NetworkDiagnoticsStatus.fromString(json['status']),
+class NetworkDiagnostics {
+  NetworkDiagnostics.fromJson(Json json)
+    : status = NetworkDiagnosticsStatus.fromString(json['status']),
       domain = json['domain'],
       ip = json['ip'],
       tip = json['tip'],
       error = json['error'];
-  final NetworkDiagnoticsStatus status;
+  final NetworkDiagnosticsStatus status;
   final String domain;
   final String? ip;
   final String? error;
   final String? tip;
 
   @override
-  bool operator ==(Object other) => other is NetworkDiagnotics && status == other.status && domain == other.domain;
+  bool operator ==(Object other) => other is NetworkDiagnostics && status == other.status && domain == other.domain;
 
   @override
   int get hashCode => Object.hash(status, domain);

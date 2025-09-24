@@ -9,7 +9,7 @@ interface BasePlayerView {
     fun pause()
     fun next(index: Int)
     fun seekTo(position: Long)
-    fun updateSource(data: HashMap<String, Any>, index: Int)
+    fun updateSource(data: HashMap<String, Any>)
     fun setSource(data: HashMap<String, Any>?)
     fun setTransform(matrix: ArrayList<Double>)
     fun setAspectRatio(aspectRatio: Float?)

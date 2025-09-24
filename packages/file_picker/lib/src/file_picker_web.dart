@@ -4,8 +4,6 @@ import 'dart:js_interop_unsafe';
 import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
-import 'package:js/js.dart';
-import 'package:js/js_util.dart';
 
 import '../file_picker.dart';
 import 'file_picker_platform_interface.dart';
@@ -25,19 +23,28 @@ class FilePickerWeb extends FilePickerPlatform {
   @override
   Future<String?> get moviePath {
     final path = globalContext.getProperty<JSObject>('__TAURI__'.toJS).getProperty<JSObject>('path'.toJS);
-    return path.callMethod<JSPromise>('videoDir'.toJS).toDart.then((data) => data?.dartify() as String?);
+    return path
+        .callMethod<JSPromise>('videoDir'.toJS)
+        .toDart
+        .then((data) => data.dartify() as String?);
   }
 
   @override
   Future<String?> get musicPath {
     final path = globalContext.getProperty<JSObject>('__TAURI__'.toJS).getProperty<JSObject>('path'.toJS);
-    return path.callMethod<JSPromise>('audioDir'.toJS).toDart.then((data) => data?.dartify() as String?);
+    return path
+        .callMethod<JSPromise>('audioDir'.toJS)
+        .toDart
+        .then((data) => data.dartify() as String?);
   }
 
   @override
   Future<String?> get cachePath {
     final path = globalContext.getProperty<JSObject>('__TAURI__'.toJS).getProperty<JSObject>('path'.toJS);
-    return path.callMethod<JSPromise>('cacheDir'.toJS).toDart.then((data) => data?.dartify() as String?);
+    return path
+        .callMethod<JSPromise>('cacheDir'.toJS)
+        .toDart
+        .then((data) => data.dartify() as String?);
   }
 
   @override
@@ -87,7 +94,7 @@ class FilePickerWeb extends FilePickerPlatform {
                   'defaultPath': rootPath,
                 }.jsify())
             .toDart
-            .then((data) => data?.dartify() as T);
+            .then((data) => data.dartify() as T);
 
         if (path != null) {
           throw UnimplementedError();

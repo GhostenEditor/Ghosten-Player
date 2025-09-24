@@ -2,7 +2,11 @@ package com.ghosten.bluetooth
 
 import android.Manifest
 import android.app.Activity
-import android.bluetooth.*
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothManager
+import android.bluetooth.BluetoothServerSocket
+import android.bluetooth.BluetoothSocket
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -24,8 +28,15 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.ActivityResultListener
 import io.flutter.plugin.common.PluginRegistry.RequestPermissionsResultListener
-import java.io.*
-import java.util.*
+import java.io.DataInputStream
+import java.io.DataOutputStream
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
+import java.util.UUID
 
 class BluetoothPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private lateinit var channel: MethodChannel
@@ -35,10 +46,11 @@ class BluetoothPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private lateinit var mBluetooth: Bluetooth
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-        channel = MethodChannel(flutterPluginBinding.binaryMessenger, PLUGIN_NAMESPACE + "/methods")
-        discoveryChannel = EventChannel(flutterPluginBinding.binaryMessenger, PLUGIN_NAMESPACE + "/discovery")
-        connectionChannel = EventChannel(flutterPluginBinding.binaryMessenger, PLUGIN_NAMESPACE + "/connection")
-        connectedChannel = EventChannel(flutterPluginBinding.binaryMessenger, PLUGIN_NAMESPACE + "/connected")
+        val messenger = flutterPluginBinding.binaryMessenger
+        channel = MethodChannel(messenger, "$PLUGIN_NAMESPACE/methods")
+        discoveryChannel = EventChannel(messenger, "$PLUGIN_NAMESPACE/discovery")
+        connectionChannel = EventChannel(messenger, "$PLUGIN_NAMESPACE/connection")
+        connectedChannel = EventChannel(messenger, "$PLUGIN_NAMESPACE/connected")
         channel.setMethodCallHandler(this)
     }
 
@@ -122,7 +134,12 @@ class BluetoothPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
-        mBluetooth = Bluetooth(binding.activity, channel, discoveryChannel, connectionChannel, connectedChannel)
+        mBluetooth = Bluetooth(
+            binding.activity,
+            discoveryChannel,
+            connectionChannel,
+            connectedChannel
+        )
         binding.addActivityResultListener(mBluetooth)
         binding.addRequestPermissionsResultListener(mBluetooth)
     }
@@ -142,13 +159,13 @@ class BluetoothPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 }
 
 internal class Bluetooth(
-        private val activity: Activity,
-        private val channel: MethodChannel,
-        private val discoveryChannel: EventChannel,
-        private val connectionChannel: EventChannel,
-        private val connectedChannel: EventChannel
+    private val activity: Activity,
+    discoveryChannel: EventChannel,
+    connectionChannel: EventChannel,
+    connectedChannel: EventChannel
 ) : StreamHandler, BroadcastReceiver(), ActivityResultListener, RequestPermissionsResultListener {
-    private val bluetoothManager: BluetoothManager = activity.getSystemService(BluetoothManager::class.java)
+    private val bluetoothManager: BluetoothManager =
+        activity.getSystemService(BluetoothManager::class.java)
     var bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
     private var discoverySink: EventSink? = null
     private var connectionSink: EventSink? = null
@@ -192,11 +209,11 @@ internal class Bluetooth(
             BluetoothDevice.ACTION_FOUND -> {
                 try {
                     val device: BluetoothDevice =
-                            intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)!!
+                        intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)!!
                     if (device.type == BluetoothDevice.DEVICE_TYPE_CLASSIC || device.type == BluetoothDevice.DEVICE_TYPE_DUAL) {
                         discoverySink!!.success(device.toMap())
                     }
-                } catch (e: NullPointerException) {
+                } catch (_: NullPointerException) {
                 }
 
             }
@@ -204,7 +221,7 @@ internal class Bluetooth(
             BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
                 try {
                     activity.unregisterReceiver(this)
-                } catch (e: IllegalArgumentException) {
+                } catch (_: IllegalArgumentException) {
                 }
                 bluetoothAdapter!!.cancelDiscovery()
                 if (discoverySink != null) {
@@ -223,7 +240,7 @@ internal class Bluetooth(
     override fun onCancel(args: Any?) {
         try {
             activity.unregisterReceiver(this)
-        } catch (ex: IllegalArgumentException) {
+        } catch (_: IllegalArgumentException) {
         }
 
         bluetoothAdapter!!.cancelDiscovery()
@@ -273,7 +290,11 @@ internal class Bluetooth(
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, resultCode: Array<out String>, data: IntArray): Boolean {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        resultCode: Array<out String>,
+        data: IntArray
+    ): Boolean {
         return when (requestCode) {
             REQUEST_BLUETOOTH_PERMISSION -> {
                 methodCallResult?.success(data.all { it == PackageManager.PERMISSION_GRANTED })
@@ -288,20 +309,22 @@ internal class Bluetooth(
     fun requestPermission() {
         val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             arrayOf(
-                    Manifest.permission.BLUETOOTH_ADVERTISE,
-                    Manifest.permission.BLUETOOTH_SCAN,
-                    Manifest.permission.BLUETOOTH_CONNECT)
+                Manifest.permission.BLUETOOTH_ADVERTISE,
+                Manifest.permission.BLUETOOTH_SCAN,
+                Manifest.permission.BLUETOOTH_CONNECT
+            )
         } else {
             arrayOf(
-                    Manifest.permission.BLUETOOTH,
-                    Manifest.permission.BLUETOOTH_ADMIN,
-                    Manifest.permission.ACCESS_FINE_LOCATION)
+                Manifest.permission.BLUETOOTH,
+                Manifest.permission.BLUETOOTH_ADMIN,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            )
         }
         activity.requestPermissions(permissions, REQUEST_BLUETOOTH_PERMISSION)
     }
 
     fun requestEnable() {
-        if (bluetoothAdapter!!.isEnabled == false) {
+        if (!bluetoothAdapter!!.isEnabled) {
             val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
             activity.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BLUETOOTH)
         } else {
@@ -323,9 +346,10 @@ internal class Bluetooth(
             }
             methodCallResult = null
         } else {
-            val discoverableIntent: Intent = Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE).apply {
-                putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, duration)
-            }
+            val discoverableIntent: Intent =
+                Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE).apply {
+                    putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, duration)
+                }
             activity.startActivityForResult(discoverableIntent, REQUEST_DISCOVERABLE_BLUETOOTH)
         }
 
@@ -333,13 +357,18 @@ internal class Bluetooth(
 
     fun getBondedDevices() {
         val pairedDevices = bluetoothAdapter!!.bondedDevices
-        methodCallResult?.success(pairedDevices.filter { it.type == BluetoothDevice.DEVICE_TYPE_CLASSIC || it.type == BluetoothDevice.DEVICE_TYPE_DUAL }.map { it.toMap() })
+        methodCallResult?.success(pairedDevices.filter { it.type == BluetoothDevice.DEVICE_TYPE_CLASSIC || it.type == BluetoothDevice.DEVICE_TYPE_DUAL }
+            .map { it.toMap() })
         methodCallResult = null
     }
 
     fun startDiscovery() {
         if (bluetoothAdapter!!.isDiscovering) {
-            methodCallResult?.error(TAG, "Bluetooth is Discovering", Exception("Bluetooth is Discovering"))
+            methodCallResult?.error(
+                TAG,
+                "Bluetooth is Discovering",
+                Exception("Bluetooth is Discovering")
+            )
         } else {
             val intent = IntentFilter()
             intent.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
@@ -348,15 +377,18 @@ internal class Bluetooth(
             if (bluetoothAdapter!!.startDiscovery()) {
                 methodCallResult?.success(null)
             } else {
-                methodCallResult?.error(TAG, "StartDiscovery Failed", IOException("StartDiscovery Failed"))
+                methodCallResult?.error(
+                    TAG,
+                    "StartDiscovery Failed",
+                    IOException("StartDiscovery Failed")
+                )
             }
         }
         methodCallResult = null
     }
 
     fun startServer() {
-        if (acceptThread?.isAlive == true) {
-        } else {
+        if (acceptThread?.isAlive != true) {
             acceptThread = AcceptThread()
             acceptThread?.start()
         }
@@ -388,7 +420,7 @@ internal class Bluetooth(
             methodCallResult?.error(TAG, "No Connection", IOException("not connected"))
             methodCallResult = null
         } else {
-            connectionThread!!.write_text(data)
+            connectionThread!!.writeText(data)
         }
     }
 
@@ -402,13 +434,18 @@ internal class Bluetooth(
                 methodCallResult?.error(TAG, "File Not Existed", IOException(filePath))
                 methodCallResult = null
             } else {
-                connectionThread!!.write_file(file)
+                connectionThread!!.writeFile(file)
             }
         }
     }
 
     fun openSettings() {
-        activity.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", activity.applicationContext.packageName, null)))
+        activity.startActivity(
+            Intent(
+                Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                Uri.fromParts("package", activity.applicationContext.packageName, null)
+            )
+        )
     }
 
     fun close() {
@@ -536,7 +573,8 @@ internal class Bluetooth(
 
                             var len = 0
                             var r: Int
-                            val filePath = activity.applicationContext.cacheDir.path + "/" + filename
+                            val filePath =
+                                activity.applicationContext.cacheDir.path + "/" + filename
                             val out = FileOutputStream(filePath)
                             while ((mIn.read(mmBuffer).also { r = it }) != -1) {
                                 out.write(mmBuffer, 0, r)
@@ -560,21 +598,25 @@ internal class Bluetooth(
             connectionThread = null
         }
 
-        fun write_text(data: String) {
+        fun writeText(data: String) {
             try {
                 mOut.writeInt(FLAG_TEXT)
                 mOut.writeUTF(data)
                 methodCallResult?.success(null)
                 methodCallResult = null
             } catch (e: IOException) {
-                Log.e(TAG, "Bluetooth Connection Write Text Failed, Text: ${data}", e)
-                methodCallResult?.error(TAG, "Bluetooth Connection Write Text Failed, Text: ${data}", e)
+                Log.e(TAG, "Bluetooth Connection Write Text Failed, Text: $data", e)
+                methodCallResult?.error(
+                    TAG,
+                    "Bluetooth Connection Write Text Failed, Text: $data",
+                    e
+                )
                 methodCallResult = null
                 return
             }
         }
 
-        fun write_file(file: File) {
+        fun writeFile(file: File) {
             val filStream = FileInputStream(file)
             try {
                 mOut.writeInt(FLAG_FILE)
@@ -589,7 +631,11 @@ internal class Bluetooth(
                 methodCallResult = null
             } catch (e: IOException) {
                 Log.e(TAG, "Bluetooth Connection Write File Failed, Filename: ${file.name}", e)
-                methodCallResult?.error(TAG, "Bluetooth Connection Write File Failed, Filename: ${file.name}", e)
+                methodCallResult?.error(
+                    TAG,
+                    "Bluetooth Connection Write File Failed, Filename: ${file.name}",
+                    e
+                )
                 methodCallResult = null
                 return
             }
@@ -613,12 +659,11 @@ internal class Bluetooth(
         const val REQUEST_DISCOVERABLE_BLUETOOTH = 4522
         const val REQUEST_BLUETOOTH_PERMISSION = 5233
         const val TAG = "BLUETOOTH"
-
-        const val MESSAGE_READ: Int = 0
-        const val MESSAGE_WRITE: Int = 1
-        const val MESSAGE_TOAST: Int = 2
         const val FLAG_TEXT = 0
         const val FLAG_FILE = 1
+//        const val MESSAGE_READ: Int = 0
+//        const val MESSAGE_WRITE: Int = 1
+//        const val MESSAGE_TOAST: Int = 2
     }
 }
 

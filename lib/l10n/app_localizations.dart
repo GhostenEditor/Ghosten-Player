@@ -1394,11 +1394,11 @@ abstract class AppLocalizations {
   /// **'Movie Folder'**
   String get settingsItemMovie;
 
-  /// No description provided for @settingsItemNetworkDiagnotics.
+  /// No description provided for @settingsItemNetworkDiagnostics.
   ///
   /// In en, this message translates to:
-  /// **'Network Diagnotics'**
-  String get settingsItemNetworkDiagnotics;
+  /// **'Network Diagnostics'**
+  String get settingsItemNetworkDiagnostics;
 
   /// No description provided for @settingsItemNfoEnabled.
   ///

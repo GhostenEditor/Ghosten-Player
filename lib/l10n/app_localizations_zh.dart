@@ -829,7 +829,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsItemMovie => '电影目录设置';
 
   @override
-  String get settingsItemNetworkDiagnotics => '网络诊断';
+  String get settingsItemNetworkDiagnostics => '网络诊断';
 
   @override
   String get settingsItemNfoEnabled => 'NFO 启用';

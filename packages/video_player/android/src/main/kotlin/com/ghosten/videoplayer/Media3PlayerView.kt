@@ -1,6 +1,10 @@
 package com.ghosten.videoplayer
 
-import android.app.*
+import android.app.Activity
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.PictureInPictureParams
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -8,7 +12,6 @@ import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.media.MediaMetadataRetriever
 import android.net.TrafficStats
-import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -16,8 +19,17 @@ import android.view.View
 import android.widget.FrameLayout
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.media3.common.*
+import androidx.core.net.toUri
+import androidx.media3.common.C
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
+import androidx.media3.common.MimeTypes
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
+import androidx.media3.common.TrackSelectionOverride
+import androidx.media3.common.Tracks
 import androidx.media3.common.util.Log
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.datasource.FileDataSource
@@ -45,9 +57,10 @@ import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
 import java.net.SocketTimeoutException
-import java.util.*
+import java.util.UUID
 import java.util.concurrent.ExecutionException
 
+@UnstableApi
 class Media3PlayerView(
     private val context: Context,
     private val activity: Activity,
@@ -55,14 +68,14 @@ class Media3PlayerView(
     private var extensionRendererMode: Int?,
     private var enableDecoderFallback: Boolean?,
     private var language: String?,
-    private var subtitleStyle: List<Int>?,
+    subtitleStyle: List<Int>?,
     private val width: Int?,
     private val height: Int?,
     private val top: Int?,
     private val left: Int?,
     private val autoPip: Boolean,
 ) : Player.Listener, BasePlayerView {
-    private val mRootView: FrameLayout = activity.findViewById<FrameLayout>(android.R.id.content)
+    private val mRootView: FrameLayout = activity.findViewById(android.R.id.content)
     private val mNativeView: View = View.inflate(context, R.layout.player_view, null)
     private var httpDataSourceFactory = DefaultHttpDataSource.Factory()
 //        .setUserAgent(USER_AGENT)
@@ -72,7 +85,7 @@ class Media3PlayerView(
     private val handler = Handler(Looper.getMainLooper())
     private var player: ExoPlayer
     private var mediaSession: MediaSession
-    private var mLastTotalRxBytes: Long? = null;
+    private var mLastTotalRxBytes: Long? = null
     private val playerDB: PlayerDatabaseHelper = PlayerDatabaseHelper(context)
     private var thumbnailThread: ThumbnailThread = ThumbnailThread()
     private var isFullscreen = width == null && height == null
@@ -84,7 +97,7 @@ class Media3PlayerView(
         createNotificationChannel()
         player = initPlayer()
         if (subtitleStyle?.size == 4) {
-            setSubtitleStyle(subtitleStyle!!)
+            setSubtitleStyle(subtitleStyle)
         }
         fullscreen(false)
         mediaSession = MediaSession.Builder(context, player).build()
@@ -93,14 +106,13 @@ class Media3PlayerView(
 
     inner class ThumbnailThread : Thread() {
         private val tasks: MutableList<() -> Unit> = mutableListOf()
-        private var shouldLoop = true;
-        private var currentVideo: Video? = null
+        private var shouldLoop = true
         private var retriever: MediaMetadataRetriever? = null
         private var url: String? = null
         override fun run() {
             while (shouldLoop) {
                 if (tasks.size == 0) {
-                    Thread.sleep(1000L)
+                    sleep(1000L)
                 }
                 while (shouldLoop && tasks.size > 0) {
                     Log.d("Retriever Tasks Count", tasks.size.toString())
@@ -120,11 +132,11 @@ class Media3PlayerView(
                     retriever = MediaMetadataRetriever()
                     try {
                         if (url!!.startsWith("content://", ignoreCase = true)) {
-                            retriever?.setDataSource(context, Uri.parse(url))
+                            retriever?.setDataSource(context, url!!.toUri())
                         } else if (url!!.startsWith("file://", ignoreCase = true)) {
                             retriever?.setDataSource(url)
                         } else {
-                            retriever?.setDataSource(url, HashMap<String, String>())
+                            retriever?.setDataSource(url, HashMap())
 
                         }
                     } catch (e: Exception) {
@@ -287,7 +299,11 @@ class Media3PlayerView(
             val name = "Now Playing"
             val descriptionText = "Now Playing"
             val channel =
-                NotificationChannel(context.getString(CHANNEL_ID), name, NotificationManager.IMPORTANCE_LOW).apply {
+                NotificationChannel(
+                    context.getString(CHANNEL_ID),
+                    name,
+                    NotificationManager.IMPORTANCE_LOW
+                ).apply {
                     description = descriptionText
                 }
             val notificationManager: NotificationManager =
@@ -301,7 +317,7 @@ class Media3PlayerView(
         }
     }
 
-    fun createAction(ac: String, icon: Int, title: String): NotificationCompat.Action {
+    private fun createAction(ac: String, icon: Int, title: String): NotificationCompat.Action {
         val intent = Intent(context, ActionBroadcastReceiver::class.java).apply {
             action = Intent.ACTION_MEDIA_BUTTON
             putExtra("EXTRA_NOTIFICATION_ID", ac)
@@ -311,7 +327,7 @@ class Media3PlayerView(
         return NotificationCompat.Action(icon, title, pendingIntent)
     }
 
-    fun showNotification(mediaMetadata: MediaMetadata) {
+    private fun showNotification(mediaMetadata: MediaMetadata) {
         fun show(bitmap: Bitmap?) {
             var builder = NotificationCompat.Builder(context, context.getString(CHANNEL_ID))
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
@@ -319,15 +335,21 @@ class Media3PlayerView(
                 .addAction(
                     createAction(
                         "Seek to previous item",
-                        androidx.media3.ui.R.drawable.exo_icon_previous,
+                        androidx.media3.session.R.drawable.media3_icon_previous,
                         "Seek to previous item"
                     )
                 )
-                .addAction(createAction("pause", androidx.media3.ui.R.drawable.exo_icon_pause, "Pause"))
+                .addAction(
+                    createAction(
+                        "pause",
+                        androidx.media3.session.R.drawable.media3_icon_pause,
+                        "Pause"
+                    )
+                )
                 .addAction(
                     createAction(
                         "Seek to next item",
-                        androidx.media3.ui.R.drawable.exo_icon_next,
+                        androidx.media3.session.R.drawable.media3_icon_next,
                         "Seek to next item"
                     )
                 )
@@ -355,7 +377,7 @@ class Media3PlayerView(
                     try {
                         val bitmap = bitmapFuture.get()
                         show(bitmap)
-                    } catch (e: ExecutionException) {
+                    } catch (_: ExecutionException) {
                     }
 
                 } else {
@@ -365,7 +387,7 @@ class Media3PlayerView(
         }
     }
 
-    fun cancelNotification() {
+    private fun cancelNotification() {
         with(NotificationManagerCompat.from(context)) {
             cancel(NOTIFICATION_ID)
         }
@@ -435,7 +457,10 @@ class Media3PlayerView(
                     this["audioBitrate"] = player.audioFormat?.averageBitrate
                 }
                 mChannel.invokeMethod("mediaInfo", mediaInfo)
-                mChannel.invokeMethod("duration", if (player.duration == C.TIME_UNSET) 0 else player.duration)
+                mChannel.invokeMethod(
+                    "duration",
+                    if (player.duration == C.TIME_UNSET) 0 else player.duration
+                )
                 setMediaSkipEnd()
                 player.mediaMetadata.also { mediaMetadata ->
                     if (mediaMetadata.title == null || mediaMetadata.artist == null) {
@@ -450,7 +475,7 @@ class Media3PlayerView(
                                     ?: item.description
                             )
                         if (item.poster != null) {
-                            metadataBuilder = metadataBuilder.setArtworkUri(Uri.parse(item.poster))
+                            metadataBuilder = metadataBuilder.setArtworkUri(item.poster.toUri())
                         }
                         val mediaItem = player.currentMediaItem!!.buildUpon()
                             .setMediaMetadata(metadataBuilder.build())
@@ -522,7 +547,10 @@ class Media3PlayerView(
                     is MediaCodecDecoderException, is DecoderInitializationException -> {
                         player.trackSelectionParameters = player.trackSelectionParameters
                             .buildUpon()
-                            .setTrackTypeDisabled(player.getRenderer(error.rendererIndex).trackType, true)
+                            .setTrackTypeDisabled(
+                                player.getRenderer(error.rendererIndex).trackType,
+                                true
+                            )
                             .build()
                         player.prepare()
                         mChannel.invokeMethod("error", cause.message)
@@ -530,7 +558,10 @@ class Media3PlayerView(
                     }
 
                     is UnrecognizedInputFormatException -> {
-                        mChannel.invokeMethod("fatalError", "None of the available extractors could read the stream.")
+                        mChannel.invokeMethod(
+                            "fatalError",
+                            "None of the available extractors could read the stream."
+                        )
                     }
 
                     is BehindLiveWindowException -> {
@@ -599,7 +630,7 @@ class Media3PlayerView(
                                 null
                             }
                         } ?: ""
-                        this["id"] = trackFormat.id?.toString()
+                        this["id"] = trackFormat.id
                     }
                     if (track["type"] != null) {
                         tracksList.add(track)
@@ -648,7 +679,7 @@ class Media3PlayerView(
             .setUri(video.url)
             .setMimeType(video.mimeType)
             .setSubtitleConfigurations((video.subtitle ?: listOf()).map {
-                MediaItem.SubtitleConfiguration.Builder(Uri.parse(it.url))
+                MediaItem.SubtitleConfiguration.Builder(it.url.toUri())
                     .setMimeType(
                         when (it.mimeType) {
                             "xml" -> MimeTypes.APPLICATION_TTML
@@ -715,8 +746,9 @@ class Media3PlayerView(
 
     override fun setSubtitleStyle(style: List<Int>) {
         if (style.size != 4) return
-        val playerView = mNativeView.findViewById<androidx.media3.ui.PlayerView>(R.id.video_view);
-        val subtitle = playerView.findViewById<androidx.media3.ui.SubtitleView>(androidx.media3.ui.R.id.exo_subtitles)
+        val playerView = mNativeView.findViewById<androidx.media3.ui.PlayerView>(R.id.video_view)
+        val subtitle =
+            playerView.findViewById<androidx.media3.ui.SubtitleView>(androidx.media3.ui.R.id.exo_subtitles)
         subtitle.setStyle(
             CaptionStyleCompat(
                 style[0],
@@ -731,7 +763,7 @@ class Media3PlayerView(
 
     override fun getVideoThumbnail(result: MethodChannel.Result, timeMs: Long) {
         val url = mPlaylist[player.currentMediaItemIndex].url
-        var path: String? = playerDB.queryPath(url, timeMs)
+        val path: String? = playerDB.queryPath(url, timeMs)
         if (path != null) {
             if (File(context.cacheDir, path).exists()) {
                 result.success(context.cacheDir.toString() + "/" + path)
@@ -774,10 +806,16 @@ class Media3PlayerView(
                     val isSupported = trackGroup.isTrackSupported(i)
                     val trackFormat = trackGroup.getTrackFormat(i)
                     if (isSupported && trackFormat.id == trackId) {
-                        player.trackSelectionParameters = player.trackSelectionParameters.buildUpon()
-                            .setTrackTypeDisabled(trackGroup.mediaTrackGroup.type, false)
-                            .setOverrideForType(TrackSelectionOverride(trackGroup.mediaTrackGroup, i))
-                            .build()
+                        player.trackSelectionParameters =
+                            player.trackSelectionParameters.buildUpon()
+                                .setTrackTypeDisabled(trackGroup.mediaTrackGroup.type, false)
+                                .setOverrideForType(
+                                    TrackSelectionOverride(
+                                        trackGroup.mediaTrackGroup,
+                                        i
+                                    )
+                                )
+                                .build()
                         break
                     }
                 }
@@ -858,7 +896,7 @@ class Media3PlayerView(
         }
     }
 
-    override fun updateSource(data: HashMap<String, Any>, index: Int) {
+    override fun updateSource(data: HashMap<String, Any>) {
         val video = Video(
             data[URL] as String,
             data[MIME_TYPE] as String?,
@@ -889,7 +927,8 @@ class Media3PlayerView(
     }
 
     override fun setAspectRatio(aspectRatio: Float?) {
-        val contentFrame = mNativeView.findViewById<AspectRatioFrameLayout>(androidx.media3.ui.R.id.exo_content_frame)
+        val contentFrame =
+            mNativeView.findViewById<AspectRatioFrameLayout>(androidx.media3.ui.R.id.exo_content_frame)
         contentFrame.setAspectRatio(
             aspectRatio ?: if (player.videoSize.height == 0) {
                 1.778f
@@ -901,16 +940,20 @@ class Media3PlayerView(
 
     override fun fullscreen(flag: Boolean) {
         if (flag) {
-            (mNativeView.layoutParams as FrameLayout.LayoutParams).width = FrameLayout.LayoutParams.MATCH_PARENT
-            (mNativeView.layoutParams as FrameLayout.LayoutParams).height = FrameLayout.LayoutParams.MATCH_PARENT
+            (mNativeView.layoutParams as FrameLayout.LayoutParams).width =
+                FrameLayout.LayoutParams.MATCH_PARENT
+            (mNativeView.layoutParams as FrameLayout.LayoutParams).height =
+                FrameLayout.LayoutParams.MATCH_PARENT
             (mNativeView.layoutParams as FrameLayout.LayoutParams).topMargin = 0
             (mNativeView.layoutParams as FrameLayout.LayoutParams).leftMargin = 0
             mNativeView.requestLayout()
         } else {
             if (width != null) (mNativeView.layoutParams as FrameLayout.LayoutParams).width = width
-            if (height != null) (mNativeView.layoutParams as FrameLayout.LayoutParams).height = height
+            if (height != null) (mNativeView.layoutParams as FrameLayout.LayoutParams).height =
+                height
             if (top != null) (mNativeView.layoutParams as FrameLayout.LayoutParams).topMargin = top
-            if (left != null) (mNativeView.layoutParams as FrameLayout.LayoutParams).leftMargin = left
+            if (left != null) (mNativeView.layoutParams as FrameLayout.LayoutParams).leftMargin =
+                left
             mNativeView.requestLayout()
         }
         isFullscreen = flag
@@ -923,7 +966,6 @@ class Media3PlayerView(
     }
 
     companion object {
-        private const val TYPE: String = "type"
         private const val URL: String = "url"
         private const val TITLE: String = "title"
         private const val DESCRIPTION: String = "description"
@@ -936,10 +978,10 @@ class Media3PlayerView(
         private const val SELECTED: String = "selected"
         private const val LABEL: String = "label"
         private const val NOTIFICATION_ID = 3423523
-        private const val USER_AGENT =
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.83 Safari/537.36"
         private val CHANNEL_ID = R.string.default_player_channel_id
         private val PENDING_INTENT_FLAG_MUTABLE =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) android.app.PendingIntent.FLAG_MUTABLE else 0;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PendingIntent.FLAG_MUTABLE else 0
+//        private const val USER_AGENT =
+//            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.83 Safari/537.36"
     }
 }

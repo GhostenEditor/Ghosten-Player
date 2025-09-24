@@ -63,7 +63,7 @@ class ApiWeb extends ApiPlatform {
 
   /// Miscellaneous Start
   @override
-  Stream<List<NetworkDiagnotics>> networkDiagnostics() async* {
+  Stream<List<NetworkDiagnostics>> networkDiagnostics() async* {
     final data = await client.post<Json>('/network/diagnostics/cb');
     if (data != null) {
       final sessionId = data['id'];
@@ -73,7 +73,7 @@ class ApiWeb extends ApiPlatform {
         final session = await sessionStatus<List<dynamic>>(sessionId);
         switch (session.status) {
           case SessionStatus.progressing:
-            yield session.data!.map((d) => NetworkDiagnotics.fromJson(d)).toList();
+            yield session.data!.map((d) => NetworkDiagnostics.fromJson(d)).toList();
           case SessionStatus.finished:
           case SessionStatus.failed:
             break loop;

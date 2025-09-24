@@ -9,7 +9,7 @@ import '../components/setting.dart';
 import '../utils/utils.dart';
 import 'settings_about.dart';
 import 'settings_account.dart';
-import 'settings_diagnotics.dart';
+import 'settings_diagnostics.dart';
 import 'settings_downloader.dart';
 import 'settings_library.dart';
 import 'settings_log.dart';
@@ -70,9 +70,9 @@ class SettingsPage extends StatelessWidget {
             onTap: () => navigateToSlideLeft(context, const SystemSettingsServer()),
           ),
           ButtonSettingItem(
-            title: Text(AppLocalizations.of(context)!.settingsItemNetworkDiagnotics),
+            title: Text(AppLocalizations.of(context)!.settingsItemNetworkDiagnostics),
             leading: const Icon(Icons.rule_rounded),
-            onTap: () => navigateToSlideLeft(context, const SettingsDiagnotics()),
+            onTap: () => navigateToSlideLeft(context, const SettingsDiagnostics()),
           ),
           ButtonSettingItem(
             title: Text(AppLocalizations.of(context)!.settingsItemLog),

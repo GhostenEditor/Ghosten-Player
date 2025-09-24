@@ -130,11 +130,11 @@ class MethodChannelApi extends ApiPlatform {
   }
 
   @override
-  Stream<List<NetworkDiagnotics>> networkDiagnostics() async* {
+  Stream<List<NetworkDiagnostics>> networkDiagnostics() async* {
     final data = await client.post<Json>('/network/diagnostics/cb');
     final eventChannel = EventChannel('$_pluginNamespace/update/${data!['id']}');
     yield* eventChannel.receiveBroadcastStream().map(
-      (event) => (jsonDecode(event) as List<dynamic>).map((item) => NetworkDiagnotics.fromJson(item)).toList(),
+      (event) => (jsonDecode(event) as List<dynamic>).map((item) => NetworkDiagnostics.fromJson(item)).toList(),
     );
   }
 

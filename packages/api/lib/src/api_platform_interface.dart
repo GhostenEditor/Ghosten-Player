@@ -581,7 +581,7 @@ abstract class ApiPlatform extends PlatformInterface {
     );
   }
 
-  Stream<List<NetworkDiagnotics>> networkDiagnostics() {
+  Stream<List<NetworkDiagnostics>> networkDiagnostics() {
     throw UnimplementedError('networkDiagnostics() has not been implemented.');
   }
 
