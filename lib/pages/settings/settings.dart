@@ -14,6 +14,7 @@ import '../player/singleton_player.dart';
 import '../utils/utils.dart';
 import 'settings_diagnotics.dart';
 import 'settings_downloader.dart';
+import 'settings_help.dart';
 import 'settings_log.dart';
 import 'settings_other.dart';
 import 'settings_player_history.dart';
@@ -98,6 +99,11 @@ class SettingsPage extends StatelessWidget {
             onTap: () => navigateTo(context, const SystemSettingsOther()),
           ),
           const Divider(),
+          _buildItem(
+            AppLocalizations.of(context)!.settingsItemHelp,
+            Icons.help_outline_rounded,
+            onTap: () => navigateTo(context, const SettingsHelp()),
+          ),
           _buildItem(
             AppLocalizations.of(context)!.settingsItemFeedback,
             Icons.feedback_outlined,

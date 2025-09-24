@@ -814,6 +814,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsItemFeedback => '反馈';
 
   @override
+  String get settingsItemHelp => '帮助';
+
+  @override
   String get settingsItemInfo => '关于';
 
   @override

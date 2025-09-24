@@ -2,9 +2,13 @@ import 'dart:async';
 
 import 'package:api/api.dart';
 import 'package:date_format/date_format.dart';
+import 'package:dio/dio.dart';
+import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+
+final cacheHttpClient = Dio()..interceptors.add(DioCacheInterceptor(options: CacheOptions(store: MemCacheStore())));
 
 Future<T?> navigateTo<T extends Object?>(BuildContext context, Widget page) {
   return Navigator.of(context).push<T>(MaterialPageRoute(builder: (context) => page));
