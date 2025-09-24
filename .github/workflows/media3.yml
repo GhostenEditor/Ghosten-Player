@@ -61,7 +61,7 @@ jobs:
         run: |
           mkdir artifacts
           cp media/libraries/decoder_ffmpeg/buildout/outputs/aar/lib-decoder-ffmpeg-release.aar artifacts/
-          cp media/libraries/decoder_av1/buildout/outputs/aar/lib-decoder-av1-release.aar artifacts/
+#          cp media/libraries/decoder_av1/buildout/outputs/aar/lib-decoder-av1-release.aar artifacts/
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4

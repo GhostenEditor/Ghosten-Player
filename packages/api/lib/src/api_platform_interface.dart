@@ -364,10 +364,10 @@ abstract class ApiPlatform extends PlatformInterface {
     return client.post('/movie/metadata/update/id', data: data);
   }
 
-  Future<void> movieScraperById(dynamic id, String scraperId, String scraperType, String? language) {
+  Future<void> movieScraperById(dynamic id, String scraperId, String scraperType, String? scraperLang) {
     return client.post(
       '/movie/scraper/id',
-      data: {'id': id, 'scraperId': scraperId, 'scraperType': scraperType, 'language': language},
+      data: {'id': id, 'scraperId': scraperId, 'scraperType': scraperType, 'scraperLang': scraperLang},
     );
   }
 
