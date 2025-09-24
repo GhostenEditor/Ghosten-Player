@@ -68,6 +68,7 @@ class _SettingsHelpState extends State<SettingsHelp> {
   }
 }
 
+// ignore_for_file: avoid_dynamic_calls
 class WikiPage {
   WikiPage.fromJson(dynamic json)
     : title = json['title'],

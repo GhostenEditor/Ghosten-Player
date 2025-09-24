@@ -107,9 +107,7 @@ class HtmlToSpanVisitor extends TreeVisitor {
       last.accept(spanNode);
     }
     _spansStack.add(spanNode);
-    for (final child in node.nodes.toList(growable: false)) {
-      visit(child);
-    }
+    node.nodes.forEach(visit);
     _spansStack.removeLast();
   }
 }

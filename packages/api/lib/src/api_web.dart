@@ -37,6 +37,7 @@ class ApiWeb extends ApiPlatform {
   Stream<dynamic> driverInsert(Json data) async* {
     final resp = await client.put('/driver/insert/cb', data: data);
     if (resp != null) {
+      // ignore: avoid_dynamic_calls
       final sessionId = resp['id'];
       loop:
       while (true) {
@@ -53,6 +54,7 @@ class ApiWeb extends ApiPlatform {
         }
       }
     } else {
+      // ignore: avoid_dynamic_calls
       throw Exception(resp.error);
     }
   }

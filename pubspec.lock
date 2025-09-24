@@ -15,7 +15,7 @@ packages:
       path: "packages/api"
       relative: true
     source: path
-    version: "2.1.2"
+    version: "2.3.0"
   args:
     dependency: transitive
     description:
@@ -189,7 +189,7 @@ packages:
       path: "packages/file_picker"
       relative: true
     source: path
-    version: "2.2.0"
+    version: "2.3.0"
   fixnum:
     dependency: transitive
     description:
@@ -949,7 +949,7 @@ packages:
       path: "packages/video_player"
       relative: true
     source: path
-    version: "2.1.1"
+    version: "2.3.0"
   visibility_detector:
     dependency: transitive
     description:

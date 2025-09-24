@@ -194,6 +194,8 @@ class _SettingsUpdatingState extends State<_SettingsUpdating> {
   static final Map<String, _DownloadTask> _downloading = {};
   final _controller = ScrollController();
   double _cachedOffset = 0;
+
+  // ignore: unused_field
   bool _failed = false;
 
   @override
