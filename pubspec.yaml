@@ -25,7 +25,7 @@ dependencies:
   flutter_markdown: ^0.7.7
   flutter_slidable: ^4.0.0
   flutter_spinkit: ^5.2.0
-  infinite_scroll_pagination: ^5.1.0
+  infinite_scroll_pagination: ^5.1.1
   install_plugin: ^2.1.0
   photo_view: ^0.15.0
   provider: ^6.1.5
