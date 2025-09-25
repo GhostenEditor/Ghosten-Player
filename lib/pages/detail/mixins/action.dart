@@ -174,7 +174,7 @@ mixin ActionMixin<S extends StatefulWidget> on State<S> {
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16),
         title: Text(AppLocalizations.of(context)!.buttonDelete),
-        leading: const Icon(Icons.delete_outline),
+        leading: const Icon(Icons.delete_outline_rounded),
       ),
     );
   }

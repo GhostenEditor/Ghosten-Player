@@ -114,7 +114,7 @@ class _LiveListPageState extends State<LiveListPage> {
                                                 if (!context.mounted) return;
                                                 context.read<IptvCubit>().update();
                                               },
-                                              icon: const Icon(Icons.delete_outline),
+                                              icon: const Icon(Icons.delete_outline_rounded),
                                             ),
                                           ],
                                         ),

@@ -69,7 +69,7 @@ class _SettingsAccountPageState extends State<SettingsAccountPage> {
                           }
                         }
                       },
-                      icon: const Icon(Icons.delete_outline),
+                      icon: const Icon(Icons.delete_outline_rounded),
                     ),
                   ],
                 ),

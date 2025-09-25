@@ -98,7 +98,7 @@ class _AccountManageState extends State<AccountManage> {
                             },
                             child: ListTile(
                               contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                              leading: const Icon(Icons.delete_outline),
+                              leading: const Icon(Icons.delete_outline_rounded),
                               title: Text(AppLocalizations.of(context)!.buttonDelete),
                             ),
                           ),

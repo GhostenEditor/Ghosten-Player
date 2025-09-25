@@ -80,7 +80,7 @@ class _LibraryManageState extends State<LibraryManage> {
                                     ),
                                   IconButton(
                                     onPressed: () => Api.scheduleTaskDeleteById(item.id),
-                                    icon: const Icon(Icons.delete_outline),
+                                    icon: const Icon(Icons.delete_outline_rounded),
                                   ),
                                 ],
                               ),
@@ -273,7 +273,7 @@ class _LibraryItem extends StatelessWidget {
               },
               child: ListTile(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                leading: const Icon(Icons.delete_outline),
+                leading: const Icon(Icons.delete_outline_rounded),
                 title: Text(AppLocalizations.of(context)!.buttonDelete),
               ),
             ),
