@@ -6,16 +6,18 @@ import 'package:markdown_widget/markdown_widget.dart';
 import 'html_support.dart';
 
 class MarkdownViewer extends StatelessWidget {
-  const MarkdownViewer({super.key, required this.data, this.padding});
+  const MarkdownViewer({super.key, required this.data, this.padding, this.tocController});
 
   final String data;
   final EdgeInsetsGeometry? padding;
+  final TocController? tocController;
 
   @override
   Widget build(BuildContext context) {
     return MarkdownWidget(
       padding: padding,
       data: data,
+      tocController: tocController,
       config: switch (Theme.of(context).brightness) {
         Brightness.dark => MarkdownConfig.darkConfig.copy(configs: [const PConfig(textStyle: TextStyle(fontSize: 14))]),
         Brightness.light => MarkdownConfig(configs: [const PConfig(textStyle: TextStyle(fontSize: 14))]),

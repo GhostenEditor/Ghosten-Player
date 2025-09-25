@@ -11,6 +11,7 @@ import 'settings_about.dart';
 import 'settings_account.dart';
 import 'settings_diagnostics.dart';
 import 'settings_downloader.dart';
+import 'settings_help.dart';
 import 'settings_library.dart';
 import 'settings_log.dart';
 import 'settings_other.dart';
@@ -85,6 +86,11 @@ class SettingsPage extends StatelessWidget {
             onTap: () => navigateToSlideLeft(context, const SystemSettingsOther()),
           ),
           const DividerSettingItem(),
+          ButtonSettingItem(
+            title: Text(AppLocalizations.of(context)!.settingsItemHelp),
+            leading: const Icon(Icons.help_outline_rounded),
+            onTap: () => navigateToSlideLeft(context, const SettingsHelp()),
+          ),
           ButtonSettingItem(
             title: Text(AppLocalizations.of(context)!.settingsItemFeedback),
             leading: const Icon(Icons.feedback_outlined),
