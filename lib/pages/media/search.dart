@@ -103,6 +103,7 @@ class _SearchPageState extends State<SearchPage> {
             autofocus: widget.autofocus,
             focusNode: _focusNode,
             controller: _searchController,
+            textInputAction: TextInputAction.search,
             decoration: InputDecoration(
               border: const OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(50)),

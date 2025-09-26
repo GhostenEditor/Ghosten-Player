@@ -6,6 +6,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vector_math/vector_math_64.dart' as vm;
@@ -659,11 +660,20 @@ class PlayerSettings extends StatelessWidget {
 }
 
 class PlayerPlatformView extends StatefulWidget {
-  const PlayerPlatformView({super.key, this.initialized, this.autoPip = false, required this.playerType});
+  const PlayerPlatformView({
+    super.key,
+    this.initialized,
+    this.autoPip = false,
+    required this.playerType,
+    this.initializeFailed,
+    this.mpvVersion,
+  });
 
   final VoidCallback? initialized;
+  final Function(PlatformException)? initializeFailed;
   final bool autoPip;
   final PlayerType playerType;
+  final String? mpvVersion;
 
   @override
   State<PlayerPlatformView> createState() => _PlayerPlatformViewState();
@@ -680,19 +690,24 @@ class _PlayerPlatformViewState extends State<PlayerPlatformView> {
       final language = Localizations.localeOf(context).languageCode;
       final prefs = await SharedPreferences.getInstance();
       if (!context.mounted) return;
-      await PlayerPlatform.instance.init({
-        'type': widget.playerType.name,
-        'language': language,
-        'width': (box.size.width * devicePixelRatio).round(),
-        'height': (box.size.height * devicePixelRatio).round(),
-        'top': (offset.dy * -1 * devicePixelRatio).round(),
-        'left': (offset.dx * -1 * devicePixelRatio).round(),
-        'autoPip': widget.autoPip,
-        'extensionRendererMode': PlayerConfig.getExtensionRendererMode(prefs),
-        'enableDecoderFallback': PlayerConfig.getEnableDecoderFallback(prefs),
-        'subtitleStyle': PlayerConfig.getSubtitleSettings(prefs),
-      });
-      widget.initialized?.call();
+      try {
+        await PlayerPlatform.instance.init({
+          'type': widget.playerType.name,
+          'mpvVersion': widget.mpvVersion,
+          'language': language,
+          'width': (box.size.width * devicePixelRatio).round(),
+          'height': (box.size.height * devicePixelRatio).round(),
+          'top': (offset.dy * -1 * devicePixelRatio).round(),
+          'left': (offset.dx * -1 * devicePixelRatio).round(),
+          'autoPip': widget.autoPip,
+          'extensionRendererMode': PlayerConfig.getExtensionRendererMode(prefs),
+          'enableDecoderFallback': PlayerConfig.getEnableDecoderFallback(prefs),
+          'subtitleStyle': PlayerConfig.getSubtitleSettings(prefs),
+        });
+        widget.initialized?.call();
+      } on PlatformException catch (e) {
+        widget.initializeFailed?.call(e);
+      }
     });
     super.initState();
   }

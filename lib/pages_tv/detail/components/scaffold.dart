@@ -65,6 +65,7 @@ class _DetailScaffoldState<T extends MediaBase> extends State<DetailScaffold<T>>
               child: Scaffold(
                 key: widget.scaffoldKey,
                 backgroundColor: Colors.transparent,
+                resizeToAvoidBottomInset: false,
                 endDrawer:
                     widget.endDrawer != null
                         ? Builder(
@@ -134,7 +135,14 @@ class _DetailScaffoldState<T extends MediaBase> extends State<DetailScaffold<T>>
       fit: StackFit.expand,
       children: [
         if (item.backdrop != null)
-          AsyncImage(item.backdrop!)
+          AsyncImage(
+            item.backdrop!,
+            errorWidget:
+                (_, _, _) => Image.asset(switch (Theme.of(context).brightness) {
+                  Brightness.dark => 'assets/tv/images/bg-pixel.webp',
+                  Brightness.light => 'assets/tv/images/bg-pixel-light.webp',
+                }, repeat: ImageRepeat.repeat),
+          )
         else
           Image.asset(switch (Theme.of(context).brightness) {
             Brightness.dark => 'assets/tv/images/bg-pixel.webp',
@@ -150,6 +158,7 @@ class _DetailScaffoldState<T extends MediaBase> extends State<DetailScaffold<T>>
               needLoading: false,
               fit: BoxFit.contain,
               alignment: Alignment.topRight,
+              showErrorWidget: false,
             ),
           ),
         DecoratedBox(

@@ -82,13 +82,14 @@ class _SettingsLogPageState extends State<SettingsLogPage> {
             builderDelegate: PagedChildBuilderDelegate<Log>(
               itemBuilder:
                   (context, item, index) => ButtonSettingItem(
+                    dense: true,
                     title: Text(item.message),
                     subtitle: Text(
                       formatDate(item.time, [yyyy, '-', mm, '-', dd, ' ', HH, ':', nn, ':', ss, '.', SSS]),
                     ),
                     leading: Badge(
                       label: SizedBox(
-                        width: 40,
+                        width: 24,
                         child: Text(item.level.name.toUpperCase(), textAlign: TextAlign.center),
                       ),
                       textColor: Theme.of(context).colorScheme.surface,
@@ -112,7 +113,7 @@ class _SettingsLogPageState extends State<SettingsLogPage> {
                   ),
             ),
             separatorBuilder:
-                (BuildContext context, int index) => const Divider(indent: 18, endIndent: 12, thickness: 0.5),
+                (BuildContext context, int index) => const Divider(indent: 18, endIndent: 12, height: 1),
           ),
         ),
       ),

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:api/api.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -20,7 +21,13 @@ void main() async {
   ScaledWidgetsFlutterBinding.ensureInitialized(scaleFactor: (deviceSize) => deviceSize.width / 960);
   final initialized = await Api.initialized();
   if (initialized ?? false) {
-    HttpOverrides.global = MyHttpOverrides();
+    if (kIsWeb) {
+      BrowserContextMenu.disableContextMenu();
+    } else {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.top]);
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+      HttpOverrides.global = MyHttpOverrides();
+    }
     final userConfig = await UserConfig.init();
     final shortcutTV = await ShortcutTV.init();
     Provider.debugCheckInvalidValueType = null;

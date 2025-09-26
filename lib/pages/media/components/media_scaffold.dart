@@ -74,7 +74,8 @@ class _MediaScaffoldState extends State<MediaScaffold> {
               backgroundColor: Colors.transparent,
               surfaceTintColor: Colors.transparent,
               shadowColor: Colors.transparent,
-              pinned: true,
+              snap: true,
+              floating: true,
               leading: MobileBuilder(
                 builder: (context, isMobile, child) => isMobile ? child : null,
                 child: const Padding(padding: EdgeInsets.all(12), child: Logo()),

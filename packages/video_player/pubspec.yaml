@@ -1,9 +1,9 @@
 name: video_player
 description: "Video Player Plugin for Ghosten Player"
-version: 2.1.1
+version: 0.0.0
 
 environment:
-  sdk: ^3.8.0
+  sdk: ^3.7.2
   flutter: '>=3.3.0'
 
 dependencies:

@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_dynamic_calls
+
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
@@ -744,15 +746,20 @@ class SettingScraper {
 }
 
 class UpdateResp {
-  UpdateResp.fromJson(dynamic json)
-    : assets = List.generate(json['assets'].length, (index) => UpdateRespAsset.fromJson(json['assets'][index])),
-      tagName = Version.fromString((json['tag_name'] as String).substring(1)),
+  UpdateResp.fromJson(Json json)
+    : assets = List.generate(
+        (json['assets'] as JsonList).length,
+        (index) => UpdateRespAsset.fromJson((json['assets'] as JsonList).elementAt(index)),
+      ),
+      version = Version.fromString((json['tag_name'] as String).substring(1)),
+      tagName = json['tag_name'],
       comment = json['body'],
       prerelease = json['prerelease'],
       createAt = (json['published_at'] as String).toDateTime();
   final List<UpdateRespAsset> assets;
   final DateTime? createAt;
-  final Version tagName;
+  final Version version;
+  final String tagName;
   final String comment;
   final bool prerelease;
 }
@@ -764,10 +771,10 @@ class UpdateRespAsset {
 }
 
 class UpdateData {
-  const UpdateData({required this.url, required this.tagName, required this.comment, this.createAt});
+  const UpdateData({required this.url, required this.version, required this.comment, this.createAt});
 
   final DateTime? createAt;
-  final Version tagName;
+  final Version version;
   final String comment;
   final String url;
 }
@@ -852,31 +859,31 @@ class Version {
   }
 }
 
-enum NetworkDiagnoticsStatus {
+enum NetworkDiagnosticsStatus {
   success,
   fail;
 
-  static NetworkDiagnoticsStatus fromString(String s) {
-    return NetworkDiagnoticsStatus.values.firstWhere((e) => e.name == s);
+  static NetworkDiagnosticsStatus fromString(String s) {
+    return NetworkDiagnosticsStatus.values.firstWhere((e) => e.name == s);
   }
 }
 
 @immutable
-class NetworkDiagnotics {
-  NetworkDiagnotics.fromJson(Json json)
-    : status = NetworkDiagnoticsStatus.fromString(json['status']),
+class NetworkDiagnostics {
+  NetworkDiagnostics.fromJson(Json json)
+    : status = NetworkDiagnosticsStatus.fromString(json['status']),
       domain = json['domain'],
       ip = json['ip'],
       tip = json['tip'],
       error = json['error'];
-  final NetworkDiagnoticsStatus status;
+  final NetworkDiagnosticsStatus status;
   final String domain;
   final String? ip;
   final String? error;
   final String? tip;
 
   @override
-  bool operator ==(Object other) => other is NetworkDiagnotics && status == other.status && domain == other.domain;
+  bool operator ==(Object other) => other is NetworkDiagnostics && status == other.status && domain == other.domain;
 
   @override
   int get hashCode => Object.hash(status, domain);

@@ -112,7 +112,7 @@ class FileViewer extends StatelessWidget {
                         },
                       ),
                       TVListTile(
-                        leading: const Icon(Icons.delete_outline),
+                        leading: const Icon(Icons.delete_outline_rounded),
                         title: Text(AppLocalizations.of(context)!.buttonDelete),
                         onTap: () async {
                           final flag = await showConfirm(context, AppLocalizations.of(context)!.deleteConfirmText);

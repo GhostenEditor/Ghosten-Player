@@ -1,33 +1,39 @@
 package com.ghosten.videoplayer
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.PictureInPictureParams
 import android.content.Context
-import android.content.res.AssetManager
 import android.graphics.Matrix
 import android.os.Build
 import android.util.Log
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.widget.FrameLayout
-import com.ghosten.videoplayer.MPVLib.mpvFormat.*
+import com.ghosten.videoplayer.MPVLib.mpvFormat.MPV_FORMAT_DOUBLE
+import com.ghosten.videoplayer.MPVLib.mpvFormat.MPV_FORMAT_FLAG
+import com.ghosten.videoplayer.MPVLib.mpvFormat.MPV_FORMAT_INT64
+import com.ghosten.videoplayer.MPVLib.mpvFormat.MPV_FORMAT_NONE
+import com.ghosten.videoplayer.MPVLib.mpvFormat.MPV_FORMAT_STRING
 import io.flutter.plugin.common.MethodChannel
-import java.io.*
+import org.json.JSONArray
+import java.io.File
+import java.io.FileNotFoundException
 
 class MPVPlayerView(
     private val context: Context,
     private val activity: Activity,
     private val mChannel: MethodChannel,
     private val hwdec: Boolean? = true,
-    private val language: String?,
+    language: String?,
     private val width: Int?,
     private val height: Int?,
     private val top: Int?,
     private val left: Int?,
+    private val version: String,
 ) : SurfaceView(context), SurfaceHolder.Callback, BasePlayerView, MPVLib.EventObserver {
     companion object {
         private const val TAG = "mpv"
-        private const val TYPE: String = "type"
         private const val URL: String = "url"
         private const val TITLE: String = "title"
         private const val DESCRIPTION: String = "description"
@@ -41,7 +47,7 @@ class MPVPlayerView(
         private const val LABEL: String = "label"
     }
 
-    private val mRootView: FrameLayout = activity.findViewById<FrameLayout>(android.R.id.content)
+    private val mRootView: FrameLayout = activity.findViewById(android.R.id.content)
     private var coreIdle: Boolean = false
     private var pause: Boolean = false
     private var pausedForCache: Boolean = false
@@ -50,51 +56,52 @@ class MPVPlayerView(
     private var isFullscreen = width == null && height == null
 
     init {
-        val assetManager = context.assets
-        val configDir = context.filesDir.path
-        var ins: InputStream? = null
-        var out: OutputStream? = null
-        val filename = "subfont.ttf"
-        try {
-            ins = assetManager.open(filename, AssetManager.ACCESS_STREAMING)
-            val outFile = File("$configDir/$filename")
-            if (outFile.length() == ins.available().toLong()) {
-                Log.v(TAG, "Skipping copy of asset file (exists same size): $filename")
-            }
-            out = FileOutputStream(outFile)
-            ins.copyTo(out)
-            Log.w(TAG, "Copied asset file: $filename")
-        } catch (e: IOException) {
-            Log.e(TAG, "Failed to copy asset file: $filename", e)
-        } finally {
-            ins?.close()
-            out?.close()
+        if (mpvLibsDownloaded(version)) {
+            loadMpvLibs()
+
+            MPVLib.create(context)
+
+            initOptions(language)
+
+            MPVLib.init()
+
+            MPVLib.setOptionString("save-position-on-quit", "no")
+            MPVLib.setOptionString("force-window", "no")
+            MPVLib.setOptionString("idle", "yes")
+
+            holder.addCallback(this)
+            observeProperties()
+
+            mRootView.addView(this, 0)
+            addObserver(this)
+            mChannel.invokeMethod("isInitialized", null)
+
+            fullscreen(false)
         }
-
-
-        MPVLib.create(context)
-
-        initOptions(language)
-
-        MPVLib.init()
-
-        MPVLib.setOptionString("save-position-on-quit", "no")
-        MPVLib.setOptionString("force-window", "no")
-        MPVLib.setOptionString("idle", "yes")
-
-        holder.addCallback(this)
-        observeProperties()
-
-        mRootView.addView(this, 0)
-        addObserver(this)
-        mChannel.invokeMethod("isInitialized", null)
-
-        fullscreen(false)
     }
 
-    fun initOptions(language: String?) {
+    @SuppressLint("UnsafeDynamicallyLoadedCode")
+    private fun loadMpvLibs() {
+        val dir = File(context.filesDir.path.plus("/mpv/$version"))
+        val manifest = File(dir, "manifest.json")
+        if (!manifest.exists()) {
+            throw FileNotFoundException("MPV is not installed")
+        }
+        val libs = manifest.bufferedReader().use { JSONArray(it.readText()) }
+        for (i in 0..<libs.length()) {
+            val lib = libs.getString(i)
+            System.load(File(dir, "$lib.so").path)
+        }
+    }
+
+    private fun mpvLibsDownloaded(version: String): Boolean {
+        val dir = File(context.filesDir.path.plus("/mpv/$version"))
+        return dir.exists()
+    }
+
+    private fun initOptions(language: String?) {
         MPVLib.setOptionString("config", "yes")
-        MPVLib.setOptionString("config-dir", context.filesDir.path)
+        MPVLib.setOptionString("config-dir", context.filesDir.path.plus("/mpv/$version"))
         for (opt in arrayOf("gpu-shader-cache-dir", "icc-cache-dir"))
             MPVLib.setOptionString(opt, context.cacheDir.path)
 
@@ -128,7 +135,7 @@ class MPVPlayerView(
         MPVLib.setOptionString("vd-lavc-film-grain", "cpu")
     }
 
-    fun observeProperties() {
+    private fun observeProperties() {
         MPVLib.observeProperty("time-pos/full", MPV_FORMAT_INT64)
         MPVLib.observeProperty("duration/full", MPV_FORMAT_DOUBLE)
         MPVLib.observeProperty("playlist-playing-pos", MPV_FORMAT_INT64)
@@ -155,15 +162,15 @@ class MPVPlayerView(
 
     }
 
-    fun addObserver(o: MPVLib.EventObserver) {
+    private fun addObserver(o: MPVLib.EventObserver) {
         MPVLib.addObserver(o)
     }
 
-    fun removeObserver(o: MPVLib.EventObserver) {
+    private fun removeObserver(o: MPVLib.EventObserver) {
         MPVLib.removeObserver(o)
     }
 
-    fun updateStatus() {
+    private fun updateStatus() {
         Log.d("updateStatus", "$coreIdle,$pause,$pausedForCache,$seeking")
         activity.runOnUiThread {
             mChannel.invokeMethod(
@@ -180,11 +187,11 @@ class MPVPlayerView(
         }
     }
 
-    fun loadTracks() {
+    private fun loadTracks() {
         val count = MPVLib.getPropertyInt("track-list/count")!!
 
         val tracksList = mutableListOf<java.util.HashMap<String, Any?>>()
-        var tracks = arrayOf("audio", "video", "sub")
+        val tracks = arrayOf("audio", "video", "sub")
 
         for (i in 0 until count) {
             val type = MPVLib.getPropertyString("track-list/$i/type") ?: continue
@@ -193,7 +200,7 @@ class MPVPlayerView(
                 continue
             }
             val mpvId = MPVLib.getPropertyInt("track-list/$i/id") ?: continue
-            val lang = MPVLib.getPropertyString("track-list/$i/lang")
+//            val lang = MPVLib.getPropertyString("track-list/$i/lang")
             val title = MPVLib.getPropertyString("track-list/$i/title")
             val isSelected = MPVLib.getPropertyBoolean("track-list/$i/selected")
 
@@ -242,10 +249,10 @@ class MPVPlayerView(
     }
 
     override fun seekTo(position: Long) {
-        MPVLib.command(arrayOf("seek", (position / 1000).toString(), "absolute"));
+        MPVLib.command(arrayOf("seek", (position / 1000).toString(), "absolute"))
     }
 
-    override fun updateSource(data: HashMap<String, Any>, index: Int) {
+    override fun updateSource(data: HashMap<String, Any>) {
     }
 
     override fun setSource(data: HashMap<String, Any>?) {
@@ -267,7 +274,7 @@ class MPVPlayerView(
                 },
                 (data[START_POSITION] as Int? ?: 0).toLong(),
                 (data[END_POSITION] as Int? ?: 0).toLong(),
-            );
+            )
             val commands = mutableListOf(
                 "loadfile",
                 video.url,
@@ -368,7 +375,7 @@ class MPVPlayerView(
     override fun eventProperty(property: String, value: Long) {
         activity.runOnUiThread {
             when (property) {
-                "time-pos/full" -> mChannel.invokeMethod("position", (value * 1000).toLong())
+                "time-pos/full" -> mChannel.invokeMethod("position", value * 1000)
                 "cache-speed" -> mChannel.invokeMethod("networkSpeed", value)
                 "playlist-playing-pos" -> {
                     if (value >= 0) {
@@ -418,7 +425,7 @@ class MPVPlayerView(
             when (property) {
                 "duration/full" -> mChannel.invokeMethod("duration", (value * 1000).toLong())
                 "video-params/aspect" -> {
-                    videoAspectRatio = value;
+                    videoAspectRatio = value
                     Log.d(TAG, "video-params/aspect $value")
                 }
 

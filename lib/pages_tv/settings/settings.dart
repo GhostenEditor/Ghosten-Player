@@ -9,8 +9,9 @@ import '../components/setting.dart';
 import '../utils/utils.dart';
 import 'settings_about.dart';
 import 'settings_account.dart';
-import 'settings_diagnotics.dart';
+import 'settings_diagnostics.dart';
 import 'settings_downloader.dart';
+import 'settings_help.dart';
 import 'settings_library.dart';
 import 'settings_log.dart';
 import 'settings_other.dart';
@@ -66,13 +67,13 @@ class SettingsPage extends StatelessWidget {
           const DividerSettingItem(),
           ButtonSettingItem(
             title: Text(AppLocalizations.of(context)!.settingsItemServer),
-            leading: const Icon(Icons.storage_outlined),
+            leading: const Icon(Icons.public_rounded),
             onTap: () => navigateToSlideLeft(context, const SystemSettingsServer()),
           ),
           ButtonSettingItem(
-            title: Text(AppLocalizations.of(context)!.settingsItemNetworkDiagnotics),
+            title: Text(AppLocalizations.of(context)!.settingsItemNetworkDiagnostics),
             leading: const Icon(Icons.rule_rounded),
-            onTap: () => navigateToSlideLeft(context, const SettingsDiagnotics()),
+            onTap: () => navigateToSlideLeft(context, const SettingsDiagnostics()),
           ),
           ButtonSettingItem(
             title: Text(AppLocalizations.of(context)!.settingsItemLog),
@@ -85,6 +86,11 @@ class SettingsPage extends StatelessWidget {
             onTap: () => navigateToSlideLeft(context, const SystemSettingsOther()),
           ),
           const DividerSettingItem(),
+          ButtonSettingItem(
+            title: Text(AppLocalizations.of(context)!.settingsItemHelp),
+            leading: const Icon(Icons.help_outline_rounded),
+            onTap: () => navigateToSlideLeft(context, const SettingsHelp()),
+          ),
           ButtonSettingItem(
             title: Text(AppLocalizations.of(context)!.settingsItemFeedback),
             leading: const Icon(Icons.feedback_outlined),

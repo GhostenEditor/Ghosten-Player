@@ -71,16 +71,19 @@ class SettingsSponsor extends StatelessWidget {
                       ),
                     ),
                   ),
-                  FutureBuilderSliverHandler(
-                    future: _getSponsorList(context),
-                    builder: (context, snapshot) {
-                      return SliverList.builder(
-                        itemCount: snapshot.requireData.length,
-                        itemBuilder:
-                            (context, index) =>
-                                ButtonSettingItem(dense: true, title: Text(snapshot.requireData[index]), onTap: () {}),
-                      );
-                    },
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    sliver: FutureBuilderSliverHandler(
+                      future: _getSponsorList(context),
+                      builder: (context, snapshot) {
+                        return SliverList.builder(
+                          itemCount: snapshot.requireData.length,
+                          itemBuilder:
+                              (context, index) =>
+                                  ButtonSettingItem(dense: true, title: Text(snapshot.requireData[index]), onTap: () {}),
+                        );
+                      },
+                    ),
                   ),
                   const SliverToBoxAdapter(child: SizedBox(height: 32)),
                 ],

@@ -93,7 +93,7 @@ mixin ActionMixin<S extends StatefulWidget> on State<S> {
 
   Widget buildDeleteAction(BuildContext context, Future<void> Function() future) {
     return ButtonSettingItem(
-      leading: const Icon(Icons.delete_outline),
+      leading: const Icon(Icons.delete_outline_rounded),
       title: Text(AppLocalizations.of(context)!.buttonDelete),
       onTap: () async {
         final confirmed = await showConfirm(context, AppLocalizations.of(context)!.deleteConfirmText);

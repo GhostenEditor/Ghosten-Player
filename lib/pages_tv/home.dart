@@ -27,11 +27,7 @@ class _HomeState extends State<TVHomePage> {
   final _navigatorKey = GlobalKey<NavigatorState>();
   int tabIndex = 0;
   bool reverse = false;
-
-  @override
-  void initState() {
-    super.initState();
-  }
+  bool confirmed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -52,51 +48,24 @@ class _HomeState extends State<TVHomePage> {
       child: Scaffold(
         key: _scaffoldKey,
         extendBodyBehindAppBar: true,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          surfaceTintColor: Colors.transparent,
-          leadingWidth: 160,
-          leading: Padding(
-            padding: const EdgeInsets.only(left: 32),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                label: Text(AppLocalizations.of(context)!.search),
-                onPressed: () => navigateTo(context, const SearchPage(autofocus: true)),
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  iconColor: Colors.white,
-                  foregroundColor: Theme.of(context).colorScheme.onSurface,
-                  visualDensity: VisualDensity.compact,
-                ),
-                icon: const Icon(Icons.search_rounded, size: 20, color: Colors.grey),
-              ),
-            ),
-          ),
-          title: _HomeTabs(
-            tabs: [
-              AppLocalizations.of(context)!.homeTabTV,
-              AppLocalizations.of(context)!.homeTabMovie,
-              AppLocalizations.of(context)!.homeTabLive,
-            ],
-            onTabChange: (index) {
-              setState(() {
+        appBar: _HomeAppbar(
+          activeIndex: tabIndex,
+          popScopePredicate: () {
+            final canPop = Navigator.of(context).canPop();
+            if (canPop) {
+              if (_scaffoldKey.currentState!.isEndDrawerOpen) {
+                if (!_navigatorKey.currentState!.canPop()) {
+                  _scaffoldKey.currentState!.closeEndDrawer();
+                }
+              }
+            }
+            return !canPop;
+          },
+          onTabChange:
+              (index) => setState(() {
                 reverse = true;
                 tabIndex = index;
-              });
-            },
-          ),
-          actions: [
-            TVIconButton(
-              onPressed: () {
-                _scaffoldKey.currentState!.openEndDrawer();
-              },
-              icon: const Icon(Icons.settings_outlined),
-            ),
-            const SizedBox(width: 12),
-            const Clock(),
-            const SizedBox(width: 48),
-          ],
+              }),
         ),
         endDrawer: NavigatorPopHandler(
           onPopWithResult: (_) => _navigatorKey.currentState!.maybePop(),
@@ -134,10 +103,11 @@ class _HomeState extends State<TVHomePage> {
 }
 
 class _HomeTabs extends StatefulWidget {
-  const _HomeTabs({required this.tabs, required this.onTabChange});
+  const _HomeTabs({required this.tabs, required this.onTabChange, this.activeIndex});
 
   final List<String> tabs;
-  final Function(int) onTabChange;
+  final ValueChanged<int> onTabChange;
+  final int? activeIndex;
 
   @override
   State<_HomeTabs> createState() => _HomeTabsState();
@@ -147,8 +117,17 @@ class _HomeTabsState extends State<_HomeTabs> {
   double _lineWidth = 0;
   double _lineOffset = 0;
   bool _tabFocused = false;
-  int _active = 0;
+  late int _active = widget.activeIndex ?? 0;
   late final tabKeys = List.generate(widget.tabs.length, (_) => GlobalKey());
+
+  @override
+  void didUpdateWidget(covariant _HomeTabs oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.activeIndex != _active && widget.activeIndex != null) {
+      _active = widget.activeIndex!;
+      setState(() {});
+    }
+  }
 
   @override
   void didChangeDependencies() {
@@ -258,5 +237,155 @@ class _HomeTabsState extends State<_HomeTabs> {
     final offset = box.globalToLocal(Offset.zero, ancestor: box.parent?.parent?.parent?.parent);
     _lineWidth = box.size.width;
     _lineOffset = -offset.dx;
+  }
+}
+
+class _HomeAppbar extends StatefulWidget implements PreferredSizeWidget {
+  const _HomeAppbar({required this.onTabChange, required this.popScopePredicate, this.activeIndex});
+
+  final int? activeIndex;
+  final ValueChanged<int> onTabChange;
+  final bool Function() popScopePredicate;
+
+  @override
+  State<_HomeAppbar> createState() => _HomeAppbarState();
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+}
+
+class _HomeAppbarState extends State<_HomeAppbar> {
+  bool _show = true;
+  bool confirmed = false;
+  ScrollNotificationObserverState? _scrollNotificationObserver;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _scrollNotificationObserver?.removeListener(_handleScrollNotification);
+    final scaffoldState = Scaffold.maybeOf(context);
+
+    if (scaffoldState != null && (scaffoldState.isDrawerOpen || scaffoldState.isEndDrawerOpen)) {
+      return;
+    }
+    _scrollNotificationObserver = ScrollNotificationObserver.maybeOf(context);
+    _scrollNotificationObserver?.addListener(_handleScrollNotification);
+  }
+
+  @override
+  void dispose() {
+    if (_scrollNotificationObserver != null) {
+      _scrollNotificationObserver!.removeListener(_handleScrollNotification);
+      _scrollNotificationObserver = null;
+    }
+    super.dispose();
+  }
+
+  void _handleScrollNotification(ScrollNotification notification) {
+    if (notification is ScrollUpdateNotification) {
+      final oldShow = _show;
+      final metrics = notification.metrics;
+      switch (metrics.axisDirection) {
+        case AxisDirection.up:
+        case AxisDirection.down:
+          _show = metrics.extentBefore < 100;
+        case AxisDirection.right:
+        case AxisDirection.left:
+          break;
+      }
+      if (_show != oldShow) {
+        setState(() {});
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: _onPopInvokedWithResult,
+      child: PageTransitionSwitcher(
+        reverse: _show,
+        duration: const Duration(milliseconds: 600),
+        transitionBuilder: (Widget child, Animation<double> animation, Animation<double> secondaryAnimation) {
+          return SharedAxisTransition(
+            animation: animation,
+            secondaryAnimation: secondaryAnimation,
+            transitionType: SharedAxisTransitionType.vertical,
+            fillColor: Colors.transparent,
+            child: child,
+          );
+        },
+        child:
+            _show
+                ? Padding(
+                  padding: const EdgeInsets.only(left: 36, right: 48),
+                  child: Row(
+                    children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton.icon(
+                          label: Text(AppLocalizations.of(context)!.search),
+                          onPressed: () => navigateTo(context, const SearchPage(autofocus: true)),
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            iconColor: Colors.white,
+                            foregroundColor: Theme.of(context).colorScheme.onSurface,
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          icon: const Icon(Icons.search_rounded, size: 20, color: Colors.grey),
+                        ),
+                      ),
+                      const SizedBox(width: 60),
+                      _HomeTabs(
+                        activeIndex: widget.activeIndex,
+                        tabs: [
+                          AppLocalizations.of(context)!.homeTabTV,
+                          AppLocalizations.of(context)!.homeTabMovie,
+                          AppLocalizations.of(context)!.homeTabLive,
+                        ],
+                        onTabChange: widget.onTabChange,
+                      ),
+                      const Spacer(),
+                      TVIconButton(
+                        onPressed: () => Scaffold.of(context).openEndDrawer(),
+                        icon: const Icon(Icons.settings_outlined),
+                      ),
+                      const SizedBox(width: 12),
+                      const Clock(),
+                    ],
+                  ),
+                )
+                : const SizedBox(),
+      ),
+    );
+  }
+
+  Future<void> _onPopInvokedWithResult(bool didPop, dynamic _) async {
+    if (didPop) {
+      return;
+    }
+    if (!widget.popScopePredicate()) {
+      return;
+    }
+    // if (_scrollController.offset > 300) {
+    //   _scrollController.animateTo(0, duration: const Duration(milliseconds: 400), curve: Curves.easeOut);
+    //   return;
+    // }
+    if (confirmed) {
+      confirmed = false;
+      SystemNavigator.pop();
+    } else {
+      confirmed = true;
+      final controller = ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.confirmTextExit, textAlign: TextAlign.center),
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          width: 200,
+        ),
+      );
+      controller.closed.then((_) => confirmed = false);
+    }
   }
 }

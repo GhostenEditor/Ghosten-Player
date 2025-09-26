@@ -306,7 +306,7 @@ class CarouselBackground extends StatelessWidget {
                   child: child,
                 );
               },
-              child: src != null ? AsyncImage(key: ValueKey(src), src!) : const SizedBox(),
+              child: src != null ? AsyncImage(key: ValueKey(src), src!, showErrorWidget: false) : const SizedBox(),
             ),
           ),
         ),

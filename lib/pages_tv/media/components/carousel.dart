@@ -20,10 +20,8 @@ class Carousel extends StatelessWidget {
     required this.index,
     required this.child,
     required this.onChange,
-    this.onFocusChange,
   });
 
-  final ValueChanged<bool>? onFocusChange;
   final ValueChanged<int> onChange;
   final int len;
   final int index;
@@ -52,7 +50,21 @@ class Carousel extends StatelessWidget {
             child: child,
           ),
         ),
-        CarouselPagination(len: len, index: index, onChange: onChange, onFocusChange: onFocusChange),
+        CarouselPagination(
+          len: len,
+          index: index,
+          onChange: onChange,
+          onFocusChange: (f) {
+            if (f) {
+              Scrollable.ensureVisible(
+                FocusManager.instance.primaryFocus!.context!,
+                alignment: 1,
+                duration: const Duration(milliseconds: 400),
+                curve: Curves.easeOut,
+              );
+            }
+          },
+        ),
       ],
     );
   }
@@ -309,7 +321,15 @@ class CarouselBackground extends StatelessWidget {
               key: UniqueKey(),
               child:
                   src != null
-                      ? AsyncImage(key: UniqueKey(), src!)
+                      ? AsyncImage(
+                        key: UniqueKey(),
+                        src!,
+                        errorWidget:
+                            (_, _, _) => Image.asset(switch (Theme.of(context).brightness) {
+                              Brightness.dark => 'assets/tv/images/bg-pixel.webp',
+                              Brightness.light => 'assets/tv/images/bg-pixel-light.webp',
+                            }, repeat: ImageRepeat.repeat),
+                      )
                       : Image.asset(switch (Theme.of(context).brightness) {
                         Brightness.dark => 'assets/tv/images/bg-pixel.webp',
                         Brightness.light => 'assets/tv/images/bg-pixel-light.webp',
@@ -423,6 +443,16 @@ class CarouselItem extends StatelessWidget {
                         label: Text(AppLocalizations.of(context)!.buttonWatchNow),
                         icon: const Icon(Icons.play_arrow_rounded),
                       ),
+                      onFocusChange: (f) {
+                        if (f) {
+                          Scrollable.ensureVisible(
+                            FocusManager.instance.primaryFocus!.context!,
+                            alignment: 1,
+                            duration: const Duration(milliseconds: 400),
+                            curve: Curves.easeOut,
+                          );
+                        }
+                      },
                     ),
                   ],
                 ),
@@ -435,7 +465,16 @@ class CarouselItem extends StatelessWidget {
                           ? AsyncImage(
                             item.poster!,
                             width: MediaQuery.of(context).size.width / 5,
+                            height: MediaQuery.of(context).size.width / 10 * 3,
                             radius: BorderRadius.circular(6),
+                            errorWidget:
+                                (context, _, _) => Card(
+                                  child: Icon(
+                                    Icons.broken_image,
+                                    size: 48,
+                                    color: Theme.of(context).colorScheme.error.withAlpha(0x33),
+                                  ),
+                                ),
                           )
                           : const SizedBox(),
                 ),

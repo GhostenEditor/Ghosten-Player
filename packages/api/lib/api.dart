@@ -7,6 +7,7 @@ export 'src/models.dart';
 class Api {
   static Uri get baseUrl => ApiPlatform.instance.baseUrl;
 
+  static final arch = ApiPlatform.instance.arch;
   static final databasePath = ApiPlatform.instance.databasePath;
   static final syncData = ApiPlatform.instance.syncData;
   static final initialized = ApiPlatform.instance.initialized;

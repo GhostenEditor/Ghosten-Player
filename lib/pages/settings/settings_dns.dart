@@ -116,7 +116,7 @@ class _SystemSettingsDNSEditState extends State<_SystemSettingsDNSEdit> {
                 if (context.mounted) await showNotification(context, Api.dnsOverrideDeleteById(widget.item!.id));
                 if (context.mounted) Navigator.of(context).pop(true);
               },
-              icon: const Icon(Icons.delete_outline),
+              icon: const Icon(Icons.delete_outline_rounded),
             ),
           IconButton(
             onPressed: () async {

@@ -69,7 +69,7 @@ class _SubtitleManagerState extends State<SubtitleManager> {
                                       final resp = await showNotification(context, Api.subtitleDeleteById(item.id));
                                       if (resp?.error == null && context.mounted) setState(() {});
                                     },
-                                    icon: const Icon(Icons.delete_outline),
+                                    icon: const Icon(Icons.delete_outline_rounded),
                                   ),
                                 ],
                               ),

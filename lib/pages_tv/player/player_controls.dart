@@ -1015,7 +1015,12 @@ class PlayerPlaylistView<T> extends StatefulWidget {
 }
 
 class _PlayerPlaylistViewState<T> extends State<PlayerPlaylistView<T>> {
-  late final _controller = ScrollController(initialScrollOffset: (widget.activeIndex ?? 0) * 216);
+  late final _controller = ScrollController(
+    initialScrollOffset: min(
+      (widget.activeIndex ?? 0) * 216,
+      max(widget.playlist.length * 216 - MediaQuery.of(context).size.width + 64, 0),
+    ),
+  );
 
   @override
   void didUpdateWidget(covariant PlayerPlaylistView<T> oldWidget) {
@@ -1037,58 +1042,65 @@ class _PlayerPlaylistViewState<T> extends State<PlayerPlaylistView<T>> {
   Widget build(BuildContext context) {
     return Scrollbar(
       controller: _controller,
-      child: ListView.separated(
+      child: ListView.builder(
         controller: _controller,
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 48),
         itemCount: widget.playlist.length,
+        itemExtent: 216,
         itemBuilder: (context, index) {
           final item = widget.playlist[index];
-          return SizedBox(
-            width: 200,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              spacing: 8,
-              children: [
-                Stack(
-                  children: [
-                    FocusableImage(
-                      width: 200,
-                      height: 112,
-                      poster: item.poster,
-                      autofocus: index == widget.activeIndex,
-                      onTap: () => widget.onTap(index),
-                    ),
-                    if (index == widget.activeIndex)
-                      Container(
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: SizedBox(
+              width: 200,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: 8,
+                children: [
+                  Stack(
+                    children: [
+                      FocusableImage(
                         width: 200,
                         height: 112,
-                        decoration: BoxDecoration(color: Colors.black45, borderRadius: BorderRadius.circular(6)),
-                        child: Align(
-                          alignment: Alignment.topRight,
-                          child: PlayingIcon(color: Theme.of(context).colorScheme.primary),
+                        poster: item.poster,
+                        autofocus: index == widget.activeIndex,
+                        onTap: () => widget.onTap(index),
+                      ),
+                      if (index == widget.activeIndex)
+                        Container(
+                          width: 200,
+                          height: 112,
+                          decoration: BoxDecoration(color: Colors.black45, borderRadius: BorderRadius.circular(6)),
+                          child: Align(
+                            alignment: Alignment.topRight,
+                            child: PlayingIcon(color: Theme.of(context).colorScheme.primary),
+                          ),
                         ),
-                      ),
-                  ],
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (item.title != null)
-                      Text(item.title!, style: Theme.of(context).textTheme.titleSmall, overflow: TextOverflow.ellipsis),
-                    if (item.description != null)
-                      Text(
-                        item.description!,
-                        style: Theme.of(context).textTheme.bodySmall,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (item.title != null)
+                        Text(
+                          item.title!,
+                          style: Theme.of(context).textTheme.titleSmall,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      if (item.description != null)
+                        Text(
+                          item.description!,
+                          style: Theme.of(context).textTheme.bodySmall,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           );
         },
-        separatorBuilder: (context, index) => const SizedBox(width: 16),
       ),
     );
   }

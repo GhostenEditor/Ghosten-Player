@@ -8,6 +8,7 @@ import '../../providers/user_config.dart';
 import '../../utils/utils.dart';
 import '../utils/notification.dart';
 import 'settings_dns.dart';
+import 'settings_player_kernel.dart';
 import 'settings_sync.dart';
 
 class SystemSettingsOther extends StatefulWidget {
@@ -43,36 +44,17 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
             subtitle: Text(AppLocalizations.of(context)!.settingsItemAutoPipTip),
             onChanged: userConfig.setAutoPip,
           ),
-          _buildPopupMenuItem(
+          ListTile(
             title: Text(AppLocalizations.of(context)!.settingsItemPlayerKernel),
             trailing:
                 userConfig.playerType == PlayerType.mpv
-
                     ? Badge(
                       label: const Text('Alpha'),
-                      offset: const Offset(6, -14),
+                      offset: const Offset(0, -14),
                       child: Text(AppLocalizations.of(context)!.playerType(userConfig.playerType.name)),
                     )
                     : Text(AppLocalizations.of(context)!.playerType(userConfig.playerType.name)),
-            onSelected: userConfig.setPlayerType,
-            itemBuilder:
-                (BuildContext context) =>
-                    PlayerType.values
-                        .map(
-                          (playerType) => CheckedPopupMenuItem(
-                            value: playerType,
-                            checked: userConfig.playerType == playerType,
-                            child:
-                                playerType == PlayerType.mpv
-                                    ? Badge(
-                                      label: const Text('Alpha'),
-                                      offset: const Offset(-20, 0),
-                                      child: Text(AppLocalizations.of(context)!.playerType(playerType.name)),
-                                    )
-                                    : Text(AppLocalizations.of(context)!.playerType(playerType.name)),
-                          ),
-                        )
-                        .toList(),
+            onTap: () => navigateTo(context, const SettingsPlayerKernel()),
           ),
           const Divider(),
           ListTile(title: Text(AppLocalizations.of(context)!.settingsItemDisplaySettings), dense: true),

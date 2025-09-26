@@ -87,10 +87,11 @@ class _CommonPlayerPageState<T> extends State<CommonPlayerPage<T>> {
 
   @override
   Widget build(BuildContext context) {
+    final userConfig = context.read<UserConfig>();
     return Stack(
       children: [
         PlayerPlatformView(
-          playerType: context.read<UserConfig>().playerType,
+          playerType: userConfig.playerType,
           initialized: () async {
             try {
               final playlist = await widget.playlist;
@@ -105,6 +106,8 @@ class _CommonPlayerPageState<T> extends State<CommonPlayerPage<T>> {
               _controller.playlistError.value = e;
             }
           },
+          mpvVersion: userConfig.mpvVersion,
+          initializeFailed: (e) => _controller.fatalError.value = e.message,
         ),
         ListenableBuilder(
           listenable: _controller.playlistError,

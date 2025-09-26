@@ -51,7 +51,7 @@ class SystemSettingsDNSState extends State<SystemSettingsDNS> {
                           if (resp?.error == null && context.mounted) setState(() {});
                         }
                       },
-                      icon: const Icon(Icons.delete_outline),
+                      icon: const Icon(Icons.delete_outline_rounded),
                     ),
                   ],
                 ),

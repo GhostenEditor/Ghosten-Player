@@ -275,6 +275,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get downloaderDeleteFileConfirmText => 'Whether to delete files at the same time?';
 
   @override
+  String get downloaderLabelDownloadFailed => 'Download Failed';
+
+  @override
   String get downloaderLabelDownloaded => 'Downloaded';
 
   @override
@@ -824,6 +827,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsItemFeedback => 'Feedback';
 
   @override
+  String get settingsItemHelp => 'Help';
+
+  @override
   String get settingsItemInfo => 'Info';
 
   @override
@@ -836,7 +842,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsItemMovie => 'Movie Folder';
 
   @override
-  String get settingsItemNetworkDiagnotics => 'Network Diagnotics';
+  String get settingsItemNetworkDiagnostics => 'Network Diagnostics';
 
   @override
   String get settingsItemNfoEnabled => 'NFO Enabled';

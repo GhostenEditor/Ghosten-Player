@@ -1,7 +1,9 @@
 name: Release
 
 on:
-  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
 
 jobs:
   build:
@@ -21,9 +23,6 @@ jobs:
           flutter-version: '3.32.8'
 
       - run: flutter pub get
-
-      - run: |
-          sed -i '918a\rect = rect.inflate(96);' ${{ env.FLUTTER_ROOT }}/packages/flutter/lib/src/rendering/viewport.dart
 
       - name: Decode Keystore
         run: |
@@ -50,24 +49,15 @@ jobs:
           run-id: ${{ secrets.API_RUN_ID }}
           repository: ${{ secrets.API_REPOSITORY }}
 
-      - name: Download Libraries
-        uses: actions/download-artifact@v4
-        with:
-          github-token: ${{ secrets.TOKEN }}
-          run-id: ${{ secrets.MPV_RUN_ID }}
-          repository: ${{ secrets.MPV_REPOSITORY }}
-
       - name: Move Libraries
         run: |
           mkdir android/app/libs
           mv media3-extension/* android/app/libs
           mv api/* android/app/libs
-          mv mpv/* android/app/libs
 
-      - name: Extract version from pubspec.yaml
+      - name: Extract version from tag
         run: |
-          version=$(grep '^version: ' pubspec.yaml | cut -d ' ' -f 2 | tr -d '\r')
-          echo "VERSION=$version" >> $GITHUB_ENV
+          echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
       - name: Calculate Build Number
         run: |
@@ -83,10 +73,15 @@ jobs:
           --split-per-abi \
           --obfuscate \
           --split-debug-info=./build/app/outputs/flutter-apk/ \
+          --target-platform=android-arm,android-arm64 \
+          --build-name=${{ env.VERSION }} \
           --build-number=${{ env.BUILD_NUMBER }} \
           --dart-define=BUILD_DATE=$(date "+%F") \
           --dart-define=BUILD_VERSION=${{ env.VERSION }} \
           --flavor=mobile
+
+      - run: |
+          sed -i '918a\rect = rect.inflate(96);' ${{ env.FLUTTER_ROOT }}/packages/flutter/lib/src/rendering/viewport.dart
 
       - name: Build TV apk
         run: |
@@ -95,6 +90,8 @@ jobs:
           --split-per-abi \
           --obfuscate \
           --split-debug-info=./build/app/outputs/flutter-apk/ \
+          --target-platform=android-arm,android-arm64 \
+          --build-name=${{ env.VERSION }} \
           --build-number=${{ env.BUILD_NUMBER }} \
           --dart-define=BUILD_DATE=$(date "+%F") \
           --dart-define=BUILD_VERSION=${{ env.VERSION }} \
@@ -104,20 +101,6 @@ jobs:
         run: |
           mv build/app/outputs/flutter-apk/app-arm64-v8a-mobile-release.apk build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
           mv build/app/outputs/flutter-apk/app-armeabi-v7a-mobile-release.apk build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
-
-      - name: Check if Tag Exists
-        run: |
-          if git rev-parse "v${{ env.VERSION }}" >/dev/null 2>&1; then
-            echo "TAG_EXISTS=true" >> $GITHUB_ENV
-          else
-            echo "TAG_EXISTS=false" >> $GITHUB_ENV
-          fi
-
-      - name: Modify Tag
-        if: env.TAG_EXISTS == 'true'
-        run: |
-          new_version="${{ env.VERSION }}-build-${{ github.run_number }}"
-          echo "VERSION=$new_version" >> $GITHUB_ENV
 
       - name: Push APK to Releases
         uses: softprops/action-gh-release@v2
@@ -131,9 +114,7 @@ jobs:
           files: build/app/outputs/flutter-apk/app-arm*-release.apk
           append_body: true
           body: |
-            > 如果项目对您有帮助，就请给颗[🌟Star](https://github.com/GhostenEditor/Ghosten-Player)吧。
-            > 请我喝咖啡(支持作者) ☕️ [赏你](https://github.com/GhostenEditor/Ghosten-Player?tab=readme-ov-file#%E8%B5%9E%E5%8A%A9)
-            > ${{vars.CHAT_GROUP}}
+            ${{vars.RELEASE_NOTE_PREFIX}}
 
             ## 🎉New Features
             

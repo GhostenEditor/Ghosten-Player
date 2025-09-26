@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 import 'file_picker_dialog.dart';
 import 'file_picker_platform_interface.dart';
@@ -25,6 +26,9 @@ class MethodChannelFilePicker extends FilePickerPlatform {
   Future<String?> get cachePath => methodChannel.invokeMethod<String>('cachePath');
 
   @override
+  Future<String?> get filePath => methodChannel.invokeMethod<String>('filePath');
+
+  @override
   Future<List<UsbStorage>?> get externalUsbStorages => methodChannel
       .invokeMethod<List<dynamic>>('externalUsbStorages')
       .then((s) => s?.map(UsbStorage.fromJson).toList());
@@ -37,30 +41,32 @@ class MethodChannelFilePicker extends FilePickerPlatform {
   @override
   Future<T?> showFilePicker<T>(
     BuildContext context, {
-    String? title,
-    Widget? empty,
     String? rootPath,
-    Widget Function(AsyncSnapshot<List<T>>)? errorBuilder,
-    required Widget Function(
-      BuildContext context,
-      T item, {
-      required VoidCallback onPage,
-      required ValueChanged<T?> onSubmit,
-      required VoidCallback onRefresh,
-      T? groupValue,
-    })
-    childBuilder,
     required FilePickerType type,
-    required Future<List<T>> Function(T? id) onFetch,
+    Widget? defaultTitle,
+    required Widget Function(T?) titleBuilder,
+    required List<Widget> actions,
+    required Future<PageData<T>> Function(int) fetchData,
+    required ItemWidgetBuilder<T> itemBuilder,
+    required FileViewerController<T> controller,
+    WidgetBuilder? firstPageProgressIndicatorBuilder,
+    WidgetBuilder? newPageProgressIndicatorBuilder,
+    WidgetBuilder? noItemsFoundIndicatorBuilder,
+    WidgetBuilder? firstPageErrorIndicatorBuilder,
   }) {
     return Navigator.of(context).push<T>(
       MaterialPageRoute(
         builder: (context) => FilePickerDialog(
-          title: title,
-          empty: empty,
-          onFetch: onFetch,
-          errorBuilder: errorBuilder,
-          childBuilder: childBuilder,
+          defaultTitle: defaultTitle,
+          titleBuilder: titleBuilder,
+          actions: actions,
+          fetchData: fetchData,
+          itemBuilder: itemBuilder,
+          controller: controller,
+          firstPageProgressIndicatorBuilder: firstPageProgressIndicatorBuilder,
+          newPageProgressIndicatorBuilder: newPageProgressIndicatorBuilder,
+          noItemsFoundIndicatorBuilder: noItemsFoundIndicatorBuilder,
+          firstPageErrorIndicatorBuilder: firstPageErrorIndicatorBuilder,
         ),
       ),
     );

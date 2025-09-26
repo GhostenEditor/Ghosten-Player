@@ -1,12 +1,11 @@
-import 'dart:math';
-
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../../components/async_image.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../utils/utils.dart';
+import '../../components/fluid_focusable.dart';
+import '../../components/keyboard_scroll.dart';
 import '../../utils/utils.dart';
 import 'file_info.dart';
 
@@ -31,27 +30,23 @@ class OverviewSection<T extends MediaBase> extends StatefulWidget {
 }
 
 class _OverviewSectionState<T extends MediaBase> extends State<OverviewSection<T>> {
-  bool _focused = false;
+  final _focusNode = FocusNode();
+
+  @override
+  void dispose() {
+    super.dispose();
+    _focusNode.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(6),
-        side:
-            _focused
-                ? BorderSide(width: 4, color: Theme.of(context).colorScheme.inverseSurface, strokeAlign: 2)
-                : BorderSide.none,
-      ),
+    return FluidFocusable(
+      focusNode: _focusNode,
+      backgroundColor: Colors.transparent,
       child: InkWell(
         onTap: () => _showFull(context),
         customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-        onFocusChange: (f) {
-          if (_focused != f) {
-            setState(() => _focused = f);
-          }
-        },
+        focusNode: _focusNode,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
           child: Text(
@@ -110,7 +105,7 @@ class _OverviewState<T extends MediaBase> extends State<Overview<T>> {
 
   @override
   Widget build(BuildContext context) {
-    return Focus(
+    return KeyboardScroll(
       autofocus: true,
       onFocusChange: (f) {
         if (focused != f) {
@@ -119,27 +114,7 @@ class _OverviewState<T extends MediaBase> extends State<Overview<T>> {
           });
         }
       },
-      onKeyEvent: (FocusNode node, KeyEvent event) {
-        if (event is KeyDownEvent || event is KeyRepeatEvent) {
-          switch (event.logicalKey) {
-            case LogicalKeyboardKey.arrowUp:
-              _scrollController.animateTo(
-                max(_scrollController.offset - 200, 0),
-                duration: const Duration(milliseconds: 400),
-                curve: Curves.easeOut,
-              );
-              return KeyEventResult.handled;
-            case LogicalKeyboardKey.arrowDown:
-              _scrollController.animateTo(
-                min(_scrollController.offset + 200, _scrollController.position.maxScrollExtent),
-                duration: const Duration(milliseconds: 400),
-                curve: Curves.easeOut,
-              );
-              return KeyEventResult.handled;
-          }
-        }
-        return KeyEventResult.ignored;
-      },
+      controller: _scrollController,
       child: Scrollbar(
         controller: _scrollController,
         thumbVisibility: focused,
@@ -199,7 +174,10 @@ class _OverviewState<T extends MediaBase> extends State<Overview<T>> {
                 hasScrollBody: false,
                 child: Padding(
                   padding: const EdgeInsets.all(32),
-                  child: Align(alignment: Alignment.bottomCenter, child: FileInfoSection(fileId: widget.fileId!)),
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: FileInfoSection(fileId: widget.fileId!),
+                  ),
                 ),
               ),
             const SliverToBoxAdapter(child: SafeArea(child: SizedBox())),

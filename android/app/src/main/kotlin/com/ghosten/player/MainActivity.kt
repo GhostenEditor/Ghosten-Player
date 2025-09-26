@@ -1,6 +1,5 @@
 package com.ghosten.player
 
-import android.annotation.TargetApi
 import android.app.UiModeManager
 import android.content.Intent
 import android.content.res.Configuration
@@ -25,14 +24,22 @@ class MainActivity : FragmentActivity() {
 
         super.onCreate(savedInstanceState)
 
-        if (intent.scheme == "content") {
-            mainFragment = ensureFlutterFragmentCreated(
+        mainFragment = if (intent.scheme == "content") {
+            ensureFlutterFragmentCreated(
                 PLAYER_FRAGMENT, "player", listOf(androidDeviceType().toString(), intent.data?.toString())
             )
         } else if (androidDeviceType() == DEVICE_TYPE_TV) {
-            mainFragment = ensureFlutterFragmentCreated(MAIN_FRAGMENT, "main", listOf(androidDeviceType().toString()))
+            ensureFlutterFragmentCreated(
+                MAIN_FRAGMENT,
+                "main",
+                listOf(androidDeviceType().toString())
+            )
         } else {
-            mainFragment = ensureFlutterFragmentCreated(MAIN_FRAGMENT, "main", listOf(androidDeviceType().toString()))
+            ensureFlutterFragmentCreated(
+                MAIN_FRAGMENT,
+                "main",
+                listOf(androidDeviceType().toString())
+            )
         }
         registerOnBackInvokedCallback()
     }
@@ -70,7 +77,6 @@ class MainActivity : FragmentActivity() {
         return OnBackInvokedCallback { mainFragment?.onBackPressed() }
     }
 
-    @TargetApi(API_LEVELS.API_34)
     @RequiresApi(API_LEVELS.API_34)
     fun startBackGesture(backEvent: BackEvent) {
         if (stillAttachedForEvent("startBackGesture")) {
@@ -78,7 +84,6 @@ class MainActivity : FragmentActivity() {
         }
     }
 
-    @TargetApi(API_LEVELS.API_34)
     @RequiresApi(API_LEVELS.API_34)
     fun updateBackGestureProgress(backEvent: BackEvent) {
         if (stillAttachedForEvent("updateBackGestureProgress")) {
@@ -86,7 +91,6 @@ class MainActivity : FragmentActivity() {
         }
     }
 
-    @TargetApi(API_LEVELS.API_34)
     @RequiresApi(API_LEVELS.API_34)
     fun commitBackGesture() {
         if (stillAttachedForEvent("commitBackGesture")) {
@@ -94,7 +98,6 @@ class MainActivity : FragmentActivity() {
         }
     }
 
-    @TargetApi(API_LEVELS.API_34)
     @RequiresApi(API_LEVELS.API_34)
     fun cancelBackGesture() {
         if (stillAttachedForEvent("cancelBackGesture")) {
@@ -103,10 +106,7 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun stillAttachedForEvent(event: String): Boolean {
-        if (mainFragment == null) {
-            return false
-        }
-        return true
+        return mainFragment != null
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -174,7 +174,7 @@ class MainActivity : FragmentActivity() {
             fragmentManager.beginTransaction().replace(R.id.fragment_container, newFragment, tag).commit()
         }
         fragment = newFragment
-        return fragment;
+        return fragment
     }
 
     private fun androidDeviceType(): Int {

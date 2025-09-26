@@ -71,7 +71,7 @@ class _HomeViewState extends State<HomeView> {
                   useIndicator: true,
                   onDestinationSelected: (index) => setState(() => this.index = index),
                 ),
-                if (index != 2) VerticalDivider(color: Theme.of(context).colorScheme.surfaceContainerHighest),
+                VerticalDivider(color: Theme.of(context).colorScheme.surfaceContainerHighest, width: 1),
               ],
             ),
           ),

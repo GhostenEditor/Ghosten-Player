@@ -2,13 +2,22 @@ package com.ghosten.videoplayer
 
 import android.os.SystemClock
 import android.util.Log
-import androidx.media3.common.*
+import androidx.media3.common.AudioAttributes
+import androidx.media3.common.Format
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Metadata
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.PlaybackParameters
+import androidx.media3.common.Player
+import androidx.media3.common.Timeline
+import androidx.media3.common.Tracks
+import androidx.media3.common.VideoSize
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util
 import androidx.media3.exoplayer.DecoderCounters
 import androidx.media3.exoplayer.DecoderReuseEvaluation
 import androidx.media3.exoplayer.analytics.AnalyticsListener
 import androidx.media3.exoplayer.analytics.AnalyticsListener.EventTime
-import androidx.media3.exoplayer.audio.AudioSink
 import androidx.media3.exoplayer.audio.AudioSink.AudioTrackConfig
 import androidx.media3.exoplayer.source.LoadEventInfo
 import androidx.media3.exoplayer.source.MediaLoadData
@@ -20,45 +29,53 @@ interface EventLoggerHandler {
     fun onLog(level: Int, message: String)
 }
 
+@UnstableApi
+@Suppress("SameParameterValue")
 class EventLogger(private val handler: EventLoggerHandler) : AnalyticsListener {
     private val startTimeMs: Long = SystemClock.elapsedRealtime()
-    private val period = Timeline.Period();
+    private val period = Timeline.Period()
 
-    fun log(level: Int, eventTime: AnalyticsListener.EventTime, eventName: String, message: String) {
-        handler.onLog(level, "Media3: " + eventName + "\n" + getEventTimeString(eventTime) + "\n" + message)
+    private fun log(level: Int, eventTime: EventTime, eventName: String, message: String) {
+        handler.onLog(
+            level,
+            "Media3: " + eventName + "\n" + getEventTimeString(eventTime) + "\n" + message
+        )
     }
 
-    fun logi(eventTime: AnalyticsListener.EventTime, eventName: String) {
-        log(3, eventTime, eventName, "")
-    }
+//    fun logi(eventTime: EventTime, eventName: String) {
+//        log(3, eventTime, eventName, "")
+//    }
 
-    fun logi(eventTime: AnalyticsListener.EventTime, eventName: String, message: String) {
+    private fun logi(eventTime: EventTime, eventName: String, message: String) {
         log(3, eventTime, eventName, message)
     }
 
-    fun logd(eventTime: AnalyticsListener.EventTime, eventName: String) {
+    private fun logd(eventTime: EventTime, eventName: String) {
         log(4, eventTime, eventName, "")
     }
 
-    fun logd(eventTime: AnalyticsListener.EventTime, eventName: String, message: String) {
+    private fun logd(eventTime: EventTime, eventName: String, message: String) {
         log(4, eventTime, eventName, message)
     }
 
-    fun loge(eventTime: AnalyticsListener.EventTime, eventName: String, error: String) {
+    private fun loge(eventTime: EventTime, eventName: String, error: String) {
         log(1, eventTime, eventName, error)
     }
 
-    fun loge(eventTime: AnalyticsListener.EventTime, eventName: String, error: IOException) {
+    private fun loge(eventTime: EventTime, eventName: String, error: IOException) {
         log(1, eventTime, eventName, error.message + "\n" + Log.getStackTraceString(error))
     }
 
-    fun loge(eventTime: AnalyticsListener.EventTime, eventName: String, error: Exception) {
+    private fun loge(eventTime: EventTime, eventName: String, error: Exception) {
         log(1, eventTime, eventName, error.message + "\n" + Log.getStackTraceString(error))
     }
 
-    fun loge(eventTime: AnalyticsListener.EventTime, eventName: String, error: PlaybackException) {
+    private fun loge(eventTime: EventTime, eventName: String, error: PlaybackException) {
         log(
-            1, eventTime, eventName, error.errorCodeName + " " + error.message + "\n" + Log.getStackTraceString(error)
+            1,
+            eventTime,
+            eventName,
+            error.errorCodeName + " " + error.message + "\n" + Log.getStackTraceString(error)
         )
     }
 
@@ -72,8 +89,10 @@ class EventLogger(private val handler: EventLoggerHandler) : AnalyticsListener {
             windowPeriodString =
                 windowPeriodString + ", period=" + eventTime.timeline.getIndexOfPeriod(eventTime.mediaPeriodId!!.periodUid)
             if (eventTime.mediaPeriodId!!.isAd) {
-                windowPeriodString = windowPeriodString + ", adGroup=" + eventTime.mediaPeriodId!!.adGroupIndex
-                windowPeriodString = windowPeriodString + ", ad=" + eventTime.mediaPeriodId!!.adIndexInAdGroup
+                windowPeriodString =
+                    windowPeriodString + ", adGroup=" + eventTime.mediaPeriodId!!.adGroupIndex
+                windowPeriodString =
+                    windowPeriodString + ", ad=" + eventTime.mediaPeriodId!!.adIndexInAdGroup
             }
         }
 
@@ -159,11 +178,11 @@ class EventLogger(private val handler: EventLoggerHandler) : AnalyticsListener {
         return if (selected) "[X]" else "[ ]"
     }
 
-    override fun onPlaybackStateChanged(eventTime: AnalyticsListener.EventTime, state: Int) {
+    override fun onPlaybackStateChanged(eventTime: EventTime, state: Int) {
         logi(eventTime, "state", getStateString(state))
     }
 
-    override fun onPlayWhenReadyChanged(eventTime: AnalyticsListener.EventTime, playWhenReady: Boolean, reason: Int) {
+    override fun onPlayWhenReadyChanged(eventTime: EventTime, playWhenReady: Boolean, reason: Int) {
         logi(
             eventTime,
             "playWhenReady",
@@ -172,7 +191,7 @@ class EventLogger(private val handler: EventLoggerHandler) : AnalyticsListener {
     }
 
     override fun onPlaybackSuppressionReasonChanged(
-        eventTime: AnalyticsListener.EventTime,
+        eventTime: EventTime,
         playbackSuppressionReason: Int
     ) {
         logd(
@@ -182,11 +201,11 @@ class EventLogger(private val handler: EventLoggerHandler) : AnalyticsListener {
         )
     }
 
-    override fun onIsPlayingChanged(eventTime: AnalyticsListener.EventTime, isPlaying: Boolean) {
+    override fun onIsPlayingChanged(eventTime: EventTime, isPlaying: Boolean) {
         logi(eventTime, "isPlaying", isPlaying.toString())
     }
 
-    override fun onTimelineChanged(eventTime: AnalyticsListener.EventTime, reason: Int) {
+    override fun onTimelineChanged(eventTime: EventTime, reason: Int) {
         val periodCount = eventTime.timeline.periodCount
         val windowCount = eventTime.timeline.windowCount
         val builder = StringBuilder()
@@ -199,7 +218,7 @@ class EventLogger(private val handler: EventLoggerHandler) : AnalyticsListener {
 
         for (i in 0 until min(periodCount, 3)) {
             eventTime.timeline.getPeriod(i, this.period)
-            builder.append("  period [" + getTimeString(this.period.getDurationMs()) + "]")
+            builder.append("  period [" + getTimeString(this.period.durationMs) + "]")
             builder.appendLine()
         }
 
@@ -212,32 +231,39 @@ class EventLogger(private val handler: EventLoggerHandler) : AnalyticsListener {
         logi(eventTime, "timeline", builder.toString())
     }
 
-    override fun onMediaItemTransition(eventTime: AnalyticsListener.EventTime, mediaItem: MediaItem?, reason: Int) {
+    override fun onMediaItemTransition(eventTime: EventTime, mediaItem: MediaItem?, reason: Int) {
         logi(
             eventTime, "MediaItemTransition", "reason=" + getMediaItemTransitionReasonString(reason)
         )
     }
 
     override fun onPositionDiscontinuity(
-        eventTime: AnalyticsListener.EventTime,
+        eventTime: EventTime,
         oldPosition: Player.PositionInfo,
         newPosition: Player.PositionInfo,
         reason: Int
     ) {
         val builder = StringBuilder()
         builder.append("reason=").append(getDiscontinuityReasonString(reason))
-            .append(", PositionInfo:old [").append("mediaItem=").append(oldPosition.mediaItemIndex).append(", period=")
+            .append(", PositionInfo:old [").append("mediaItem=").append(oldPosition.mediaItemIndex)
+            .append(", period=")
             .append(oldPosition.periodIndex).append(", pos=").append(oldPosition.positionMs)
         if (oldPosition.adGroupIndex != -1) {
-            builder.append(", contentPos=").append(oldPosition.contentPositionMs).append(", adGroup=")
-                .append(oldPosition.adGroupIndex).append(", ad=").append(oldPosition.adIndexInAdGroup)
+            builder.append(", contentPos=").append(oldPosition.contentPositionMs)
+                .append(", adGroup=")
+                .append(oldPosition.adGroupIndex).append(", ad=")
+                .append(oldPosition.adIndexInAdGroup)
         }
 
-        builder.append("], PositionInfo:new [").append("mediaItem=").append(newPosition.mediaItemIndex)
-            .append(", period=").append(newPosition.periodIndex).append(", pos=").append(newPosition.positionMs)
+        builder.append("], PositionInfo:new [").append("mediaItem=")
+            .append(newPosition.mediaItemIndex)
+            .append(", period=").append(newPosition.periodIndex).append(", pos=")
+            .append(newPosition.positionMs)
         if (newPosition.adGroupIndex != -1) {
-            builder.append(", contentPos=").append(newPosition.contentPositionMs).append(", adGroup=")
-                .append(newPosition.adGroupIndex).append(", ad=").append(newPosition.adIndexInAdGroup)
+            builder.append(", contentPos=").append(newPosition.contentPositionMs)
+                .append(", adGroup=")
+                .append(newPosition.adGroupIndex).append(", ad=")
+                .append(newPosition.adIndexInAdGroup)
         }
 
         builder.append("]")
@@ -245,29 +271,29 @@ class EventLogger(private val handler: EventLoggerHandler) : AnalyticsListener {
     }
 
     override fun onPlaybackParametersChanged(
-        eventTime: AnalyticsListener.EventTime,
+        eventTime: EventTime,
         playbackParameters: PlaybackParameters
     ) {
         logd(eventTime, "playbackParameters", playbackParameters.toString())
     }
 
-    override fun onRepeatModeChanged(eventTime: AnalyticsListener.EventTime, repeatMode: Int) {
+    override fun onRepeatModeChanged(eventTime: EventTime, repeatMode: Int) {
         logd(eventTime, "repeatMode", getRepeatModeString(repeatMode))
     }
 
-    override fun onShuffleModeChanged(eventTime: AnalyticsListener.EventTime, shuffleModeEnabled: Boolean) {
+    override fun onShuffleModeChanged(eventTime: EventTime, shuffleModeEnabled: Boolean) {
         logd(eventTime, "shuffleModeEnabled", shuffleModeEnabled.toString())
     }
 
-    override fun onIsLoadingChanged(eventTime: AnalyticsListener.EventTime, isLoading: Boolean) {
+    override fun onIsLoadingChanged(eventTime: EventTime, isLoading: Boolean) {
         logi(eventTime, "loading", isLoading.toString())
     }
 
-    override fun onPlayerError(eventTime: AnalyticsListener.EventTime, error: PlaybackException) {
+    override fun onPlayerError(eventTime: EventTime, error: PlaybackException) {
         this.loge(eventTime, "playerFailed", error)
     }
 
-    override fun onTracksChanged(eventTime: AnalyticsListener.EventTime, tracks: Tracks) {
+    override fun onTracksChanged(eventTime: EventTime, tracks: Tracks) {
         val builder = StringBuilder()
 
         builder.append(getEventTimeString(eventTime))
@@ -280,9 +306,10 @@ class EventLogger(private val handler: EventLoggerHandler) : AnalyticsListener {
             builder.appendLine()
             for (trackIndex in 0 until trackGroup.length) {
                 val status = getTrackStatusString(trackGroup.isTrackSelected(trackIndex))
-                val formatSupport = Util.getFormatSupportString(trackGroup.getTrackSupport(trackIndex))
+                val formatSupport =
+                    Util.getFormatSupportString(trackGroup.getTrackSupport(trackIndex))
                 builder.append(
-                    "    " + status + " Track:" + trackIndex + ", " + Format.toLogString(
+                    "    $status Track:$trackIndex, " + Format.toLogString(
                         trackGroup.getTrackFormat(
                             trackIndex
                         )
@@ -325,7 +352,7 @@ class EventLogger(private val handler: EventLoggerHandler) : AnalyticsListener {
     }
 
     override fun onLoadError(
-        eventTime: AnalyticsListener.EventTime,
+        eventTime: EventTime,
         loadEventInfo: LoadEventInfo,
         mediaLoadData: MediaLoadData,
         error: IOException,
@@ -334,15 +361,15 @@ class EventLogger(private val handler: EventLoggerHandler) : AnalyticsListener {
         loge(eventTime, "loadError", error)
     }
 
-    override fun onDownstreamFormatChanged(eventTime: AnalyticsListener.EventTime, mediaLoadData: MediaLoadData) {
+    override fun onDownstreamFormatChanged(eventTime: EventTime, mediaLoadData: MediaLoadData) {
         logd(eventTime, "downstreamFormat", Format.toLogString(mediaLoadData.trackFormat))
     }
 
-    override fun onUpstreamDiscarded(eventTime: AnalyticsListener.EventTime, mediaLoadData: MediaLoadData) {
+    override fun onUpstreamDiscarded(eventTime: EventTime, mediaLoadData: MediaLoadData) {
         logd(eventTime, "upstreamDiscarded", Format.toLogString(mediaLoadData.trackFormat))
     }
 
-    override fun onMetadata(eventTime: AnalyticsListener.EventTime, metadata: Metadata) {
+    override fun onMetadata(eventTime: EventTime, metadata: Metadata) {
         val builder = StringBuilder()
 
         for (i in 0 until metadata.length()) {
@@ -351,12 +378,12 @@ class EventLogger(private val handler: EventLoggerHandler) : AnalyticsListener {
         logd(eventTime, "metadata", builder.toString())
     }
 
-    override fun onAudioEnabled(eventTime: AnalyticsListener.EventTime, decoderCounters: DecoderCounters) {
+    override fun onAudioEnabled(eventTime: EventTime, decoderCounters: DecoderCounters) {
         logd(eventTime, "audioEnabled", "")
     }
 
     override fun onAudioDecoderInitialized(
-        eventTime: AnalyticsListener.EventTime,
+        eventTime: EventTime,
         decoderName: String,
         initializedTimestampMs: Long,
         initializationDurationMs: Long
@@ -365,7 +392,7 @@ class EventLogger(private val handler: EventLoggerHandler) : AnalyticsListener {
     }
 
     override fun onAudioInputFormatChanged(
-        eventTime: AnalyticsListener.EventTime,
+        eventTime: EventTime,
         format: Format,
         decoderReuseEvaluation: DecoderReuseEvaluation?
     ) {
@@ -373,7 +400,7 @@ class EventLogger(private val handler: EventLoggerHandler) : AnalyticsListener {
     }
 
     override fun onAudioUnderrun(
-        eventTime: AnalyticsListener.EventTime,
+        eventTime: EventTime,
         bufferSize: Int,
         bufferSizeMs: Long,
         elapsedSinceLastFeedMs: Long
@@ -381,19 +408,19 @@ class EventLogger(private val handler: EventLoggerHandler) : AnalyticsListener {
         loge(eventTime, "audioTrackUnderrun", "$bufferSize, $bufferSizeMs, $elapsedSinceLastFeedMs")
     }
 
-    override fun onAudioDecoderReleased(eventTime: AnalyticsListener.EventTime, decoderName: String) {
+    override fun onAudioDecoderReleased(eventTime: EventTime, decoderName: String) {
         logd(eventTime, "audioDecoderReleased", decoderName)
     }
 
-    override fun onAudioDisabled(eventTime: AnalyticsListener.EventTime, decoderCounters: DecoderCounters) {
+    override fun onAudioDisabled(eventTime: EventTime, decoderCounters: DecoderCounters) {
         logd(eventTime, "audioDisabled", "")
     }
 
-    override fun onAudioSessionIdChanged(eventTime: AnalyticsListener.EventTime, audioSessionId: Int) {
+    override fun onAudioSessionIdChanged(eventTime: EventTime, audioSessionId: Int) {
         logd(eventTime, "audioSessionId", audioSessionId.toString())
     }
 
-    override fun onAudioAttributesChanged(eventTime: AnalyticsListener.EventTime, audioAttributes: AudioAttributes) {
+    override fun onAudioAttributesChanged(eventTime: EventTime, audioAttributes: AudioAttributes) {
         logd(
             eventTime,
             "audioAttributes",
@@ -401,35 +428,35 @@ class EventLogger(private val handler: EventLoggerHandler) : AnalyticsListener {
         )
     }
 
-    override fun onSkipSilenceEnabledChanged(eventTime: AnalyticsListener.EventTime, skipSilenceEnabled: Boolean) {
+    override fun onSkipSilenceEnabledChanged(eventTime: EventTime, skipSilenceEnabled: Boolean) {
         logd(eventTime, "skipSilenceEnabled", skipSilenceEnabled.toString())
     }
 
     override fun onAudioTrackInitialized(
-        eventTime: AnalyticsListener.EventTime,
-        audioTrackConfig: AudioSink.AudioTrackConfig
+        eventTime: EventTime,
+        audioTrackConfig: AudioTrackConfig
     ) {
         logd(eventTime, "audioTrackInit", getAudioTrackConfigString(audioTrackConfig))
 
     }
 
     override fun onAudioTrackReleased(
-        eventTime: AnalyticsListener.EventTime,
-        audioTrackConfig: AudioSink.AudioTrackConfig
+        eventTime: EventTime,
+        audioTrackConfig: AudioTrackConfig
     ) {
         logd(eventTime, "audioTrackReleased", getAudioTrackConfigString(audioTrackConfig))
     }
 
-    override fun onVolumeChanged(eventTime: AnalyticsListener.EventTime, volume: Float) {
+    override fun onVolumeChanged(eventTime: EventTime, volume: Float) {
         logd(eventTime, "volume", volume.toString())
     }
 
-    override fun onVideoEnabled(eventTime: AnalyticsListener.EventTime, decoderCounters: DecoderCounters) {
+    override fun onVideoEnabled(eventTime: EventTime, decoderCounters: DecoderCounters) {
         logd(eventTime, "videoEnabled")
     }
 
     override fun onVideoDecoderInitialized(
-        eventTime: AnalyticsListener.EventTime,
+        eventTime: EventTime,
         decoderName: String,
         initializedTimestampMs: Long,
         initializationDurationMs: Long
@@ -438,68 +465,68 @@ class EventLogger(private val handler: EventLoggerHandler) : AnalyticsListener {
     }
 
     override fun onVideoInputFormatChanged(
-        eventTime: AnalyticsListener.EventTime,
+        eventTime: EventTime,
         format: Format,
         decoderReuseEvaluation: DecoderReuseEvaluation?
     ) {
         logd(eventTime, "videoInputFormat", Format.toLogString(format))
     }
 
-    override fun onDroppedVideoFrames(eventTime: AnalyticsListener.EventTime, droppedFrames: Int, elapsedMs: Long) {
+    override fun onDroppedVideoFrames(eventTime: EventTime, droppedFrames: Int, elapsedMs: Long) {
         logd(eventTime, "droppedFrames", droppedFrames.toString())
     }
 
-    override fun onVideoDecoderReleased(eventTime: AnalyticsListener.EventTime, decoderName: String) {
+    override fun onVideoDecoderReleased(eventTime: EventTime, decoderName: String) {
         logd(eventTime, "videoDecoderReleased", decoderName)
     }
 
-    override fun onVideoDisabled(eventTime: AnalyticsListener.EventTime, decoderCounters: DecoderCounters) {
+    override fun onVideoDisabled(eventTime: EventTime, decoderCounters: DecoderCounters) {
         logd(eventTime, "videoDisabled")
     }
 
-    override fun onRenderedFirstFrame(eventTime: AnalyticsListener.EventTime, output: Any, renderTimeMs: Long) {
+    override fun onRenderedFirstFrame(eventTime: EventTime, output: Any, renderTimeMs: Long) {
         logi(eventTime, "renderedFirstFrame", output.toString())
     }
 
-    override fun onVideoSizeChanged(eventTime: AnalyticsListener.EventTime, videoSize: VideoSize) {
+    override fun onVideoSizeChanged(eventTime: EventTime, videoSize: VideoSize) {
         logd(eventTime, "videoSize", videoSize.width.toString() + ", " + videoSize.height)
     }
 
-    override fun onSurfaceSizeChanged(eventTime: AnalyticsListener.EventTime, width: Int, height: Int) {
+    override fun onSurfaceSizeChanged(eventTime: EventTime, width: Int, height: Int) {
         logd(eventTime, "surfaceSize", "$width, $height")
     }
 
-    override fun onDrmSessionAcquired(eventTime: AnalyticsListener.EventTime, state: Int) {
+    override fun onDrmSessionAcquired(eventTime: EventTime, state: Int) {
         logd(eventTime, "drmSessionAcquired", "state=$state")
     }
 
-    override fun onDrmKeysLoaded(eventTime: AnalyticsListener.EventTime) {
+    override fun onDrmKeysLoaded(eventTime: EventTime) {
         logd(eventTime, "drmKeysLoaded")
     }
 
-    override fun onDrmSessionManagerError(eventTime: AnalyticsListener.EventTime, error: Exception) {
+    override fun onDrmSessionManagerError(eventTime: EventTime, error: Exception) {
         loge(eventTime, "drmSessionManagerError", error)
     }
 
-    override fun onDrmKeysRestored(eventTime: AnalyticsListener.EventTime) {
+    override fun onDrmKeysRestored(eventTime: EventTime) {
         logd(eventTime, "drmKeysRestored")
     }
 
-    override fun onDrmKeysRemoved(eventTime: AnalyticsListener.EventTime) {
+    override fun onDrmKeysRemoved(eventTime: EventTime) {
         logd(eventTime, "drmKeysRemoved")
     }
 
-    override fun onDrmSessionReleased(eventTime: AnalyticsListener.EventTime) {
+    override fun onDrmSessionReleased(eventTime: EventTime) {
         logd(eventTime, "drmSessionReleased")
     }
 
     companion object {
-        val TIME_FORMAT = NumberFormat.getInstance(java.util.Locale.US)
+        val TIME_FORMAT: NumberFormat = NumberFormat.getInstance(java.util.Locale.US)
 
         init {
             TIME_FORMAT.setMinimumFractionDigits(2)
             TIME_FORMAT.setMaximumFractionDigits(2)
-            TIME_FORMAT.setGroupingUsed(false)
+            TIME_FORMAT.isGroupingUsed = false
         }
     }
 }
