@@ -1,7 +1,9 @@
 name: Release
 
 on:
-  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
 
 jobs:
   build:
@@ -21,9 +23,6 @@ jobs:
           flutter-version: '3.35.4'
 
       - run: flutter pub get
-
-      - run: |
-          sed -i '918a\rect = rect.inflate(96);' ${{ env.FLUTTER_ROOT }}/packages/flutter/lib/src/rendering/viewport.dart
 
       - name: Decode Keystore
         run: |
@@ -64,10 +63,9 @@ jobs:
           mv api/* android/app/libs
           mv mpv/* android/app/libs
 
-      - name: Extract version from pubspec.yaml
+      - name: Extract version from tag
         run: |
-          version=$(grep '^version: ' pubspec.yaml | cut -d ' ' -f 2 | tr -d '\r')
-          echo "VERSION=$version" >> $GITHUB_ENV
+          echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
       - name: Calculate Build Number
         run: |
@@ -87,6 +85,9 @@ jobs:
           --dart-define=BUILD_DATE=$(date "+%F") \
           --dart-define=BUILD_VERSION=${{ env.VERSION }} \
           --flavor=mobile
+
+      - run: |
+          sed -i '979a\rect = rect.inflate(96);' ${{ env.FLUTTER_ROOT }}/packages/flutter/lib/src/rendering/viewport.dart
 
       - name: Build TV apk
         run: |
