@@ -8,7 +8,6 @@ on:
 permissions:
   contents: read
   pages: write
-  id-token: write
 
 jobs:
   build:
@@ -23,7 +22,7 @@ jobs:
           type: now
           from_branch: main
           target_branch: gh-pages
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.TOKEN }}
 
       - uses: subosito/flutter-action@v1
         with:
