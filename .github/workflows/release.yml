@@ -49,13 +49,6 @@ jobs:
           run-id: ${{ secrets.API_RUN_ID }}
           repository: ${{ secrets.API_REPOSITORY }}
 
-      - name: Download Libraries
-        uses: actions/download-artifact@v4
-        with:
-          github-token: ${{ secrets.TOKEN }}
-          run-id: ${{ secrets.MPV_RUN_ID }}
-          repository: ${{ secrets.MPV_REPOSITORY }}
-
       - name: Move Libraries
         run: |
           mkdir android/app/libs
