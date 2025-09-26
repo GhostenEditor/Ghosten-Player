@@ -172,7 +172,7 @@ class _SearchResultSelectState extends State<SearchResultSelect> {
                               ),
                             ),
                             DropdownButtonFormField(
-                              initialValue: languageCode,
+                              value: languageCode,
                               decoration: InputDecoration(
                                 prefixIcon: const Icon(Icons.language_rounded),
                                 border: const UnderlineInputBorder(),

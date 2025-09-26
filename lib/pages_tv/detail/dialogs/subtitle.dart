@@ -157,7 +157,7 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
                 ),
                 Gap.vMD,
                 DropdownButtonFormField(
-                  initialValue: _mimeType,
+                  value: _mimeType,
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.subtitles_outlined),
                     isDense: true,
@@ -179,7 +179,7 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
                 ),
                 Gap.vMD,
                 DropdownButtonFormField(
-                  initialValue: _language,
+                  value: _language,
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.language),
                     isDense: true,

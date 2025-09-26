@@ -329,6 +329,7 @@ Future<DriverFile?> _showFilePicker(
           leading: Radio<DriverFile>(
             value: item,
             onChanged: (selectableType == null || item.type == selectableType) ? submit : null,
+            groupValue: null,
           ),
           title: Text(item.name),
           subtitle: RichText(

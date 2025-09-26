@@ -98,24 +98,25 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
             scrollDirection: Axis.horizontal,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: RadioGroup(
-                groupValue: _driverType,
-                onChanged: (t) => setState(() => _driverType = t!),
-                child: Row(
-                  children: [DriverType.alipan, DriverType.quark, DriverType.webdav]
-                      .map(
-                        (ty) => [
-                          Radio(value: ty),
-                          GestureDetector(
-                            onTap: () => setState(() => _driverType = ty),
-                            child: Text(AppLocalizations.of(context)!.driverType(ty.name)),
-                          ),
-                          Gap.hSM,
-                        ],
-                      )
-                      .flattened
-                      .toList(),
-                ),
+              child: Row(
+                children:
+                    [DriverType.alipan, DriverType.quark, DriverType.webdav]
+                        .map(
+                          (ty) => [
+                            Radio(
+                              value: ty,
+                              groupValue: _driverType,
+                              onChanged: (t) => setState(() => _driverType = t!),
+                            ),
+                            GestureDetector(
+                              onTap: () => setState(() => _driverType = ty),
+                              child: Text(AppLocalizations.of(context)!.driverType(ty.name)),
+                            ),
+                            Gap.hSM,
+                          ],
+                        )
+                        .flattened
+                        .toList(),
               ),
             ),
           ),
@@ -123,11 +124,12 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
           if (_driverType == DriverType.quark)
             Expanded(
               child: WebViewWidget(
-                controller: WebViewController()
-                  ..setJavaScriptMode(JavaScriptMode.unrestricted)
-                  ..setUserAgent(ua)
-                  ..scrollBy(10000, 0)
-                  ..loadRequest(Uri.parse('https://pan.quark.cn')),
+                controller:
+                    WebViewController()
+                      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+                      ..setUserAgent(ua)
+                      ..scrollBy(10000, 0)
+                      ..loadRequest(Uri.parse('https://pan.quark.cn')),
               ),
             ),
           if (_driverType == DriverType.webdav) Expanded(child: FormGroup(controller: _webdav)),
@@ -173,76 +175,77 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
       title: Text(AppLocalizations.of(context)!.modalTitleNotification),
       content: StreamBuilder(
         stream: stream,
-        builder: (context, snapshot) => PopScope(
-          canPop: false,
-          onPopInvokedWithResult: (didPop, _) {
-            if (!didPop &&
-                (snapshot.connectionState == ConnectionState.done ||
-                    snapshot.connectionState == ConnectionState.none ||
-                    snapshot.hasData)) {
-              Navigator.of(context).pop();
-            }
-          },
-          child: Builder(
-            builder: (context) {
-              switch (snapshot.connectionState) {
-                case ConnectionState.waiting:
-                case ConnectionState.active:
-                  if (snapshot.hasData) {
-                    final data = snapshot.requireData as Map<String, dynamic>;
-                    if (data['type'] == 'qrcode') {
-                      return SizedBox(
-                        width: kQrSize,
-                        height: kQrSize,
-                        child: QrImageView(backgroundColor: Colors.white, data: data['qrcode_data'], size: kQrSize),
-                      );
-                    } else {
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Padding(padding: EdgeInsets.all(17), child: CircularProgressIndicator()),
-                          Text(AppLocalizations.of(context)!.modalNotificationLoadingText),
-                        ],
-                      );
-                    }
-                  } else {
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Padding(padding: EdgeInsets.all(17), child: CircularProgressIndicator()),
-                        Text(AppLocalizations.of(context)!.modalNotificationLoadingText),
-                      ],
-                    );
-                  }
-                case ConnectionState.none:
-                case ConnectionState.done:
-                  if (snapshot.hasError) {
-                    return ErrorMessage(
-                      error: snapshot.error,
-                      leading: const Icon(Icons.error_outline, size: 60, color: Colors.red),
-                    );
-                  } else {
-                    Future.delayed(const Duration(seconds: 1)).then((value) {
-                      if (context.mounted) {
-                        Navigator.of(context).pop(true);
+        builder:
+            (context, snapshot) => PopScope(
+              canPop: false,
+              onPopInvokedWithResult: (didPop, _) {
+                if (!didPop &&
+                    (snapshot.connectionState == ConnectionState.done ||
+                        snapshot.connectionState == ConnectionState.none ||
+                        snapshot.hasData)) {
+                  Navigator.of(context).pop();
+                }
+              },
+              child: Builder(
+                builder: (context) {
+                  switch (snapshot.connectionState) {
+                    case ConnectionState.waiting:
+                    case ConnectionState.active:
+                      if (snapshot.hasData) {
+                        final data = snapshot.requireData as Map<String, dynamic>;
+                        if (data['type'] == 'qrcode') {
+                          return SizedBox(
+                            width: kQrSize,
+                            height: kQrSize,
+                            child: QrImageView(backgroundColor: Colors.white, data: data['qrcode_data'], size: kQrSize),
+                          );
+                        } else {
+                          return Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Padding(padding: EdgeInsets.all(17), child: CircularProgressIndicator()),
+                              Text(AppLocalizations.of(context)!.modalNotificationLoadingText),
+                            ],
+                          );
+                        }
+                      } else {
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Padding(padding: EdgeInsets.all(17), child: CircularProgressIndicator()),
+                            Text(AppLocalizations.of(context)!.modalNotificationLoadingText),
+                          ],
+                        );
                       }
-                    });
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.check_circle_outline, size: 60, color: Colors.green),
-                        Gap.vMD,
-                        Text(AppLocalizations.of(context)!.modalNotificationSuccessText),
-                      ],
-                    );
+                    case ConnectionState.none:
+                    case ConnectionState.done:
+                      if (snapshot.hasError) {
+                        return ErrorMessage(
+                          error: snapshot.error,
+                          leading: const Icon(Icons.error_outline, size: 60, color: Colors.red),
+                        );
+                      } else {
+                        Future.delayed(const Duration(seconds: 1)).then((value) {
+                          if (context.mounted) {
+                            Navigator.of(context).pop(true);
+                          }
+                        });
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.check_circle_outline, size: 60, color: Colors.green),
+                            Gap.vMD,
+                            Text(AppLocalizations.of(context)!.modalNotificationSuccessText),
+                          ],
+                        );
+                      }
                   }
-              }
-            },
-          ),
-        ),
+                },
+              ),
+            ),
       ),
     );
   }

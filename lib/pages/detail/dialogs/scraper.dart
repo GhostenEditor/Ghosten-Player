@@ -69,7 +69,7 @@ class _ScraperDialogState<T extends MediaBase> extends State<ScraperDialog<T>> {
               onEditingComplete: () => FocusScope.of(context).nextFocus(),
             ),
             DropdownButtonFormField(
-              initialValue: languageCode,
+              value: languageCode,
               decoration: InputDecoration(
                 prefixIcon: const Icon(Icons.language_rounded),
                 border: const UnderlineInputBorder(),

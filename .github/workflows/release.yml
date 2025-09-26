@@ -20,7 +20,7 @@ jobs:
 
       - uses: subosito/flutter-action@v1
         with:
-          flutter-version: '3.35.4'
+          flutter-version: '3.32.8'
 
       - run: flutter pub get
 
@@ -73,13 +73,14 @@ jobs:
           --split-per-abi \
           --obfuscate \
           --split-debug-info=./build/app/outputs/flutter-apk/ \
+          --target-platform=android-arm,android-arm64 \
           --build-number=${{ env.BUILD_NUMBER }} \
           --dart-define=BUILD_DATE=$(date "+%F") \
           --dart-define=BUILD_VERSION=${{ env.VERSION }} \
           --flavor=mobile
 
       - run: |
-          sed -i '979a\rect = rect.inflate(96);' ${{ env.FLUTTER_ROOT }}/packages/flutter/lib/src/rendering/viewport.dart
+          sed -i '918a\rect = rect.inflate(96);' ${{ env.FLUTTER_ROOT }}/packages/flutter/lib/src/rendering/viewport.dart
 
       - name: Build TV apk
         run: |
@@ -88,6 +89,7 @@ jobs:
           --split-per-abi \
           --obfuscate \
           --split-debug-info=./build/app/outputs/flutter-apk/ \
+          --target-platform=android-arm,android-arm64 \
           --build-number=${{ env.BUILD_NUMBER }} \
           --dart-define=BUILD_DATE=$(date "+%F") \
           --dart-define=BUILD_VERSION=${{ env.VERSION }} \

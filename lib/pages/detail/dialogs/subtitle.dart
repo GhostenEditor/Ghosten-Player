@@ -166,7 +166,7 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
               },
             ),
             DropdownButtonFormField(
-              initialValue: _mimeType,
+              value: _mimeType,
               decoration: InputDecoration(
                 prefixIcon: const Icon(Icons.subtitles_outlined),
                 filled: true,
@@ -188,7 +188,7 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
               onChanged: (v) => setState(() => _mimeType = v),
             ),
             DropdownButtonFormField(
-              initialValue: _language,
+              value: _language,
               decoration: InputDecoration(
                 prefixIcon: const Icon(Icons.language),
                 filled: true,
