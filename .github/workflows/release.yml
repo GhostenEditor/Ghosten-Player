@@ -131,9 +131,7 @@ jobs:
           files: build/app/outputs/flutter-apk/app-arm*-release.apk
           append_body: true
           body: |
-            > 如果项目对您有帮助，就请给颗[🌟Star](https://github.com/GhostenEditor/Ghosten-Player)吧。
-            > 请我喝咖啡(支持作者) ☕️ [赏你](https://github.com/GhostenEditor/Ghosten-Player?tab=readme-ov-file#%E8%B5%9E%E5%8A%A9)
-            > ${{vars.CHAT_GROUP}}
+            ${{vars.RELEASE_NOTE_PREFIX}}
 
             ## 🎉New Features
             
