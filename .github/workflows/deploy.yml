@@ -17,6 +17,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Merge main -> gh-pages
+        uses: devmasx/merge-branch@master
+        with:
+          type: now
+          from_branch: main
+          target_branch: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
       - uses: subosito/flutter-action@v1
         with:
           flutter-version: '3.32.8'
