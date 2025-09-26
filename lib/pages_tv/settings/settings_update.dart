@@ -2,16 +2,17 @@ import 'package:api/api.dart';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:install_plugin/install_plugin.dart';
 import 'package:provider/provider.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 
 import '../../components/error_message.dart';
+import '../../components/markdown_viewer.dart';
 import '../../const.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/user_config.dart';
 import '../../utils/utils.dart';
+import '../components/keyboard_scroll.dart';
 
 class SettingsUpdate extends StatefulWidget {
   const SettingsUpdate({super.key});
@@ -25,7 +26,7 @@ class _SettingsUpdateState extends State<SettingsUpdate> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 60),
+        padding: const EdgeInsets.only(left: 60),
         child: FutureBuilder(
           future: _checkUpdate(context),
           builder: (context, snapshot) {
@@ -192,8 +193,7 @@ class _SettingsUpdating extends StatefulWidget {
 
 class _SettingsUpdatingState extends State<_SettingsUpdating> {
   static final Map<String, _DownloadTask> _downloading = {};
-  final _controller = ScrollController();
-  double _cachedOffset = 0;
+  final _controller = AutoScrollController();
 
   // ignore: unused_field
   bool _failed = false;
@@ -231,8 +231,8 @@ class _SettingsUpdatingState extends State<_SettingsUpdating> {
                 if (_downloading.containsKey(widget.data.url))
                   ListenableBuilder(
                     listenable: _downloading[widget.data.url]!.progress,
-                    builder:
-                        (context, _) => LinearProgressIndicator(value: _downloading[widget.data.url]!.progress.value),
+                    builder: (context, _) =>
+                        LinearProgressIndicator(value: _downloading[widget.data.url]!.progress.value),
                   )
                 else
                   const LinearProgressIndicator(value: 1, color: Colors.greenAccent),
@@ -242,54 +242,26 @@ class _SettingsUpdatingState extends State<_SettingsUpdating> {
           ),
         ),
         Flexible(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 32),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Focus(
-                    autofocus: true,
-                    onKeyEvent: (FocusNode node, KeyEvent event) {
-                      if (event is KeyDownEvent || event is KeyRepeatEvent) {
-                        switch (event.logicalKey) {
-                          case LogicalKeyboardKey.arrowUp:
-                            _cachedOffset = (_cachedOffset - 100).clamp(
-                              _controller.position.minScrollExtent,
-                              _controller.position.maxScrollExtent,
-                            );
-                            if (_cachedOffset != _controller.offset) {
-                              _controller.animateTo(
-                                _cachedOffset,
-                                duration: const Duration(milliseconds: 200),
-                                curve: Curves.easeOut,
-                              );
-                              return KeyEventResult.handled;
-                            }
-                          case LogicalKeyboardKey.arrowDown:
-                            _cachedOffset = (_cachedOffset + 100).clamp(
-                              _controller.position.minScrollExtent,
-                              _controller.position.maxScrollExtent,
-                            );
-                            if (_cachedOffset != _controller.offset) {
-                              _controller.animateTo(
-                                _cachedOffset,
-                                duration: const Duration(milliseconds: 200),
-                                curve: Curves.easeOut,
-                              );
-                              return KeyEventResult.handled;
-                            }
-                        }
-                      }
-                      return KeyEventResult.ignored;
-                    },
-                    child: Scrollbar(
-                      controller: _controller,
-                      child: Markdown(data: widget.data.comment, controller: _controller),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: KeyboardScroll(
+                  autofocus: true,
+                  controller: _controller,
+                  child: Scrollbar(
+                    controller: _controller,
+                    child: MarkdownViewer(
+                      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 60),
+                      data: widget.data.comment,
+                      autoScrollController: _controller,
                     ),
                   ),
                 ),
-                ElevatedButton(
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 32, left: 32, right: 60),
+                child: ElevatedButton(
                   onPressed: _downloading.containsKey(widget.data.url) ? null : _download,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 64),
@@ -303,8 +275,8 @@ class _SettingsUpdatingState extends State<_SettingsUpdating> {
                         : AppLocalizations.of(context)!.updateNow,
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ],

@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:markdown/markdown.dart' as m;
 import 'package:markdown_widget/markdown_widget.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 
 import 'html_support.dart';
 
 class MarkdownViewer extends StatelessWidget {
-  const MarkdownViewer({super.key, required this.data, this.padding, this.tocController});
+  const MarkdownViewer({super.key, required this.data, this.padding, this.tocController, this.autoScrollController});
 
   final String data;
   final EdgeInsetsGeometry? padding;
   final TocController? tocController;
+  final AutoScrollController? autoScrollController;
 
   @override
   Widget build(BuildContext context) {
@@ -18,6 +20,7 @@ class MarkdownViewer extends StatelessWidget {
       padding: padding,
       data: data,
       tocController: tocController,
+      autoScrollController: autoScrollController,
       config: switch (Theme.of(context).brightness) {
         Brightness.dark => MarkdownConfig.darkConfig.copy(configs: [const PConfig(textStyle: TextStyle(fontSize: 14))]),
         Brightness.light => MarkdownConfig(configs: [const PConfig(textStyle: TextStyle(fontSize: 14))]),
