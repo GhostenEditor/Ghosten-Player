@@ -1,5 +1,7 @@
-import 'dart:js';
+// ignore_for_file: avoid_dynamic_calls
+
 import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
@@ -86,22 +88,27 @@ class PlayerWeb extends PlayerPlatform {
   }
 
   Future<T>? invoke<T>(String method, [dynamic arg]) {
-    final ar = arg is Map ? JsObject.jsify(arg) : arg;
-    return context['__TAURI__']?.callMethod('invoke', [method, ar].nonNulls.toList()) as Future<T>?;
+    final ar = arg is Map ? arg.jsify() : arg;
+    final core = globalContext.getProperty<JSObject?>('__TAURI__'.toJS)?.getProperty<JSObject?>('core'.toJS);
+    if (ar == null) {
+      return core?.callMethod<JSPromise>('invoke'.toJS, method.jsify()).toDart.then((data) => data.dartify() as T);
+    } else {
+      return core?.callMethod<JSPromise>('invoke'.toJS, method.jsify(), ar).toDart.then((data) => data.dartify() as T);
+    }
   }
 
   void listen(String event, void Function(dynamic data) callback) {
-    context['__TAURI__']?['event']?.callMethod('listen', [
-      event,
-      (JsObject data) {
-        final payload = data['payload'];
-        if (payload is JsObject) {
-          callback(payload.toJSBox.toDart);
-        } else {
-          callback(payload);
-        }
-      },
-    ]);
+    globalContext
+        .getProperty<JSObject?>('__TAURI__'.toJS)
+        ?.getProperty<JSObject?>('event'.toJS)
+        ?.callMethod(
+          'listen'.toJS,
+          event.toJS,
+          (JSObject data) {
+            final payload = data.getProperty('payload'.toJS);
+            callback(payload.dartify());
+          }.toJS,
+        );
   }
 
   void updateStatus(bool coreIdle, bool pause, bool seeking, bool pausedForCache) {
@@ -161,10 +168,17 @@ class PlayerWeb extends PlayerPlatform {
   }
 
   @override
-  Future<void> enterFullscreen() async {}
+  Future<void> setTransform(List<double> matrix) async {}
 
   @override
-  Future<void> exitFullscreen() async {}
+  Future<void> enterFullscreen() async {
+    invoke('player_fullscreen', {'fullscreen': true});
+  }
+
+  @override
+  Future<void> exitFullscreen() async {
+    invoke('player_fullscreen', {'fullscreen': false});
+  }
 
   @override
   void setMethodCallHandler(Future<dynamic> Function(MethodCall call)? handler) {
@@ -180,4 +194,24 @@ class PlayerWeb extends PlayerPlatform {
   Future<void> dispose() async {
     invoke('dispose');
   }
+
+  @override
+  Future<void> setAspectRatio(double? aspectRatio) async {}
+
+  @override
+  Future<void> setSource(Map<String, dynamic>? item) async {}
+
+  @override
+  Future<void> updateSource(Map<String, dynamic> source, int index) async {}
+
+  @override
+  Future<String> getLocalIpAddress() async {
+    return '';
+  }
+
+  @override
+  Future<void> setPlayerOption(String optionName, dynamic optionValue) async {}
+
+  @override
+  Future<void> setSubtitleStyle(List<int> style) async {}
 }

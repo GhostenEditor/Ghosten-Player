@@ -73,6 +73,7 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
   @override
   Widget build(BuildContext context) {
     final shortcuts = context.watch<ShortcutTV>();
+    final userConfig = context.read<UserConfig>();
     return Theme(
       data: tvDarkTheme,
       child: Scaffold(
@@ -141,12 +142,14 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
           fit: StackFit.expand,
           children: [
             PlayerPlatformView(
-              playerType: context.read<UserConfig>().playerType,
+              playerType: userConfig.playerType,
+              mpvVersion: userConfig.mpvVersion,
               initialized: () async {
                 _controller.setPlaylist(widget.playlist);
                 await _controller.next(widget.index);
                 await _controller.play();
               },
+              initializeFailed: (e) => _controller.fatalError.value = e.message,
             ),
             PopScope(
               canPop: false,

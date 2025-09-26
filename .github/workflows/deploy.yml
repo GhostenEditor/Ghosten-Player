@@ -1,8 +1,8 @@
 name: Deploy to GitHub Pages
 
 on:
-  push:
-    branches: [ "gh-pages" ]
+  release:
+    types: [ "published" ]
   workflow_dispatch:
 
 jobs:
@@ -15,13 +15,13 @@ jobs:
 
       - uses: subosito/flutter-action@v1
         with:
-          flutter-version: '3.27.4'
+          flutter-version: '3.35.4'
 
       - run: flutter pub get
 
       - name: Build
         run: |
-          flutter build web \
+          flutter build web --wasm \
           --base-href=/Ghosten-Player/
           --dart-define=BUILD_DATE=$(date "+%F")
 

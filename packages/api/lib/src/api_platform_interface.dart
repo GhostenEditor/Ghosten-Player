@@ -49,6 +49,10 @@ abstract class ApiPlatform extends PlatformInterface {
     throw UnimplementedError('log() has not been implemented.');
   }
 
+  Future<String?> arch() async {
+    throw UnimplementedError('arch() has not been implemented.');
+  }
+
   Future<void> requestStoragePermission() async {}
 
   Future<void> requestStorageManagePermission() async {}
@@ -577,7 +581,7 @@ abstract class ApiPlatform extends PlatformInterface {
     );
   }
 
-  Stream<List<NetworkDiagnotics>> networkDiagnostics() {
+  Stream<List<NetworkDiagnostics>> networkDiagnostics() {
     throw UnimplementedError('networkDiagnostics() has not been implemented.');
   }
 

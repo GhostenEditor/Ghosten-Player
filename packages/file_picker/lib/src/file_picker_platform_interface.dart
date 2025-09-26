@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
+import '../file_picker.dart';
 import 'file_picker_method_channel.dart';
-import 'models.dart';
 
 abstract class FilePickerPlatform extends PlatformInterface {
   FilePickerPlatform() : super(token: _token);
@@ -29,6 +30,8 @@ abstract class FilePickerPlatform extends PlatformInterface {
 
   Future<String?> get cachePath => throw UnimplementedError('cachePath() has not been implemented.');
 
+  Future<String?> get filePath => throw UnimplementedError('filePath() has not been implemented.');
+
   Future<List<UsbStorage>?> get externalUsbStorages =>
       throw UnimplementedError('externalUsbStorages() has not been implemented.');
 
@@ -38,27 +41,25 @@ abstract class FilePickerPlatform extends PlatformInterface {
 
   Future<T?> showFilePicker<T>(
     BuildContext context, {
-    String? title,
-    Widget? empty,
     String? rootPath,
-    Widget Function(AsyncSnapshot<List<T>>)? errorBuilder,
-    required Widget Function(
-      BuildContext context,
-      T item, {
-      required VoidCallback onPage,
-      required ValueChanged<T?> onSubmit,
-      required VoidCallback onRefresh,
-      T? groupValue,
-    })
-    childBuilder,
     required FilePickerType type,
-    required Future<List<T>> Function(T? id) onFetch,
+    Widget? defaultTitle,
+    required Widget Function(T?) titleBuilder,
+    required List<Widget> actions,
+    required Future<PageData<T>> Function(int) fetchData,
+    required ItemWidgetBuilder<T> itemBuilder,
+    required FileViewerController<T> controller,
+    WidgetBuilder? firstPageProgressIndicatorBuilder,
+    WidgetBuilder? newPageProgressIndicatorBuilder,
+    WidgetBuilder? noItemsFoundIndicatorBuilder,
+    WidgetBuilder? firstPageErrorIndicatorBuilder,
   }) {
     throw UnimplementedError('showFilePicker() has not been implemented.');
   }
 }
 
 class UsbStorage {
+// ignore: avoid_dynamic_calls
   UsbStorage.fromJson(dynamic json) : desc = json['desc'], path = json['path'];
   final String desc;
   final String path;

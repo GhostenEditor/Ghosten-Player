@@ -96,17 +96,20 @@ class _SingletonPlayerState<T> extends State<SingletonPlayer<T>> {
 
   @override
   Widget build(BuildContext context) {
+    final userConfig = context.read<UserConfig>();
     return Stack(
       children: [
         PlayerPlatformView(
-          playerType: context.read<UserConfig>().playerType,
-          autoPip: context.read<UserConfig>().autoPip,
+          playerType: userConfig.playerType,
+          mpvVersion: userConfig.mpvVersion,
+          autoPip: userConfig.autoPip,
           initialized: () async {
             await _controller.enterFullscreen();
             _controller.setPlaylist(widget.playlist);
             await _controller.next(0);
             await _controller.play();
           },
+          initializeFailed: (e) => _controller.fatalError.value = e.message,
         ),
         PlayerControlsFull(_controller, _progressController, theme: widget.theme),
       ],

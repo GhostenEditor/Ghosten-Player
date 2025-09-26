@@ -70,7 +70,7 @@ class _LibraryManageState extends State<LibraryManage> {
                                         ),
                                       TVIconButton(
                                         onPressed: () => Api.scheduleTaskDeleteById(item.id),
-                                        icon: const Icon(Icons.delete_outline),
+                                        icon: const Icon(Icons.delete_outline_rounded),
                                       ),
                                     ],
                                     title: switch (item.type) {
@@ -198,7 +198,7 @@ class _LibraryManageState extends State<LibraryManage> {
                                   ),
                             ),
                             TVIconButton(
-                              icon: const Icon(Icons.delete_outline),
+                              icon: const Icon(Icons.delete_outline_rounded),
                               onPressed: () async {
                                 final confirmed = await showConfirm(
                                   context,

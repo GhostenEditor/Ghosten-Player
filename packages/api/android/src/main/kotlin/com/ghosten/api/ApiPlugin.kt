@@ -7,24 +7,31 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.os.IBinder
 import android.provider.Settings
-import androidx.annotation.RequiresApi
-import androidx.core.content.ContextCompat.startActivity
+import androidx.core.net.toUri
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
-import io.flutter.plugin.common.*
+import io.flutter.plugin.common.BinaryMessenger
+import io.flutter.plugin.common.EventChannel
+import io.flutter.plugin.common.MethodCall
+import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import kotlinx.coroutines.*
+import io.flutter.plugin.common.PluginRegistry
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.net.InetAddress
 import java.net.NetworkInterface
-import java.util.*
+import java.util.Collections
+import java.util.UUID
 
 class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnection,
     PluginRegistry.RequestPermissionsResultListener {
@@ -90,7 +97,7 @@ class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnec
 
             else -> {
                 if (apiService == null) {
-                    return result.error("50000", "Service Start Failed", null);
+                    return result.error("50000", "Service Start Failed", null)
                 }
                 coroutineScope.launch(Dispatchers.Main) {
                     if (call.method.endsWith("/cb")) {
@@ -179,12 +186,12 @@ class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnec
         }
     }
 
-    inner class ApiData(val data: ByteArray) {
+    inner class ApiData(data: ByteArray) {
         val code: Int
         val msg: String
 
         init {
-            code = parse_u8(data.get(0)) shl 8 or parse_u8(data.get(1))
+            code = parseU8(data[0]) shl 8 or parseU8(data[1])
             msg = data.copyOfRange(2, data.size).toString(Charsets.UTF_8)
         }
 
@@ -192,7 +199,7 @@ class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnec
             return code / 10000 == 2
         }
 
-        fun parse_u8(b: Byte): Int {
+        private fun parseU8(b: Byte): Int {
             return b.let {
                 if (it < 0) {
                     it.toInt() + 256
@@ -250,12 +257,11 @@ class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnec
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun arch(): String {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && Build.SUPPORTED_ABIS.contains("arm64-v8a")) {
-            "arm64"
+        return if (Build.SUPPORTED_ABIS.isNotEmpty()) {
+            Build.SUPPORTED_ABIS[0]
         } else {
-            "arm"
+            "unknown"
         }
     }
 
@@ -275,16 +281,16 @@ class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnec
         return null
     }
 
-    fun requestStorageManagePermission(result: Result) {
+    private fun requestStorageManagePermission(result: Result) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             if (!Environment.isExternalStorageManager()) {
-                val intent: Intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
-                intent.setData(Uri.parse("package:" + activity.getPackageName()))
+                val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+                intent.setData(("package:" + activity.packageName).toUri())
                 if (intent.resolveActivity(activity.packageManager) != null) {
                     activity.startActivity(intent)
                 } else {
                     val fallbackIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                    fallbackIntent.setData(Uri.parse("package:" + activity.getPackageName()))
+                    fallbackIntent.setData(("package:" + activity.packageName).toUri())
                     activity.startActivity(fallbackIntent)
                 }
             } else {
@@ -295,7 +301,7 @@ class ApiPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ServiceConnec
         }
     }
 
-    fun requestStoragePermission(result: Result) {
+    private fun requestStoragePermission(result: Result) {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (activity.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED || activity.checkSelfPermission(
                     Manifest.permission.WRITE_EXTERNAL_STORAGE

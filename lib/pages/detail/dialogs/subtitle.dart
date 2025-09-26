@@ -69,7 +69,7 @@ class _SubtitleManagerState extends State<SubtitleManager> {
                                       final resp = await showNotification(context, Api.subtitleDeleteById(item.id));
                                       if (resp?.error == null && context.mounted) setState(() {});
                                     },
-                                    icon: const Icon(Icons.delete_outline),
+                                    icon: const Icon(Icons.delete_outline_rounded),
                                   ),
                                 ],
                               ),
@@ -166,7 +166,7 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
               },
             ),
             DropdownButtonFormField(
-              value: _mimeType,
+              initialValue: _mimeType,
               decoration: InputDecoration(
                 prefixIcon: const Icon(Icons.subtitles_outlined),
                 filled: true,
@@ -188,7 +188,7 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
               onChanged: (v) => setState(() => _mimeType = v),
             ),
             DropdownButtonFormField(
-              value: _language,
+              initialValue: _language,
               decoration: InputDecoration(
                 prefixIcon: const Icon(Icons.language),
                 filled: true,

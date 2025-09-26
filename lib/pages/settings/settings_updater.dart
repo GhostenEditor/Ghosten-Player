@@ -87,40 +87,40 @@ class SystemSettingsUpdaterState extends State<SystemSettingsUpdater> {
                     },
                     title: Text(AppLocalizations.of(context)!.updatePrerelease),
                   ),
-                  PopupMenuButton(
-                    offset: const Offset(1, 0),
-                    tooltip: '',
-                    onSelected: (value) => setState(() => _userConfig.setGithubProxy(value)),
-                    itemBuilder:
-                        (context) =>
-                            ['', 'https://gh-proxy.com/']
-                                .map(
-                                  (value) => CheckedPopupMenuItem(
-                                    value: value,
-                                    checked: value == _userConfig.githubProxy,
-                                    child: Text(value.isNotEmpty ? value : AppLocalizations.of(context)!.none),
-                                  ),
-                                )
-                                .toList(),
-                    child: ListTile(
-                      title: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(AppLocalizations.of(context)!.githubProxy),
-                          Gap.hMD,
-                          Expanded(
-                            child: Text(
-                              _userConfig.githubProxy.isNotEmpty
-                                  ? _userConfig.githubProxy
-                                  : AppLocalizations.of(context)!.none,
-                              textAlign: TextAlign.end,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  // PopupMenuButton(
+                  //   offset: const Offset(1, 0),
+                  //   tooltip: '',
+                  //   onSelected: (value) => setState(() => _userConfig.setGithubProxy(value)),
+                  //   itemBuilder:
+                  //       (context) =>
+                  //           ['', 'https://gh-proxy.com/']
+                  //               .map(
+                  //                 (value) => CheckedPopupMenuItem(
+                  //                   value: value,
+                  //                   checked: value == _userConfig.githubProxy,
+                  //                   child: Text(value.isNotEmpty ? value : AppLocalizations.of(context)!.none),
+                  //                 ),
+                  //               )
+                  //               .toList(),
+                  //   child: ListTile(
+                  //     title: Row(
+                  //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //       children: [
+                  //         Text(AppLocalizations.of(context)!.githubProxy),
+                  //         Gap.hMD,
+                  //         Expanded(
+                  //           child: Text(
+                  //             _userConfig.githubProxy.isNotEmpty
+                  //                 ? _userConfig.githubProxy
+                  //                 : AppLocalizations.of(context)!.none,
+                  //             textAlign: TextAlign.end,
+                  //             overflow: TextOverflow.ellipsis,
+                  //           ),
+                  //         ),
+                  //       ],
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
             ),
@@ -141,9 +141,8 @@ class SystemSettingsUpdaterState extends State<SystemSettingsUpdater> {
                             constraints: const BoxConstraints(minWidth: double.infinity),
                             builder: (context) => UpdateBottomSheet(data),
                           );
-                          _updated = true;
                         } else {
-                          _updated = false;
+                          _updated = true;
                         }
                         setState(() => _loading = false);
                       },

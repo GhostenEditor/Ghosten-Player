@@ -578,6 +578,12 @@ abstract class AppLocalizations {
   /// **'Whether to delete files at the same time?'**
   String get downloaderDeleteFileConfirmText;
 
+  /// No description provided for @downloaderLabelDownloadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Failed'**
+  String get downloaderLabelDownloadFailed;
+
   /// No description provided for @downloaderLabelDownloaded.
   ///
   /// In en, this message translates to:
@@ -1358,6 +1364,12 @@ abstract class AppLocalizations {
   /// **'Feedback'**
   String get settingsItemFeedback;
 
+  /// No description provided for @settingsItemHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get settingsItemHelp;
+
   /// No description provided for @settingsItemInfo.
   ///
   /// In en, this message translates to:
@@ -1382,11 +1394,11 @@ abstract class AppLocalizations {
   /// **'Movie Folder'**
   String get settingsItemMovie;
 
-  /// No description provided for @settingsItemNetworkDiagnotics.
+  /// No description provided for @settingsItemNetworkDiagnostics.
   ///
   /// In en, this message translates to:
-  /// **'Network Diagnotics'**
-  String get settingsItemNetworkDiagnotics;
+  /// **'Network Diagnostics'**
+  String get settingsItemNetworkDiagnostics;
 
   /// No description provided for @settingsItemNfoEnabled.
   ///

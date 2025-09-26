@@ -1,4 +1,4 @@
-import 'package:api/api.dart';
+import 'package:api/api.dart' hide PageData;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
@@ -98,7 +98,7 @@ class _AccountManageState extends State<AccountManage> {
                             },
                             child: ListTile(
                               contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                              leading: const Icon(Icons.delete_outline),
+                              leading: const Icon(Icons.delete_outline_rounded),
                               title: Text(AppLocalizations.of(context)!.buttonDelete),
                             ),
                           ),
@@ -136,18 +136,64 @@ class _AccountManageState extends State<AccountManage> {
     );
   }
 
-  Future<DriverFile?> _showFilePicker(FilePickerType type, int driverId, String defaultPath) {
-    return FilePicker.showFilePicker(
+  Future<DriverFile?> _showFilePicker(FilePickerType type, int driverId, String defaultPath) async {
+    final controller = FileViewerController<DriverFile>();
+    final file = await FilePicker.showFilePicker(
       context,
+      controller: controller,
       type: type,
-      title: AppLocalizations.of(context)!.pageTitleFileViewer,
-      errorBuilder: (snapshot) => Center(child: ErrorMessage(error: snapshot.error)),
-      empty: const NoData(),
-      onFetch: (item) => Api.fileList(driverId, item?.id ?? defaultPath),
-      childBuilder: (context, item, {required onPage, required onSubmit, required onRefresh, groupValue}) {
-        return FileViewer(item: item, driverId: driverId, onRefresh: onRefresh, onPage: onPage);
+      defaultTitle: Text(AppLocalizations.of(context)!.pageTitleFileViewer),
+      actions: [
+        PopupMenuButton(
+          offset: const Offset(1, 0),
+          tooltip: '',
+          itemBuilder:
+              (context) => [
+                PopupMenuItem(
+                  padding: EdgeInsets.zero,
+                  onTap: () async {
+                    final filename = await showDialog<String>(
+                      context: context,
+                      builder: (context) => FilenameDialog(dialogTitle: AppLocalizations.of(context)!.buttonNewFolder),
+                    );
+                    if (filename != null && context.mounted) {
+                      final resp = await showNotification(
+                        context,
+                        Api.fileMkdir(driverId, controller.currentItem.value?.id ?? defaultPath, filename),
+                      );
+                      if (resp?.error == null) {
+                        controller.refresh();
+                      }
+                    }
+                  },
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    leading: const Icon(Icons.folder_open_rounded),
+                    title: Text(AppLocalizations.of(context)!.buttonNewFolder),
+                  ),
+                ),
+              ],
+        ),
+      ],
+      titleBuilder: (item) => Text(item?.name ?? 'Home'),
+      firstPageErrorIndicatorBuilder: (_) => Center(child: ErrorMessage(error: controller.error)),
+      noItemsFoundIndicatorBuilder: (_) => const NoData(),
+      fetchData: (index) async {
+        final items = await Api.fileList(driverId, controller.currentItem.value?.id ?? defaultPath);
+        return PageData(items: items, count: items.length, limit: 99999999);
+      },
+      itemBuilder: (context, item, index) {
+        return FileViewer(
+          item: item,
+          onRefresh: controller.refresh,
+          onPage: () => controller.nextPage(item),
+          onRemove: () => Api.fileRemove(driverId, item.id),
+          onRename: (filename) => Api.fileRename(driverId, item.id, filename),
+        );
       },
     );
+    controller.dispose();
+    return file;
   }
 }
 

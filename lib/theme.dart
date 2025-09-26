@@ -11,7 +11,8 @@ final lightTheme = ThemeData(
   bottomSheetTheme: _bottomSheetTheme,
   dialogTheme: _dialogTheme,
   colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF3558C4), primary: const Color(0xFF3558C4)),
-  dividerTheme: const DividerThemeData(space: 1, color: Colors.black12),
+  dividerTheme: const DividerThemeData(color: Colors.black12),
+  dividerColor: Colors.black12,
   cardTheme: const CardThemeData(elevation: 0.75),
   appBarTheme: const AppBarTheme(
     scrolledUnderElevation: 0.75,
@@ -27,7 +28,8 @@ final darkTheme = ThemeData(
   bottomSheetTheme: _bottomSheetTheme,
   dialogTheme: _dialogTheme,
   colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF98C2FF), brightness: Brightness.dark),
-  dividerTheme: const DividerThemeData(space: 1, color: Colors.white12),
+  dividerTheme: const DividerThemeData(color: Colors.white12),
+  dividerColor: Colors.white12,
   cardTheme: const CardThemeData(elevation: 4, shadowColor: Colors.transparent),
   appBarTheme: const AppBarTheme(scrolledUnderElevation: 0.75),
   navigationBarTheme: const NavigationBarThemeData(elevation: 0.75, backgroundColor: Color(0xFF111318)),
@@ -41,6 +43,7 @@ final tvTheme = ThemeData(
   drawerTheme: const DrawerThemeData(shape: RoundedRectangleBorder(), endShape: RoundedRectangleBorder()),
   colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF98C2FF)),
   dividerTheme: const DividerThemeData(color: Colors.black12),
+  dividerColor: Colors.black12,
   scrollbarTheme: const ScrollbarThemeData(radius: Radius.circular(10)),
 );
 
@@ -52,5 +55,6 @@ final tvDarkTheme = ThemeData(
   scaffoldBackgroundColor: Colors.black,
   colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF98C2FF), brightness: Brightness.dark),
   dividerTheme: const DividerThemeData(color: Colors.white12),
+  dividerColor: Colors.white12,
   scrollbarTheme: const ScrollbarThemeData(radius: Radius.circular(10)),
 );

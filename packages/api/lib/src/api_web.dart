@@ -37,6 +37,7 @@ class ApiWeb extends ApiPlatform {
   Stream<dynamic> driverInsert(Json data) async* {
     final resp = await client.put('/driver/insert/cb', data: data);
     if (resp != null) {
+      // ignore: avoid_dynamic_calls
       final sessionId = resp['id'];
       loop:
       while (true) {
@@ -53,6 +54,7 @@ class ApiWeb extends ApiPlatform {
         }
       }
     } else {
+      // ignore: avoid_dynamic_calls
       throw Exception(resp.error);
     }
   }
@@ -61,7 +63,7 @@ class ApiWeb extends ApiPlatform {
 
   /// Miscellaneous Start
   @override
-  Stream<List<NetworkDiagnotics>> networkDiagnostics() async* {
+  Stream<List<NetworkDiagnostics>> networkDiagnostics() async* {
     final data = await client.post<Json>('/network/diagnostics/cb');
     if (data != null) {
       final sessionId = data['id'];
@@ -71,7 +73,7 @@ class ApiWeb extends ApiPlatform {
         final session = await sessionStatus<List<dynamic>>(sessionId);
         switch (session.status) {
           case SessionStatus.progressing:
-            yield session.data!.map((d) => NetworkDiagnotics.fromJson(d)).toList();
+            yield session.data!.map((d) => NetworkDiagnostics.fromJson(d)).toList();
           case SessionStatus.finished:
           case SessionStatus.failed:
             break loop;

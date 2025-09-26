@@ -29,7 +29,13 @@ class ApiService : Service() {
     private external fun apiInitialized(): Boolean
 
     external fun call(method: String, data: String, params: String): ByteArray
-    external fun callWithCallback(method: String, data: String, params: String, callback: ApiMethodHandler): ByteArray
+    external fun callWithCallback(
+        method: String,
+        data: String,
+        params: String,
+        callback: ApiMethodHandler
+    ): ByteArray
+
     external fun log(level: Int, message: String)
 
     private var apiThread: ProxyThread? = null
@@ -113,11 +119,11 @@ class ApiService : Service() {
         }
     }
 
-    public fun apiInitializedPort(): Int? {
-        if (apiInitialized()) {
-            return port
+    fun apiInitializedPort(): Int? {
+        return if (apiInitialized()) {
+            port
         } else {
-            return null
+            null
         }
     }
 
@@ -126,7 +132,11 @@ class ApiService : Service() {
         override fun run() {
             while (shouldLoop) {
                 val cacheFolder =
-                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS.plus('/' + APP_NAME))
+                    Environment.getExternalStoragePublicDirectory(
+                        Environment.DIRECTORY_DOWNLOADS.plus(
+                            "/$APP_NAME"
+                        )
+                    )
                 if (!cacheFolder.exists()) {
                     cacheFolder.mkdir()
                 }

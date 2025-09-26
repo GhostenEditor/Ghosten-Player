@@ -116,7 +116,7 @@ class _SystemSettingsDNSEditState extends State<_SystemSettingsDNSEdit> {
                 if (context.mounted) await showNotification(context, Api.dnsOverrideDeleteById(widget.item!.id));
                 if (context.mounted) Navigator.of(context).pop(true);
               },
-              icon: const Icon(Icons.delete_outline),
+              icon: const Icon(Icons.delete_outline_rounded),
             ),
           IconButton(
             onPressed: () async {
@@ -153,7 +153,7 @@ class _SystemSettingsDNSEditState extends State<_SystemSettingsDNSEdit> {
               spacing: 12,
               children: [
                 DropdownButtonFormField(
-                  value: _controller1.text,
+                  initialValue: _controller1.text,
                   isExpanded: true,
                   decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)!.dnsFormItemLabelDomain,

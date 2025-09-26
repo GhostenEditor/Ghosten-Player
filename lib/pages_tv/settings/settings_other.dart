@@ -11,6 +11,7 @@ import '../components/text_field_focus.dart';
 import '../utils/notification.dart';
 import '../utils/utils.dart';
 import 'settings_dns.dart';
+import 'settings_player_kernel.dart';
 import 'settings_shortcut.dart';
 import 'settings_sync.dart';
 
@@ -211,42 +212,6 @@ class SettingsThemePage extends StatelessWidget {
                     title: Text(AppLocalizations.of(context)!.systemTheme(theme.name)),
                     onChanged: (theme) {
                       if (theme != null) userConfig.setTheme(theme);
-                    },
-                  ),
-                )
-                .toList(),
-      ),
-    );
-  }
-}
-
-class SettingsPlayerKernel extends StatelessWidget {
-  const SettingsPlayerKernel({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final userConfig = Provider.of<UserConfig>(context);
-
-    return SettingPage(
-      title: AppLocalizations.of(context)!.settingsItemPlayerKernel,
-      child: ListView(
-        padding: const EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 32),
-        children:
-            PlayerType.values
-                .map(
-                  (playerType) => RadioSettingItem(
-                    value: playerType,
-                    groupValue: userConfig.playerType,
-                    title:
-                        playerType == PlayerType.mpv
-                            ? Badge(
-                              label: const Text('Alpha'),
-                              offset: Offset.zero,
-                              child: Text(AppLocalizations.of(context)!.playerType(playerType.name)),
-                            )
-                            : Text(AppLocalizations.of(context)!.playerType(playerType.name)),
-                    onChanged: (playerType) {
-                      if (playerType != null) userConfig.setPlayerType(playerType);
                     },
                   ),
                 )

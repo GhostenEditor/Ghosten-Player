@@ -268,6 +268,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get downloaderDeleteFileConfirmText => '是否同时删除文件？';
 
   @override
+  String get downloaderLabelDownloadFailed => '下载失败';
+
+  @override
   String get downloaderLabelDownloaded => '已下载';
 
   @override
@@ -811,6 +814,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsItemFeedback => '反馈';
 
   @override
+  String get settingsItemHelp => '帮助';
+
+  @override
   String get settingsItemInfo => '关于';
 
   @override
@@ -823,7 +829,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsItemMovie => '电影目录设置';
 
   @override
-  String get settingsItemNetworkDiagnotics => '网络诊断';
+  String get settingsItemNetworkDiagnostics => '网络诊断';
 
   @override
   String get settingsItemNfoEnabled => 'NFO 启用';

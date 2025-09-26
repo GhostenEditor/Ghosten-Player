@@ -1,9 +1,9 @@
 name: bluetooth
 description: "Bluetooth Plugin for Ghosten Player"
-version: 1.5.0
+version: 0.0.0
 
 environment:
-  sdk: ^3.8.0
+  sdk: ^3.9.0
   flutter: '>=3.3.0'
 
 dependencies:

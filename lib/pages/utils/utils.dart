@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:api/api.dart';
+import 'package:api/api.dart' hide PageData;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -286,15 +286,27 @@ Future<DriverFile?> _showFilePicker(
   required String defaultPath,
   FileType? fileType,
   FileType? selectableType,
-}) {
-  return FilePicker.showFilePicker(
+}) async {
+  final controller = FileViewerController<DriverFile>();
+  Future<void> submit(DriverFile? file) async {
+    if (file == null) return;
+    Navigator.of(context).pop(file);
+  }
+
+  final file = await FilePicker.showFilePicker(
     context,
+    controller: controller,
     type: type,
-    title: title,
-    errorBuilder: (snapshot) => Center(child: ErrorMessage(error: snapshot.error)),
-    empty: const NoData(),
-    onFetch: (item) => Api.fileList(driverId, item?.id ?? defaultPath, type: fileType),
-    childBuilder: (context, item, {required onPage, required onSubmit, required onRefresh, groupValue}) {
+    defaultTitle: Text(AppLocalizations.of(context)!.pageTitleFileViewer),
+    titleBuilder: (item) => Text(item?.name ?? 'Home'),
+    actions: [],
+    firstPageErrorIndicatorBuilder: (_) => Center(child: ErrorMessage(error: controller.error)),
+    noItemsFoundIndicatorBuilder: (_) => const NoData(),
+    fetchData: (index) async {
+      final items = await Api.fileList(driverId, controller.currentItem.value?.id ?? defaultPath, type: fileType);
+      return PageData(items: items, count: items.length, limit: 99999999);
+    },
+    itemBuilder: (context, item, index) {
       return Focus(
         onKeyEvent:
             item.type == FileType.folder
@@ -302,11 +314,11 @@ Future<DriverFile?> _showFilePicker(
                   if (event is KeyUpEvent) {
                     switch (event.logicalKey) {
                       case LogicalKeyboardKey.arrowRight:
-                        onPage();
+                        controller.nextPage(item);
                         return KeyEventResult.handled;
                       case LogicalKeyboardKey.select:
                       case LogicalKeyboardKey.enter:
-                        onSubmit(item);
+                        submit(item);
                         return KeyEventResult.handled;
                     }
                   }
@@ -314,10 +326,9 @@ Future<DriverFile?> _showFilePicker(
                 }
                 : null,
         child: ListTile(
-          leading: Radio(
+          leading: Radio<DriverFile>(
             value: item,
-            onChanged: (selectableType == null || item.type == selectableType) ? onSubmit : null,
-            groupValue: groupValue,
+            onChanged: (selectableType == null || item.type == selectableType) ? submit : null,
           ),
           title: Text(item.name),
           subtitle: RichText(
@@ -332,11 +343,13 @@ Future<DriverFile?> _showFilePicker(
           ),
           trailing:
               item.type == FileType.folder
-                  ? IconButton(icon: const Icon(Icons.chevron_right), onPressed: onPage)
+                  ? IconButton(icon: const Icon(Icons.chevron_right), onPressed: () => controller.nextPage(item))
                   : null,
-          onTap: item.type == FileType.folder ? onPage : null,
+          onTap: item.type == FileType.folder ? () => controller.nextPage(item) : null,
         ),
       );
     },
   );
+  controller.dispose();
+  return file;
 }

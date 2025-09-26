@@ -48,16 +48,16 @@ class _SettingsAboutPageState extends State<SettingsAboutPage> {
             },
             title: Text(AppLocalizations.of(context)!.updatePrerelease),
           ),
-          ButtonSettingItem(
-            title: Text(AppLocalizations.of(context)!.githubProxy),
-            subtitle: Text(
-              _userConfig.githubProxy.isNotEmpty ? _userConfig.githubProxy : AppLocalizations.of(context)!.none,
-            ),
-            onTap: () async {
-              final flag = await navigateToSlideLeft<bool>(context, const SettingsGithubProxy());
-              if ((flag ?? false) && context.mounted) setState(() {});
-            },
-          ),
+          // ButtonSettingItem(
+          //   title: Text(AppLocalizations.of(context)!.githubProxy),
+          //   subtitle: Text(
+          //     _userConfig.githubProxy.isNotEmpty ? _userConfig.githubProxy : AppLocalizations.of(context)!.none,
+          //   ),
+          //   onTap: () async {
+          //     final flag = await navigateToSlideLeft<bool>(context, const SettingsGithubProxy());
+          //     if ((flag ?? false) && context.mounted) setState(() {});
+          //   },
+          // ),
           ButtonSettingItem(
             title: const Text(appName),
             subtitle: const Text(appVersion),

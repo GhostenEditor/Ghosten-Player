@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import '../../components/stream_builder_handler.dart';
 import '../../l10n/app_localizations.dart';
 
-class SettingsDiagnotics extends StatelessWidget {
-  const SettingsDiagnotics({super.key});
+class SettingsDiagnostics extends StatelessWidget {
+  const SettingsDiagnostics({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context)!.settingsItemNetworkDiagnotics)),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.settingsItemNetworkDiagnostics)),
       body: StreamBuilderHandler(
         stream: Api.networkDiagnostics(),
         builder: (context, snapshot) {
@@ -29,12 +29,12 @@ class SettingsDiagnotics extends StatelessWidget {
                           ? Text('${item.error!}\n${item.tip ?? ''}')
                           : null,
                   trailing: switch (item.status) {
-                    NetworkDiagnoticsStatus.success => Container(
+                    NetworkDiagnosticsStatus.success => Container(
                       padding: const EdgeInsets.all(2),
                       decoration: BoxDecoration(borderRadius: BorderRadius.circular(50), color: Colors.green),
                       child: const Icon(Icons.check, color: Colors.white, size: 12),
                     ),
-                    NetworkDiagnoticsStatus.fail => Container(
+                    NetworkDiagnosticsStatus.fail => Container(
                       padding: const EdgeInsets.all(2),
                       decoration: BoxDecoration(borderRadius: BorderRadius.circular(50), color: Colors.red),
                       child: const Icon(Icons.close, color: Colors.white, size: 12),
@@ -43,13 +43,13 @@ class SettingsDiagnotics extends StatelessWidget {
                 );
               } else {
                 if (snapshot.connectionState == ConnectionState.done) {
-                  if (snapshot.requireData.every((item) => item.status == NetworkDiagnoticsStatus.success)) {
+                  if (snapshot.requireData.every((item) => item.status == NetworkDiagnosticsStatus.success)) {
                     return ListTile(
-                      title: Text(AppLocalizations.of(context)!.networkStatus(NetworkDiagnoticsStatus.success.name)),
+                      title: Text(AppLocalizations.of(context)!.networkStatus(NetworkDiagnosticsStatus.success.name)),
                     );
                   } else {
                     return ListTile(
-                      title: Text(AppLocalizations.of(context)!.networkStatus(NetworkDiagnoticsStatus.fail.name)),
+                      title: Text(AppLocalizations.of(context)!.networkStatus(NetworkDiagnosticsStatus.fail.name)),
                     );
                   }
                 } else {

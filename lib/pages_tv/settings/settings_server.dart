@@ -156,7 +156,7 @@ class _SystemSettingsAddState extends State<_SystemSettingsAdd> {
               spacing: 12,
               children: [
                 DropdownButtonFormField(
-                  value: 'emby',
+                  initialValue: 'emby',
                   isExpanded: true,
                   decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)!.serverFormItemLabelServerType,

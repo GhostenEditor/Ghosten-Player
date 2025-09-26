@@ -30,21 +30,20 @@ class _TVListPageState extends State<TVListPage> {
   final _backdrop = ValueNotifier<String?>(null);
   final _carouselIndex = ValueNotifier<int?>(null);
   final _showBlur = ValueNotifier(false);
-  final _controller = ScrollController();
+  final _scrollController = ScrollController();
+  late final halfHeight = MediaQuery.of(context).size.height / 2;
 
   @override
   void initState() {
-    _controller.addListener(() {
-      final halfHeight = MediaQuery.of(context).size.height / 2;
-      _showBlur.value = _controller.offset > halfHeight;
-    });
+    _scrollController.addListener(_scrollListener);
     super.initState();
   }
 
   @override
   void dispose() {
     _backdrop.dispose();
-    _controller.dispose();
+    _scrollController.removeListener(_scrollListener);
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -74,7 +73,7 @@ class _TVListPageState extends State<TVListPage> {
           ),
         ),
         CustomScrollView(
-          controller: _controller,
+          controller: _scrollController,
           slivers: [
             FutureBuilderSliverHandler(
               future: Api.tvRecommendation(),
@@ -102,15 +101,6 @@ class _TVListPageState extends State<TVListPage> {
                                   key: ValueKey(snapshot.requireData.length),
                                   index: _carouselIndex.value ?? 0,
                                   len: snapshot.requireData.length,
-                                  onFocusChange: (f) {
-                                    if (f) {
-                                      _controller.animateTo(
-                                        0,
-                                        duration: const Duration(milliseconds: 400),
-                                        curve: Curves.easeOut,
-                                      );
-                                    }
-                                  },
                                   onChange: (index) {
                                     _backdrop.value = snapshot.requireData[index].backdrop;
                                     _carouselIndex.value = index;
@@ -280,7 +270,8 @@ class _TVListPageState extends State<TVListPage> {
                     padding: const EdgeInsets.symmetric(horizontal: 6),
                     child: LinearProgressIndicator(
                       value: item.lastPlayedPosition!.inSeconds / item.duration!.inSeconds,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onSurface,
+                      backgroundColor: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(3),
                       minHeight: 3,
                     ),
@@ -317,5 +308,9 @@ class _TVListPageState extends State<TVListPage> {
   Future<void> _onMediaTap(TVSeries item) async {
     final flag = await navigateTo<bool>(context, TVDetail(initialData: item));
     if ((flag ?? false) && mounted) setState(() {});
+  }
+
+  void _scrollListener() {
+    _showBlur.value = _scrollController.offset > halfHeight;
   }
 }

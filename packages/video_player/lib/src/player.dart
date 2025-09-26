@@ -20,19 +20,19 @@ enum PlaybackStatusEvent { start, progress, stop }
 
 class PlayerController<T> implements PlayerBaseController {
   PlayerController(Function(int, String)? onLog, {this.onGetPlayBackInfo, this.onPlaybackStatusUpdate}) {
-    this.index.addListener(() {
+    index.addListener(() {
       title.value = currentItem?.title;
       subTitle.value = currentItem?.description ?? '';
-      isFirst.value = this.index.value == 0;
-      isLast.value = this.index.value == playlist.value.length - 1;
+      isFirst.value = index.value == 0;
+      isLast.value = index.value == playlist.value.length - 1;
     });
     PlayerPlatform.instance.canPip().then((value) => canPip.value = value ?? false);
     PlayerPlatform.instance.setMethodCallHandler((call) async {
       switch (call.method) {
         case 'position':
-          position.value = Duration(milliseconds: call.arguments);
+          position.value = Duration(milliseconds: (call.arguments as num).toInt());
         case 'duration':
-          duration.value = Duration(milliseconds: call.arguments);
+          duration.value = Duration(milliseconds: (call.arguments as num).toInt());
         case 'networkSpeed':
           networkSpeed.value = call.arguments;
         case 'updateStatus':
@@ -50,7 +50,7 @@ class PlayerController<T> implements PlayerBaseController {
             _subscription?.pause();
           }
         case 'bufferingUpdate':
-          bufferedPosition.value = Duration(milliseconds: call.arguments);
+          bufferedPosition.value = Duration(milliseconds: (call.arguments as num).toInt());
         case 'tracksChanged':
           final tracks = (call.arguments as List<dynamic>).map(MediaTrack.fromJson).toList();
           trackGroup.value = MediaTrackGroup.fromTracks(tracks);
@@ -68,7 +68,7 @@ class PlayerController<T> implements PlayerBaseController {
           position.value = mediaChange.position;
           error.value = null;
         case 'mediaIndexChanged':
-          this.index.value = call.arguments;
+          index.value = call.arguments;
         case 'volumeChanged':
           volume.value = call.arguments;
         case 'mediaInfo':
@@ -77,6 +77,7 @@ class PlayerController<T> implements PlayerBaseController {
           willSkip.value = UniqueKey();
         case 'log':
           if (onLog != null) {
+            // ignore: avoid_dynamic_calls
             onLog(call.arguments['level'], call.arguments['message']);
           }
       }
@@ -259,12 +260,8 @@ class PlayerController<T> implements PlayerBaseController {
         List.generate(playlist.length, (i) => i).every((index) => playlist[index] == this.playlist.value[index])) {
       return;
     }
-    this.index.value = null;
+    index.value = null;
     this.playlist.value = playlist;
-  }
-
-  void setPlaylistError(Object? error) {
-    playlistError.value = error;
   }
 
   Future<void> enterFullscreen() {
