@@ -54,56 +54,49 @@ class _DriverFilePickerState extends State<DriverFilePicker> {
                       const SliverPadding(padding: EdgeInsets.only(top: 12)),
                       FutureBuilderSliverHandler<List<DriverAccount>>(
                         future: Api.driverQueryAll(),
-                        builder:
-                            (context, snapshot) => ListenableBuilder(
-                              listenable: _selectedDriverId,
-                              builder: (context, _) {
-                                return SliverPadding(
-                                  padding:
-                                      snapshot.requireData.isNotEmpty
-                                          ? const EdgeInsets.symmetric(horizontal: 12)
-                                          : EdgeInsets.zero,
-                                  sliver: SliverList.builder(
-                                    itemCount: snapshot.requireData.length,
-                                    itemBuilder: (context, index) {
-                                      final item = snapshot.requireData[index];
-                                      return TVListTile(
-                                        selected: _selectedDriverId.value == item.id,
-                                        autofocus: index == 0,
-                                        title: Text(item.name),
-                                        subtitle: Text(AppLocalizations.of(context)!.driverType(item.type.name)),
-                                        leading: AspectRatio(
-                                          aspectRatio: 1,
-                                          child:
-                                              item.avatar == null
-                                                  ? const AspectRatio(
-                                                    aspectRatio: 1,
-                                                    child: Icon(Icons.account_circle, size: 48),
-                                                  )
-                                                  : AsyncImage(
-                                                    item.avatar!,
-                                                    radius: BorderRadius.circular(6),
-                                                    ink: true,
-                                                  ),
+                        builder: (context, snapshot) => ListenableBuilder(
+                          listenable: _selectedDriverId,
+                          builder: (context, _) {
+                            return SliverPadding(
+                              padding: snapshot.requireData.isNotEmpty
+                                  ? const EdgeInsets.symmetric(horizontal: 12)
+                                  : EdgeInsets.zero,
+                              sliver: SliverList.builder(
+                                itemCount: snapshot.requireData.length,
+                                itemBuilder: (context, index) {
+                                  final item = snapshot.requireData[index];
+                                  return TVListTile(
+                                    selected: _selectedDriverId.value == item.id,
+                                    autofocus: index == 0,
+                                    title: Text(item.name),
+                                    subtitle: Text(AppLocalizations.of(context)!.driverType(item.type.name)),
+                                    leading: AspectRatio(
+                                      aspectRatio: 1,
+                                      child: item.avatar == null
+                                          ? const AspectRatio(
+                                              aspectRatio: 1,
+                                              child: Icon(Icons.account_circle, size: 48),
+                                            )
+                                          : AsyncImage(item.avatar!, radius: BorderRadius.circular(6), ink: true),
+                                    ),
+                                    onTap: () async {
+                                      _selectedDriverId.value = item.id;
+                                      navigateToSlideLeft(
+                                        _navigatorKey.currentContext!,
+                                        _FileListPage(
+                                          driverId: item.id,
+                                          parentFileId: '/',
+                                          type: widget.fileType,
+                                          selectableType: widget.selectableType,
                                         ),
-                                        onTap: () async {
-                                          _selectedDriverId.value = item.id;
-                                          navigateToSlideLeft(
-                                            _navigatorKey.currentContext!,
-                                            _FileListPage(
-                                              driverId: item.id,
-                                              parentFileId: '/',
-                                              type: widget.fileType,
-                                              selectableType: widget.selectableType,
-                                            ),
-                                          );
-                                        },
                                       );
                                     },
-                                  ),
-                                );
-                              },
-                            ),
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                        ),
                       ),
                       SliverPadding(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -211,8 +204,8 @@ class _DriverFilePickerState extends State<DriverFilePicker> {
                 child: Navigator(
                   key: _navigatorKey,
                   requestFocus: false,
-                  onGenerateRoute:
-                      (settings) => FadeInPageRoute(builder: (context) => const SizedBox(), settings: settings),
+                  onGenerateRoute: (settings) =>
+                      FadeInPageRoute(builder: (context) => const SizedBox(), settings: settings),
                 ),
               ),
             ),
@@ -253,56 +246,53 @@ class _FileListPageState extends State<_FileListPage> {
         future: Api.fileList(widget.driverId, widget.parentFileId, type: widget.type),
         builder: (context, snapshot) {
           return snapshot.requireData.isNotEmpty
-              ? ListView.builder(
-                padding: const EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 32),
-                itemCount: snapshot.requireData.length,
-                itemBuilder: (context, index) {
-                  final item = snapshot.requireData[index];
-                  return Focus(
-                    skipTraversal: true,
-                    onKeyEvent:
-                        item.type == FileType.folder
+              ? RadioGroup(
+                  onChanged: (file) => Navigator.of(navigatorKey.currentContext!).pop((widget.driverId, file)),
+                  groupValue: _selectedFile,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 32),
+                    itemCount: snapshot.requireData.length,
+                    itemBuilder: (context, index) {
+                      final item = snapshot.requireData[index];
+                      return Focus(
+                        skipTraversal: true,
+                        onKeyEvent: item.type == FileType.folder
                             ? (FocusNode node, KeyEvent event) {
-                              if (event is KeyUpEvent) {
-                                switch (event.logicalKey) {
-                                  case LogicalKeyboardKey.arrowRight:
-                                    _onPage(item.id);
-                                    return KeyEventResult.handled;
+                                if (event is KeyUpEvent) {
+                                  switch (event.logicalKey) {
+                                    case LogicalKeyboardKey.arrowRight:
+                                      _onPage(item.id);
+                                      return KeyEventResult.handled;
+                                  }
                                 }
+                                return KeyEventResult.ignored;
                               }
-                              return KeyEventResult.ignored;
-                            }
                             : null,
-                    child: TVListTile(
-                      autofocus: index == 0,
-                      leading: Radio(
-                        value: item,
-                        onChanged:
-                            (widget.selectableType == null || item.type == widget.selectableType)
-                                ? (file) => Navigator.of(navigatorKey.currentContext!).pop((widget.driverId, item))
-                                : null,
-                        groupValue: _selectedFile,
-                      ),
-                      title: Text(item.name),
-                      subtitle: Row(
-                        spacing: 12,
-                        children: [
-                          if (item.updatedAt != null) Text(item.updatedAt!.formatFull()),
-                          if (item.size != null) Text(item.size!.toSizeDisplay()),
-                        ],
-                      ),
-                      trailing:
-                          item.type == FileType.folder
+                        child: TVListTile(
+                          autofocus: index == 0,
+                          leading: Radio(
+                            value: item,
+                            enabled: widget.selectableType == null || item.type == widget.selectableType,
+                          ),
+                          title: Text(item.name),
+                          subtitle: Row(
+                            spacing: 12,
+                            children: [
+                              if (item.updatedAt != null) Text(item.updatedAt!.formatFull()),
+                              if (item.size != null) Text(item.size!.toSizeDisplay()),
+                            ],
+                          ),
+                          trailing: item.type == FileType.folder
                               ? TVIconButton(icon: const Icon(Icons.chevron_right), onPressed: () => _onPage(item.id))
                               : null,
-                      onTap:
-                          (widget.selectableType == null || item.type == widget.selectableType)
+                          onTap: (widget.selectableType == null || item.type == widget.selectableType)
                               ? () => Navigator.of(navigatorKey.currentContext!).pop((widget.driverId, item))
                               : () {},
-                    ),
-                  );
-                },
-              )
+                        ),
+                      );
+                    },
+                  ),
+                )
               : const NoData();
         },
       ),

@@ -153,7 +153,7 @@ class _SystemSettingsDNSEditState extends State<_SystemSettingsDNSEdit> {
               spacing: 12,
               children: [
                 DropdownButtonFormField(
-                  value: _controller1.text,
+                  initialValue: _controller1.text,
                   isExpanded: true,
                   decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)!.dnsFormItemLabelDomain,

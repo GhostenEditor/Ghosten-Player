@@ -107,7 +107,7 @@ class _SystemSettingsDNSEditState extends State<_SystemSettingsDNSEdit> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 DropdownButtonFormField(
-                  value: _controller1.text,
+                  initialValue: _controller1.text,
                   isExpanded: true,
                   decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)!.dnsFormItemLabelDomain,

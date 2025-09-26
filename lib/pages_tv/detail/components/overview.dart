@@ -1,8 +1,5 @@
-import 'dart:math';
-
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../../components/async_image.dart';
 import '../../../l10n/app_localizations.dart';
