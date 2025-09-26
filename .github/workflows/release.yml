@@ -54,7 +54,6 @@ jobs:
           mkdir android/app/libs
           mv media3-extension/* android/app/libs
           mv api/* android/app/libs
-          mv mpv/* android/app/libs
 
       - name: Extract version from tag
         run: |
@@ -98,20 +97,6 @@ jobs:
         run: |
           mv build/app/outputs/flutter-apk/app-arm64-v8a-mobile-release.apk build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
           mv build/app/outputs/flutter-apk/app-armeabi-v7a-mobile-release.apk build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
-
-      - name: Check if Tag Exists
-        run: |
-          if git rev-parse "v${{ env.VERSION }}" >/dev/null 2>&1; then
-            echo "TAG_EXISTS=true" >> $GITHUB_ENV
-          else
-            echo "TAG_EXISTS=false" >> $GITHUB_ENV
-          fi
-
-      - name: Modify Tag
-        if: env.TAG_EXISTS == 'true'
-        run: |
-          new_version="${{ env.VERSION }}-build-${{ github.run_number }}"
-          echo "VERSION=$new_version" >> $GITHUB_ENV
 
       - name: Push APK to Releases
         uses: softprops/action-gh-release@v2
