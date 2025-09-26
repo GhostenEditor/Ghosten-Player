@@ -3,7 +3,7 @@ description: "Ghosten Player: A Video Player"
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 2.2.0
 environment:
-  sdk: ^3.7.2
+  sdk: ^3.9.2
 dependencies:
   flutter:
     sdk: flutter
