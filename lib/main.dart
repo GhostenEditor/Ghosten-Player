@@ -194,7 +194,7 @@ class StatusBar extends StatelessWidget {
               const Icon(Icons.signal_cellular_alt),
               const Icon(Icons.five_g_rounded),
               const Icon(Icons.wifi_rounded),
-              Transform.rotate(angle: pi / 2, child: Icon(Icons.battery_6_bar_rounded, size: 24)),
+              Transform.rotate(angle: pi / 2, child: const Icon(Icons.battery_6_bar_rounded, size: 24)),
             ],
           ),
         ),

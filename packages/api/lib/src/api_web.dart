@@ -43,44 +43,29 @@ class ApiWeb extends ApiPlatform {
   /// Library Start
 
   @override
-  Future<void> libraryRefreshById(dynamic id, bool incremental) async {
-    await Future.delayed(const Duration(seconds: 1));
-    Stream<double?> s() async* {
-      yield 0.2;
-      await Future.delayed(const Duration(seconds: 1));
-      yield 0.4;
-      await Future.delayed(const Duration(seconds: 1));
-      yield 0.6;
-      await Future.delayed(const Duration(seconds: 1));
-      yield 0.8;
-      await Future.delayed(const Duration(seconds: 1));
-      yield 1;
-      await Future.delayed(const Duration(seconds: 3));
-      yield null;
-    }
-
-    // ApiPlatform.streamController.addStream(s());
+  Future<void> libraryRefreshById(dynamic id, bool incremental) {
+    return Future.delayed(const Duration(seconds: 1));
   }
 
   /// Library End
 
   /// Miscellaneous Start
   @override
-  Stream<List<NetworkDiagnotics>> networkDiagnostics() async* {
+  Stream<List<NetworkDiagnostics>> networkDiagnostics() async* {
     final items = [
       {'domain': 'openapi.alipan.com', 'ip': '***.***.***.***', 'status': 'success'},
       {'domain': 'api.themoviedb.org', 'ip': '***.***.***.***', 'status': 'success'},
       {'domain': 'image.tmdb.org', 'ip': '***.***.***.***', 'status': 'success'},
-      {'domain': 'drive-pc.quark.cn', 'ip': '***.***.***.***', 'status': 'success'}
+      {'domain': 'drive-pc.quark.cn', 'ip': '***.***.***.***', 'status': 'success'},
     ];
     await Future.delayed(const Duration(seconds: 2));
-    yield items.take(1).map(NetworkDiagnotics.fromJson).toList();
+    yield items.take(1).map(NetworkDiagnostics.fromJson).toList();
     await Future.delayed(const Duration(seconds: 1));
-    yield items.take(2).map(NetworkDiagnotics.fromJson).toList();
+    yield items.take(2).map(NetworkDiagnostics.fromJson).toList();
     await Future.delayed(const Duration(seconds: 1));
-    yield items.take(3).map(NetworkDiagnotics.fromJson).toList();
+    yield items.take(3).map(NetworkDiagnostics.fromJson).toList();
     await Future.delayed(const Duration(seconds: 1));
-    yield items.take(4).map(NetworkDiagnotics.fromJson).toList();
+    yield items.take(4).map(NetworkDiagnostics.fromJson).toList();
   }
 
   /// Miscellaneous End
@@ -90,11 +75,11 @@ class ApiWeb extends ApiPlatform {
   Stream<List<dynamic>> dlnaDiscover() async* {
     await Future.delayed(const Duration(seconds: 1));
     yield [
-      {'id': '1', 'friendlyName': '投屏设备'}
+      {'id': '1', 'friendlyName': '投屏设备'},
     ];
   }
 
-///  Cast End
+  ///  Cast End
 }
 
 final forbiddenException = PlatformException(code: '40301');
@@ -110,86 +95,79 @@ class Client extends ApiClient {
   @override
   Future<T?> get<T>(String path, {Json? queryParameters}) async {
     return switch (path) {
-      '/session/status' => {
-        'status': 'created',
-        'data': '',
-      },
-      '/file/info' => {
-        'filename': '展示文件.mp4',
-        'driverType': 'webdav',
-        'createAt': DateTime.now().subtract(const Duration(days: 20)).toString(),
-        'size': 1 << 31,
-      },
-      '/player/history' => episodes
-          .where((episode) => episode['lastPlayedTime'] != null)
-          .map((episode) => {
-        'mediaType': 'episode',
-        ...episode,
-      })
-          .toList(),
-      '/playback/info' => {
-        'url': 'http://127.0.0.1',
-        'subtitles': [],
-      },
-      '/server/query/all' => servers,
-      '/download/task/query/all' => downloadTasks,
-      '/playlist/query/all' => playlists,
-      '/playlist/channels/query/id' => channels,
-      '/tv/recommendation' => series.take(6).toList(),
-      '/tv/series/query/all' => {
-        'limit': queryParameters?['limit'] ?? 100,
-        'offset': 0,
-        'count': series.length,
-        'data': series.take(queryParameters?['limit'] ?? 100).toList(),
-      },
-      '/tv/series/nextToPlay/query/all' => episodes.where((item) => item['lastPlayedTime'] != null).toList(),
-      '/tv/series/query/id' => series.firstWhere((el) => el['id'] == 61),
-      '/tv/season/query/id' => seasons.firstWhere((el) => el['id'] == queryParameters!['id']),
-      '/tv/episode/query/id' => episodes.firstWhere((el) => el['id'] == queryParameters!['id']),
-      '/movie/query/all' => {
-        'limit': queryParameters?['limit'] ?? 100,
-        'offset': 0,
-        'count': movies.length,
-        'data': movies.take(queryParameters?['limit'] ?? 100).toList(),
-      },
-      '/movie/nextToPlay/query/all' => movies.take(2).toList(),
-      '/movie/recommendation' => movies,
-      '/movie/query/id' => movies[0],
-      '/studio/query/all' => studios,
-      '/genre/query/all' => genres,
-      '/keyword/query/all' => keywords,
-      '/cast/query/all' => actors,
-      '/crew/query/all' => [],
-      '/driver/query/all' => drivers,
-      '/driver/setting/query/id' => {
-        if (queryParameters!['id'] != 2) 'concurrency': 3,
-        if (queryParameters['id'] == 1) 'proxy': true,
-        if (queryParameters['id'] != 2) 'sliceSize': 5,
-      },
-      '/library/query/all' => [
-        {
-          'driverAvatar': null,
-          'driverId': 0,
-          'driverName': 'TEST Name',
-          'driverType': 'webdav',
-          'filename': 'TEST',
-          'id': 0,
-          'poster': null,
-          'type': queryParameters!['type']
+          '/session/status' => {'status': 'created', 'data': ''},
+          '/file/info' => {
+            'filename': '展示文件.mp4',
+            'driverType': 'webdav',
+            'createAt': DateTime.now().subtract(const Duration(days: 20)).toString(),
+            'size': 1 << 31,
+          },
+          '/player/history' =>
+            episodes
+                .where((episode) => episode['lastPlayedTime'] != null)
+                .map((episode) => {'mediaType': 'episode', ...episode})
+                .toList(),
+          '/playback/info' => {'url': 'http://127.0.0.1', 'subtitles': []},
+          '/server/query/all' => servers,
+          '/download/task/query/all' => downloadTasks,
+          '/playlist/query/all' => playlists,
+          '/playlist/channels/query/id' => channels,
+          '/tv/recommendation' => series.take(6).toList(),
+          '/tv/series/query/all' => {
+            'limit': queryParameters?['limit'] ?? 100,
+            'offset': 0,
+            'count': series.length,
+            'data': series.take(queryParameters?['limit'] ?? 100).toList(),
+          },
+          '/tv/series/nextToPlay/query/all' => episodes.where((item) => item['lastPlayedTime'] != null).toList(),
+          '/tv/series/query/id' => series.firstWhere((el) => el['id'] == 61),
+          '/tv/season/query/id' => seasons.firstWhere((el) => el['id'] == queryParameters!['id']),
+          '/tv/episode/query/id' => episodes.firstWhere((el) => el['id'] == queryParameters!['id']),
+          '/movie/query/all' => {
+            'limit': queryParameters?['limit'] ?? 100,
+            'offset': 0,
+            'count': movies.length,
+            'data': movies.take(queryParameters?['limit'] ?? 100).toList(),
+          },
+          '/movie/nextToPlay/query/all' => movies.take(2).toList(),
+          '/movie/recommendation' => movies,
+          '/movie/query/id' => movies[0],
+          '/studio/query/all' => studios,
+          '/genre/query/all' => genres,
+          '/keyword/query/all' => keywords,
+          '/cast/query/all' => actors,
+          '/crew/query/all' => [],
+          '/driver/query/all' => drivers,
+          '/driver/setting/query/id' => {
+            if (queryParameters!['id'] != 2) 'concurrency': 3,
+            if (queryParameters['id'] == 1) 'proxy': true,
+            if (queryParameters['id'] != 2) 'sliceSize': 5,
+          },
+          '/library/query/all' => [
+            {
+              'driverAvatar': null,
+              'driverId': 0,
+              'driverName': 'TEST Name',
+              'driverType': 'webdav',
+              'filename': 'TEST',
+              'id': 0,
+              'poster': null,
+              'type': queryParameters!['type'],
+            },
+          ],
+          '/schedule/task/query/all' => [],
+          '/dns/override/query/all' => dns,
+          '/log/query/page' => {
+            'offset': 0,
+            'limit': 50,
+            'count': 1,
+            'data': [
+              {'level': 3, 'time': DateTime.now().toString(), 'message': '这是一条展示用日志！'},
+            ],
+          },
+          _ => null,
         }
-      ],
-      '/schedule/task/query/all' => [],
-      '/dns/override/query/all' => dns,
-      '/log/query/page' => {
-        'offset': 0,
-        'limit': 50,
-        'count': 1,
-        'data': [
-          {'level': 3, 'time': DateTime.now().toString(), 'message': '这是一条展示用日志！'}
-        ]
-      },
-      _ => null
-    } as T?;
+        as T?;
     // return null;
   }
 
@@ -272,7 +250,11 @@ class Client extends ApiClient {
   @override
   Future<T?> put<T>(String path, {Object? data}) async {
     return switch (path) {
-      '/file/mkdir' || '/server/insert' || '/playlist/insert' || '/library/insert' || '/dns/override/insert' => throw forbiddenException,
+      '/file/mkdir' ||
+      '/server/insert' ||
+      '/playlist/insert' ||
+      '/library/insert' ||
+      '/dns/override/insert' => throw forbiddenException,
       _ => null,
     };
   }

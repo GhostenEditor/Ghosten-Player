@@ -202,9 +202,6 @@ class PlayerWeb extends PlayerPlatform {
   Future<void> setAspectRatio(double? aspectRatio) async {}
 
   @override
-  Future<void> setSource(Map<String, dynamic>? item) async {}
-
-  @override
   Future<void> updateSource(Map<String, dynamic> source, int index) async {}
 
   @override

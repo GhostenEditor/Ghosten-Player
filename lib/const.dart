@@ -1,5 +1,5 @@
 const alphaVersion = bool.fromEnvironment('ALPHA_VERSION');
-const appVersion = String.fromEnvironment('BUILD_VERSION', defaultValue: 'Dev');
+const appVersion = String.fromEnvironment('BUILD_VERSION', defaultValue: 'Demo');
 const buildDate = String.fromEnvironment('BUILD_DATE', defaultValue: '2024-03-12');
 const repoAuthor = String.fromEnvironment('REPO_AUTHOR', defaultValue: 'GhostenEditor');
 const repoName = String.fromEnvironment('REPO_NAME', defaultValue: 'Ghosten-Player');

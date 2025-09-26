@@ -17,7 +17,7 @@ final fileList = [
     'size': null,
     'type': 'folder',
     'updatedAt': '+002024-11-04T08:49:29.308000000Z',
-    'url': null
+    'url': null,
   },
   {
     'category': null,
@@ -29,7 +29,7 @@ final fileList = [
     'size': null,
     'type': 'folder',
     'updatedAt': '+002024-01-27T08:45:25.834000000Z',
-    'url': null
+    'url': null,
   },
   {
     'category': null,
@@ -41,7 +41,7 @@ final fileList = [
     'size': null,
     'type': 'folder',
     'updatedAt': '+002023-05-20T09:32:13.392000000Z',
-    'url': null
+    'url': null,
   },
   {
     'category': 'audio',
@@ -53,7 +53,7 @@ final fileList = [
     'size': null,
     'type': 'file',
     'updatedAt': '+002023-07-28T05:22:40.666000000Z',
-    'url': null
+    'url': null,
   },
   {
     'category': 'video',
@@ -65,12 +65,12 @@ final fileList = [
     'size': null,
     'type': 'file',
     'updatedAt': '+002024-11-13T06:57:15.609000000Z',
-    'url': null
-  }
+    'url': null,
+  },
 ];
 
 final playlists = [
-  {'id': 3, 'title': 'DEFAULT', 'url': ''}
+  {'id': 3, 'title': 'DEFAULT', 'url': ''},
 ];
 final channels = [
   {
@@ -78,201 +78,201 @@ final channels = [
     'category': '📺央视频道',
     'image': 'https://gh.catmak.name/https://raw.githubusercontent.com/fanmingming/live/main/tv/CCTV1.png',
     'links': [''],
-    'title': 'CCTV-1'
+    'title': 'CCTV-1',
   },
   {
     'id': 0,
     'category': '📺央视频道',
     'image': 'https://gh.catmak.name/https://raw.githubusercontent.com/fanmingming/live/main/tv/CCTV2.png',
     'links': [''],
-    'title': 'CCTV-2'
+    'title': 'CCTV-2',
   },
   {
     'id': 0,
     'category': '📺央视频道',
     'image': 'https://gh.catmak.name/https://raw.githubusercontent.com/fanmingming/live/main/tv/CCTV3.png',
     'links': [''],
-    'title': 'CCTV-3'
+    'title': 'CCTV-3',
   },
   {
     'id': 0,
     'category': '📺央视频道',
     'image': 'https://gh.catmak.name/https://raw.githubusercontent.com/fanmingming/live/main/tv/CCTV4.png',
     'links': [''],
-    'title': 'CCTV-4'
+    'title': 'CCTV-4',
   },
   {
     'id': 0,
     'category': '📺央视频道',
     'image': 'https://gh.catmak.name/https://raw.githubusercontent.com/fanmingming/live/main/tv/CCTV5.png',
     'links': [''],
-    'title': 'CCTV-5'
+    'title': 'CCTV-5',
   },
   {
     'id': 0,
     'category': '📺央视频道',
     'image': 'https://gh.catmak.name/https://raw.githubusercontent.com/fanmingming/live/main/tv/CCTV5+.png',
     'links': [''],
-    'title': 'CCTV-5+'
+    'title': 'CCTV-5+',
   },
   {
     'id': 0,
     'category': '📺央视频道',
     'image': 'https://gh.catmak.name/https://raw.githubusercontent.com/fanmingming/live/main/tv/CCTV6.png',
     'links': [''],
-    'title': 'CCTV-6'
+    'title': 'CCTV-6',
   },
   {
     'id': 0,
     'category': '📺央视频道',
     'image': 'https://gh.catmak.name/https://raw.githubusercontent.com/fanmingming/live/main/tv/CCTV7.png',
     'links': [''],
-    'title': 'CCTV-7'
+    'title': 'CCTV-7',
   },
   {
     'id': 0,
     'category': '📺央视频道',
     'image': 'https://gh.catmak.name/https://raw.githubusercontent.com/fanmingming/live/main/tv/CCTV8.png',
     'links': [''],
-    'title': 'CCTV-8'
+    'title': 'CCTV-8',
   },
   {
     'id': 0,
     'category': '📺央视频道',
     'image': 'https://gh.catmak.name/https://raw.githubusercontent.com/fanmingming/live/main/tv/CCTV9.png',
     'links': [''],
-    'title': 'CCTV-9'
+    'title': 'CCTV-9',
   },
   {
     'id': 0,
     'category': '📺央视频道',
     'image': 'https://gh.catmak.name/https://raw.githubusercontent.com/fanmingming/live/main/tv/CCTV10.png',
     'links': [''],
-    'title': 'CCTV-10'
+    'title': 'CCTV-10',
   },
   {
     'id': 0,
     'category': '📺央视频道',
     'image': 'https://gh.catmak.name/https://raw.githubusercontent.com/fanmingming/live/main/tv/CCTV11.png',
     'links': [''],
-    'title': 'CCTV-11'
+    'title': 'CCTV-11',
   },
   {
     'id': 0,
     'category': '📺央视频道',
     'image': 'https://gh.catmak.name/https://raw.githubusercontent.com/fanmingming/live/main/tv/CCTV12.png',
     'links': [''],
-    'title': 'CCTV-12'
+    'title': 'CCTV-12',
   },
   {
     'id': 0,
     'category': '📺央视频道',
     'image': 'https://gh.catmak.name/https://raw.githubusercontent.com/fanmingming/live/main/tv/CCTV13.png',
     'links': [''],
-    'title': 'CCTV-13'
+    'title': 'CCTV-13',
   },
   {
     'id': 0,
     'category': '📺央视频道',
     'image': 'https://gh.catmak.name/https://raw.githubusercontent.com/fanmingming/live/main/tv/CCTV14.png',
     'links': [''],
-    'title': 'CCTV-14'
+    'title': 'CCTV-14',
   },
   {
     'id': 0,
     'category': '📺央视频道',
     'image': 'https://gh.catmak.name/https://raw.githubusercontent.com/fanmingming/live/main/tv/CCTV15.png',
     'links': [''],
-    'title': 'CCTV-15'
+    'title': 'CCTV-15',
   },
   {
     'id': 0,
     'category': '📺央视频道',
     'image': 'https://gh.catmak.name/https://raw.githubusercontent.com/fanmingming/live/main/tv/CCTV16.png',
     'links': [''],
-    'title': 'CCTV-16'
+    'title': 'CCTV-16',
   },
   {
     'id': 0,
     'category': '📺央视频道',
     'image': 'https://gh.catmak.name/https://raw.githubusercontent.com/fanmingming/live/main/tv/CCTV17.png',
     'links': [''],
-    'title': 'CCTV-17'
+    'title': 'CCTV-17',
   },
   {
     'id': 0,
     'category': '📡卫视频道',
     'image': 'https://gh.catmak.name/https://raw.githubusercontent.com/fanmingming/live/main/tv/广东卫视.png',
     'links': [''],
-    'title': '广东卫视'
+    'title': '广东卫视',
   },
   {
     'id': 0,
     'category': '☘️广东频道',
     'image': 'https://gh.catmak.name/https://raw.githubusercontent.com/fanmingming/live/main/tv/广东珠江.png',
     'links': [''],
-    'title': '广东珠江'
+    'title': '广东珠江',
   },
   {
     'id': 0,
     'category': '☘️浙江频道',
     'image': 'https://gh.catmak.name/https://raw.githubusercontent.com/fanmingming/live/main/tv/浙江钱江.png',
     'links': [''],
-    'title': '浙江钱江'
+    'title': '浙江钱江',
   },
   {
     'id': 0,
     'category': '☘️北京频道',
     'image': 'https://gh.catmak.name/https://raw.githubusercontent.com/fanmingming/live/main/tv/北京科教.png',
     'links': [''],
-    'title': '北京科教'
+    'title': '北京科教',
   },
   {
     'id': 0,
     'category': '☘️上海频道',
     'image': 'https://gh.catmak.name/https://raw.githubusercontent.com/fanmingming/live/main/tv/七彩戏剧.png',
     'links': [''],
-    'title': '七彩戏剧'
+    'title': '七彩戏剧',
   },
   {
     'id': 0,
     'category': '☘️重庆频道',
     'image': 'https://gh.catmak.name/https://raw.githubusercontent.com/fanmingming/live/main/tv/万源新闻综合.png',
     'links': [''],
-    'title': '万源新闻综合'
+    'title': '万源新闻综合',
   },
   {
     'id': 0,
     'category': '☘️江苏频道',
     'image': 'https://gh.catmak.name/https://raw.githubusercontent.com/fanmingming/live/main/tv/六合新闻综合.png',
     'links': [''],
-    'title': '六合新闻综合'
+    'title': '六合新闻综合',
   },
   {
     'id': 0,
     'category': '☘️湖南频道',
     'image': 'https://gh.catmak.name/https://raw.githubusercontent.com/fanmingming/live/main/tv/湖南都市.png',
     'links': [''],
-    'title': '湖南都市'
+    'title': '湖南都市',
   },
   {
     'id': 0,
     'category': '☘️湖北频道',
     'image': 'https://gh.catmak.name/https://raw.githubusercontent.com/fanmingming/live/main/tv/湖北影视.png',
     'links': [''],
-    'title': '湖北影视'
+    'title': '湖北影视',
   },
   {
     'id': 0,
     'category': '☘️广西频道',
     'image': 'https://gh.catmak.name/https://raw.githubusercontent.com/fanmingming/live/main/tv/南宁公共.png',
     'links': [''],
-    'title': '南宁公共'
+    'title': '南宁公共',
   },
 ];
 
 final dns = [
-  {'domain': 'api.themoviedb.org', 'id': 1, 'ip': '8.8.8.8'}
+  {'domain': 'api.themoviedb.org', 'id': 1, 'ip': '8.8.8.8'},
 ];
 final downloadTasks = [
   {
@@ -286,8 +286,8 @@ final downloadTasks = [
     'size': 19323377131,
     'speed': null,
     'status': 'idle',
-    'title': '疯狂元素城'
-  }
+    'title': '疯狂元素城',
+  },
 ];
 
 final series = [
@@ -320,7 +320,7 @@ final series = [
     'updateAt': '2025-03-22 12:03:14.0 +00:00:00',
     'voteAverage': 8.581999778747559,
     'voteCount': 1319,
-    'watched': false
+    'watched': false,
   },
   {
     'actors': [],
@@ -351,7 +351,7 @@ final series = [
     'updateAt': '2025-03-22 12:03:14.0 +00:00:00',
     'voteAverage': 8.600000381469727,
     'voteCount': 936,
-    'watched': false
+    'watched': false,
   },
   {
     'actors': [],
@@ -381,7 +381,7 @@ final series = [
     'updateAt': '2025-03-22 12:03:12.0 +00:00:00',
     'voteAverage': 8.616000175476074,
     'voteCount': 1416,
-    'watched': false
+    'watched': false,
   },
   {
     'actors': [],
@@ -411,7 +411,7 @@ final series = [
     'updateAt': '2025-03-22 12:03:13.0 +00:00:00',
     'voteAverage': 8.767000198364258,
     'voteCount': 1237,
-    'watched': false
+    'watched': false,
   },
   {
     'actors': [],
@@ -441,7 +441,7 @@ final series = [
     'updateAt': '2025-03-22 12:03:11.0 +00:00:00',
     'voteAverage': 8.633999824523926,
     'voteCount': 731,
-    'watched': false
+    'watched': false,
   },
   {
     'actors': [],
@@ -472,7 +472,7 @@ final series = [
     'updateAt': '2025-03-22 12:03:13.0 +00:00:00',
     'voteAverage': 8.600000381469727,
     'voteCount': 3088,
-    'watched': false
+    'watched': false,
   },
   {
     'actors': [],
@@ -503,7 +503,7 @@ final series = [
     'updateAt': '2025-03-22 12:03:14.0 +00:00:00',
     'voteAverage': 8.63599967956543,
     'voteCount': 4970,
-    'watched': false
+    'watched': false,
   },
   {
     'actors': [],
@@ -519,7 +519,8 @@ final series = [
     'logo': 'https://image.tmdb.org/t/p/w500/9nTn5F8FQRprHSw6yki4O06JlPd.png',
     'nextToPlay': null,
     'originalTitle': 'BANANA FISH',
-    'overview': '纽约。有着非凡的姿容，和卓越战斗力的少年·亚修。统领街头暴力团的他听到了，被手下所杀的男人在临死之际说出的“BANANA FISH”的神秘话语。与此同时，他与作为摄影师的助手来取材的日本少年·奥村英二相遇。两人决定一同追寻“BANANA FISH”之谜——',
+    'overview':
+        '纽约。有着非凡的姿容，和卓越战斗力的少年·亚修。统领街头暴力团的他听到了，被手下所杀的男人在临死之际说出的“BANANA FISH”的神秘话语。与此同时，他与作为摄影师的助手来取材的日本少年·奥村英二相遇。两人决定一同追寻“BANANA FISH”之谜——',
     'poster': 'https://image.tmdb.org/t/p/w600_and_h900_bestv2/3GiB5Ybbhzt0ePRR2zgld9R56DB.jpg',
     'scrapper': {'id': '80564', 'type': 'tmdb'},
     'seasons': [],
@@ -533,7 +534,7 @@ final series = [
     'updateAt': '2025-03-22 12:03:14.0 +00:00:00',
     'voteAverage': 8.586000442504883,
     'voteCount': 870,
-    'watched': false
+    'watched': false,
   },
   {
     'actors': [],
@@ -564,7 +565,7 @@ final series = [
     'updateAt': '2025-03-22 12:03:13.0 +00:00:00',
     'voteAverage': 8.618000030517578,
     'voteCount': 1385,
-    'watched': false
+    'watched': false,
   },
   {
     'actors': [],
@@ -594,7 +595,7 @@ final series = [
     'updateAt': '2025-03-22 12:03:12.0 +00:00:00',
     'voteAverage': 8.800000190734863,
     'voteCount': 214,
-    'watched': false
+    'watched': false,
   },
   {
     'actors': [],
@@ -624,7 +625,7 @@ final series = [
     'updateAt': '2025-03-22 12:03:13.0 +00:00:00',
     'voteAverage': 8.640000343322754,
     'voteCount': 4798,
-    'watched': false
+    'watched': false,
   },
   {
     'actors': [],
@@ -655,7 +656,7 @@ final series = [
     'updateAt': '2025-03-22 12:03:11.0 +00:00:00',
     'voteAverage': 8.600000381469727,
     'voteCount': 5426,
-    'watched': false
+    'watched': false,
   },
   {
     'actors': [],
@@ -685,7 +686,7 @@ final series = [
     'updateAt': '2025-03-22 12:03:14.0 +00:00:00',
     'voteAverage': 8.666999816894531,
     'voteCount': 224,
-    'watched': false
+    'watched': false,
   },
   {
     'actors': [],
@@ -716,7 +717,7 @@ final series = [
     'updateAt': '2025-03-22 12:03:52.0 +00:00:00',
     'voteAverage': 8.600000381469727,
     'voteCount': 912,
-    'watched': false
+    'watched': false,
   },
   {
     'actors': [],
@@ -732,7 +733,8 @@ final series = [
     'logo': 'https://image.tmdb.org/t/p/w500/2Jj07dFN8Eh1H8LN0Ccaig25k8G.png',
     'nextToPlay': null,
     'originalTitle': 'The Owl House',
-    'overview': '露丝是一个自信的人类少女，她偶然发现了一个通往魔法新世界的入口，在那里她结识了叛逆的女巫伊丹和可爱的小战士魔王。尽管没有魔法能力，露丝还是选择在猫头鹰魔法社给伊丹当学徒，来实现自己成为女巫的梦想，并最终在这个地方找到了新家庭。',
+    'overview':
+        '露丝是一个自信的人类少女，她偶然发现了一个通往魔法新世界的入口，在那里她结识了叛逆的女巫伊丹和可爱的小战士魔王。尽管没有魔法能力，露丝还是选择在猫头鹰魔法社给伊丹当学徒，来实现自己成为女巫的梦想，并最终在这个地方找到了新家庭。',
     'poster': 'https://image.tmdb.org/t/p/w600_and_h900_bestv2/zqjSex7DZn7p4dU7mMktdJ8zQV5.jpg',
     'scrapper': {'id': '92685', 'type': 'tmdb'},
     'seasons': [],
@@ -746,7 +748,7 @@ final series = [
     'updateAt': '2025-03-22 12:16:25.0 +00:00:00',
     'voteAverage': 8.661999702453613,
     'voteCount': 1651,
-    'watched': false
+    'watched': false,
   },
   {
     'actors': [],
@@ -777,7 +779,7 @@ final series = [
     'updateAt': '2025-03-22 12:24:26.0 +00:00:00',
     'voteAverage': 8.699999809265137,
     'voteCount': 1102,
-    'watched': false
+    'watched': false,
   },
   {
     'actors': [],
@@ -808,7 +810,7 @@ final series = [
     'updateAt': '2025-03-22 12:22:43.0 +00:00:00',
     'voteAverage': 8.92199993133545,
     'voteCount': 15230,
-    'watched': false
+    'watched': false,
   },
   {
     'actors': [],
@@ -839,7 +841,7 @@ final series = [
     'updateAt': '2025-03-22 12:03:13.0 +00:00:00',
     'voteAverage': 8.800000190734863,
     'voteCount': 437,
-    'watched': false
+    'watched': false,
   },
   {
     'actors': [],
@@ -870,7 +872,7 @@ final series = [
     'updateAt': '2025-03-22 12:26:13.0 +00:00:00',
     'voteAverage': 8.800000190734863,
     'voteCount': 4978,
-    'watched': false
+    'watched': false,
   },
   {
     'actors': [],
@@ -886,7 +888,8 @@ final series = [
     'logo': 'https://image.tmdb.org/t/p/w500/yQuc8JcBxRWXfRHrNUSM47gCXOo.png',
     'nextToPlay': null,
     'originalTitle': '葬送のフリーレン',
-    'overview': '打倒了魔王的勇者一行人的后日谈——在“那之后”的故事。身为魔法使的芙莉莲是一位精灵，她和另外三人有着不一样的地方。对于生活在“之后”的世界、感受到的事情有着不一样的看法……残存世间的人们所编织的，葬送与祈祷相伴的故事——从“冒险的结束”开始了。',
+    'overview':
+        '打倒了魔王的勇者一行人的后日谈——在“那之后”的故事。身为魔法使的芙莉莲是一位精灵，她和另外三人有着不一样的地方。对于生活在“之后”的世界、感受到的事情有着不一样的看法……残存世间的人们所编织的，葬送与祈祷相伴的故事——从“冒险的结束”开始了。',
     'poster': 'https://image.tmdb.org/t/p/w600_and_h900_bestv2/jvueXfiDeeifwGCySYsQdcw2fCz.jpg',
     'scrapper': {'id': '209867', 'type': 'tmdb'},
     'seasons': [],
@@ -900,7 +903,7 @@ final series = [
     'updateAt': '2025-03-22 12:03:12.0 +00:00:00',
     'voteAverage': 8.77299976348877,
     'voteCount': 401,
-    'watched': false
+    'watched': false,
   },
   {
     'actors': [],
@@ -931,7 +934,7 @@ final series = [
     'updateAt': '2025-03-22 12:03:11.0 +00:00:00',
     'voteAverage': 8.600000381469727,
     'voteCount': 277,
-    'watched': false
+    'watched': false,
   },
   {
     'actors': [],
@@ -962,7 +965,7 @@ final series = [
     'updateAt': '2025-03-22 12:03:11.0 +00:00:00',
     'voteAverage': 8.600000381469727,
     'voteCount': 1467,
-    'watched': false
+    'watched': false,
   },
   {
     'firstAirDate': '2019-04-06',
@@ -1022,11 +1025,11 @@ final series = [
       'title': '某人的梦',
       'updateAt': '2025-03-22 13:22:53.0 +00:00:00',
       'url': '/file/download?id=17bad23e71c246068ed8a8e22d902eb9',
-      'watched': false
+      'watched': false,
     },
     'seasons': seasons,
     'studios': studios,
-  }
+  },
 ];
 
 final movies = [
@@ -1043,7 +1046,7 @@ final movies = [
     'id': 1,
     'fileId': '1',
     'lastPlayedPosition': 643253,
-    'lastPlayedTime': DateTime.now().subtract(Duration(hours: 2)).toString(),
+    'lastPlayedTime': DateTime.now().subtract(const Duration(hours: 2)).toString(),
     'logo': 'https://image.tmdb.org/t/p/w500/aYT1V9U0LjgCosicUA3oLnFF53x.png',
     'originalTitle': 'Elemental',
     'overview':
@@ -1069,7 +1072,7 @@ final movies = [
         'name': '莉娅·刘易斯',
         'originalName': 'Leah Lewis',
         'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/liV9OXUeo7T19hhjFlqTELtETnW.jpg',
-        'scrapper': {'id': '1087262', 'type': 'tmdb'}
+        'scrapper': {'id': '1087262', 'type': 'tmdb'},
       },
       {
         'adult': false,
@@ -1079,7 +1082,7 @@ final movies = [
         'name': '马莫多·阿西',
         'originalName': 'Mamoudou Athie',
         'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/ycUbhfZRKC8MtNK9oMwscRsl3uM.jpg',
-        'scrapper': {'id': '1639848', 'type': 'tmdb'}
+        'scrapper': {'id': '1639848', 'type': 'tmdb'},
       },
       {
         'adult': false,
@@ -1089,7 +1092,7 @@ final movies = [
         'name': '罗尼·德尔·卡门',
         'originalName': 'Ronnie del Carmen',
         'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/lPCmkQK76DOgkmcRjg9394QPyAu.jpg',
-        'scrapper': {'id': '1236458', 'type': 'tmdb'}
+        'scrapper': {'id': '1236458', 'type': 'tmdb'},
       },
       {
         'adult': false,
@@ -1099,7 +1102,7 @@ final movies = [
         'name': '希拉·沃索夫',
         'originalName': 'Shila Ommi',
         'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/i9m2RGrANNxidj0bVKlSs0zHPNX.jpg',
-        'scrapper': {'id': '2073564', 'type': 'tmdb'}
+        'scrapper': {'id': '2073564', 'type': 'tmdb'},
       },
       {
         'adult': false,
@@ -1109,7 +1112,7 @@ final movies = [
         'name': '温迪·麦丽登·康薇',
         'originalName': 'Wendi McLendon-Covey',
         'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/d8VKC8Ms3u9XiW4e4jsy2grP02d.jpg',
-        'scrapper': {'id': '63234', 'type': 'tmdb'}
+        'scrapper': {'id': '63234', 'type': 'tmdb'},
       },
       {
         'adult': false,
@@ -1119,7 +1122,7 @@ final movies = [
         'name': '凯瑟琳·欧哈拉',
         'originalName': "Catherine O'Hara",
         'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/cMBxHeztNVc8YXKcj084Mdd3f3U.jpg',
-        'scrapper': {'id': '11514', 'type': 'tmdb'}
+        'scrapper': {'id': '11514', 'type': 'tmdb'},
       },
       {
         'adult': false,
@@ -1129,7 +1132,7 @@ final movies = [
         'name': '梅森·韦特海默',
         'originalName': 'Mason Wertheimer',
         'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/vpjZTxItJMpkjFrls2kpVnJq1H.jpg',
-        'scrapper': {'id': '3983226', 'type': 'tmdb'}
+        'scrapper': {'id': '3983226', 'type': 'tmdb'},
       },
       {
         'adult': false,
@@ -1139,7 +1142,7 @@ final movies = [
         'name': '罗诺比尔·拉希里',
         'originalName': 'Ronobir Lahiri',
         'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/uZQu5zBGxE62uGP7qaGhjQ79bn3.jpg',
-        'scrapper': {'id': '1217619', 'type': 'tmdb'}
+        'scrapper': {'id': '1217619', 'type': 'tmdb'},
       },
       {
         'adult': false,
@@ -1149,7 +1152,7 @@ final movies = [
         'name': '威尔玛·博尼特',
         'originalName': 'Wilma Bonet',
         'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/2YC8C8FXWQZ4UXv3wAkWUtmqJLY.jpg',
-        'scrapper': {'id': '1576334', 'type': 'tmdb'}
+        'scrapper': {'id': '1576334', 'type': 'tmdb'},
       },
       {
         'adult': false,
@@ -1159,7 +1162,7 @@ final movies = [
         'name': '乔·佩拉',
         'originalName': 'Joe Pera',
         'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/lzf1mnclmHo4y53ZpvtlkWgFunZ.jpg',
-        'scrapper': {'id': '1663974', 'type': 'tmdb'}
+        'scrapper': {'id': '1663974', 'type': 'tmdb'},
       },
       {
         'adult': false,
@@ -1169,7 +1172,7 @@ final movies = [
         'name': '马修·杨·金',
         'originalName': 'Matthew Yang King',
         'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/jcLJIw0s2uP4PSnH5E8oM3pUyiV.jpg',
-        'scrapper': {'id': '157067', 'type': 'tmdb'}
+        'scrapper': {'id': '157067', 'type': 'tmdb'},
       },
       {
         'adult': false,
@@ -1179,7 +1182,7 @@ final movies = [
         'name': 'Clara Lin Ding',
         'originalName': 'Clara Lin Ding',
         'profile': null,
-        'scrapper': {'id': '4078463', 'type': 'tmdb'}
+        'scrapper': {'id': '4078463', 'type': 'tmdb'},
       },
       {
         'adult': false,
@@ -1189,7 +1192,7 @@ final movies = [
         'name': '杜采融',
         'originalName': 'Reagan To',
         'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/xrmRnIi9RxGeBYOl50aLtdCdiJd.jpg',
-        'scrapper': {'id': '1937823', 'type': 'tmdb'}
+        'scrapper': {'id': '1937823', 'type': 'tmdb'},
       },
       {
         'adult': false,
@@ -1199,7 +1202,7 @@ final movies = [
         'name': '杰夫·拉彭西',
         'originalName': 'Jeff Lapensee',
         'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/hXCk1ZUUOxVMrEdCFqQtnxYB9o4.jpg',
-        'scrapper': {'id': '4078465', 'type': 'tmdb'}
+        'scrapper': {'id': '4078465', 'type': 'tmdb'},
       },
       {
         'adult': false,
@@ -1209,7 +1212,7 @@ final movies = [
         'name': 'Ben Morris',
         'originalName': 'Ben Morris',
         'profile': null,
-        'scrapper': {'id': '1997753', 'type': 'tmdb'}
+        'scrapper': {'id': '1997753', 'type': 'tmdb'},
       },
       {
         'adult': false,
@@ -1219,7 +1222,7 @@ final movies = [
         'name': '喬納森·亞當斯',
         'originalName': 'Jonathan Adams',
         'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/mkgyl2MciZ14wsYi6zedyj6hnR8.jpg',
-        'scrapper': {'id': '13477', 'type': 'tmdb'}
+        'scrapper': {'id': '13477', 'type': 'tmdb'},
       },
       {
         'adult': false,
@@ -1229,7 +1232,7 @@ final movies = [
         'name': 'Alex Kapp',
         'originalName': 'Alex Kapp',
         'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/qpVxC6GgYaTg6iyPWV93u0i4JKK.jpg',
-        'scrapper': {'id': '1211955', 'type': 'tmdb'}
+        'scrapper': {'id': '1211955', 'type': 'tmdb'},
       },
       {
         'adult': false,
@@ -1239,77 +1242,77 @@ final movies = [
         'name': 'P.L. Brown',
         'originalName': 'P.L. Brown',
         'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/6sH4laBWYn3rPg6BQSe5mDYJBSe.jpg',
-        'scrapper': {'id': '1906860', 'type': 'tmdb'}
-      }
+        'scrapper': {'id': '1906860', 'type': 'tmdb'},
+      },
     ],
     'genres': [
       {
         'id': 2,
         'name': '喜剧',
-        'scrapper': {'id': '35', 'type': 'tmdb'}
+        'scrapper': {'id': '35', 'type': 'tmdb'},
       },
       {
         'id': 4,
         'name': '家庭',
-        'scrapper': {'id': '10751', 'type': 'tmdb'}
+        'scrapper': {'id': '10751', 'type': 'tmdb'},
       },
       {
         'id': 5,
         'name': '动画',
-        'scrapper': {'id': '16', 'type': 'tmdb'}
+        'scrapper': {'id': '16', 'type': 'tmdb'},
       },
       {
         'id': 11,
         'name': '奇幻',
-        'scrapper': {'id': '14', 'type': 'tmdb'}
+        'scrapper': {'id': '14', 'type': 'tmdb'},
       },
       {
         'id': 12,
         'name': '爱情',
-        'scrapper': {'id': '10749', 'type': 'tmdb'}
-      }
+        'scrapper': {'id': '10749', 'type': 'tmdb'},
+      },
     ],
     'keywords': [
       {
         'id': 72,
         'name': 'fire',
-        'scrapper': {'id': '657', 'type': 'tmdb'}
+        'scrapper': {'id': '657', 'type': 'tmdb'},
       },
       {
         'id': 73,
         'name': 'earth',
-        'scrapper': {'id': '4627', 'type': 'tmdb'}
+        'scrapper': {'id': '4627', 'type': 'tmdb'},
       },
       {
         'id': 74,
         'name': 'computer animation',
-        'scrapper': {'id': '10159', 'type': 'tmdb'}
+        'scrapper': {'id': '10159', 'type': 'tmdb'},
       },
       {
         'id': 75,
         'name': 'duringcreditsstinger',
-        'scrapper': {'id': '179431', 'type': 'tmdb'}
+        'scrapper': {'id': '179431', 'type': 'tmdb'},
       },
       {
         'id': 76,
         'name': 'elements',
-        'scrapper': {'id': '268053', 'type': 'tmdb'}
+        'scrapper': {'id': '268053', 'type': 'tmdb'},
       },
       {
         'id': 77,
         'name': 'water',
-        'scrapper': {'id': '271672', 'type': 'tmdb'}
+        'scrapper': {'id': '271672', 'type': 'tmdb'},
       },
       {
         'id': 78,
         'name': 'city',
-        'scrapper': {'id': '282997', 'type': 'tmdb'}
+        'scrapper': {'id': '282997', 'type': 'tmdb'},
       },
       {
         'id': 79,
         'name': 'hopeful',
-        'scrapper': {'id': '325824', 'type': 'tmdb'}
-      }
+        'scrapper': {'id': '325824', 'type': 'tmdb'},
+      },
     ],
     'studios': [
       {
@@ -1317,15 +1320,15 @@ final movies = [
         'id': 42,
         'logo': 'https://image.tmdb.org/t/p/h50/wdrCwmRnLFJhEoH8GSfymY85KHT.png',
         'name': 'Walt Disney Pictures',
-        'scrapper': {'id': '2', 'type': 'tmdb'}
+        'scrapper': {'id': '2', 'type': 'tmdb'},
       },
       {
         'country': 'US',
         'id': 43,
         'logo': 'https://image.tmdb.org/t/p/h50/1TjvGVDMYsj6JBxOAkUHpPEwLf7.png',
         'name': 'Pixar',
-        'scrapper': {'id': '3', 'type': 'tmdb'}
-      }
+        'scrapper': {'id': '3', 'type': 'tmdb'},
+      },
     ],
   },
   {
@@ -1344,7 +1347,7 @@ final movies = [
     'fileId': '1',
     'keywords': [],
     'lastPlayedPosition': 212445,
-    'lastPlayedTime': DateTime.now().subtract(Duration(hours: 2)).toString(),
+    'lastPlayedTime': DateTime.now().subtract(const Duration(hours: 2)).toString(),
     'logo': 'https://image.tmdb.org/t/p/w500/IoNbZB5Fjq3UV1STluNcT5MPK0.png',
     'originalTitle': 'The Super Mario Bros. Movie',
     'overview':
@@ -1361,7 +1364,7 @@ final movies = [
     'url': '',
     'voteAverage': 7.626999855041504,
     'voteCount': 9512,
-    'watched': false
+    'watched': false,
   },
   {
     'actors': [],
@@ -1396,8 +1399,8 @@ final movies = [
     'url': '',
     'voteAverage': 7.939000129699707,
     'voteCount': 1418,
-    'watched': false
-  }
+    'watched': false,
+  },
 ];
 
 const actors = [
@@ -1409,7 +1412,7 @@ const actors = [
     'name': '福原克己',
     'originalName': '福原かつみ',
     'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/ijpwBGoo3iPmb9v1Oh4Fz9CFzOx.jpg',
-    'scrapper': {'id': '2312002', 'type': 'tmdb'}
+    'scrapper': {'id': '2312002', 'type': 'tmdb'},
   },
   {
     'adult': false,
@@ -1419,7 +1422,7 @@ const actors = [
     'name': '花江夏树',
     'originalName': '花江夏樹',
     'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/alTb0DlcPIbcwM08WSmxFai58sd.jpg',
-    'scrapper': {'id': '1256603', 'type': 'tmdb'}
+    'scrapper': {'id': '1256603', 'type': 'tmdb'},
   },
   {
     'adult': false,
@@ -1429,7 +1432,7 @@ const actors = [
     'name': '鬼头明里',
     'originalName': '鬼頭明里',
     'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/AoRQOZRC0yINB0WeKnM569rV1wF.jpg',
-    'scrapper': {'id': '1563442', 'type': 'tmdb'}
+    'scrapper': {'id': '1563442', 'type': 'tmdb'},
   },
   {
     'adult': false,
@@ -1439,7 +1442,7 @@ const actors = [
     'name': '下野纮',
     'originalName': '下野紘',
     'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/yrSDcgFefHtWkFmLnTrcw2t0MV.jpg',
-    'scrapper': {'id': '119145', 'type': 'tmdb'}
+    'scrapper': {'id': '119145', 'type': 'tmdb'},
   },
   {
     'adult': false,
@@ -1449,7 +1452,7 @@ const actors = [
     'name': '松冈祯丞',
     'originalName': '松岡禎丞',
     'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/ugDwdWEXnmv43jcbnfAi4XwiQ8C.jpg',
-    'scrapper': {'id': '233590', 'type': 'tmdb'}
+    'scrapper': {'id': '233590', 'type': 'tmdb'},
   },
   {
     'adult': false,
@@ -1459,7 +1462,7 @@ const actors = [
     'name': '高桥伸也',
     'originalName': '高橋伸也',
     'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/19DN4yrD9c3E7BWthVEqvwhQNdb.jpg',
-    'scrapper': {'id': '1157642', 'type': 'tmdb'}
+    'scrapper': {'id': '1157642', 'type': 'tmdb'},
   },
   {
     'adult': false,
@@ -1469,7 +1472,7 @@ const actors = [
     'name': '樱井孝宏',
     'originalName': '櫻井孝宏',
     'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/8s8owcKmpRAuhzEGjSdRpztthUg.jpg',
-    'scrapper': {'id': '9705', 'type': 'tmdb'}
+    'scrapper': {'id': '9705', 'type': 'tmdb'},
   },
   {
     'adult': false,
@@ -1479,7 +1482,7 @@ const actors = [
     'name': '冈本信彦',
     'originalName': '岡本信彦',
     'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/7s1K2yQVF5iIWILaOfG7QrMZkXA.jpg',
-    'scrapper': {'id': '1245094', 'type': 'tmdb'}
+    'scrapper': {'id': '1245094', 'type': 'tmdb'},
   },
   {
     'adult': false,
@@ -1489,7 +1492,7 @@ const actors = [
     'name': '小西克幸',
     'originalName': '小西克幸',
     'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/nYM5cH6U7cp4x9dIzW0enmEKmeV.jpg',
-    'scrapper': {'id': '24647', 'type': 'tmdb'}
+    'scrapper': {'id': '24647', 'type': 'tmdb'},
   },
   {
     'adult': false,
@@ -1499,7 +1502,7 @@ const actors = [
     'name': '河西健吾',
     'originalName': '河西健吾',
     'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/u59FdPSHlA7JCWNnX1m10neLfT.jpg',
-    'scrapper': {'id': '1324472', 'type': 'tmdb'}
+    'scrapper': {'id': '1324472', 'type': 'tmdb'},
   },
   {
     'adult': false,
@@ -1509,7 +1512,7 @@ const actors = [
     'name': '花泽香菜',
     'originalName': '花澤香菜',
     'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/rYbVloKRRK3gRTVAf3Mbj9xak4Z.jpg',
-    'scrapper': {'id': '119143', 'type': 'tmdb'}
+    'scrapper': {'id': '119143', 'type': 'tmdb'},
   },
   {
     'adult': false,
@@ -1519,7 +1522,7 @@ const actors = [
     'name': '山崎巧',
     'originalName': '山崎たくみ',
     'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/wq8K3No0DUJsTCWDqparegOlGL6.jpg',
-    'scrapper': {'id': '96728', 'type': 'tmdb'}
+    'scrapper': {'id': '96728', 'type': 'tmdb'},
   },
   {
     'adult': false,
@@ -1529,7 +1532,7 @@ const actors = [
     'name': '森川智之',
     'originalName': '森川智之',
     'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/u1N6H7V0dehFD4fcO7ZkHvIMUrG.jpg',
-    'scrapper': {'id': '9706', 'type': 'tmdb'}
+    'scrapper': {'id': '9706', 'type': 'tmdb'},
   },
   {
     'adult': false,
@@ -1539,7 +1542,7 @@ const actors = [
     'name': '早见沙织',
     'originalName': '早見沙織',
     'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/gLv9lO7dlUbIsmyJUvgegqAAXki.jpg',
-    'scrapper': {'id': '221773', 'type': 'tmdb'}
+    'scrapper': {'id': '221773', 'type': 'tmdb'},
   },
   {
     'adult': false,
@@ -1549,7 +1552,7 @@ const actors = [
     'name': '日野聪',
     'originalName': '日野聡',
     'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/8ZJIiwIVF2zDyyFr7oXewj0eEuu.jpg',
-    'scrapper': {'id': '224413', 'type': 'tmdb'}
+    'scrapper': {'id': '224413', 'type': 'tmdb'},
   },
   {
     'adult': false,
@@ -1559,7 +1562,7 @@ const actors = [
     'name': '关俊彦',
     'originalName': '関俊彦',
     'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/7jUPvx4hxWZWZJgyiCwd8KxWuvI.jpg',
-    'scrapper': {'id': '90571', 'type': 'tmdb'}
+    'scrapper': {'id': '90571', 'type': 'tmdb'},
   },
   {
     'adult': false,
@@ -1569,7 +1572,7 @@ const actors = [
     'name': ' ',
     'originalName': '外崎友亮',
     'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/txWqsedWOeZFQo72XmYnM1vEHbI.jpg',
-    'scrapper': {'id': '2868405', 'type': 'tmdb'}
+    'scrapper': {'id': '2868405', 'type': 'tmdb'},
   },
   {
     'adult': false,
@@ -1579,7 +1582,7 @@ const actors = [
     'name': '浪川大辅',
     'originalName': '浪川大輔',
     'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/iw0X8oDutxaBAri3Ifga8nhdUJK.jpg',
-    'scrapper': {'id': '110665', 'type': 'tmdb'}
+    'scrapper': {'id': '110665', 'type': 'tmdb'},
   },
   {
     'adult': false,
@@ -1589,7 +1592,7 @@ const actors = [
     'name': '铃村健一',
     'originalName': '鈴村健一',
     'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/vFqjmIjxfgBkh3ZmUin7QETV0sy.jpg',
-    'scrapper': {'id': '9726', 'type': 'tmdb'}
+    'scrapper': {'id': '9726', 'type': 'tmdb'},
   },
   {
     'adult': false,
@@ -1599,7 +1602,7 @@ const actors = [
     'name': '泽城美雪',
     'originalName': '沢城みゆき',
     'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/11mGqwpmu8CoEy1YJgabj2g7MIv.jpg',
-    'scrapper': {'id': '186341', 'type': 'tmdb'}
+    'scrapper': {'id': '186341', 'type': 'tmdb'},
   },
   {
     'adult': false,
@@ -1609,7 +1612,7 @@ const actors = [
     'name': '关智一',
     'originalName': '関智一',
     'profile': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/jGQC9KkfNMh2wBgizw81GLX2KN2.jpg',
-    'scrapper': {'id': '90567', 'type': 'tmdb'}
+    'scrapper': {'id': '90567', 'type': 'tmdb'},
   },
 ];
 
@@ -1634,7 +1637,7 @@ final seasons = [
     'updateAt': '2025-03-22 13:22:53.0 +00:00:00',
     'watched': false,
     'mediaCast': actors,
-  }
+  },
 ];
 
 final episodes = [
@@ -1669,7 +1672,7 @@ final episodes = [
     'title': '某人的梦',
     'updateAt': '2025-03-22 13:25:52.0 +00:00:00',
     'url': '',
-    'watched': false
+    'watched': false,
   },
   {
     'fileId': '1',
@@ -1688,7 +1691,8 @@ final episodes = [
     'lastPlayedTime': '2025-03-22 13:25:52',
     'logo': 'https://image.tmdb.org/t/p/w500/ecghlDeabR3X3Vv8tXIOeXHQvQe.png',
     'originalTitle': null,
-    'overview': '因刀刃破损而惹怒了钢铁冢的炭治郎，与祢豆子一起前往刀匠们居住的村庄。在对鬼杀队士来说重要的据点之一，深藏的刀匠的村落，炭治郎与同期的不死川玄弥，恋柱·甘露寺蜜璃再会。从蜜璃那里听到秘密武器存在的炭治郎在山中寻找的时候，发现霞柱·时透无一郎和村子里的少年在争论着什么……',
+    'overview':
+        '因刀刃破损而惹怒了钢铁冢的炭治郎，与祢豆子一起前往刀匠们居住的村庄。在对鬼杀队士来说重要的据点之一，深藏的刀匠的村落，炭治郎与同期的不死川玄弥，恋柱·甘露寺蜜璃再会。从蜜璃那里听到秘密武器存在的炭治郎在山中寻找的时候，发现霞柱·时透无一郎和村子里的少年在争论着什么……',
     'poster': 'https://image.tmdb.org/t/p/w1280_and_h720_bestv2/uvT1yTTx3rfAIP8AtqxtSM0ZxRB.jpg',
     'season': 4,
     'seasonId': 61,
@@ -1702,7 +1706,7 @@ final episodes = [
     'title': '缘一零式',
     'updateAt': '2025-03-22 13:25:52.0 +00:00:00',
     'url': '',
-    'watched': false
+    'watched': false,
   },
   {
     'fileId': '1',
@@ -1721,7 +1725,8 @@ final episodes = [
     'lastPlayedTime': '2025-03-22 13:25:52',
     'logo': 'https://image.tmdb.org/t/p/w500/ecghlDeabR3X3Vv8tXIOeXHQvQe.png',
     'originalTitle': null,
-    'overview': '炭治郎和缘一零式开始训练，并被小铁坚持不懈的魔鬼式训练推向极限。通过这次训练，炭治郎掌握了一项新技能，即通过嗅觉预测对手的下一步行动会击中哪里。在训练中，炭治郎对缘一零式进行了一次打击，最终将其摧毁，但一把300多年前的剑从里面出现了...',
+    'overview':
+        '炭治郎和缘一零式开始训练，并被小铁坚持不懈的魔鬼式训练推向极限。通过这次训练，炭治郎掌握了一项新技能，即通过嗅觉预测对手的下一步行动会击中哪里。在训练中，炭治郎对缘一零式进行了一次打击，最终将其摧毁，但一把300多年前的剑从里面出现了...',
     'poster': 'https://image.tmdb.org/t/p/w1280_and_h720_bestv2/wquxWyBwsXG3lWrDjg7TQKSRfew.jpg',
     'season': 4,
     'seasonId': 61,
@@ -1735,7 +1740,7 @@ final episodes = [
     'title': '三百年以前的刀',
     'updateAt': '2025-03-22 13:25:52.0 +00:00:00',
     'url': '',
-    'watched': false
+    'watched': false,
   },
   {
     'fileId': '1',
@@ -1754,7 +1759,8 @@ final episodes = [
     'lastPlayedTime': null,
     'logo': 'https://image.tmdb.org/t/p/w500/ecghlDeabR3X3Vv8tXIOeXHQvQe.png',
     'originalTitle': null,
-    'overview': '在炭治郎和无一郎面前，突然出现了上弦的鬼。无一郎砍下鬼的脖子，鬼分裂成两个，无一郎被打飞。炭治郎和祢󠄀豆子、玄弥与两个鬼对峙，由于不停分裂的鬼发起了攻击，炭治郎也被拉开了。另一方面，无一郎在森林中救出了被金鱼鬼袭击的小铁——',
+    'overview':
+        '在炭治郎和无一郎面前，突然出现了上弦的鬼。无一郎砍下鬼的脖子，鬼分裂成两个，无一郎被打飞。炭治郎和祢󠄀豆子、玄弥与两个鬼对峙，由于不停分裂的鬼发起了攻击，炭治郎也被拉开了。另一方面，无一郎在森林中救出了被金鱼鬼袭击的小铁——',
     'poster': 'https://image.tmdb.org/t/p/w1280_and_h720_bestv2/2HLP9LAcPkkzGbLpeKm33BXj4NE.jpg',
     'season': 4,
     'seasonId': 61,
@@ -1768,7 +1774,7 @@ final episodes = [
     'title': '时透，谢谢你',
     'updateAt': '2025-03-22 13:25:52.0 +00:00:00',
     'url': '',
-    'watched': false
+    'watched': false,
   },
   {
     'fileId': '1',
@@ -1801,7 +1807,7 @@ final episodes = [
     'title': '赫刀',
     'updateAt': '2025-03-22 13:25:52.0 +00:00:00',
     'url': '',
-    'watched': false
+    'watched': false,
   },
   {
     'fileId': '1',
@@ -1820,7 +1826,8 @@ final episodes = [
     'lastPlayedTime': null,
     'logo': 'https://image.tmdb.org/t/p/w500/ecghlDeabR3X3Vv8tXIOeXHQvQe.png',
     'originalTitle': null,
-    'overview': '炭治郎和他的朋友在奋力抵抗四个分裂的半天狗的攻击。然而，借助禰豆子的血之力，挥舞着燃烧变红的刀，炭治郎成功地同时砍断了其中三只鬼的脖子。炭治郎发现玄弥也斩断了剩下一只鬼的颈部，但是拿着鬼的颈部的玄弥却变了样……',
+    'overview':
+        '炭治郎和他的朋友在奋力抵抗四个分裂的半天狗的攻击。然而，借助禰豆子的血之力，挥舞着燃烧变红的刀，炭治郎成功地同时砍断了其中三只鬼的脖子。炭治郎发现玄弥也斩断了剩下一只鬼的颈部，但是拿着鬼的颈部的玄弥却变了样……',
     'poster': 'https://image.tmdb.org/t/p/w1280_and_h720_bestv2/o0HAhA3zeNsPQPtAnoigJlpCCuk.jpg',
     'season': 4,
     'seasonId': 61,
@@ -1834,7 +1841,7 @@ final episodes = [
     'title': '你不是要成为柱吗！',
     'updateAt': '2025-03-22 13:25:52.0 +00:00:00',
     'url': '',
-    'watched': false
+    'watched': false,
   },
   {
     'fileId': '1',
@@ -1868,7 +1875,7 @@ final episodes = [
     'title': '大坏蛋',
     'updateAt': '2025-03-22 13:25:52.0 +00:00:00',
     'url': '',
-    'watched': false
+    'watched': false,
   },
   {
     'fileId': '1',
@@ -1901,7 +1908,7 @@ final episodes = [
     'title': '无一郎的无',
     'updateAt': '2025-03-22 13:25:52.0 +00:00:00',
     'url': '',
-    'watched': false
+    'watched': false,
   },
   {
     'fileId': '1',
@@ -1934,7 +1941,7 @@ final episodes = [
     'title': '霞柱・时透无一郎',
     'updateAt': '2025-03-22 13:25:52.0 +00:00:00',
     'url': '',
-    'watched': false
+    'watched': false,
   },
   {
     'fileId': '1',
@@ -1953,7 +1960,8 @@ final episodes = [
     'lastPlayedTime': null,
     'logo': 'https://image.tmdb.org/t/p/w500/ecghlDeabR3X3Vv8tXIOeXHQvQe.png',
     'originalTitle': null,
-    'overview': '炭治郎、祢豆子和玄弥三人在与憎珀天操纵的五条木龙的战斗中陷入了困境。面对使用喜怒哀乐四位鬼的力量的木龙们的防守，炭治郎被木龙吞噬。就在绝境之际，蜜璃赶到并救出了炭治郎。然后，为了救出被捕的祢󠄀豆子和玄弥，他们决意面对憎珀天！',
+    'overview':
+        '炭治郎、祢豆子和玄弥三人在与憎珀天操纵的五条木龙的战斗中陷入了困境。面对使用喜怒哀乐四位鬼的力量的木龙们的防守，炭治郎被木龙吞噬。就在绝境之际，蜜璃赶到并救出了炭治郎。然后，为了救出被捕的祢󠄀豆子和玄弥，他们决意面对憎珀天！',
     'poster': 'https://image.tmdb.org/t/p/w1280_and_h720_bestv2/iKD90AUxGHcLHGvbuSKfqq76rbE.jpg',
     'season': 4,
     'seasonId': 61,
@@ -1967,7 +1975,7 @@ final episodes = [
     'title': '恋柱・甘露寺蜜璃',
     'updateAt': '2025-03-22 13:25:52.0 +00:00:00',
     'url': '',
-    'watched': false
+    'watched': false,
   },
   {
     'fileId': '1',
@@ -1986,7 +1994,8 @@ final episodes = [
     'lastPlayedTime': null,
     'logo': 'https://image.tmdb.org/t/p/w500/ecghlDeabR3X3Vv8tXIOeXHQvQe.png',
     'originalTitle': null,
-    'overview': '趁着恋柱挡住憎珀天的时候，炭治郎、祢󠄀豆子以及玄弥前往追赶半天狗的真身。他们三个找到了藏着半天狗的木球，并合力将球击破，然而里面已经只剩下空壳。炭治郎等人继续追赶再次逃走的半天狗，玄弥对四处逃窜的半天狗感到不耐烦，便拔起树干扔了过去，祢󠄀豆子也扑了上去......！',
+    'overview':
+        '趁着恋柱挡住憎珀天的时候，炭治郎、祢󠄀豆子以及玄弥前往追赶半天狗的真身。他们三个找到了藏着半天狗的木球，并合力将球击破，然而里面已经只剩下空壳。炭治郎等人继续追赶再次逃走的半天狗，玄弥对四处逃窜的半天狗感到不耐烦，便拔起树干扔了过去，祢󠄀豆子也扑了上去......！',
     'poster': 'https://image.tmdb.org/t/p/w1280_and_h720_bestv2/kFvPNnB8215j0xudEtFXa7oJ8F6.jpg',
     'season': 4,
     'seasonId': 61,
@@ -2000,8 +2009,8 @@ final episodes = [
     'title': '连系的羁绊 黎明・拂晓',
     'updateAt': '2025-03-22 13:25:52.0 +00:00:00',
     'url': '',
-    'watched': false
-  }
+    'watched': false,
+  },
 ];
 
 const studios = [
@@ -2010,359 +2019,359 @@ const studios = [
     'id': 3,
     'logo': 'https://image.tmdb.org/t/p/h50/4x4GsmRmSLLL0RVNKsoqAVH43tz.png',
     'name': 'Fuji TV',
-    'scrapper': {'id': '1', 'type': 'tmdb'}
+    'scrapper': {'id': '1', 'type': 'tmdb'},
   },
   {
     'country': 'JP',
     'id': 4,
     'logo': 'https://image.tmdb.org/t/p/h50/9rNqtDYAnD6yTOutvHI3synSEs2.png',
     'name': 'Gunma TV',
-    'scrapper': {'id': '343', 'type': 'tmdb'}
+    'scrapper': {'id': '343', 'type': 'tmdb'},
   },
   {
     'country': 'JP',
     'id': 5,
     'logo': 'https://image.tmdb.org/t/p/h50/hSdroyVthq3CynxTIIY7lnS8w1.png',
     'name': 'Tokyo MX',
-    'scrapper': {'id': '614', 'type': 'tmdb'}
+    'scrapper': {'id': '614', 'type': 'tmdb'},
   },
   {
     'country': 'JP',
     'id': 6,
     'logo': 'https://image.tmdb.org/t/p/h50/JQ5bx6n7Qmdmyqz6sqjo5Fz2iR.png',
     'name': 'BS11',
-    'scrapper': {'id': '861', 'type': 'tmdb'}
+    'scrapper': {'id': '861', 'type': 'tmdb'},
   },
   {
     'country': 'JP',
     'id': 7,
     'logo': 'https://image.tmdb.org/t/p/h50/pX3gDCsG8WcQvQbCNJ37t5w0HyG.png',
     'name': 'Tokai Television Broadcasting',
-    'scrapper': {'id': '879', 'type': 'tmdb'}
+    'scrapper': {'id': '879', 'type': 'tmdb'},
   },
   {
     'country': 'JP',
     'id': 8,
     'logo': 'https://image.tmdb.org/t/p/h50/1J33ZvSff1VOEt3aC8CyKmj9GEy.png',
     'name': 'Kansai TV',
-    'scrapper': {'id': '1163', 'type': 'tmdb'}
+    'scrapper': {'id': '1163', 'type': 'tmdb'},
   },
   {
     'country': 'JP',
     'id': 9,
     'logo': 'https://image.tmdb.org/t/p/h50/2v82HpzoKRveJEJcGHkeTcktMRM.png',
     'name': 'Tochigi TV',
-    'scrapper': {'id': '2478', 'type': 'tmdb'}
+    'scrapper': {'id': '2478', 'type': 'tmdb'},
   },
   {
     'country': 'JP',
     'id': 10,
     'logo': 'https://image.tmdb.org/t/p/h50/sces9gh6ih1DaD54WXvqHeLMScE.png',
     'name': 'Fukui TV',
-    'scrapper': {'id': '3535', 'type': 'tmdb'}
+    'scrapper': {'id': '3535', 'type': 'tmdb'},
   },
   {
     'country': 'JP',
     'id': 11,
     'logo': 'https://image.tmdb.org/t/p/h50/vkOmMDoyA8Jj8gDJOyP6CjD06Kj.png',
     'name': 'Hokkaido Cultural Broadcasting',
-    'scrapper': {'id': '3721', 'type': 'tmdb'}
+    'scrapper': {'id': '3721', 'type': 'tmdb'},
   },
   {
     'country': 'JP',
     'id': 12,
     'logo': 'https://image.tmdb.org/t/p/h50/y1F9WoEjz7MhzjN56im3tVKTd1r.png',
     'name': 'Iwate Menkoi Television',
-    'scrapper': {'id': '4799', 'type': 'tmdb'}
+    'scrapper': {'id': '4799', 'type': 'tmdb'},
   },
   {
     'country': 'JP',
     'id': 13,
     'logo': 'https://image.tmdb.org/t/p/h50/9dD3buakf1nS6XQVBwEtm50izs4.png',
     'name': 'TOS',
-    'scrapper': {'id': '4825', 'type': 'tmdb'}
+    'scrapper': {'id': '4825', 'type': 'tmdb'},
   },
   {
     'country': 'JP',
     'id': 14,
     'logo': 'https://image.tmdb.org/t/p/h50/qHGklsa90XMreAdYm7AZl6eeaCL.png',
     'name': 'Sendai Television',
-    'scrapper': {'id': '4829', 'type': 'tmdb'}
+    'scrapper': {'id': '4829', 'type': 'tmdb'},
   },
   {
     'country': 'JP',
     'id': 15,
     'logo': 'https://image.tmdb.org/t/p/h50/pRhoUkllLEe3U9341NUCeKdQ7to.png',
     'name': 'SAGA TV',
-    'scrapper': {'id': '4839', 'type': 'tmdb'}
+    'scrapper': {'id': '4839', 'type': 'tmdb'},
   },
   {
     'country': 'JP',
     'id': 16,
     'logo': 'https://image.tmdb.org/t/p/h50/7QZ9b8bIpNUU5AjdaW6BXcMziY6.png',
     'name': 'Ishikawa TV',
-    'scrapper': {'id': '4841', 'type': 'tmdb'}
+    'scrapper': {'id': '4841', 'type': 'tmdb'},
   },
   {
     'country': 'JP',
     'id': 17,
     'logo': 'https://image.tmdb.org/t/p/h50/thh0SqE1oh7oOH08ISphk6cRghq.png',
     'name': 'TNC',
-    'scrapper': {'id': '4850', 'type': 'tmdb'}
+    'scrapper': {'id': '4850', 'type': 'tmdb'},
   },
   {
     'country': 'JP',
     'id': 18,
     'logo': 'https://image.tmdb.org/t/p/h50/wd94E8WjZwEbu1PLxhNNH0Ny3VT.png',
     'name': 'OHK',
-    'scrapper': {'id': '4851', 'type': 'tmdb'}
+    'scrapper': {'id': '4851', 'type': 'tmdb'},
   },
   {
     'country': 'JP',
     'id': 19,
     'logo': 'https://image.tmdb.org/t/p/h50/vRWtsyWIcIrtw0PXbCbjC4xvXtw.png',
     'name': 'Kochi Sun Sun Broadcasting',
-    'scrapper': {'id': '4855', 'type': 'tmdb'}
+    'scrapper': {'id': '4855', 'type': 'tmdb'},
   },
   {
     'country': 'JP',
     'id': 20,
     'logo': 'https://image.tmdb.org/t/p/h50/6hrEhIW5lIUKeX78BNTzMQ0e8aK.png',
     'name': 'Television Shin Hiroshima System',
-    'scrapper': {'id': '4970', 'type': 'tmdb'}
+    'scrapper': {'id': '4970', 'type': 'tmdb'},
   },
   {
     'country': 'JP',
     'id': 21,
     'logo': 'https://image.tmdb.org/t/p/h50/832SJcpnozaNWKto6hPSpYvDYQU.png',
     'name': 'TV Shizuoka',
-    'scrapper': {'id': '5644', 'type': 'tmdb'}
+    'scrapper': {'id': '5644', 'type': 'tmdb'},
   },
   {
     'country': 'JP',
     'id': 22,
     'logo': 'https://image.tmdb.org/t/p/h50/gxpzF98cV1DHpXzJmXf2Ew6sQvV.png',
     'name': 'UMK TV Miyazaki',
-    'scrapper': {'id': '6156', 'type': 'tmdb'}
+    'scrapper': {'id': '6156', 'type': 'tmdb'},
   },
   {
     'country': 'JP',
     'id': 23,
     'logo': 'https://image.tmdb.org/t/p/h50/fjenNun3vCLtnHHsTpAgVYkubMl.png',
     'name': 'NST',
-    'scrapper': {'id': '6209', 'type': 'tmdb'}
+    'scrapper': {'id': '6209', 'type': 'tmdb'},
   },
   {
     'country': 'JP',
     'id': 24,
     'logo': 'https://image.tmdb.org/t/p/h50/kCNJcIxnOXI4fkc8oZLOk1BZb0o.png',
     'name': 'NBS',
-    'scrapper': {'id': '6210', 'type': 'tmdb'}
+    'scrapper': {'id': '6210', 'type': 'tmdb'},
   },
   {
     'country': 'JP',
     'id': 25,
     'logo': 'https://image.tmdb.org/t/p/h50/mFM7fx4yt3FOa6leUbBbd8iGZIi.png',
     'name': 'Sakuranbo TV',
-    'scrapper': {'id': '6211', 'type': 'tmdb'}
+    'scrapper': {'id': '6211', 'type': 'tmdb'},
   },
   {
     'country': 'JP',
     'id': 26,
     'logo': 'https://image.tmdb.org/t/p/h50/eAaH52WuIH4XNlqYSonXZRPRnGE.png',
     'name': 'TSK',
-    'scrapper': {'id': '6212', 'type': 'tmdb'}
+    'scrapper': {'id': '6212', 'type': 'tmdb'},
   },
   {
     'country': 'JP',
     'id': 27,
     'logo': 'https://image.tmdb.org/t/p/h50/np5gbKJvysVLnJKg8g1OxhiA6Qa.png',
     'name': 'Ehime Broadcasting',
-    'scrapper': {'id': '6213', 'type': 'tmdb'}
+    'scrapper': {'id': '6213', 'type': 'tmdb'},
   },
   {
     'country': 'JP',
     'id': 28,
     'logo': 'https://image.tmdb.org/t/p/h50/fF4u5E7SBK4qOoIUOVmr5FbYk2g.png',
     'name': 'KTS',
-    'scrapper': {'id': '6214', 'type': 'tmdb'}
+    'scrapper': {'id': '6214', 'type': 'tmdb'},
   },
   {
     'country': 'JP',
     'id': 29,
     'logo': 'https://image.tmdb.org/t/p/h50/rCdk5TWd3RPKTZU1zlhDCEFuzsI.png',
     'name': 'Fukushima TV',
-    'scrapper': {'id': '6666', 'type': 'tmdb'}
+    'scrapper': {'id': '6666', 'type': 'tmdb'},
   },
   {
     'country': 'JP',
     'id': 30,
     'logo': 'https://image.tmdb.org/t/p/h50/7OAJi6aS9zQWwP64jqxRllBvYKR.png',
     'name': 'NIB',
-    'scrapper': {'id': '6670', 'type': 'tmdb'}
+    'scrapper': {'id': '6670', 'type': 'tmdb'},
   },
   {
     'country': 'JP',
     'id': 31,
     'logo': 'https://image.tmdb.org/t/p/h50/hNbCO6N6F4o09DCGAoz7g0G2E9F.png',
     'name': 'AKT',
-    'scrapper': {'id': '6819', 'type': 'tmdb'}
+    'scrapper': {'id': '6819', 'type': 'tmdb'},
   },
   {
     'country': 'JP',
     'id': 32,
     'logo': 'https://image.tmdb.org/t/p/h50/mkTZDdapxuLVS4gzSCwD01DFkbw.png',
     'name': 'Toyama Television',
-    'scrapper': {'id': '6821', 'type': 'tmdb'}
+    'scrapper': {'id': '6821', 'type': 'tmdb'},
   },
   {
     'country': 'JP',
     'id': 33,
     'logo': 'https://image.tmdb.org/t/p/h50/lquU1iSzXNKMWohDVIE91pxDzhE.png',
     'name': 'TV Kumamoto',
-    'scrapper': {'id': '6822', 'type': 'tmdb'}
+    'scrapper': {'id': '6822', 'type': 'tmdb'},
   },
   {
     'country': 'JP',
     'id': 34,
     'logo': 'https://image.tmdb.org/t/p/h50/UQS8TXqK0b367KX6Vw0aOfMB.png',
     'name': 'Okinawa Television Broadcasting',
-    'scrapper': {'id': '6823', 'type': 'tmdb'}
-  }
+    'scrapper': {'id': '6823', 'type': 'tmdb'},
+  },
 ];
 
 const genres = [
   {
     'id': 5,
     'name': '动画',
-    'scrapper': {'id': '16', 'type': 'tmdb'}
+    'scrapper': {'id': '16', 'type': 'tmdb'},
   },
   {
     'id': 6,
     'name': '动作冒险',
-    'scrapper': {'id': '10759', 'type': 'tmdb'}
+    'scrapper': {'id': '10759', 'type': 'tmdb'},
   },
   {
     'id': 7,
     'name': 'Sci-Fi & Fantasy',
-    'scrapper': {'id': '10765', 'type': 'tmdb'}
-  }
+    'scrapper': {'id': '10765', 'type': 'tmdb'},
+  },
 ];
 
 const keywords = [
   {
     'id': 8,
     'name': 'sibling relationship',
-    'scrapper': {'id': '380', 'type': 'tmdb'}
+    'scrapper': {'id': '380', 'type': 'tmdb'},
   },
   {
     'id': 9,
     'name': 'swordplay',
-    'scrapper': {'id': '1400', 'type': 'tmdb'}
+    'scrapper': {'id': '1400', 'type': 'tmdb'},
   },
   {
     'id': 10,
     'name': 'magic',
-    'scrapper': {'id': '2343', 'type': 'tmdb'}
+    'scrapper': {'id': '2343', 'type': 'tmdb'},
   },
   {
     'id': 11,
     'name': 'supernatural',
-    'scrapper': {'id': '6152', 'type': 'tmdb'}
+    'scrapper': {'id': '6152', 'type': 'tmdb'},
   },
   {
     'id': 12,
     'name': 'undead',
-    'scrapper': {'id': '10327', 'type': 'tmdb'}
+    'scrapper': {'id': '10327', 'type': 'tmdb'},
   },
   {
     'id': 13,
     'name': 'tragedy',
-    'scrapper': {'id': '10614', 'type': 'tmdb'}
+    'scrapper': {'id': '10614', 'type': 'tmdb'},
   },
   {
     'id': 14,
     'name': 'coming of age',
-    'scrapper': {'id': '10683', 'type': 'tmdb'}
+    'scrapper': {'id': '10683', 'type': 'tmdb'},
   },
   {
     'id': 15,
     'name': 'based on manga',
-    'scrapper': {'id': '13141', 'type': 'tmdb'}
+    'scrapper': {'id': '13141', 'type': 'tmdb'},
   },
   {
     'id': 16,
     'name': 'demon',
-    'scrapper': {'id': '15001', 'type': 'tmdb'}
+    'scrapper': {'id': '15001', 'type': 'tmdb'},
   },
   {
     'id': 17,
     'name': 'mutilation',
-    'scrapper': {'id': '157512', 'type': 'tmdb'}
+    'scrapper': {'id': '157512', 'type': 'tmdb'},
   },
   {
     'id': 18,
     'name': 'dark fantasy',
-    'scrapper': {'id': '177895', 'type': 'tmdb'}
+    'scrapper': {'id': '177895', 'type': 'tmdb'},
   },
   {
     'id': 19,
     'name': 'anachronism',
-    'scrapper': {'id': '201950', 'type': 'tmdb'}
+    'scrapper': {'id': '201950', 'type': 'tmdb'},
   },
   {
     'id': 20,
     'name': 'shounen',
-    'scrapper': {'id': '207826', 'type': 'tmdb'}
+    'scrapper': {'id': '207826', 'type': 'tmdb'},
   },
   {
     'id': 21,
     'name': 'anime',
-    'scrapper': {'id': '210024', 'type': 'tmdb'}
+    'scrapper': {'id': '210024', 'type': 'tmdb'},
   },
   {
     'id': 22,
     'name': 'time skip',
-    'scrapper': {'id': '244663', 'type': 'tmdb'}
+    'scrapper': {'id': '244663', 'type': 'tmdb'},
   },
   {
     'id': 25,
     'name': 'lacrimation',
-    'scrapper': {'id': '317156', 'type': 'tmdb'}
+    'scrapper': {'id': '317156', 'type': 'tmdb'},
   },
   {
     'id': 41,
     'name': 'demon hunter',
-    'scrapper': {'id': '186425', 'type': 'tmdb'}
+    'scrapper': {'id': '186425', 'type': 'tmdb'},
   },
   {
     'id': 71,
     'name': 'taisho period',
-    'scrapper': {'id': '343025', 'type': 'tmdb'}
+    'scrapper': {'id': '343025', 'type': 'tmdb'},
   },
   {
     'id': 137,
     'name': 'shocking',
-    'scrapper': {'id': '200234', 'type': 'tmdb'}
+    'scrapper': {'id': '200234', 'type': 'tmdb'},
   },
   {
     'id': 153,
     'name': 'sword',
-    'scrapper': {'id': '1938', 'type': 'tmdb'}
+    'scrapper': {'id': '1938', 'type': 'tmdb'},
   },
   {
     'id': 154,
     'name': 'training',
-    'scrapper': {'id': '4613', 'type': 'tmdb'}
+    'scrapper': {'id': '4613', 'type': 'tmdb'},
   },
   {
     'id': 155,
     'name': 'breathing',
-    'scrapper': {'id': '209947', 'type': 'tmdb'}
+    'scrapper': {'id': '209947', 'type': 'tmdb'},
   },
   {
     'id': 156,
     'name': 'demon slayer',
-    'scrapper': {'id': '279745', 'type': 'tmdb'}
-  }
+    'scrapper': {'id': '279745', 'type': 'tmdb'},
+  },
 ];
