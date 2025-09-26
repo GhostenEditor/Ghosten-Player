@@ -132,7 +132,7 @@ class SystemSettingsUpdaterState extends State<SystemSettingsUpdater> {
                         setState(() => _loading = true);
                         final data = await Api.checkUpdate(
                           '${_userConfig.githubProxy}$updateUrl',
-                          false,
+                          _userConfig.updatePrerelease,
                           Version.fromString(appVersion),
                         );
                         if (data != null && context.mounted) {

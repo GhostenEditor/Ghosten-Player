@@ -74,6 +74,7 @@ jobs:
           --obfuscate \
           --split-debug-info=./build/app/outputs/flutter-apk/ \
           --target-platform=android-arm,android-arm64 \
+          --build-name=${{ env.VERSION }} \
           --build-number=${{ env.BUILD_NUMBER }} \
           --dart-define=BUILD_DATE=$(date "+%F") \
           --dart-define=BUILD_VERSION=${{ env.VERSION }} \
@@ -90,6 +91,7 @@ jobs:
           --obfuscate \
           --split-debug-info=./build/app/outputs/flutter-apk/ \
           --target-platform=android-arm,android-arm64 \
+          --build-name=${{ env.VERSION }} \
           --build-number=${{ env.BUILD_NUMBER }} \
           --dart-define=BUILD_DATE=$(date "+%F") \
           --dart-define=BUILD_VERSION=${{ env.VERSION }} \
