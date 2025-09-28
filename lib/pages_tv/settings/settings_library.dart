@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:api/api.dart';
@@ -26,10 +27,24 @@ class LibraryManage extends StatefulWidget {
 
 class _LibraryManageState extends State<LibraryManage> {
   final _controller = ScrollController();
+  final _stream = Stream.periodic(
+    const Duration(seconds: 1),
+  ).switchMap((_) => Stream.fromFuture(Api.scheduleTaskQueryByAll()));
+  final _streamController = StreamController<List<ScheduleTask>>();
+  StreamSubscription<List<ScheduleTask>>? _subscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _subscription = _stream.listen((data) {
+      _streamController.add(data);
+    });
+  }
 
   @override
   void dispose() {
     _controller.dispose();
+    _subscription?.cancel();
     super.dispose();
   }
 
@@ -41,9 +56,7 @@ class _LibraryManageState extends State<LibraryManage> {
         slivers: [
           StreamBuilderSliverHandler(
             initialData: const <ScheduleTask>[],
-            stream: Stream.periodic(
-              const Duration(seconds: 1),
-            ).switchMap((_) => Stream.fromFuture(Api.scheduleTaskQueryByAll())),
+            stream: _streamController.stream,
             builder:
                 (context, snapshot) =>
                     snapshot.requireData.isNotEmpty
@@ -225,12 +238,16 @@ class _LibraryManageState extends State<LibraryManage> {
                         icon: const Icon(Icons.add),
                         autofocus: snapshot.requireData.isEmpty,
                         onPressed: () async {
+                          _subscription?.pause();
                           final resp = await navigateTo(
                             navigatorKey.currentContext!,
                             const DriverFilePicker(selectableType: FileType.folder),
                           );
-                          if (context.mounted && resp is (int, DriverFile)) {
-                            _addLibrary(context, resp.$1, resp.$2);
+                          if (context.mounted) {
+                            _subscription?.resume();
+                            if (resp is (int, DriverFile)) {
+                              _addLibrary(context, resp.$1, resp.$2);
+                            }
                           }
                         },
                       ),

@@ -2,6 +2,7 @@ import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 
 import '../../../components/error_message.dart';
+import '../../../components/no_data.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../utils/utils.dart';
 import '../../../validators/validators.dart';
@@ -71,7 +72,8 @@ class _SearchResultSelectState extends State<SearchResultSelect> {
                           ? const Padding(padding: EdgeInsets.symmetric(vertical: 16), child: LinearProgressIndicator())
                           : error != null
                           ? ErrorMessage(error: error)
-                          : ListView.builder(
+                          : items.isNotEmpty
+                          ? ListView.builder(
                             padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
                             itemBuilder: (context, index) {
                               final item = items[index];
@@ -130,7 +132,8 @@ class _SearchResultSelectState extends State<SearchResultSelect> {
                               );
                             },
                             itemCount: items.length,
-                          ),
+                          )
+                          : const NoData(),
                 ),
                 Flexible(
                   fit: FlexFit.tight,
