@@ -32,8 +32,9 @@ abstract class FilePickerPlatform extends PlatformInterface {
 
   Future<String?> get filePath => throw UnimplementedError('filePath() has not been implemented.');
 
-  Future<List<UsbStorage>?> get externalUsbStorages =>
-      throw UnimplementedError('externalUsbStorages() has not been implemented.');
+  Future<List<UsbStorage>?> externalUsbStorages() {
+    throw UnimplementedError('externalUsbStorages() has not been implemented.');
+  }
 
   Future<bool> requestStoragePermission() {
     throw UnimplementedError('requestStoragePermission() has not been implemented.');

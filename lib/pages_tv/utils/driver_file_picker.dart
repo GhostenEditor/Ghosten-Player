@@ -108,7 +108,7 @@ class _DriverFilePickerState extends State<DriverFilePicker> {
                       SliverPadding(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         sliver: FutureBuilderSliverHandler(
-                          future: FilePicker.externalUsbStorages,
+                          future: FilePicker.externalUsbStorages(),
                           builder: (context, snapshot) {
                             return SliverList.builder(
                               itemCount: snapshot.requireData!.length,
