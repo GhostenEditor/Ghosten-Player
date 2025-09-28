@@ -93,7 +93,6 @@ class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activit
                             "dispose" -> {
                                 mPlayerView?.dispose()
                                 mPlayerView = null
-                                activity.unregisterActivityLifecycleCallbacks(this)
                             }
 
                             "setTrack" -> mPlayerView?.setTrack(
@@ -127,9 +126,11 @@ class PlayerViewPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activit
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         activity = binding.activity
+        activity.application.registerActivityLifecycleCallbacks(this)
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
+        activity.application.unregisterActivityLifecycleCallbacks(this)
     }
 
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
