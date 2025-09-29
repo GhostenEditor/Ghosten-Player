@@ -217,7 +217,7 @@ class _PlayerControlsFullState<T> extends State<PlayerControlsFull<T>> with Play
                   ],
                 ),
                 extendBodyBehindAppBar: true,
-                backgroundColor: kIsWeb ? Colors.black : Colors.transparent,
+                backgroundColor: Colors.transparent,
                 endDrawer: Drawer(
                   child: Container(
                     width: 360,

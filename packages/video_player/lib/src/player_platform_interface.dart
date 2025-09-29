@@ -89,6 +89,10 @@ abstract class PlayerPlatform extends PlatformInterface {
     throw UnimplementedError('setSubtitleStyle() has not been implemented.');
   }
 
+  Future<void> setVideoMarginRatio(double left, double top, double right, double bottom) {
+    throw UnimplementedError('setVideoMarginRatio() has not been implemented.');
+  }
+
   void setMethodCallHandler(Future<dynamic> Function(MethodCall call)? handler) {
     throw UnimplementedError('setMethodCallHandler() has not been implemented.');
   }

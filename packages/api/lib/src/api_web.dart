@@ -1,4 +1,7 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -110,85 +113,163 @@ class ApiWeb extends ApiPlatform {
   ///  Cast End
 }
 
-class Client extends ApiClient {
-  Client(Uri baseUrl) {
-    _client =
-        Dio(
-            BaseOptions(
-              connectTimeout: const Duration(seconds: 10),
-              baseUrl: baseUrl.toString(),
-              validateStatus: (status) => status != null && status >= 200 && status < 300 || status == 304,
-            ),
-          )
-          ..interceptors.add(
-            InterceptorsWrapper(
-              onRequest: (options, handler) {
-                handler.next(options..headers.putIfAbsent('content-type', () => 'application/json'));
-              },
-              onError: (error, handler) {
-                handler.reject(error);
-              },
-            ),
-          )
-          ..interceptors.add(
-            InterceptorsWrapper(
-              onRequest: (RequestOptions options, RequestInterceptorHandler handler) {
-                options.headers['Accept-Language'] = Localizations.localeOf(navigatorKey.currentContext!).languageCode;
-                return handler.next(options);
-              },
-            ),
-          );
-  }
+// class Client extends ApiClient {
+//   Client(Uri baseUrl) {
+//     _client =
+//         Dio(
+//             BaseOptions(
+//               connectTimeout: const Duration(seconds: 10),
+//               baseUrl: baseUrl.toString(),
+//               validateStatus: (status) => status != null && status >= 200 && status < 300 || status == 304,
+//             ),
+//           )
+//           ..interceptors.add(
+//             InterceptorsWrapper(
+//               onRequest: (options, handler) {
+//                 handler.next(options..headers.putIfAbsent('content-type', () => 'application/json'));
+//               },
+//               onError: (error, handler) {
+//                 handler.reject(error);
+//               },
+//             ),
+//           )
+//           ..interceptors.add(
+//             InterceptorsWrapper(
+//               onRequest: (RequestOptions options, RequestInterceptorHandler handler) {
+//                 options.headers['Accept-Language'] = Localizations.localeOf(navigatorKey.currentContext!).languageCode;
+//                 return handler.next(options);
+//               },
+//             ),
+//           );
+//   }
+//
+//   late final Dio _client;
+//
+//   @override
+//   Future<T?> delete<T>(String path, {Object? data}) {
+//     return _client.delete<T>(path, data: data).then((resp) => resp.data).catchError((error) {
+//       throw convert(error);
+//     }, test: (error) => error is DioException);
+//   }
+//
+//   @override
+//   Future<T?> get<T>(String path, {Json? queryParameters}) {
+//     return _client.get<T>(path, queryParameters: queryParameters).then((resp) => resp.data).catchError((error) {
+//       throw convert(error);
+//     }, test: (error) => error is DioException);
+//   }
+//
+//   @override
+//   Future<T?> post<T>(String path, {Object? data}) {
+//     return _client.post<T>(path, data: data).then((resp) => resp.data).catchError((error) {
+//       throw convert(error);
+//     }, test: (error) => error is DioException);
+//   }
+//
+//   @override
+//   Future<T?> put<T>(String path, {Object? data}) {
+//     return _client.put<T>(path, data: data).then((resp) => resp.data).catchError((error) {
+//       throw convert(error);
+//     }, test: (error) => error is DioException);
+//   }
+//
+//   PlatformException convert(DioException exception) {
+//     return switch (exception.type) {
+//       DioExceptionType.connectionTimeout ||
+//       DioExceptionType.sendTimeout ||
+//       DioExceptionType.receiveTimeout => PlatformException(
+//         code: '40800',
+//         message: exception.response?.data.toString() ?? exception.message,
+//         stacktrace: exception.stackTrace.toString(),
+//       ),
+//       DioExceptionType.badCertificate ||
+//       DioExceptionType.badResponse ||
+//       DioExceptionType.cancel ||
+//       DioExceptionType.connectionError ||
+//       DioExceptionType.unknown => PlatformException(
+//         code:
+//             exception.response?.headers.value('Error-Code') ?? ((exception.response?.statusCode ?? 0) * 100).toString(),
+//         message: exception.response?.data.toString() ?? exception.message,
+//         stacktrace: exception.stackTrace.toString(),
+//       ),
+//     };
+//   }
+// }
 
-  late final Dio _client;
+class Client extends ApiClient {
+  const Client(Uri baseUrl);
 
   @override
   Future<T?> delete<T>(String path, {Object? data}) {
-    return _client.delete<T>(path, data: data).then((resp) => resp.data).catchError((error) {
-      throw convert(error);
-    }, test: (error) => error is DioException);
+    return _send<T>('DELETE', path, data as Json?);
   }
 
   @override
   Future<T?> get<T>(String path, {Json? queryParameters}) {
-    return _client.get<T>(path, queryParameters: queryParameters).then((resp) => resp.data).catchError((error) {
-      throw convert(error);
-    }, test: (error) => error is DioException);
+    return _send<T>('GET', path, queryParameters);
   }
 
   @override
   Future<T?> post<T>(String path, {Object? data}) {
-    return _client.post<T>(path, data: data).then((resp) => resp.data).catchError((error) {
-      throw convert(error);
-    }, test: (error) => error is DioException);
+    return _send<T>('POST', path, data as Json?);
   }
 
   @override
   Future<T?> put<T>(String path, {Object? data}) {
-    return _client.put<T>(path, data: data).then((resp) => resp.data).catchError((error) {
-      throw convert(error);
-    }, test: (error) => error is DioException);
+    return _send<T>('PUT', path, data as Json?);
   }
 
-  PlatformException convert(DioException exception) {
-    return switch (exception.type) {
-      DioExceptionType.connectionTimeout ||
-      DioExceptionType.sendTimeout ||
-      DioExceptionType.receiveTimeout => PlatformException(
-        code: '40800',
-        message: exception.response?.data.toString() ?? exception.message,
-        stacktrace: exception.stackTrace.toString(),
-      ),
-      DioExceptionType.badCertificate ||
-      DioExceptionType.badResponse ||
-      DioExceptionType.cancel ||
-      DioExceptionType.connectionError ||
-      DioExceptionType.unknown => PlatformException(
-        code:
-            exception.response?.headers.value('Error-Code') ?? ((exception.response?.statusCode ?? 0) * 100).toString(),
-        message: exception.response?.data.toString() ?? exception.message,
-        stacktrace: exception.stackTrace.toString(),
-      ),
-    };
+  Future<T?> _send<T>(String method, String path, [Json? data]) {
+    return invoke<String>('call', {
+              'method': path,
+              'data':
+                  data != null
+                      ? method == 'GET'
+                          ? Uri(
+                            queryParameters: data.entries.fold({}, (acc, cur) {
+                              if (cur.value != null) {
+                                acc?[cur.key] = cur.value?.toString();
+                              }
+                              return acc;
+                            }),
+                          ).toString().substring(1)
+                          : jsonEncode(data)
+                      : '',
+              'params': jsonEncode({
+                'acceptLanguage': Localizations.localeOf(navigatorKey.currentState!.context).languageCode,
+              }),
+            })
+            ?.timeout(const Duration(seconds: 30))
+            .then((value) {
+              if (value.isNotEmpty) {
+                try {
+                  return jsonDecode(value) as T;
+                } catch (e) {
+                  print(e);
+                  return null;
+                }
+              } else {
+                return null;
+              }
+            })
+            .catchError(
+              (error) {
+                throw PlatformException(code: '40800', message: (error as TimeoutException).message);
+              },
+              test: (error) {
+                return error is TimeoutException;
+              },
+            ) ??
+        Future.value();
+  }
+
+  Future<T>? invoke<T>(String method, [dynamic arg]) {
+    final ar = arg is Map ? arg.jsify() : arg;
+    final core = globalContext.getProperty<JSObject?>('__TAURI__'.toJS)?.getProperty<JSObject?>('core'.toJS);
+    if (ar == null) {
+      return core?.callMethod<JSPromise>('invoke'.toJS, method.jsify()).toDart.then((data) => data.dartify() as T);
+    } else {
+      return core?.callMethod<JSPromise>('invoke'.toJS, method.jsify(), ar).toDart.then((data) => data.dartify() as T);
+    }
   }
 }

@@ -98,6 +98,11 @@ class MethodChannelPlayer extends PlayerPlatform {
   }
 
   @override
+  Future<void> setVideoMarginRatio(double left, double top, double right, double bottom) {
+    return Future.value();
+  }
+
+  @override
   void setMethodCallHandler(Future<dynamic> Function(MethodCall call)? handler) {
     _channel.setMethodCallHandler(handler);
   }

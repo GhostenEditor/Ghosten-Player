@@ -713,6 +713,25 @@ class _PlayerPlatformViewState extends State<PlayerPlatformView> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    WidgetsBinding.instance.endOfFrame.then((_) async {
+      final box = context.findRenderObject()! as RenderBox;
+      final offset = box.globalToLocal(Offset.zero);
+      final windowSize = MediaQuery
+          .of(context)
+          .size;
+
+      PlayerPlatform.instance.setVideoMarginRatio(
+        offset.dx / windowSize.width,
+        offset.dy / windowSize.height,
+        (windowSize.width - offset.dx - box.size.width) / windowSize.width,
+        (windowSize.height - offset.dy - box.size.height) / windowSize.height,
+      );
+    });
+  }
+
+  @override
   void dispose() {
     PlayerPlatform.instance.dispose();
     super.dispose();

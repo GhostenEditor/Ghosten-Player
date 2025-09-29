@@ -18,13 +18,13 @@ class PlayerWeb extends PlayerPlatform {
       handler?.call(const MethodCall('isInitialized'));
     });
     listen('position', (data) {
-      handler?.call(MethodCall('position', (data as int) * 1000));
+      handler?.call(MethodCall('position', (data as num) * 1000));
     });
     listen('duration', (data) {
-      handler?.call(MethodCall('duration', (data as int) * 1000));
+      handler?.call(MethodCall('duration', (data as num) * 1000));
     });
     listen('buffer', (data) {
-      handler?.call(MethodCall('bufferingUpdate', (data as int) * 1000));
+      handler?.call(MethodCall('bufferingUpdate', (data as num) * 1000));
     });
     listen('tracksChanged', (data) {
       final mediaInfo = {};
@@ -53,13 +53,13 @@ class PlayerWeb extends PlayerPlatform {
       handler?.call(MethodCall('fatalError', data));
     });
     listen('mediaChanged', (data) {
-      handler?.call(MethodCall('mediaChanged', data));
+      handler?.call(MethodCall('mediaChanged', {'index': data['index'].toInt(), 'position': data['position'].toInt()}));
     });
     listen('volume', (data) {
       handler?.call(MethodCall('volumeChanged', data));
     });
     listen('mediaInfo', (data) {
-      handler?.call(MethodCall('mediaInfo', data));
+      handler?.call(MethodCall('mediaInfo', Map<String, dynamic>.from(data)));
     });
     listen('pause', (data) {
       pause = data;
@@ -199,7 +199,9 @@ class PlayerWeb extends PlayerPlatform {
   Future<void> setAspectRatio(double? aspectRatio) async {}
 
   @override
-  Future<void> setSource(Map<String, dynamic>? item) async {}
+  Future<void> setSource(Map<String, dynamic>? item) async {
+    invoke('set_source', {'item': item});
+  }
 
   @override
   Future<void> updateSource(Map<String, dynamic> source, int index) async {}
@@ -214,4 +216,10 @@ class PlayerWeb extends PlayerPlatform {
 
   @override
   Future<void> setSubtitleStyle(List<int> style) async {}
+
+  @override
+  Future<void> setVideoMarginRatio(double left, double top, double right, double bottom) {
+    print('$left,$top,$right,$bottom');
+    return invoke('set_video_margin_ratio', {'left': left, 'top': top, 'right': right, 'bottom': bottom})!;
+  }
 }
