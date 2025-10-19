@@ -34,6 +34,7 @@ jobs:
       - name: Build
         run: |
           flutter build web --wasm \
+          --target=lib/main_demo.dart \
           --base-href=/Ghosten-Player/ \
           --dart-define=BUILD_DATE=$(date "+%F")
 

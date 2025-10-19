@@ -1,153 +1,174 @@
-import 'dart:js_interop';
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
-import 'dart:ui';
-import 'dart:ui_web';
 
 import 'package:api/api.dart';
-import 'package:date_format/date_format.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:scaled_app/scaled_app.dart';
+import 'package:url_launcher/url_launcher_string.dart';
+import 'package:video_player/player.dart';
 
+import 'components/quit_confirm.dart';
 import 'const.dart';
 import 'l10n/app_localizations.dart';
+import 'pages/account/account.dart';
+import 'pages/components/updater.dart';
 import 'pages/home.dart';
-import 'pages_tv/home.dart';
+import 'pages/player/singleton_player.dart';
+import 'pages/utils/notification.dart';
+import 'pages/utils/utils.dart';
 import 'platform_api.dart';
-import 'providers/shortcut_tv.dart';
 import 'providers/user_config.dart';
 import 'theme.dart';
+import 'utils/utils.dart';
 
 void main(List<String> args) async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Api.initialized();
-  PlatformApi.deviceType = DeviceType.web;
-  final userConfig = await UserConfig.init();
-  final shortcutTV = await ShortcutTV.init();
-  Provider.debugCheckInvalidValueType = null;
-  runWidget(MultiProvider(
-    providers: [
-      ChangeNotifierProvider(create: (_) => userConfig),
-      ChangeNotifierProvider(create: (_) => shortcutTV),
-    ],
-    child: MultiViewApp(
-      viewBuilder: (BuildContext context) {
-        final int viewId = View.of(context).viewId;
-        final index = views.getInitialData(viewId)! as JSNumber;
-        return MainApp(index: index.toDartInt);
-      },
-    ),
-  ));
-}
-
-class MultiViewApp extends StatefulWidget {
-  const MultiViewApp({super.key, required this.viewBuilder});
-
-  final WidgetBuilder viewBuilder;
-
-  @override
-  State<MultiViewApp> createState() => _MultiViewAppState();
-}
-
-class _MultiViewAppState extends State<MultiViewApp> with WidgetsBindingObserver {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    _updateViews();
-  }
-
-  @override
-  void didUpdateWidget(MultiViewApp oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _views.clear();
-    _updateViews();
-  }
-
-  @override
-  void didChangeMetrics() {
-    _updateViews();
-  }
-
-  Map<Object, Widget> _views = <Object, Widget>{};
-
-  void _updateViews() {
-    final Map<Object, Widget> newViews = <Object, Widget>{};
-    for (final FlutterView view in WidgetsBinding.instance.platformDispatcher.views) {
-      final Widget viewWidget = _views[view.viewId] ?? _createViewWidget(view);
-      newViews[view.viewId] = viewWidget;
+  ScaledWidgetsFlutterBinding.ensureInitialized();
+  final initialized = await Api.initialized();
+  if (initialized ?? false) {
+    if (kIsWeb) {
+      BrowserContextMenu.disableContextMenu();
+      PlatformApi.deviceType = DeviceType.web;
+    } else {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.top]);
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+      HttpOverrides.global = MyHttpOverrides();
+      PlatformApi.deviceType = DeviceType.fromString(args[0]);
     }
-    setState(() {
-      _views = newViews;
-    });
+    setPreferredOrientations(false);
+    final userConfig = await UserConfig.init();
+    ScaledWidgetsFlutterBinding.instance.scaleFactor =
+        (deviceSize) => max(1, deviceSize.width / 1140) * userConfig.displayScale;
+    Provider.debugCheckInvalidValueType = null;
+    if (!kIsWeb && userConfig.shouldCheckUpdate()) {
+      Future.microtask(() async {
+        final data = await Api.checkUpdate(
+          '${userConfig.githubProxy}$updateUrl',
+          userConfig.updatePrerelease,
+          Version.fromString(appVersion),
+        );
+        if (data != null) {
+          showModalBottomSheet(
+            context: navigatorKey.currentContext!,
+            constraints: const BoxConstraints(minWidth: double.infinity),
+            builder: (context) => UpdateBottomSheet(data),
+          );
+        }
+      });
+    }
+    runApp(ChangeNotifierProvider(create: (_) => userConfig, child: const MainApp()));
+    PlatformApi.deeplinkEvent.listen(scanToLogin);
+  } else {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    runApp(const UpdateToLatest());
   }
+}
 
-  Widget _createViewWidget(FlutterView view) {
-    return View(
-      view: view,
-      child: Builder(
-        builder: widget.viewBuilder,
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ViewCollection(views: _views.values.toList(growable: false));
-  }
+@pragma('vm:entry-point')
+// ignore: avoid_void_async
+void player(List<String> args) async {
+  ScaledWidgetsFlutterBinding.ensureInitialized();
+  PlatformApi.deviceType = DeviceType.fromString(args[0]);
+  final userConfig = await UserConfig.init();
+  ScaledWidgetsFlutterBinding.instance.scaleFactor =
+      (deviceSize) => max(1, deviceSize.width / 1140) * userConfig.displayScale;
+  runApp(ChangeNotifierProvider(create: (_) => userConfig, child: PlayerApp(url: args[1])));
 }
 
 class MainApp extends StatelessWidget {
-  const MainApp({super.key, required this.index});
-
-  final int index;
+  const MainApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final child = MaterialApp(
+    return MaterialApp(
       title: appName,
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
-      theme: index != 2 ? lightTheme : tvTheme,
-      darkTheme: index != 2 ? darkTheme : tvDarkTheme,
+      theme: lightTheme,
+      darkTheme: darkTheme,
       themeMode: context.watch<UserConfig>().themeMode,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       locale: context.watch<UserConfig>().locale,
       supportedLocales: AppLocalizations.supportedLocales,
       navigatorObservers: [routeObserver],
-      home: index != 2 ? const HomeView() : const TVHomePage(),
+      home: const QuitConfirm(child: HomeView()),
       themeAnimationCurve: Curves.easeOut,
-      builder: (context, widget) => MediaQuery(
-        data: MediaQuery.of(context).scale().copyWith(
-          textScaler: NoScaleTextScaler(),
-          padding: index != 2 ? const EdgeInsets.only(top: 36, bottom: 12) : null,
-        ),
-        child: widget!,
+      builder:
+          (context, widget) => MediaQuery(
+            data: MediaQuery.of(context).scale().copyWith(textScaler: NoScaleTextScaler()),
+            child: widget!,
       ),
     );
-    return index != 2
-        ? Directionality(
-      textDirection: TextDirection.ltr,
-      child: Stack(
-        children: [
-          child,
-          IgnorePointer(
-              child: MaterialApp(
-                debugShowCheckedModeBanner: false,
-                darkTheme: ThemeData.dark(),
-                themeMode: context.watch<UserConfig>().themeMode,
-                home: const StatusBar(),
-              )),
-        ],
+  }
+}
+
+class PlayerApp extends StatelessWidget {
+  const PlayerApp({super.key, required this.url});
+
+  final String url;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: appName,
+      navigatorKey: navigatorKey,
+      debugShowCheckedModeBanner: false,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      shortcuts: {
+        ...WidgetsApp.defaultShortcuts,
+        const SingleActivator(LogicalKeyboardKey.select): const ActivateIntent(),
+      },
+      home: QuitConfirm(child: SingletonPlayer(playlist: [PlaylistItemDisplay(url: Uri.parse(url), source: null)])),
+      builder:
+          (context, widget) =>
+              MediaQuery(data: MediaQuery.of(context).copyWith(textScaler: NoScaleTextScaler()), child: widget!),
+    );
+  }
+}
+
+class UpdateToLatest extends StatelessWidget {
+  const UpdateToLatest({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: Scaffold(
+        appBar: AppBar(),
+        extendBodyBehindAppBar: true,
+        body: Center(
+          child: Builder(
+            builder: (context) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                spacing: 10,
+                children: [
+                  Text(AppLocalizations.of(context)!.versionDeprecatedTip, textAlign: TextAlign.center),
+                  FilledButton.tonal(
+                    onPressed: () {
+                      launchUrlString(
+                        'https://github.com/$repoAuthor/$repoName',
+                        browserConfiguration: const BrowserConfiguration(showTitle: true),
+                      );
+                    },
+                    child: Text(AppLocalizations.of(context)!.updateNow),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
       ),
-    )
-        : child;
+    );
   }
 }
 
@@ -161,44 +182,23 @@ class NoScaleTextScaler extends TextScaler {
   double get textScaleFactor => 1;
 }
 
-class StatusBar extends StatelessWidget {
-  const StatusBar({super.key});
+Future<void> scanToLogin(String link) async {
+  final context = navigatorKey.currentContext;
+  if (context == null) return;
+  if (await showConfirm(context, AppLocalizations.of(context)!.confirmTextLogin) != true) return;
+  try {
+    final url = Uri.parse(link);
+    final data = utf8.decode(base64.decode(url.path.split('/').last));
+    if (context.mounted) await showNotification(context, Api.driverInsert(jsonDecode(data)).last);
+    if (context.mounted) navigateTo(context, const AccountManage());
+  } catch (_) {}
+}
 
+class MyHttpOverrides extends HttpOverrides {
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-      child: IconTheme(
-        data: IconThemeData(
-            size: 18,
-            color: switch (Theme.of(context).brightness) {
-              Brightness.dark => Colors.white,
-              Brightness.light => Colors.black,
-            }),
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Row(
-            spacing: 4,
-            children: [
-              const SizedBox(),
-              DefaultTextStyle(
-                style: Theme.of(context).textTheme.labelLarge!.copyWith(fontWeight: FontWeight.bold),
-                child: StreamBuilder(
-                  initialData: formatDate(DateTime.now(), [HH, ':', nn]),
-                  stream: Stream.periodic(const Duration(seconds: 10)).map((_) => formatDate(DateTime.now(), [HH, ':', nn])).distinct(),
-                  builder: (context, snapshot) => Text(snapshot.requireData),
-                ),
-              ),
-              const Icon(Icons.near_me_rounded, size: 16),
-              const Spacer(),
-              const Icon(Icons.signal_cellular_alt),
-              const Icon(Icons.five_g_rounded),
-              const Icon(Icons.wifi_rounded),
-              Transform.rotate(angle: pi / 2, child: const Icon(Icons.battery_6_bar_rounded, size: 24)),
-            ],
-          ),
-        ),
-      ),
-    );
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => host == 'image.tmdb.org' || host == 'media.themoviedb.org';
   }
 }
