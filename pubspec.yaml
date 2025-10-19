@@ -19,7 +19,7 @@ dependencies:
   collection: ^1.19.0
   date_format: ^2.0.0
   dio: ^5.9.0
-  dio_cache_interceptor: ^4.0.3
+  dio_cache_interceptor: ^4.0.4
   file_picker:
     path: packages/file_picker
   flutter_archive: ^6.0.3
