@@ -276,7 +276,7 @@ class _MediaGridChannelState<T> extends State<MediaGridChannel<T>> {
                     showNoMoreItemsIndicatorAsGridChild: false,
                     gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                       maxCrossAxisExtent: 120,
-                      childAspectRatio: 0.5,
+                      childAspectRatio: 0.485,
                       mainAxisSpacing: 16,
                       crossAxisSpacing: 16,
                     ),

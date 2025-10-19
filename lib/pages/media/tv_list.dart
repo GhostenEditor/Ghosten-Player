@@ -61,7 +61,7 @@ class _TVListPageState extends State<TVListPage> {
           ),
           MediaChannel(
             label: AppLocalizations.of(context)!.watchNow,
-            height: 160,
+            height: 183,
             future: Api.tvSeriesNextToPlayQueryAll(),
             builder: _buildRecentMediaCard,
             more: IconButton(
@@ -90,13 +90,13 @@ class _TVListPageState extends State<TVListPage> {
                 limit: 8,
               ),
             ).then((data) => data.data),
-            height: 230,
+            height: 262,
             builder: (context, item, index) => _buildMediaCard(context, item, width: 120, height: 180),
             loadingBuilder: (context) => const ImageCardPlaceholder(width: 120, height: 180),
           ),
           MediaChannel(
             label: AppLocalizations.of(context)!.tagNewAdd,
-            height: 230,
+            height: 262,
             future: Api.tvSeriesQueryAll(
               const MediaSearchQuery(
                 sort: SortConfig(type: SortType.createAt, direction: SortDirection.desc),
@@ -108,7 +108,7 @@ class _TVListPageState extends State<TVListPage> {
           ),
           MediaChannel(
             label: AppLocalizations.of(context)!.tagNewRelease,
-            height: 230,
+            height: 262,
             future: Api.tvSeriesQueryAll(
               const MediaSearchQuery(
                 sort: SortConfig(type: SortType.createAt, direction: SortDirection.desc),
@@ -132,8 +132,21 @@ class _TVListPageState extends State<TVListPage> {
     return ImageCard(
       item.poster,
       width: 180,
-      height: 102,
-      title: Text(item.displayRecentTitle()),
+      height: 114,
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (item.seriesTitle != null)
+            Text(
+              item.seriesTitle!,
+              style: Theme.of(context).textTheme.labelMedium!.copyWith(fontWeight: FontWeight.bold),
+            ),
+          Text(
+            'S${item.season} E${item.episode} - ${item.displayTitle()}',
+            style: Theme.of(context).textTheme.labelSmall,
+          ),
+        ],
+      ),
       subtitle: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

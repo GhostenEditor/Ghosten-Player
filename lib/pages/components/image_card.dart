@@ -42,7 +42,7 @@ class ImageCard extends StatelessWidget {
             spacing: 4,
             children: [
               ConstrainedBox(
-                constraints: constraints.deflate(const EdgeInsets.symmetric(vertical: 21)).copyWith(minHeight: 0),
+                constraints: constraints.deflate(const EdgeInsets.symmetric(vertical: 33)).copyWith(minHeight: 0),
                 child: Material(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),

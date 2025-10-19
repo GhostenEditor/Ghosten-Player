@@ -244,7 +244,20 @@ class _TVListPageState extends State<TVListPage> {
     return MediaGridItem(
       imageWidth: width,
       imageHeight: height,
-      title: Text(item.displayRecentTitle()),
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (item.seriesTitle != null)
+            Text(
+              item.seriesTitle!,
+              style: Theme.of(context).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
+            ),
+          Text(
+            'S${item.season} E${item.episode} - ${item.displayTitle()}',
+            style: Theme.of(context).textTheme.labelMedium!.copyWith(fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
       subtitle: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

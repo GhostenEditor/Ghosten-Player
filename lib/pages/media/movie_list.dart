@@ -61,7 +61,7 @@ class _MovieListPageState extends State<MovieListPage> {
           ),
           MediaChannel(
             label: AppLocalizations.of(context)!.watchNow,
-            height: 230,
+            height: 262,
             future: Api.movieNextToPlayQueryAll(),
             more: IconButton(
               style: IconButton.styleFrom(
@@ -90,13 +90,13 @@ class _MovieListPageState extends State<MovieListPage> {
                 limit: 8,
               ),
             ).then((data) => data.data),
-            height: 230,
+            height: 262,
             builder: (context, item, index) => _buildMediaCard(context, item, width: 120, height: 180),
             loadingBuilder: (context) => const ImageCardPlaceholder(width: 120, height: 180),
           ),
           MediaChannel(
             label: AppLocalizations.of(context)!.tagNewAdd,
-            height: 230,
+            height: 262,
             future: Api.movieQueryAll(
               const MediaSearchQuery(
                 sort: SortConfig(type: SortType.createAt, direction: SortDirection.desc),
@@ -108,7 +108,7 @@ class _MovieListPageState extends State<MovieListPage> {
           ),
           MediaChannel(
             label: AppLocalizations.of(context)!.tagNewRelease,
-            height: 230,
+            height: 262,
             future: Api.movieQueryAll(
               const MediaSearchQuery(
                 sort: SortConfig(type: SortType.createAt, direction: SortDirection.desc),
