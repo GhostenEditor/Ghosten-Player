@@ -1,6 +1,5 @@
 package com.ghosten.player
 
-import android.annotation.TargetApi
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -99,7 +98,6 @@ class MainFragment : FlutterFragment() {
         context.unregisterReceiver(screenStateReceiver)
     }
 
-    @TargetApi(API_LEVELS.API_34)
     @RequiresApi(API_LEVELS.API_34)
     fun startBackGesture(backEvent: BackEvent) {
         ensureAlive()
@@ -108,7 +106,6 @@ class MainFragment : FlutterFragment() {
         }
     }
 
-    @TargetApi(API_LEVELS.API_34)
     @RequiresApi(API_LEVELS.API_34)
     fun updateBackGestureProgress(backEvent: BackEvent) {
         ensureAlive()
@@ -117,7 +114,6 @@ class MainFragment : FlutterFragment() {
         }
     }
 
-    @TargetApi(API_LEVELS.API_34)
     @RequiresApi(API_LEVELS.API_34)
     fun commitBackGesture() {
         ensureAlive()
@@ -126,7 +122,6 @@ class MainFragment : FlutterFragment() {
         }
     }
 
-    @TargetApi(API_LEVELS.API_34)
     @RequiresApi(API_LEVELS.API_34)
     fun cancelBackGesture() {
         ensureAlive()

@@ -60,6 +60,7 @@ The project is currently maintained with passion. Consider [sponsoring](#sponsor
 - **Others**
     - Runs locally, no backend required[^1]
     - Small app size (≈ 15 MB)
+  - External USB device reading
     - Cross-device data sync
     - Built-in search
     - Auto-update

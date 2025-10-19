@@ -165,7 +165,7 @@ Future<(int, DriverFile)?> showDriverFilePicker(
                                 ),
                           ),
                           FutureBuilderSliverHandler(
-                            future: FilePicker.externalUsbStorages,
+                            future: FilePicker.externalUsbStorages(),
                             builder: (context, snapshot) {
                               return SliverList.builder(
                                 itemCount: snapshot.requireData!.length,

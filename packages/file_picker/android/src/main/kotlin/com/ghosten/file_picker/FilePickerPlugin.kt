@@ -42,12 +42,12 @@ class FilePickerPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
 
     private fun getUniversalUSBPath(): List<HashMap<String, String>> {
         val storageManager = context.getSystemService(Context.STORAGE_SERVICE) as StorageManager
-        val storageVolumes: List<StorageVolume> = storageManager.getStorageVolumes()
+        val storageVolumes: List<StorageVolume> = storageManager.storageVolumes
         val list = mutableListOf<HashMap<String, String>>()
 
         for (volume in storageVolumes) {
             if (volume.isRemovable && volume.state == Environment.MEDIA_MOUNTED) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     list.add(HashMap<String, String>().apply {
                         this["path"] = volume.directory!!.absolutePath
                         this["desc"] = volume.getDescription(context)
