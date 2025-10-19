@@ -55,6 +55,7 @@ class AsyncImage extends StatelessWidget {
             src.startsWith('https://media.themoviedb.org')
                 ? httpHeaders ?? const {'referer': 'https://www.themoviedb.org/'}
                 : httpHeaders,
+        errorListener: (_) {},
         errorWidget:
             errorWidget ??
             (context, url, error) =>
