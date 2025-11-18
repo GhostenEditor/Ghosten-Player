@@ -151,8 +151,8 @@ class _SearchPageState extends State<SearchPage> {
             _TabItem(title: AppLocalizations.of(context)!.homeTabTV, canFilter: true),
             _TabItem(title: AppLocalizations.of(context)!.homeTabMovie, canFilter: true),
             _TabItem(title: AppLocalizations.of(context)!.formLabelEpisode),
-            _TabItem(title: AppLocalizations.of(context)!.titleCast),
-            _TabItem(title: AppLocalizations.of(context)!.titleCrew),
+            _TabItem(title: AppLocalizations.of(context)!.titleCasts),
+            _TabItem(title: AppLocalizations.of(context)!.titleCrews),
           ],
           onTabChange: (index) {
             _activeIndex = index;
@@ -440,7 +440,7 @@ class _SearchFilterState extends State<_SearchFilter> {
                       sliver:
                           snapshot.requireData.isNotEmpty
                               ? _MultiSelect(
-                                label: AppLocalizations.of(context)!.titleGenre,
+                                label: AppLocalizations.of(context)!.titleGenres,
                                 collapsedMax: 9,
                                 selected: _selectedGenre,
                                 items: snapshot.requireData,
@@ -506,7 +506,7 @@ class _SearchFilterState extends State<_SearchFilter> {
                         ? SliverPadding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           sliver: _MultiSelect(
-                            label: AppLocalizations.of(context)!.titleKeyword,
+                            label: AppLocalizations.of(context)!.titleKeywords,
                             collapsedMax: 6,
                             gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                               maxCrossAxisExtent: 150,
@@ -539,7 +539,7 @@ class _SearchFilterState extends State<_SearchFilter> {
                         ? SliverPadding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           sliver: _MultiSelect(
-                            label: AppLocalizations.of(context)!.titleCast,
+                            label: AppLocalizations.of(context)!.titleCasts,
                             collapsedMax: 6,
                             gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                               maxCrossAxisExtent: 150,
@@ -572,7 +572,7 @@ class _SearchFilterState extends State<_SearchFilter> {
                         ? SliverPadding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           sliver: _MultiSelect(
-                            label: AppLocalizations.of(context)!.titleCrew,
+                            label: AppLocalizations.of(context)!.titleCrews,
                             collapsedMax: 6,
                             gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                               maxCrossAxisExtent: 150,
@@ -935,7 +935,7 @@ class _FilterChipsGroup extends StatelessWidget {
         if (filerType.isNotEmpty)
           SliverToBoxAdapter(
             child: _FilterChips(
-              title: AppLocalizations.of(context)!.titleGenre,
+              title: AppLocalizations.of(context)!.titleGenres,
               chips: filerType,
               onDeleted: onFilterTypeDeleted,
               labelBuilder: (context, ty) => Text(ty.name),
@@ -944,7 +944,7 @@ class _FilterChipsGroup extends StatelessWidget {
         if (genres.isNotEmpty)
           SliverToBoxAdapter(
             child: _FilterChips(
-              title: AppLocalizations.of(context)!.titleGenre,
+              title: AppLocalizations.of(context)!.titleGenres,
               chips: genres,
               onDeleted: onGenreDeleted,
               labelBuilder: (context, genre) => Text(genre.name),
@@ -962,7 +962,7 @@ class _FilterChipsGroup extends StatelessWidget {
         if (keywords.isNotEmpty)
           SliverToBoxAdapter(
             child: _FilterChips(
-              title: AppLocalizations.of(context)!.titleKeyword,
+              title: AppLocalizations.of(context)!.titleKeywords,
               chips: keywords,
               onDeleted: onKeywordDeleted,
               labelBuilder: (context, keyword) => Text(keyword.name),
@@ -971,7 +971,7 @@ class _FilterChipsGroup extends StatelessWidget {
         if (cast.isNotEmpty)
           SliverToBoxAdapter(
             child: _FilterChips(
-              title: AppLocalizations.of(context)!.titleCast,
+              title: AppLocalizations.of(context)!.titleCasts,
               chips: cast,
               onDeleted: onCastDeleted,
               labelBuilder: (context, cast) => Text(cast.name),
@@ -980,7 +980,7 @@ class _FilterChipsGroup extends StatelessWidget {
         if (crew.isNotEmpty)
           SliverToBoxAdapter(
             child: _FilterChips(
-              title: AppLocalizations.of(context)!.titleCrew,
+              title: AppLocalizations.of(context)!.titleCrews,
               chips: crew,
               onDeleted: onCrewDeleted,
               labelBuilder: (context, crew) => Text(crew.name),

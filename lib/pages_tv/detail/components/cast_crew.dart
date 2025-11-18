@@ -73,13 +73,13 @@ class CastCrewTitle extends StatelessWidget {
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: mediaCast.isNotEmpty ? Text(AppLocalizations.of(context)!.titleCast) : null,
+              child: mediaCast.isNotEmpty ? Text(AppLocalizations.of(context)!.titleCasts) : null,
             ),
           ),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: mediaCrew.isNotEmpty ? Text(AppLocalizations.of(context)!.titleCrew) : null,
+              child: mediaCrew.isNotEmpty ? Text(AppLocalizations.of(context)!.titleCrews) : null,
             ),
           ),
         ],

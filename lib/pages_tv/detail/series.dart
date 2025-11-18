@@ -231,7 +231,7 @@ class _TVDetailState extends State<TVDetail> with ActionMixin {
                 ),
                 ButtonSettingItem(
                   leading: const Icon(Icons.person_rounded),
-                  title: Text(AppLocalizations.of(context)!.titleCastCrew),
+                  title: Text(AppLocalizations.of(context)!.titleCastsCrews),
                   onTap: () {
                     Navigator.pushAndRemoveUntil(
                       _navigatorKey.currentContext!,

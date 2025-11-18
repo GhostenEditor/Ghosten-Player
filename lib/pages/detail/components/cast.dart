@@ -23,7 +23,7 @@ class CastSection extends StatelessWidget {
               child: Row(
                 spacing: 4,
                 children: [
-                  Text(AppLocalizations.of(context)!.titleCast, style: Theme.of(context).textTheme.titleMedium),
+                  Text(AppLocalizations.of(context)!.titleCasts, style: Theme.of(context).textTheme.titleMedium),
                   Text('(${cast.length})', style: Theme.of(context).textTheme.labelMedium),
                 ],
               ),

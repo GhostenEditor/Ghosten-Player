@@ -18,7 +18,7 @@ class KeywordsSection extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.all(16),
-          child: Text(AppLocalizations.of(context)!.titleKeyword, style: Theme.of(context).textTheme.titleMedium),
+          child: Text(AppLocalizations.of(context)!.titleKeywords, style: Theme.of(context).textTheme.titleMedium),
         ),
         SizedBox(
           height: 20,

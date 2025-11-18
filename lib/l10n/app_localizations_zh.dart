@@ -982,13 +982,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tipsStayTuned => '敬请期待！';
 
   @override
-  String get titleCast => '演员';
+  String get titleCasts => '演员';
 
   @override
-  String get titleCastCrew => '演职人员';
+  String get titleCastsCrews => '演职人员';
 
   @override
-  String get titleCrew => '工作人员';
+  String get titleCrews => '工作人员';
 
   @override
   String get titleEditM3U => '选择M3U文件';
@@ -1000,10 +1000,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get titleEditSubtitle => '选择字幕文件';
 
   @override
-  String get titleGenre => '类型';
+  String get titleGenres => '类型';
 
   @override
-  String get titleKeyword => '关键词';
+  String get titleKeywords => '关键词';
 
   @override
   String get titleMoreFrom => '更多来自';

@@ -18,7 +18,7 @@ class GenresSection extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.all(16),
-          child: Text(AppLocalizations.of(context)!.titleGenre, style: Theme.of(context).textTheme.titleMedium),
+          child: Text(AppLocalizations.of(context)!.titleGenres, style: Theme.of(context).textTheme.titleMedium),
         ),
         SizedBox(
           height: 30,

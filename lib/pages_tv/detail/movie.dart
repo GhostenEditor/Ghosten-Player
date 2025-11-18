@@ -221,7 +221,7 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin {
                 ),
                 ButtonSettingItem(
                   leading: const Icon(Icons.person_rounded),
-                  title: Text(AppLocalizations.of(context)!.titleCastCrew),
+                  title: Text(AppLocalizations.of(context)!.titleCastsCrews),
                   onTap: () {
                     _showSide.value = true;
                     navigateToSlideLeft(

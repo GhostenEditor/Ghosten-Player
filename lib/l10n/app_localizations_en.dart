@@ -848,7 +848,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsItemNfoEnabled => 'NFO Enabled';
 
   @override
-  String get settingsItemOthers => 'Others Settings';
+  String get settingsItemOthers => 'Other Settings';
 
   @override
   String get settingsItemPlayerHistory => 'Player History';
@@ -996,13 +996,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tipsStayTuned => 'Stay tuned!';
 
   @override
-  String get titleCast => 'Cast';
+  String get titleCasts => 'Casts';
 
   @override
-  String get titleCastCrew => 'Cast and Crew';
+  String get titleCastsCrews => 'Casts and Crews';
 
   @override
-  String get titleCrew => 'Crew';
+  String get titleCrews => 'Crews';
 
   @override
   String get titleEditM3U => 'Select a M3U File';
@@ -1014,10 +1014,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get titleEditSubtitle => 'Select a Subtitle File';
 
   @override
-  String get titleGenre => 'Genre';
+  String get titleGenres => 'Genres';
 
   @override
-  String get titleKeyword => 'Keyword';
+  String get titleKeywords => 'Keywords';
 
   @override
   String get titleMoreFrom => 'More From';

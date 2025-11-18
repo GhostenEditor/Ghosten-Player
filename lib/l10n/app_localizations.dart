@@ -1409,7 +1409,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsItemOthers.
   ///
   /// In en, this message translates to:
-  /// **'Others Settings'**
+  /// **'Other Settings'**
   String get settingsItemOthers;
 
   /// No description provided for @settingsItemPlayerHistory.
@@ -1664,23 +1664,23 @@ abstract class AppLocalizations {
   /// **'Stay tuned!'**
   String get tipsStayTuned;
 
-  /// No description provided for @titleCast.
+  /// No description provided for @titleCasts.
   ///
   /// In en, this message translates to:
-  /// **'Cast'**
-  String get titleCast;
+  /// **'Casts'**
+  String get titleCasts;
 
-  /// No description provided for @titleCastCrew.
+  /// No description provided for @titleCastsCrews.
   ///
   /// In en, this message translates to:
-  /// **'Cast and Crew'**
-  String get titleCastCrew;
+  /// **'Casts and Crews'**
+  String get titleCastsCrews;
 
-  /// No description provided for @titleCrew.
+  /// No description provided for @titleCrews.
   ///
   /// In en, this message translates to:
-  /// **'Crew'**
-  String get titleCrew;
+  /// **'Crews'**
+  String get titleCrews;
 
   /// No description provided for @titleEditM3U.
   ///
@@ -1700,17 +1700,17 @@ abstract class AppLocalizations {
   /// **'Select a Subtitle File'**
   String get titleEditSubtitle;
 
-  /// No description provided for @titleGenre.
+  /// No description provided for @titleGenres.
   ///
   /// In en, this message translates to:
-  /// **'Genre'**
-  String get titleGenre;
+  /// **'Genres'**
+  String get titleGenres;
 
-  /// No description provided for @titleKeyword.
+  /// No description provided for @titleKeywords.
   ///
   /// In en, this message translates to:
-  /// **'Keyword'**
-  String get titleKeyword;
+  /// **'Keywords'**
+  String get titleKeywords;
 
   /// No description provided for @titleMoreFrom.
   ///
