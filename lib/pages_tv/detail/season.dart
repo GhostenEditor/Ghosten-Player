@@ -269,11 +269,11 @@ class _SeasonPageState extends State<_SeasonPage> {
       future: Api.tvSeasonQueryById(widget.seasonId),
       builder: (context, snapshot) {
         final item = snapshot.requireData;
-        final int foundIndex = widget.nextToPlay?.episode == null
+        final int nextToPlayIndex = widget.nextToPlay?.episode == null
           ? -1
           : item.episodes.indexWhere((ep) => ep.episode == widget.nextToPlay?.episode);
 
-        final focusIndex = foundIndex != -1 ? foundIndex : 0;
+        final focusIndex = nextToPlayIndex != -1 ? nextToPlayIndex : 0;
 
         return CustomScrollView(
           cacheExtent: 1000,
