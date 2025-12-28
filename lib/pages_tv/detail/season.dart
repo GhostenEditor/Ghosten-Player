@@ -57,8 +57,11 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
         builder: (context, snapshot) {
           final item = snapshot.requireData;
           if (item.seasons.isNotEmpty) {
+            final nextToPlaySeasonId = item.nextToPlay?.seasonId;
             _switchSeason(
-              item.seasons.firstWhere((it) => currentSeason.value == null || it.id == currentSeason.value?.id),
+              item.seasons.firstWhere((it) => currentSeason.value == null
+                ? (nextToPlaySeasonId == null || it.id == nextToPlaySeasonId)
+                : it.id == currentSeason.value?.id),
               widget.initialData.scrapper,
             );
           }
@@ -172,6 +175,7 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
   void _switchSeason(TVSeason item, Scrapper scrapper) {
     if (currentSeason.value == item) return;
     currentSeason.value = item;
+    final nextToPlay = widget.initialData.nextToPlay;
     Future.microtask(() {
       Navigator.of(_navigatorKey.currentContext!).pushAndRemoveUntil(
         FadeInPageRoute(
@@ -181,6 +185,7 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
                 seasonId: item.id,
                 scrapper: scrapper,
                 needUpdate: () => refresh = true,
+                nextToPlay: nextToPlay,
               ),
         ),
         (_) => false,
@@ -246,11 +251,12 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
 }
 
 class _SeasonPage extends StatefulWidget {
-  const _SeasonPage({super.key, required this.seasonId, required this.scrapper, required this.needUpdate});
+  const _SeasonPage({super.key, required this.seasonId, required this.scrapper, required this.needUpdate, this.nextToPlay});
 
   final dynamic seasonId;
   final Scrapper scrapper;
   final VoidCallback needUpdate;
+  final TVEpisode? nextToPlay;
 
   @override
   State<_SeasonPage> createState() => _SeasonPageState();
@@ -263,6 +269,12 @@ class _SeasonPageState extends State<_SeasonPage> {
       future: Api.tvSeasonQueryById(widget.seasonId),
       builder: (context, snapshot) {
         final item = snapshot.requireData;
+        final int foundIndex = widget.nextToPlay?.episode == null
+          ? -1
+          : item.episodes.indexWhere((ep) => ep.episode == widget.nextToPlay?.episode);
+
+        final focusIndex = foundIndex != -1 ? foundIndex : 0;
+
         return CustomScrollView(
           cacheExtent: 1000,
           slivers: [
@@ -357,7 +369,7 @@ class _SeasonPageState extends State<_SeasonPage> {
                 itemBuilder:
                     (context, index) => _EpisodeListTile(
                       key: UniqueKey(),
-                      autofocus: index == 0,
+                      autofocus: index == focusIndex,
                       episode: item.episodes[index],
                       scrapper: widget.scrapper,
                       onTap: () async {
