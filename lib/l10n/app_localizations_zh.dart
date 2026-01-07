@@ -354,7 +354,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String errorDetails(String code, Object message) {
-    String _temp0 = intl.Intl.selectLogic(code, {'other': ''});
+    String _temp0 = intl.Intl.selectLogic(code, {'other': '$message'});
     return '$_temp0';
   }
 
