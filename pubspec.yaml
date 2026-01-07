@@ -22,7 +22,7 @@ dependencies:
   dio_cache_interceptor: ^4.0.5
   file_picker:
     path: packages/file_picker
-  flutter_archive: ^6.0.3
+  flutter_archive: ^6.0.4
   flutter_bloc: ^9.1.0
   flutter_slidable: ^4.0.3
   flutter_spinkit: ^5.2.2
