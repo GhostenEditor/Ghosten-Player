@@ -186,7 +186,7 @@ class Client extends ApiClient {
       DioExceptionType.unknown => PlatformException(
         code:
             exception.response?.headers.value('Error-Code') ?? ((exception.response?.statusCode ?? 0) * 100).toString(),
-        message: exception.response?.data.toString() ?? exception.message,
+        message: exception.response?.data?.toString() ?? exception.message,
         stacktrace: exception.stackTrace.toString(),
       ),
     };
