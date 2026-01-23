@@ -59,9 +59,12 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
           if (item.seasons.isNotEmpty) {
             final nextToPlaySeasonId = item.nextToPlay?.seasonId;
             _switchSeason(
-              item.seasons.firstWhere((it) => currentSeason.value == null
-                ? (nextToPlaySeasonId == null || it.id == nextToPlaySeasonId)
-                : it.id == currentSeason.value?.id),
+              item.seasons.firstWhere(
+                (it) =>
+                    currentSeason.value == null
+                        ? (nextToPlaySeasonId == null || it.id == nextToPlaySeasonId)
+                        : it.id == currentSeason.value?.id,
+              ),
               widget.initialData.scrapper,
             );
           }
@@ -251,7 +254,13 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
 }
 
 class _SeasonPage extends StatefulWidget {
-  const _SeasonPage({super.key, required this.seasonId, required this.scrapper, required this.needUpdate, this.nextToPlay});
+  const _SeasonPage({
+    super.key,
+    required this.seasonId,
+    required this.scrapper,
+    required this.needUpdate,
+    this.nextToPlay,
+  });
 
   final dynamic seasonId;
   final Scrapper scrapper;
@@ -269,9 +278,10 @@ class _SeasonPageState extends State<_SeasonPage> {
       future: Api.tvSeasonQueryById(widget.seasonId),
       builder: (context, snapshot) {
         final item = snapshot.requireData;
-        final int nextToPlayIndex = widget.nextToPlay?.episode == null
-          ? -1
-          : item.episodes.indexWhere((ep) => ep.episode == widget.nextToPlay?.episode);
+        final nextToPlayIndex =
+            widget.nextToPlay?.episode == null
+                ? -1
+                : item.episodes.indexWhere((ep) => ep.episode == widget.nextToPlay?.episode);
 
         final focusIndex = nextToPlayIndex != -1 ? nextToPlayIndex : 0;
 
