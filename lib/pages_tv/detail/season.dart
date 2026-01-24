@@ -434,7 +434,7 @@ class _EpisodeListTile extends StatelessWidget {
                         child: IconTheme(
                           data: IconTheme.of(
                             context,
-                          ).copyWith(size: 12, color: Theme.of(context).colorScheme.onInverseSurface),
+                          ).copyWith(size: 12, color: Colors.white),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             spacing: 4,
@@ -443,17 +443,14 @@ class _EpisodeListTile extends StatelessWidget {
                               if (episode.favorite) const Badge(label: Icon(Icons.favorite_rounded)),
                               if (episode.downloaded) const Badge(label: Icon(Icons.download_rounded)),
                               if (episode.duration != null && episode.duration != Duration.zero)
-                                IconTheme(
-                                  data: IconThemeData(color: Theme.of(context).colorScheme.onInverseSurface, size: 14),
-                                  child: Badge(
-                                    label: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      spacing: 2,
-                                      children: [
-                                        const Icon(Icons.access_time_filled_rounded),
-                                        Text(episode.duration!.toDisplay()),
-                                      ],
-                                    ),
+                                Badge(
+                                  label: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    spacing: 2,
+                                    children: [
+                                      const Icon(Icons.access_time_filled_rounded),
+                                      Text(episode.duration!.toDisplay()),
+                                    ],
                                   ),
                                 ),
                             ],
