@@ -29,7 +29,7 @@ body:
         - label: |
             I can provide detailed explanations or test cases while the developers are working on this issue. / 我能够在开发者处理该Issue时提供详细的细节说明或测试
         - label: |
-            I will track the status of the issues during my term. | 我会期的跟踪Issue的状态
+            I will track the status of the issues during my term. / 我会期的跟踪Issue的状态
     validations:
       required: true
 
