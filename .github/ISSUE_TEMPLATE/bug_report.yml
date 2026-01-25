@@ -15,13 +15,6 @@ body:
         > [!IMPORTANT]
         > Each issue should correspond to a single problem. Avoid listing multiple problems within a single issue, as this makes tracking problems very difficult!
         > 一个 Issue 对应一个问题，不要在一个 Issue 中拉清单写一堆问题，这很不利于问题的追踪！
-        
-        ### Priority Explanation/ 优先级说明：
-        
-        - Low / 低:  This bug is rarely encountered and does not seriously affect normal use. / 很少遇到该Bug且该Bug对正常使用不会产生严重影响
-        - Medium / 中: This bug occurs frequently, but it does not seriously affect normal usage. / 经常遇到该Bug但该Bug对正常使用不会产生严重影响
-        - High / 高: This bug is frequently encountered or it severely impacts normal usage. / 经常遇到该Bug或该Bug对正常使用产生严重影响
-
 
   - type: checkboxes
     attributes:
