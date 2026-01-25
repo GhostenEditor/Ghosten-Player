@@ -432,9 +432,7 @@ class _EpisodeListTile extends StatelessWidget {
                       BadgeTheme(
                         data: BadgeTheme.of(context).copyWith(backgroundColor: Colors.black87, textColor: Colors.white),
                         child: IconTheme(
-                          data: IconTheme.of(
-                            context,
-                          ).copyWith(size: 12, color: Colors.white),
+                          data: IconTheme.of(context).copyWith(size: 12, color: Colors.white),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             spacing: 4,
