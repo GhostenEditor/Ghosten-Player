@@ -49,6 +49,8 @@ class _TVListTileState extends State<TVListTile> with SingleTickerProviderStateM
       backgroundColor: Colors.transparent,
       child: ListTile(
         dense: widget.dense,
+        selected: widget.selected,
+        selectedTileColor: Theme.of(context).colorScheme.secondaryContainer,
         enabled: widget.onTap != null,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         autofocus: widget.autofocus ?? false,

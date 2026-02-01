@@ -3,18 +3,42 @@ description: |
   Please report any bugs you encounter here
   请通过这里反馈遇到的 Bug 类问题
 labels: [ bug ]
+assignees:
+  - GhostenEditor
 body:
   - type: markdown
     attributes:
       value: |
         Thank you very much for your feedback, which will help me improve this project. Before that, please fill in the following form as detailed as possible to facilitate better positioning of the problem.
         非常感谢您的问题反馈，帮助我完善此项目，在此之前，请尽可能详细填写以下表单，方便更好的定位问题。
+        
+        > [!IMPORTANT]
+        > Each issue should correspond to a single problem. Avoid listing multiple problems within a single issue, as this makes tracking problems very difficult!
+        > 一个 Issue 对应一个问题，不要在一个 Issue 中拉清单写一堆问题，这很不利于问题的追踪！
+
+  - type: checkboxes
+    attributes:
+      label: 请确认以下事项 / Please make sure of the following things
+      description: |
+        You must check all of the following items, otherwise your issue may be closed immediately. Alternatively, you can go to the [Discussions](https://github.com/GhostenEditor/Ghosten-Player/discussions).
+        
+        您必须勾选以下所有内容，否则您的issue可能会被直接关闭。或者您可以去[讨论区](https://github.com/GhostenEditor/Ghosten-Player/discussions)
+      options:
+        - label: |
+            I'm certain there are no duplicate issues. / 我确定没有重复的issue
+        - label: |
+            I can provide detailed explanations or test cases while the developers are working on this issue. / 我能够在开发者处理该Issue时提供详细的细节说明或测试
+        - label: |
+            I will track the status of the issues during my term. / 我会期的跟踪Issue的状态
+    validations:
+      required: true
 
   - type: input
     attributes:
       label: Version / 版本
-      placeholder: |
+      description: |
         Please provide the specific version number of this repository, such as 1.0.0
+        
         您使用的是哪个版本的软件？请不要使用最新版/latest作为答案。
     validations:
       required: true
@@ -24,6 +48,7 @@ body:
       label: Running platform / 运行平台
       description: |
         What platform are you running this repository on?
+        
         您在什么平台上运行的该项目？
       options:
         - Android Phone / 安卓手机
@@ -36,10 +61,10 @@ body:
     attributes:
       label: Device model / 设备型号
       placeholder: |
-        Such as Redmi K70
-        比如Redmi K70
+        Such as Redmi K70 / 比如Redmi K70
       description: |
         The device model you are using
+        
         您使用的设备型号
 
   - type: input
@@ -54,6 +79,7 @@ body:
       label: Problem description / 问题描述
       description: |
         Please describe the problem you encountered in detail. If it is a UI-related problem, it would be best if you can provide screenshots.
+        
         请详细描述您遇到的问题，如果是UI相关问题，最好能提供截图
     validations:
       required: true
@@ -64,21 +90,44 @@ body:
       description: |
         Please provide steps to reproduce the problem to help locate the problem.
         If the problem is related to the player, this is a required field. You need to explain the source of the media file, encoding information, etc., and whether the problem can be stably reproduced.
+        
         请提供复现该问题的步骤，方便定位问题所在。
         如果是播放器相关问题，此为必填项。需说明媒体文件的来源，编码信息等，以及能否稳定复现。
       placeholder: |
         1.
         2.
         3.
-        
+
   - type: textarea
     attributes:
       label: Log / 日志
       description: |
         There is a log function in the settings. You can copy the error log by long pressing it, or upload a screenshot directly.
+        
         设置中有日志功能，长按报错的日志可以进行复制，也可直接上传截图
       placeholder: |
         1.
         2.
         3.
-  
+  - type: dropdown
+    attributes:
+      label: Priority / 优先级
+      description: |
+        Priority details are provided below.
+
+        优先级说明见下方
+      options:
+        - Low / 低
+        - Medium / 中
+        - High / 高
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ### Priority Explanation/ 优先级说明：
+
+        - Low / 低:  This bug is rarely encountered and does not seriously affect normal use. / 很少遇到该Bug且该Bug对正常使用不会产生严重影响
+        - Medium / 中: This bug occurs frequently, but it does not seriously affect normal usage. / 经常遇到该Bug但该Bug对正常使用不会产生严重影响
+        - High / 高: This bug is frequently encountered or it severely impacts normal usage. / 经常遇到该Bug或该Bug对正常使用产生严重影响

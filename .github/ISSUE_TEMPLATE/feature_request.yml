@@ -3,12 +3,33 @@ description: |
   Please submit your feedback on new features here
   请通过这里反馈对新功能的需求
 labels: [enhancement]
+assignees:
+  - GhostenEditor
 body:
   - type: markdown
     attributes:
       value: |
         **Before raising a request, please search for duplicate issues, especially those with the `enhancement` label.**
         **在此提出需求前，请先搜索是否存在重复的issues，尤其是带有`enhancement`标签的**
+        
+        > [!IMPORTANT]
+        > Each issue should correspond to a single problem. Avoid listing multiple problems within a single issue, as this makes tracking problems very difficult!
+        > 一个 Issue 对应一个问题，不要在一个 Issue 中拉清单写一堆问题，这很不利于问题的追踪！
+
+  - type: checkboxes
+    attributes:
+      label: 请确认以下事项 / Please make sure of the following things
+      description: |
+        You must check all of the following items, otherwise your issue may be closed immediately. Alternatively, you can go to the [Discussions](https://github.com/GhostenEditor/Ghosten-Player/discussions).
+        
+        您必须勾选以下所有内容，否则您的issue可能会被直接关闭。或者您可以去[讨论区](https://github.com/GhostenEditor/Ghosten-Player/discussions)
+      options:
+        - label: |
+            I'm certain there are no duplicate issues. / 我确定没有重复的issue
+        - label: |
+            I can provide detailed explanations or test cases while the developers are working on this issue. / 我能够在开发者处理该Issue时提供详细的细节说明或测试
+        - label: |
+            I will track the status of the issues during my term. / 我会期的跟踪Issue的状态
 
   - type: textarea
     attributes:
