@@ -273,15 +273,10 @@ class _SeasonPage extends StatefulWidget {
 
 class _SeasonPageState extends State<_SeasonPage> {
   ScrollController? _scrollController;
-  double? _lastScrollOffset;
-  double? _lastLayoutWidth;
 
   @override
   void didUpdateWidget(covariant _SeasonPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.seasonId != widget.seasonId || oldWidget.nextToPlay?.episode != widget.nextToPlay?.episode) {
-      _lastScrollOffset = null;
-    }
   }
 
   @override
@@ -310,8 +305,6 @@ class _SeasonPageState extends State<_SeasonPage> {
     if (_scrollController == null) {
       _scrollController?.dispose();
       _scrollController = ScrollController(initialScrollOffset: initialOffset);
-      _lastScrollOffset = initialOffset;
-      _lastLayoutWidth = layoutWidth;
     }
   }
 
@@ -327,7 +320,7 @@ class _SeasonPageState extends State<_SeasonPage> {
                 : item.episodes.indexWhere((ep) => ep.episode == widget.nextToPlay?.episode);
 
         final focusIndex = nextToPlayIndex != -1 ? nextToPlayIndex : 0;
-        final shouldAutoScroll = widget.nextToPlay != null && focusIndex > 2;
+        final shouldAutoScroll = widget.nextToPlay != null && focusIndex > 1;
 
         return LayoutBuilder(
           builder: (context, constraints) {
