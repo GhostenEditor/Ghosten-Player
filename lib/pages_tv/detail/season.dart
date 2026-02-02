@@ -307,7 +307,7 @@ class _SeasonPageState extends State<_SeasonPage> {
                 itemExtent / 2
             : 0.0;
 
-    if (_scrollController == null || _lastScrollOffset != initialOffset || _lastLayoutWidth != layoutWidth) {
+    if (_scrollController == null) {
       _scrollController?.dispose();
       _scrollController = ScrollController(initialScrollOffset: initialOffset);
       _lastScrollOffset = initialOffset;
