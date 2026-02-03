@@ -31,6 +31,7 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _navigatorKey = GlobalKey<NavigatorState>();
   final _drawerNavigatorKey = GlobalKey<NavigatorState>();
+  bool hasInited = false;
 
   @override
   void dispose() {
@@ -56,17 +57,20 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
         future: Api.tvSeriesQueryById(widget.initialData.id),
         builder: (context, snapshot) {
           final item = snapshot.requireData;
-          if (item.seasons.isNotEmpty) {
-            final nextToPlaySeasonId = item.nextToPlay?.seasonId;
-            _switchSeason(
-              item.seasons.firstWhere(
-                (it) =>
-                    currentSeason.value == null
-                        ? (nextToPlaySeasonId == null || it.id == nextToPlaySeasonId)
-                        : it.id == currentSeason.value?.id,
-              ),
-              widget.initialData.scrapper,
-            );
+          if (!hasInited) {
+            if (item.seasons.isNotEmpty) {
+              final nextToPlaySeasonId = item.nextToPlay?.seasonId;
+              _switchSeason(
+                item.seasons.firstWhere(
+                  (it) =>
+                      currentSeason.value == null
+                          ? (nextToPlaySeasonId == null || it.id == nextToPlaySeasonId)
+                          : it.id == currentSeason.value?.id,
+                ),
+                widget.initialData.scrapper,
+              );
+            }
+            hasInited = true;
           }
           return DetailScaffold(
             item: item,
@@ -308,6 +312,7 @@ class _SeasonPageState extends State<_SeasonPage> {
     }
   }
 
+  bool hasInited = false;
   @override
   Widget build(BuildContext context) {
     return FutureBuilderHandler(
@@ -315,20 +320,23 @@ class _SeasonPageState extends State<_SeasonPage> {
       builder: (context, snapshot) {
         final item = snapshot.requireData;
         final nextToPlayIndex =
-            widget.nextToPlay?.episode == null
+            widget.nextToPlay?.episode == null && widget.nextToPlay?.seasonId != item.id
                 ? -1
                 : item.episodes.indexWhere((ep) => ep.episode == widget.nextToPlay?.episode);
 
         final focusIndex = nextToPlayIndex != -1 ? nextToPlayIndex : 0;
-        final shouldAutoScroll = widget.nextToPlay != null && focusIndex > 1;
 
         return LayoutBuilder(
           builder: (context, constraints) {
-            _ensureScrollController(
-              layoutWidth: constraints.maxWidth,
-              focusIndex: focusIndex,
-              shouldAutoScroll: shouldAutoScroll,
-            );
+            if (!hasInited) {
+              final shouldAutoScroll = widget.nextToPlay != null && focusIndex > 1;
+              _ensureScrollController(
+                layoutWidth: constraints.maxWidth,
+                focusIndex: focusIndex,
+                shouldAutoScroll: shouldAutoScroll,
+              );
+              hasInited = true;
+            }
 
             return CustomScrollView(
               controller: _scrollController,
@@ -424,6 +432,7 @@ class _SeasonPageState extends State<_SeasonPage> {
                     itemCount: item.episodes.length,
                     itemBuilder:
                         (context, index) => _EpisodeListTile(
+                          key: ValueKey(item.episodes[index].id),
                           autofocus: index == focusIndex,
                           episode: item.episodes[index],
                           scrapper: widget.scrapper,
