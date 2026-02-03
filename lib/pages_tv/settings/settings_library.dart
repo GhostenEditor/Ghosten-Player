@@ -68,7 +68,7 @@ class _LibraryManageState extends State<LibraryManage> {
                                 itemCount: snapshot.requireData.length,
                                 itemBuilder: (context, index) {
                                   final item = snapshot.requireData[index];
-                                  final data = jsonDecode(item.data ?? '{}') as Json;
+                                  final data = jsonDecode(item.data ?? '{}') as Map<String, dynamic>;
                                   return SlidableSettingItem(
                                     actions: [
                                       if (item.status == ScheduleTaskStatus.running)

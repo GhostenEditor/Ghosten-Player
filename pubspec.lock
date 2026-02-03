@@ -12,10 +12,12 @@ packages:
   api:
     dependency: "direct main"
     description:
-      path: "packages/api"
-      relative: true
-    source: path
-    version: "0.0.0"
+      path: "."
+      ref: main
+      resolved-ref: "956824151f692bade56045a98107c9062de5f4bd"
+      url: "https://github.com/GhostenEditor/Ghosten-Player-api-flutter.git"
+    source: git
+    version: "0.0.1"
   args:
     dependency: transitive
     description:
@@ -451,6 +453,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
+  msgpack_dart:
+    dependency: transitive
+    description:
+      name: msgpack_dart
+      sha256: c2d235ed01f364719b5296aecf43ac330f0d7bc865fa134d0d7910a40454dffb
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   nested:
     dependency: transitive
     description:

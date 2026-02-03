@@ -24,6 +24,7 @@ import 'pages/utils/utils.dart';
 import 'platform_api.dart';
 import 'providers/user_config.dart';
 import 'theme.dart';
+import 'utils/check_update.dart';
 import 'utils/utils.dart';
 
 void main(List<String> args) async {
@@ -46,11 +47,7 @@ void main(List<String> args) async {
     Provider.debugCheckInvalidValueType = null;
     if (!kIsWeb && userConfig.shouldCheckUpdate()) {
       Future.microtask(() async {
-        final data = await Api.checkUpdate(
-          '${userConfig.githubProxy}$updateUrl',
-          userConfig.updatePrerelease,
-          Version.fromString(appVersion),
-        );
+        final data = await checkUpdate(userConfig.updatePrerelease);
         if (data != null) {
           showModalBottomSheet(
             context: navigatorKey.currentContext!,

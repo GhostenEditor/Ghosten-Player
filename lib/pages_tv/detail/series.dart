@@ -325,8 +325,8 @@ class _TVDetailState extends State<TVDetail> with ActionMixin {
                 ).push<bool>(FadeInPageRoute(builder: (context) => SeriesMetadata(series: item)));
                 if ((res ?? false) && context.mounted) setState(() => refresh = true);
               }),
-              if (item.scrapper.id != null)
-                buildHomeAction(context, ImdbUri(MediaType.series, item.scrapper.id!).toUri()),
+              if (item.scraper.id != null)
+                buildHomeAction(context, ImdbUri(MediaType.series, item.scraper.id!).toUri()),
               const Divider(),
               buildDeleteAction(context, () => Api.tvSeriesDeleteById(item.id)),
             ],

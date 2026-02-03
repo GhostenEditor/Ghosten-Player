@@ -154,10 +154,18 @@ class _SettingsLoginPageState extends State<SettingsLoginPage> {
                         key: ValueKey(_alipan),
                         items: _alipan,
                         onComplete: (data) async {
-                          data['type'] = DriverType.alipan.name;
                           final flag = await showDialog<bool>(
                             context: context,
-                            builder: (context) => _buildLoginLoading(Api.driverInsert(data)),
+                            builder:
+                                (context) => _buildLoginLoading(
+                                  Api.driverInsert(
+                                    DriverType.alipan,
+                                    url: data['url'],
+                                    username: data['username'],
+                                    password: data['password'],
+                                    token: data['token'],
+                                  ),
+                                ),
                           );
                           if ((flag ?? false) && context.mounted) {
                             Navigator.of(context).pop(true);
@@ -170,10 +178,18 @@ class _SettingsLoginPageState extends State<SettingsLoginPage> {
                         key: ValueKey(_webdav),
                         items: _webdav,
                         onComplete: (data) async {
-                          data['type'] = DriverType.webdav.name;
                           final flag = await showDialog<bool>(
                             context: context,
-                            builder: (context) => _buildLoginLoading(Api.driverInsert(data)),
+                            builder:
+                                (context) => _buildLoginLoading(
+                                  Api.driverInsert(
+                                    DriverType.webdav,
+                                    url: data['url'],
+                                    username: data['username'],
+                                    password: data['password'],
+                                    token: data['token'],
+                                  ),
+                                ),
                           );
                           if ((flag ?? false) && context.mounted) {
                             Navigator.of(context).pop(true);
@@ -188,7 +204,16 @@ class _SettingsLoginPageState extends State<SettingsLoginPage> {
                             onComplete: (data) async {
                               final flag = await showDialog<bool>(
                                 context: context,
-                                builder: (context) => _buildLoginLoading(Api.driverInsert(data)),
+                                builder:
+                                    (context) => _buildLoginLoading(
+                                      Api.driverInsert(
+                                        DriverType.quark,
+                                        url: data['url'],
+                                        username: data['username'],
+                                        password: data['password'],
+                                        token: data['token'],
+                                      ),
+                                    ),
                               );
                               if ((flag ?? false) && context.mounted) {
                                 Navigator.of(context).pop(true);
@@ -251,7 +276,7 @@ class _SettingsLoginPageState extends State<SettingsLoginPage> {
 class _QuarkLogin extends StatefulWidget {
   const _QuarkLogin({required this.onComplete});
 
-  final ValueChanged<dynamic> onComplete;
+  final ValueChanged<Map<String, dynamic>> onComplete;
 
   @override
   State<_QuarkLogin> createState() => _QuarkLoginState();

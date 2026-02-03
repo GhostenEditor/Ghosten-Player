@@ -75,12 +75,15 @@ class _LiveEditPageState extends State<LiveEditPage> {
   Future<void> _onSubmit(BuildContext context) async {
     if (_formGroup.validate()) {
       if (widget.item == null) {
-        final resp = await showNotification(context, Api.playlistInsert(_formGroup.data));
+        final resp = await showNotification(
+          context,
+          Api.playlistInsert(_formGroup.data['url'], _formGroup.data['title']),
+        );
         if (resp?.error == null && context.mounted) Navigator.of(context).pop(true);
       } else {
         final resp = await showNotification(
           context,
-          Api.playlistUpdateById({..._formGroup.data, 'id': widget.item?.id}),
+          Api.playlistUpdateById(widget.item!.id, _formGroup.data['url'], _formGroup.data['title']),
         );
         if (resp?.error == null && context.mounted) Navigator.of(context).pop(true);
       }

@@ -1,4 +1,5 @@
 import 'package:api/api.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -19,10 +20,9 @@ import 'placeholders/episode.dart';
 import 'utils/tmdb_uri.dart';
 
 class EpisodeDetail extends StatefulWidget {
-  const EpisodeDetail({super.key, required this.tvEpisodeId, required this.scrapper, this.initialData});
+  const EpisodeDetail({super.key, required this.tvEpisodeId, this.initialData});
 
   final dynamic tvEpisodeId;
-  final Scrapper scrapper;
   final TVEpisode? initialData;
 
   @override
@@ -161,7 +161,10 @@ class _EpisodeDetailState extends State<EpisodeDetail> with ActionMixin<EpisodeD
                                                       ? null
                                                       : () => showNotification(
                                                         context,
-                                                        Api.downloadTaskCreate(item.fileId),
+                                                        Api.downloadTaskCreate(
+                                                          item.fileId,
+                                                          FilePicker.requestStoragePermission(),
+                                                        ),
                                                         successText: AppLocalizations.of(context)!.tipsForDownload,
                                                       ),
                                               child: ListTile(
@@ -174,12 +177,12 @@ class _EpisodeDetailState extends State<EpisodeDetail> with ActionMixin<EpisodeD
                                                 leading: const Icon(Icons.download_outlined),
                                               ),
                                             ),
-                                            if (widget.scrapper.id != null)
+                                            if (item.scraper.id != null)
                                               buildHomeAction(
                                                 context,
                                                 ImdbUri(
                                                   MediaType.episode,
-                                                  widget.scrapper.id!,
+                                                  item.scraper.id!,
                                                   season: item.season,
                                                   episode: item.episode,
                                                 ).toUri(),

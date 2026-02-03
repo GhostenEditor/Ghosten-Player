@@ -86,7 +86,7 @@ class _LibraryManageState extends State<LibraryManage> {
                               ),
                               child: Builder(
                                 builder: (context) {
-                                  final data = jsonDecode(item.data ?? '{}') as Json;
+                                  final data = jsonDecode(item.data ?? '{}') as Map<String, dynamic>;
                                   return switch (item.type) {
                                     ScheduleTaskType.syncLibrary => ListTile(
                                       dense: true,

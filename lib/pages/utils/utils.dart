@@ -181,7 +181,7 @@ Future<(int, DriverFile)?> showDriverFilePicker(
                                           const Text(''),
                                           IconButton.filledTonal(
                                             onPressed: () async {
-                                              await Api.requestStorageManagePermission();
+                                              await FilePicker.requestStorageManagePermission();
                                               if (!context.mounted) return;
                                               openFilePicker(item.path);
                                             },
@@ -203,7 +203,7 @@ Future<(int, DriverFile)?> showDriverFilePicker(
                                 child: IconButton.filledTonal(
                                   onPressed: () async {
                                     final defaultPath = await FilePicker.externalStoragePath ?? '/';
-                                    await Api.requestStoragePermission();
+                                    await FilePicker.requestStoragePermission();
                                     if (!context.mounted) return;
                                     openFilePicker(defaultPath);
                                   },

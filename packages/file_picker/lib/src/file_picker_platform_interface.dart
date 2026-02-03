@@ -36,7 +36,11 @@ abstract class FilePickerPlatform extends PlatformInterface {
     throw UnimplementedError('externalUsbStorages() has not been implemented.');
   }
 
-  Future<bool> requestStoragePermission() {
+  Future<void> requestStoragePermission() {
+    throw UnimplementedError('requestStoragePermission() has not been implemented.');
+  }
+
+  Future<void> requestStorageManagePermission() async {
     throw UnimplementedError('requestStoragePermission() has not been implemented.');
   }
 
@@ -60,7 +64,7 @@ abstract class FilePickerPlatform extends PlatformInterface {
 }
 
 class UsbStorage {
-// ignore: avoid_dynamic_calls
+  // ignore: avoid_dynamic_calls
   UsbStorage.fromJson(dynamic json) : desc = json['desc'], path = json['path'];
   final String desc;
   final String path;

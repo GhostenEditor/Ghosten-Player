@@ -1,11 +1,11 @@
 import 'package:api/api.dart';
-import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 import '../../components/error_message.dart';
 import '../../components/no_data.dart';
 import '../../l10n/app_localizations.dart';
+import '../../utils/utils.dart';
 import '../components/setting.dart';
 
 class SettingsLogPage extends StatefulWidget {
@@ -84,9 +84,7 @@ class _SettingsLogPageState extends State<SettingsLogPage> {
                   (context, item, index) => ButtonSettingItem(
                     dense: true,
                     title: Text(item.message),
-                    subtitle: Text(
-                      formatDate(item.time, [yyyy, '-', mm, '-', dd, ' ', HH, ':', nn, ':', ss, '.', SSS]),
-                    ),
+                    subtitle: Text(item.time.formatFull()),
                     leading: Badge(
                       label: SizedBox(
                         width: 24,
@@ -112,8 +110,7 @@ class _SettingsLogPageState extends State<SettingsLogPage> {
                     child: Text('END', style: Theme.of(context).textTheme.labelMedium, textAlign: TextAlign.center),
                   ),
             ),
-            separatorBuilder:
-                (BuildContext context, int index) => const Divider(indent: 18, endIndent: 12, height: 1),
+            separatorBuilder: (BuildContext context, int index) => const Divider(indent: 18, endIndent: 12, height: 1),
           ),
         ),
       ),

@@ -338,6 +338,7 @@ class AppLocalizationsEn extends AppLocalizations {
       '40023': 'Wrong filter type',
       '40024': '',
       '40025': 'Updated $message data, data update failed',
+      '40026': 'message',
       '40101': 'Login verification failed: $message',
       '40102': 'Login failed, please confirm whether the Webdav address and account password are correct!',
       '40103': 'Server account error, please log in again!',

@@ -331,6 +331,7 @@ class AppLocalizationsZh extends AppLocalizations {
       '40023': '过滤类型错误',
       '40024': '',
       '40025': '更新了$message条数据，数据更新失败',
+      '40026': 'message',
       '40101': '登录验证失败: $message',
       '40102': '登录失败，请确认Webdav的地址以及账号密码是否正确!',
       '40103': 'Server 账号错误，请重新登录！',

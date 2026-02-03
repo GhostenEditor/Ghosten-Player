@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import '../../components/no_data.dart';
 import '../../const.dart';
 import '../../l10n/app_localizations.dart';
+import '../../utils/check_update.dart';
 import '../utils/notification.dart';
 
 class SettingsSyncPage extends StatefulWidget {

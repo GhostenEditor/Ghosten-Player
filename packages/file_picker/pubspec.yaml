@@ -12,10 +12,8 @@ dependencies:
   flutter_web_plugins:
     sdk: flutter
   animations: ^2.0.0
-  date_format: ^2.0.0
   infinite_scroll_pagination: ^5.1.0
   plugin_platform_interface: ^2.0.2
-  shimmer: ^3.0.0
 
 dev_dependencies:
   flutter_test:

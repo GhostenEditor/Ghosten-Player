@@ -1,5 +1,4 @@
 import 'package:api/api.dart';
-import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
@@ -8,6 +7,7 @@ import 'package:readmore/readmore.dart';
 import '../../components/error_message.dart';
 import '../../components/no_data.dart';
 import '../../l10n/app_localizations.dart';
+import '../../utils/utils.dart';
 
 class SettingsLogPage extends StatefulWidget {
   const SettingsLogPage({super.key});
@@ -122,9 +122,7 @@ class _SettingsLogPageState extends State<SettingsLogPage> {
                       trimLines: 8,
                       colorClickableText: Theme.of(context).colorScheme.primary,
                     ),
-                    subtitle: Text(
-                      formatDate(item.time, [yyyy, '-', mm, '-', dd, ' ', HH, ':', nn, ':', ss, '.', SSS]),
-                    ),
+                    subtitle: Text(item.time.formatFull()),
                     leading: Badge(
                       label: SizedBox(
                         width: 40,

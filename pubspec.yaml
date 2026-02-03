@@ -12,7 +12,9 @@ dependencies:
   intl: any
   animations: ^2.1.1
   api:
-    path: packages/api
+    git:
+      url: https://github.com/GhostenEditor/Ghosten-Player-api-flutter.git
+      ref: main
   bluetooth:
     path: packages/bluetooth
   cached_network_image: ^3.4.0

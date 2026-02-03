@@ -22,7 +22,7 @@ class CastDeviceAdaptor extends CastDevice {
 
   factory CastDeviceAdaptor.fromJson(dynamic data) {
     // ignore: avoid_dynamic_calls
-    return CastDeviceAdaptor(id: data['id'], friendlyName: data['friendlyName']);
+    return CastDeviceAdaptor(id: data[0], friendlyName: data[1]);
   }
 
   late final Stream<(int, int)> _stream = PlatformApi.screenEvent
@@ -33,7 +33,7 @@ class CastDeviceAdaptor extends CastDevice {
             (_) => Stream.fromFuture(
               Future.microtask(() async {
                 try {
-                  final data = await Api.dlnaGetPositionInfo(id) as Json;
+                  final data = await Api.dlnaGetPositionInfo(id) as Map<String, dynamic>;
                   final duration = data['duration'];
                   final position = data['position'];
                   if (duration is int && position is int) {

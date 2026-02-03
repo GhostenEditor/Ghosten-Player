@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Configuration
+import android.os.Build
 import android.provider.Settings
 import android.window.BackEvent
 import androidx.annotation.RequiresApi
@@ -12,9 +13,13 @@ import io.flutter.Build.API_LEVELS
 import io.flutter.embedding.android.FlutterFragment
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
+import io.flutter.plugin.common.MethodCall
+import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugins.GeneratedPluginRegistrant
 
-class MainFragment : FlutterFragment() {
+class MainFragment : FlutterFragment(), MethodCallHandler {
+    private var methodChannel: MethodChannel? = null
     private var deeplink: String? = null
     private var pipChannel: EventChannel? = null
     private var pipSink: EventChannel.EventSink? = null
@@ -27,7 +32,10 @@ class MainFragment : FlutterFragment() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         GeneratedPluginRegistrant.registerWith(flutterEngine)
-        pipChannel = EventChannel(flutterEngine.dartExecutor.binaryMessenger, "$PLUGIN_NAMESPACE/pip")
+        methodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, PLUGIN_NAMESPACE)
+        methodChannel!!.setMethodCallHandler(this)
+        pipChannel =
+            EventChannel(flutterEngine.dartExecutor.binaryMessenger, "$PLUGIN_NAMESPACE/pip")
         pipChannel!!.setStreamHandler(object : EventChannel.StreamHandler {
             override fun onListen(args: Any?, sink: EventChannel.EventSink?) {
                 pipSink = sink
@@ -38,7 +46,8 @@ class MainFragment : FlutterFragment() {
                 pipSink = null
             }
         })
-        screenChannel = EventChannel(flutterEngine.dartExecutor.binaryMessenger, "$PLUGIN_NAMESPACE/screen")
+        screenChannel =
+            EventChannel(flutterEngine.dartExecutor.binaryMessenger, "$PLUGIN_NAMESPACE/screen")
         screenChannel!!.setStreamHandler(object : EventChannel.StreamHandler {
             override fun onListen(args: Any?, sink: EventChannel.EventSink?) {
                 screenSink = sink
@@ -50,7 +59,8 @@ class MainFragment : FlutterFragment() {
                 screenSink = null
             }
         })
-        deeplinkChannel = EventChannel(flutterEngine.dartExecutor.binaryMessenger, "$PLUGIN_NAMESPACE/deeplink")
+        deeplinkChannel =
+            EventChannel(flutterEngine.dartExecutor.binaryMessenger, "$PLUGIN_NAMESPACE/deeplink")
         deeplinkChannel!!.setStreamHandler(object : EventChannel.StreamHandler {
             override fun onListen(args: Any?, sink: EventChannel.EventSink?) {
                 deeplinkSink = sink
@@ -63,6 +73,15 @@ class MainFragment : FlutterFragment() {
             }
         })
     }
+
+
+    override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
+        when (call.method) {
+            "arch" -> result.success(arch())
+            else -> result.notImplemented()
+        }
+    }
+
 
     override fun onFlutterUiDisplayed() {
         if (Settings.Global.getFloat(
@@ -130,11 +149,22 @@ class MainFragment : FlutterFragment() {
         }
     }
 
+    private fun arch(): String {
+        return if (Build.SUPPORTED_ABIS.isNotEmpty()) {
+            Build.SUPPORTED_ABIS[0]
+        } else {
+            "unknown"
+        }
+    }
+
     private fun ensureAlive() {
         checkNotNull(host) { "Cannot execute method on a destroyed FlutterActivityAndFragmentDelegate." }
     }
 
-    fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
+    fun onPictureInPictureModeChanged(
+        isInPictureInPictureMode: Boolean,
+        newConfig: Configuration
+    ) {
         pipSink?.success(isInPictureInPictureMode)
     }
 
@@ -157,4 +187,5 @@ class MainFragment : FlutterFragment() {
         const val SCREEN_MODE_OFF = "off"
         const val SCREEN_MODE_PRESENT = "present"
     }
+
 }

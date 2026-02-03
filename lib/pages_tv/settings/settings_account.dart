@@ -162,7 +162,7 @@ class AccountPreference extends StatelessWidget {
       child: FutureBuilderHandler(
         future: Api.driverSettingQueryById(account.id),
         builder: (context, snapshot) {
-          final data = snapshot.requireData!;
+          final data = snapshot.requireData;
           proxy = data['proxy'] ?? false;
           concurrency = data['concurrency'];
           sliceSize = data['sliceSize'];

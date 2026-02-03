@@ -1,4 +1,3 @@
-import 'package:api/api.dart';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +10,7 @@ import '../../components/markdown_viewer.dart';
 import '../../const.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/user_config.dart';
+import '../../utils/check_update.dart';
 import '../../utils/utils.dart';
 import '../components/keyboard_scroll.dart';
 
@@ -28,7 +28,7 @@ class _SettingsUpdateState extends State<SettingsUpdate> {
       body: Padding(
         padding: const EdgeInsets.only(left: 60),
         child: FutureBuilder(
-          future: _checkUpdate(context),
+          future: checkUpdate(context.read<UserConfig>().updatePrerelease),
           builder: (context, snapshot) {
             switch (snapshot.connectionState) {
               case ConnectionState.waiting:
@@ -171,15 +171,6 @@ class _SettingsUpdateState extends State<SettingsUpdate> {
       ),
     );
   }
-
-  Future<UpdateData?> _checkUpdate(BuildContext context) {
-    final userConfig = context.read<UserConfig>();
-    return Api.checkUpdate(
-      '${userConfig.githubProxy}$updateUrl',
-      userConfig.updatePrerelease,
-      Version.fromString(appVersion),
-    );
-  }
 }
 
 class _SettingsUpdating extends StatefulWidget {
@@ -231,8 +222,8 @@ class _SettingsUpdatingState extends State<_SettingsUpdating> {
                 if (_downloading.containsKey(widget.data.url))
                   ListenableBuilder(
                     listenable: _downloading[widget.data.url]!.progress,
-                    builder: (context, _) =>
-                        LinearProgressIndicator(value: _downloading[widget.data.url]!.progress.value),
+                    builder:
+                        (context, _) => LinearProgressIndicator(value: _downloading[widget.data.url]!.progress.value),
                   )
                 else
                   const LinearProgressIndicator(value: 1, color: Colors.greenAccent),
@@ -285,7 +276,7 @@ class _SettingsUpdatingState extends State<_SettingsUpdating> {
 
   Future<void> _download() async {
     final proxy = context.read<UserConfig>().githubProxy;
-    await Api.requestStoragePermission();
+    await FilePicker.requestStoragePermission();
     final url = widget.data.url;
     final task = _DownloadTask(url);
     setState(() {
