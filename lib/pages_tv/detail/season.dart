@@ -132,7 +132,7 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
                                       final item = entry.value;
                                       return SliverToBoxAdapter(
                                         child: Padding(
-                                          padding: const EdgeInsets.symmetric(vertical: 2),
+                                          padding: const EdgeInsets.symmetric(vertical: 4),
                                           child: ButtonSettingItem(
                                             autofocus: item.season == currentSeason.value?.season,
                                             selected: currentSeason.value?.id == entry.value.id,
@@ -363,8 +363,7 @@ class _SeasonPageState extends State<_SeasonPage> {
                 shouldAutoScroll: shouldAutoScroll,
               );
               hasInited = true;
-              widget.scopeManager.scopeList[1].dispose();
-              widget.scopeManager.scopeList[1] = FocusScopeNode();
+              widget.scopeManager.resetItem(1);
             }
 
             return FocusScope(
