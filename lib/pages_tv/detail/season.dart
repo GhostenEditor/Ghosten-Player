@@ -33,13 +33,14 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _navigatorKey = GlobalKey<NavigatorState>();
   final _drawerNavigatorKey = GlobalKey<NavigatorState>();
-  bool hasInited = false;
+  bool _initialized = false;
 
   final _focusScopeManager = FocusScopeManager(2);
 
   @override
   void dispose() {
     currentSeason.dispose();
+    _focusScopeManager.dispose();
     super.dispose();
   }
 
@@ -61,7 +62,7 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
         future: Api.tvSeriesQueryById(widget.initialData.id),
         builder: (context, snapshot) {
           final item = snapshot.requireData;
-          if (!hasInited) {
+          if (!_initialized) {
             if (item.seasons.isNotEmpty) {
               final nextToPlaySeasonId = item.nextToPlay?.seasonId;
               _switchSeason(
@@ -70,11 +71,12 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
                       currentSeason.value == null
                           ? (nextToPlaySeasonId == null || it.id == nextToPlaySeasonId)
                           : it.id == currentSeason.value?.id,
+                  orElse: () => item.seasons.first,
                 ),
                 widget.initialData.scrapper,
               );
             }
-            hasInited = true;
+            _initialized = true;
           }
           return DetailScaffold(
             item: item,
@@ -83,7 +85,7 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
             drawerNavigatorKey: _drawerNavigatorKey,
             endDrawer: _buildEndDrawer(context),
             child: FocusScope(
-              node: _focusScopeManager.scopeList[0],
+              node: _focusScopeManager.scopeAt(0),
               onKeyEvent: (node, event) {
                 if (event is! KeyDownEvent) {
                   return KeyEventResult.ignored;
@@ -302,12 +304,6 @@ class _SeasonPage extends StatefulWidget {
 
 class _SeasonPageState extends State<_SeasonPage> {
   ScrollController? _scrollController;
-  double _lastScrollInitialOffset = 0;
-
-  @override
-  void didUpdateWidget(covariant _SeasonPage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-  }
 
   @override
   void dispose() {
@@ -332,14 +328,13 @@ class _SeasonPageState extends State<_SeasonPage> {
                 itemExtent / 2
             : 0.0;
 
-    if (_scrollController == null || _lastScrollInitialOffset != initialOffset) {
-      _lastScrollInitialOffset = initialOffset;
+    if (_scrollController == null) {
       _scrollController?.dispose();
       _scrollController = ScrollController(initialScrollOffset: initialOffset);
     }
   }
 
-  bool hasInited = false;
+  bool _initialized = false;
   @override
   Widget build(BuildContext context) {
     return FutureBuilderHandler(
@@ -355,19 +350,19 @@ class _SeasonPageState extends State<_SeasonPage> {
 
         return LayoutBuilder(
           builder: (context, constraints) {
-            if (!hasInited) {
+            if (!_initialized) {
               final shouldAutoScroll = widget.nextToPlay != null && focusIndex > 1;
               _ensureScrollController(
                 layoutWidth: constraints.maxWidth,
                 focusIndex: focusIndex,
                 shouldAutoScroll: shouldAutoScroll,
               );
-              hasInited = true;
+              _initialized = true;
               widget.scopeManager.resetItem(1);
             }
 
             return FocusScope(
-              node: widget.scopeManager.scopeList[1],
+              node: widget.scopeManager.scopeAt(1),
               onKeyEvent: (node, event) {
                 if (event is! KeyDownEvent) {
                   return KeyEventResult.ignored;
