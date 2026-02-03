@@ -1,5 +1,6 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../models/models.dart';
@@ -9,6 +10,7 @@ import '../components/focusable_image.dart';
 import '../components/future_builder_handler.dart';
 import '../components/icon_button.dart';
 import '../components/setting.dart';
+import '../utils/focus_scope_manager.dart';
 import '../utils/player.dart';
 import '../utils/utils.dart';
 import 'components/cast_crew.dart';
@@ -32,6 +34,8 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
   final _navigatorKey = GlobalKey<NavigatorState>();
   final _drawerNavigatorKey = GlobalKey<NavigatorState>();
   bool hasInited = false;
+
+  final _focusScopeManager = FocusScopeManager(2);
 
   @override
   void dispose() {
@@ -78,100 +82,118 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
             scaffoldKey: _scaffoldKey,
             drawerNavigatorKey: _drawerNavigatorKey,
             endDrawer: _buildEndDrawer(context),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.displayTitle(),
-                  style: Theme.of(context).textTheme.displaySmall,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 6),
-                RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(text: AppLocalizations.of(context)!.seasonCount(item.seasons.length)),
-                      const TextSpan(text: ' ・ '),
-                      TextSpan(text: item.firstAirDate?.format()),
-                    ],
-                    style: Theme.of(context).textTheme.labelSmall,
+            child: FocusScope(
+              node: _focusScopeManager.scopeList[0],
+              onKeyEvent: (node, event) {
+                if (event is! KeyDownEvent) {
+                  return KeyEventResult.ignored;
+                }
+                TraversalDirection? direction;
+                if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+                  direction = TraversalDirection.right;
+                  final handled = _focusScopeManager.handleDirectionKey(direction, node);
+                  if (handled) {
+                    return KeyEventResult.handled;
+                  }
+                }
+
+                return KeyEventResult.ignored;
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.displayTitle(),
+                    style: Theme.of(context).textTheme.displaySmall,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                const SizedBox(height: 18),
-                Expanded(
-                  child: CustomScrollView(
-                    slivers: [
-                      ListenableBuilder(
-                        listenable: currentSeason,
-                        builder:
-                            (context, _) => SliverMainAxisGroup(
-                              slivers:
-                                  item.seasons.asMap().entries.map((entry) {
-                                    final item = entry.value;
-                                    return SliverToBoxAdapter(
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 2),
-                                        child: ButtonSettingItem(
-                                          autofocus: item.season == currentSeason.value?.season,
-                                          selected: currentSeason.value?.id == entry.value.id,
-                                          title: Text(AppLocalizations.of(context)!.seasonNumber(item.season)),
-                                          subtitle:
-                                              (item.title != null || item.airDate != null)
-                                                  ? Row(
-                                                    children: [
-                                                      if (item.title != null) Text(item.title!),
-                                                      if (item.title != null) const SizedBox(width: 12),
-                                                      if (item.airDate != null)
-                                                        Text(
-                                                          item.airDate!.format(),
-                                                          style: const TextStyle(fontSize: 12),
-                                                        ),
-                                                      if (item.airDate != null) const SizedBox(width: 6),
-                                                      if (item.episodeCount != null)
-                                                        Text(
-                                                          AppLocalizations.of(
-                                                            context,
-                                                          )!.episodeCount(item.episodeCount!),
-                                                          style: const TextStyle(fontSize: 12),
-                                                        ),
-                                                    ],
-                                                  )
-                                                  : null,
-                                          trailing: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              if (item.watched) const Icon(Icons.check),
-                                              if (item.favorite) const SizedBox(width: 8),
-                                              if (item.favorite) const Icon(Icons.favorite_outline_rounded),
-                                            ],
+                  const SizedBox(height: 6),
+                  RichText(
+                    text: TextSpan(
+                      children: [
+                        TextSpan(text: AppLocalizations.of(context)!.seasonCount(item.seasons.length)),
+                        const TextSpan(text: ' ・ '),
+                        TextSpan(text: item.firstAirDate?.format()),
+                      ],
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  Expanded(
+                    child: CustomScrollView(
+                      slivers: [
+                        ListenableBuilder(
+                          listenable: currentSeason,
+                          builder:
+                              (context, _) => SliverMainAxisGroup(
+                                slivers:
+                                    item.seasons.asMap().entries.map((entry) {
+                                      final item = entry.value;
+                                      return SliverToBoxAdapter(
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 2),
+                                          child: ButtonSettingItem(
+                                            autofocus: item.season == currentSeason.value?.season,
+                                            selected: currentSeason.value?.id == entry.value.id,
+                                            title: Text(AppLocalizations.of(context)!.seasonNumber(item.season)),
+                                            subtitle:
+                                                (item.title != null || item.airDate != null)
+                                                    ? Row(
+                                                      children: [
+                                                        if (item.title != null) Text(item.title!),
+                                                        if (item.title != null) const SizedBox(width: 12),
+                                                        if (item.airDate != null)
+                                                          Text(
+                                                            item.airDate!.format(),
+                                                            style: const TextStyle(fontSize: 12),
+                                                          ),
+                                                        if (item.airDate != null) const SizedBox(width: 6),
+                                                        if (item.episodeCount != null)
+                                                          Text(
+                                                            AppLocalizations.of(
+                                                              context,
+                                                            )!.episodeCount(item.episodeCount!),
+                                                            style: const TextStyle(fontSize: 12),
+                                                          ),
+                                                      ],
+                                                    )
+                                                    : null,
+                                            trailing: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                if (item.watched) const Icon(Icons.check),
+                                                if (item.favorite) const SizedBox(width: 8),
+                                                if (item.favorite) const Icon(Icons.favorite_outline_rounded),
+                                              ],
+                                            ),
+                                            onTap: () => _switchSeason(item, snapshot.requireData.scrapper),
                                           ),
-                                          onTap: () => _switchSeason(item, snapshot.requireData.scrapper),
                                         ),
-                                      ),
-                                    );
-                                  }).toList(),
+                                      );
+                                    }).toList(),
+                              ),
+                        ),
+                        SliverFillRemaining(
+                          hasScrollBody: false,
+                          child: Align(
+                            alignment: Alignment.bottomCenter,
+                            child: ButtonSettingItem(
+                              leading: const Icon(Icons.more_horiz_rounded),
+                              title: Text(AppLocalizations.of(context)!.buttonMore),
+                              onTap: () {
+                                if (currentSeason.value != null) {
+                                  _scaffoldKey.currentState!.openEndDrawer();
+                                }
+                              },
                             ),
-                      ),
-                      SliverFillRemaining(
-                        hasScrollBody: false,
-                        child: Align(
-                          alignment: Alignment.bottomCenter,
-                          child: ButtonSettingItem(
-                            leading: const Icon(Icons.more_horiz_rounded),
-                            title: Text(AppLocalizations.of(context)!.buttonMore),
-                            onTap: () {
-                              if (currentSeason.value != null) {
-                                _scaffoldKey.currentState!.openEndDrawer();
-                              }
-                            },
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         },
@@ -193,6 +215,7 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
                 scrapper: scrapper,
                 needUpdate: () => refresh = true,
                 nextToPlay: nextToPlay,
+                scopeManager: _focusScopeManager,
               ),
         ),
         (_) => false,
@@ -263,6 +286,7 @@ class _SeasonPage extends StatefulWidget {
     required this.seasonId,
     required this.scrapper,
     required this.needUpdate,
+    required this.scopeManager,
     this.nextToPlay,
   });
 
@@ -270,6 +294,7 @@ class _SeasonPage extends StatefulWidget {
   final Scrapper scrapper;
   final VoidCallback needUpdate;
   final TVEpisode? nextToPlay;
+  final FocusScopeManager scopeManager;
 
   @override
   State<_SeasonPage> createState() => _SeasonPageState();
@@ -277,6 +302,7 @@ class _SeasonPage extends StatefulWidget {
 
 class _SeasonPageState extends State<_SeasonPage> {
   ScrollController? _scrollController;
+  double _lastScrollInitialOffset = 0;
 
   @override
   void didUpdateWidget(covariant _SeasonPage oldWidget) {
@@ -306,7 +332,8 @@ class _SeasonPageState extends State<_SeasonPage> {
                 itemExtent / 2
             : 0.0;
 
-    if (_scrollController == null) {
+    if (_scrollController == null || _lastScrollInitialOffset != initialOffset) {
+      _lastScrollInitialOffset = initialOffset;
       _scrollController?.dispose();
       _scrollController = ScrollController(initialScrollOffset: initialOffset);
     }
@@ -320,7 +347,7 @@ class _SeasonPageState extends State<_SeasonPage> {
       builder: (context, snapshot) {
         final item = snapshot.requireData;
         final nextToPlayIndex =
-            widget.nextToPlay?.episode == null && widget.nextToPlay?.seasonId != item.id
+            widget.nextToPlay?.episode == null || widget.nextToPlay?.seasonId != item.id
                 ? -1
                 : item.episodes.indexWhere((ep) => ep.episode == widget.nextToPlay?.episode);
 
@@ -336,133 +363,155 @@ class _SeasonPageState extends State<_SeasonPage> {
                 shouldAutoScroll: shouldAutoScroll,
               );
               hasInited = true;
+              widget.scopeManager.scopeList[1].dispose();
+              widget.scopeManager.scopeList[1] = FocusScopeNode();
             }
 
-            return CustomScrollView(
-              controller: _scrollController,
-              cacheExtent: 1000,
-              slivers: [
-                SliverPadding(
-                  padding: const EdgeInsets.only(top: 32, left: 8, right: 8, bottom: 16),
-                  sliver: SliverToBoxAdapter(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 16,
-                      children: [
-                        FocusableImage(poster: item.poster, width: 120, height: 180, onTap: () {}),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Row(
-                                children: [
-                                  if (item.episodeCount != null)
-                                    Text(
-                                      '${item.episodes.length} / ${AppLocalizations.of(context)!.episodeCount(item.episodeCount!)}',
-                                    )
-                                  else
-                                    Text(AppLocalizations.of(context)!.episodeCount(item.episodes.length)),
-                                  const SizedBox(width: 16),
-                                  if (item.airDate != null)
-                                    Text(item.airDate!.format(), style: Theme.of(context).textTheme.labelSmall),
-                                  const Spacer(),
-                                  if (item.watched)
-                                    TVIconButton.filledTonal(
-                                      icon: const Icon(Icons.check_rounded, size: 16),
-                                      visualDensity: VisualDensity.compact,
-                                      padding: EdgeInsets.zero,
-                                      minimumSize: const Size.square(32),
-                                      onPressed: () async {
-                                        await Api.markWatched(MediaType.season, item.id, !item.watched);
-                                        if (context.mounted) setState(() {});
-                                      },
-                                    )
-                                  else
-                                    TVIconButton(
-                                      icon: const Icon(Icons.check_rounded, size: 16),
-                                      visualDensity: VisualDensity.compact,
-                                      padding: EdgeInsets.zero,
-                                      minimumSize: const Size.square(32),
-                                      onPressed: () async {
-                                        await Api.markWatched(MediaType.season, item.id, !item.watched);
-                                        if (context.mounted) setState(() {});
-                                      },
-                                    ),
-                                  if (item.favorite)
-                                    TVIconButton.filledTonal(
-                                      icon: const Icon(Icons.favorite_outline, size: 16),
-                                      visualDensity: VisualDensity.compact,
-                                      padding: EdgeInsets.zero,
-                                      minimumSize: const Size.square(32),
-                                      onPressed: () async {
-                                        await Api.markFavorite(MediaType.season, item.id, !item.favorite);
-                                        if (context.mounted) setState(() {});
-                                      },
-                                    )
-                                  else
-                                    TVIconButton(
-                                      icon: const Icon(Icons.favorite_outline, size: 16),
-                                      visualDensity: VisualDensity.compact,
-                                      padding: EdgeInsets.zero,
-                                      minimumSize: const Size.square(32),
-                                      onPressed: () async {
-                                        await Api.markFavorite(MediaType.season, item.id, !item.favorite);
-                                        if (context.mounted) setState(() {});
-                                      },
-                                    ),
-                                ],
-                              ),
-                              Text(
-                                item.overview ?? AppLocalizations.of(context)!.noOverview,
-                                style: Theme.of(context).textTheme.bodyMedium,
-                                textAlign: TextAlign.justify,
-                                maxLines: 7,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
+            return FocusScope(
+              node: widget.scopeManager.scopeList[1],
+              onKeyEvent: (node, event) {
+                if (event is! KeyDownEvent) {
+                  return KeyEventResult.ignored;
+                }
+                TraversalDirection? direction;
+                if (event.logicalKey == LogicalKeyboardKey.arrowLeft &&
+                    !node.focusInDirection(TraversalDirection.left)) {
+                  direction = TraversalDirection.left;
+                  final handled = widget.scopeManager.handleDirectionKey(direction, node);
+                  if (handled) {
+                    return KeyEventResult.handled;
+                  }
+                  return KeyEventResult.ignored;
+                }
+
+                return KeyEventResult.ignored;
+              },
+              child: CustomScrollView(
+                controller: _scrollController,
+                cacheExtent: 1000,
+                slivers: [
+                  SliverPadding(
+                    padding: const EdgeInsets.only(top: 32, left: 8, right: 8, bottom: 16),
+                    sliver: SliverToBoxAdapter(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 16,
+                        children: [
+                          FocusableImage(poster: item.poster, width: 120, height: 180, onTap: () {}),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Row(
+                                  children: [
+                                    if (item.episodeCount != null)
+                                      Text(
+                                        '${item.episodes.length} / ${AppLocalizations.of(context)!.episodeCount(item.episodeCount!)}',
+                                      )
+                                    else
+                                      Text(AppLocalizations.of(context)!.episodeCount(item.episodes.length)),
+                                    const SizedBox(width: 16),
+                                    if (item.airDate != null)
+                                      Text(item.airDate!.format(), style: Theme.of(context).textTheme.labelSmall),
+                                    const Spacer(),
+                                    if (item.watched)
+                                      TVIconButton.filledTonal(
+                                        icon: const Icon(Icons.check_rounded, size: 16),
+                                        visualDensity: VisualDensity.compact,
+                                        padding: EdgeInsets.zero,
+                                        minimumSize: const Size.square(32),
+                                        onPressed: () async {
+                                          await Api.markWatched(MediaType.season, item.id, !item.watched);
+                                          if (context.mounted) setState(() {});
+                                        },
+                                      )
+                                    else
+                                      TVIconButton(
+                                        icon: const Icon(Icons.check_rounded, size: 16),
+                                        visualDensity: VisualDensity.compact,
+                                        padding: EdgeInsets.zero,
+                                        minimumSize: const Size.square(32),
+                                        onPressed: () async {
+                                          await Api.markWatched(MediaType.season, item.id, !item.watched);
+                                          if (context.mounted) setState(() {});
+                                        },
+                                      ),
+                                    if (item.favorite)
+                                      TVIconButton.filledTonal(
+                                        icon: const Icon(Icons.favorite_outline, size: 16),
+                                        visualDensity: VisualDensity.compact,
+                                        padding: EdgeInsets.zero,
+                                        minimumSize: const Size.square(32),
+                                        onPressed: () async {
+                                          await Api.markFavorite(MediaType.season, item.id, !item.favorite);
+                                          if (context.mounted) setState(() {});
+                                        },
+                                      )
+                                    else
+                                      TVIconButton(
+                                        icon: const Icon(Icons.favorite_outline, size: 16),
+                                        visualDensity: VisualDensity.compact,
+                                        padding: EdgeInsets.zero,
+                                        minimumSize: const Size.square(32),
+                                        onPressed: () async {
+                                          await Api.markFavorite(MediaType.season, item.id, !item.favorite);
+                                          if (context.mounted) setState(() {});
+                                        },
+                                      ),
+                                  ],
+                                ),
+                                Text(
+                                  item.overview ?? AppLocalizations.of(context)!.noOverview,
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                  textAlign: TextAlign.justify,
+                                  maxLines: 7,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                SliverPadding(
-                  padding: const EdgeInsets.all(8),
-                  sliver: SliverList.separated(
-                    itemCount: item.episodes.length,
-                    itemBuilder:
-                        (context, index) => _EpisodeListTile(
-                          key: ValueKey(item.episodes[index].id),
-                          autofocus: index == focusIndex,
-                          episode: item.episodes[index],
-                          scrapper: widget.scrapper,
-                          onTap: () async {
-                            await toPlayer(navigatorKey.currentContext!, (
-                              item.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList(),
-                              index,
-                            ), theme: item.themeColor);
-                            widget.needUpdate();
-                          },
-                          onTapMore: () async {
-                            final resp = await navigateTo(
-                              navigatorKey.currentContext!,
-                              EpisodeDetail(item.episodes[index], scrapper: widget.scrapper),
-                            );
-                            if (resp == true) {
-                              setState(() {});
+                  SliverPadding(
+                    padding: const EdgeInsets.all(8),
+                    sliver: SliverList.separated(
+                      itemCount: item.episodes.length,
+                      itemBuilder:
+                          (context, index) => _EpisodeListTile(
+                            key: UniqueKey(),
+                            autofocus: index == focusIndex,
+                            episode: item.episodes[index],
+                            scrapper: widget.scrapper,
+                            onTap: () async {
+                              await toPlayer(navigatorKey.currentContext!, (
+                                item.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList(),
+                                index,
+                              ), theme: item.themeColor);
                               widget.needUpdate();
-                            }
-                          },
-                        ),
-                    separatorBuilder: (context, index) => const SizedBox(height: 16),
+                            },
+                            onTapMore: () async {
+                              final resp = await navigateTo(
+                                navigatorKey.currentContext!,
+                                EpisodeDetail(item.episodes[index], scrapper: widget.scrapper),
+                              );
+                              if (resp == true) {
+                                setState(() {});
+                                widget.needUpdate();
+                              }
+                            },
+                          ),
+                      separatorBuilder: (context, index) => const SizedBox(height: 16),
+                    ),
                   ),
-                ),
-                CastCrewTitle(mediaCast: item.mediaCast, mediaCrew: item.mediaCrew),
-                SliverPadding(
-                  padding: const EdgeInsets.all(8),
-                  sliver: CastCrewInner(mediaCast: item.mediaCast, mediaCrew: item.mediaCrew, type: MediaType.season),
-                ),
-              ],
+                  CastCrewTitle(mediaCast: item.mediaCast, mediaCrew: item.mediaCrew),
+                  SliverPadding(
+                    padding: const EdgeInsets.all(8),
+                    sliver: CastCrewInner(mediaCast: item.mediaCast, mediaCrew: item.mediaCrew, type: MediaType.season),
+                  ),
+                ],
+              ),
             );
           },
         );
