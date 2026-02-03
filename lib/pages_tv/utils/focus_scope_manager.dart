@@ -12,7 +12,10 @@ class FocusScopeManager {
       return false;
     }
 
-    final curr = scopeList.indexWhere((scope) => scope.hasFocus);
+    var curr = scopeList.indexWhere((scope) => scope.hasFocus);
+    if (curr == -1) {
+      curr = currentIndex;
+    }
 
     if (direction == TraversalDirection.up || direction == TraversalDirection.left) {
       currentIndex = (curr - 1 + scopeList.length) % scopeList.length;

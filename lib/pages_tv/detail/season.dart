@@ -373,14 +373,12 @@ class _SeasonPageState extends State<_SeasonPage> {
                   return KeyEventResult.ignored;
                 }
                 TraversalDirection? direction;
-                if (event.logicalKey == LogicalKeyboardKey.arrowLeft &&
-                    !node.focusInDirection(TraversalDirection.left)) {
+                if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
                   direction = TraversalDirection.left;
                   final handled = widget.scopeManager.handleDirectionKey(direction, node);
                   if (handled) {
                     return KeyEventResult.handled;
                   }
-                  return KeyEventResult.ignored;
                 }
 
                 return KeyEventResult.ignored;
