@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -70,6 +71,18 @@ class ErrorMessage extends StatelessWidget {
         message: error.message,
         details: AppLocalizations.of(context)!.errorDetails(error.code, error.message as Object? ?? ''),
         stackTrace: error.stacktrace == null ? null : StackTrace.fromString(error.stacktrace!),
+      ),
+      final DioException error => CommonException(
+        code: AppLocalizations.of(context)!.errorCode(
+          (error.response?.statusCode ?? 0).toString(),
+          error.response?.data?.toString() ?? error.message ?? '',
+        ),
+        message: error.response?.data?.toString() ?? error.message,
+        details: AppLocalizations.of(context)!.errorDetails(
+          (error.response?.statusCode ?? 0).toString(),
+          error.response?.data?.toString() ?? error.message ?? '',
+        ),
+        stackTrace: error.stackTrace,
       ),
       _ => CommonException(code: error.toString()),
     };

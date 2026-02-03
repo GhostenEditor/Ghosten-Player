@@ -118,7 +118,7 @@ class _DriverFilePickerState extends State<DriverFilePicker> {
                                   title: Text(item.desc),
                                   leading: Icon(_guessStorageTypeByDesc(item.desc)),
                                   onTap: () async {
-                                    await Api.requestStorageManagePermission();
+                                    await FilePicker.requestStorageManagePermission();
                                     if (!context.mounted) return;
                                     navigateToSlideLeft(
                                       _navigatorKey.currentContext!,
@@ -144,7 +144,7 @@ class _DriverFilePickerState extends State<DriverFilePicker> {
                               child: TVListTile(
                                 title: const Icon(Icons.folder_open),
                                 onTap: () async {
-                                  await Api.requestStoragePermission();
+                                  await FilePicker.requestStoragePermission();
                                   final defaultPath = await FilePicker.externalStoragePath ?? '/';
                                   if (!context.mounted) return;
                                   navigateToSlideLeft(

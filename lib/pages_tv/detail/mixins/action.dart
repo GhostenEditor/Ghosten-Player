@@ -1,4 +1,5 @@
 import 'package:api/api.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -83,7 +84,7 @@ mixin ActionMixin<S extends StatefulWidget> on State<S> {
       onTap: () async {
         final resp = await showNotification(
           context,
-          Api.downloadTaskCreate(fileId),
+          Api.downloadTaskCreate(fileId, FilePicker.requestStoragePermission()),
           successText: AppLocalizations.of(context)!.tipsForDownload,
         );
         if (resp?.error == null) setState(() => refresh = true);

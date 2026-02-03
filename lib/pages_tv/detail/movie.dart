@@ -300,8 +300,7 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin {
                     ).push<SubtitleData>(FadeInPageRoute(builder: (context) => SubtitleListPage(fileId: item.fileId!))),
               ),
               buildDownloadAction(context, item.fileId),
-              if (item.scrapper.id != null)
-                buildHomeAction(context, ImdbUri(MediaType.movie, item.scrapper.id!).toUri()),
+              if (item.scraper.id != null) buildHomeAction(context, ImdbUri(MediaType.movie, item.scraper.id!).toUri()),
               const DividerSettingItem(),
               buildDeleteAction(context, () => Api.movieDeleteById(item.id)),
             ],

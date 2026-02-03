@@ -20,7 +20,7 @@ class SearchResultSelect<T extends MediaBase> extends StatefulWidget {
 
 class _SearchResultSelectState extends State<SearchResultSelect> {
   late final _controller1 = TextEditingController(text: widget.item.title);
-  late final _controller2 = TextEditingController(text: widget.item.airDate?.year.toString());
+  late final _controller2 = TextEditingController(text: widget.item.displayAirDate?.year.toString());
   final _formKey = GlobalKey<FormState>();
   List<SearchResult> items = [];
   late String languageCode = Localizations.localeOf(context).toLanguageTag();

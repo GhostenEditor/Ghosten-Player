@@ -141,9 +141,9 @@ class _OverviewState<T extends MediaBase> extends State<Overview<T>> {
                                 context,
                               ).textTheme.titleLarge!.copyWith(height: 2, fontWeight: FontWeight.bold),
                             ),
-                          if (widget.item.airDate != null)
+                          if (widget.item.displayAirDate != null)
                             Text(
-                              widget.item.airDate!.format(),
+                              widget.item.displayAirDate!.format(),
                               style: Theme.of(
                                 context,
                               ).textTheme.labelSmall!.copyWith(height: 2, fontWeight: FontWeight.bold),

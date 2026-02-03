@@ -152,10 +152,18 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
         _ => throw UnimplementedError(),
       };
       if (!mounted) return;
-      data['type'] = _driverType.name;
       final flag = await showDialog<bool>(
         context: context,
-        builder: (context) => _buildLoginLoading(Api.driverInsert(data)),
+        builder:
+            (context) => _buildLoginLoading(
+              Api.driverInsert(
+                _driverType,
+                url: data['url'],
+                username: data['username'],
+                password: data['password'],
+                token: data['token'],
+              ),
+            ),
       );
       if ((flag ?? false) && mounted) {
         Navigator.of(context).pop(true);

@@ -1,4 +1,5 @@
 import 'package:api/api.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/player.dart';
 
@@ -62,13 +63,13 @@ mixin PlayerActionsMixin<S extends StatefulWidget> on State<S> {
             if (item?.source is TVEpisode) {
               showNotification(
                 context,
-                Api.downloadTaskCreate((item!.source as TVEpisode).fileId),
+                Api.downloadTaskCreate((item!.source as TVEpisode).fileId, FilePicker.requestStoragePermission()),
                 successText: AppLocalizations.of(context)!.tipsForDownload,
               );
             } else if (item?.source is Movie) {
               showNotification(
                 context,
-                Api.downloadTaskCreate((item!.source as Movie).fileId),
+                Api.downloadTaskCreate((item!.source as Movie).fileId, FilePicker.requestStoragePermission()),
                 successText: AppLocalizations.of(context)!.tipsForDownload,
               );
             }

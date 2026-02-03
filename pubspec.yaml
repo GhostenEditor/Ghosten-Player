@@ -12,16 +12,25 @@ dependencies:
   intl: any
   animations: ^2.1.1
   api:
-    path: packages/api
+    git:
+      url: https://github.com/GhostenEditor/Ghosten-Player-flutter-packages.git
+      path: api
+      ref: v0.0.1
   bluetooth:
-    path: packages/bluetooth
+    git:
+      url: https://github.com/GhostenEditor/Ghosten-Player-flutter-packages.git
+      path: bluetooth
+      ref: v0.0.1
   cached_network_image: ^3.4.0
   collection: ^1.19.0
   date_format: ^2.0.0
   dio: ^5.9.0
   dio_cache_interceptor: ^4.0.5
   file_picker:
-    path: packages/file_picker
+    git:
+      url: https://github.com/GhostenEditor/Ghosten-Player-flutter-packages.git
+      path: file_picker
+      ref: v0.0.1
   flutter_archive: ^6.0.4
   flutter_bloc: ^9.1.0
   flutter_slidable: ^4.0.3
@@ -48,7 +57,10 @@ dependencies:
   smooth_page_indicator: ^1.2.0
   url_launcher: ^6.3.2
   video_player:
-    path: packages/video_player
+    git:
+      url: https://github.com/GhostenEditor/Ghosten-Player-flutter-packages.git
+      path: video_player
+      ref: v0.0.1
   volume_controller: ^3.4.1
   webview_cookie_manager_plus: ^2.0.17
   webview_flutter: ^4.13.0

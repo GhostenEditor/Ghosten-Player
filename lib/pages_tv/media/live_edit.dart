@@ -98,12 +98,12 @@ class _LiveEditState extends State<LiveEdit> {
                   items: _items,
                   onComplete: (data) async {
                     if (widget.item == null) {
-                      final resp = await showNotification(context, Api.playlistInsert(data));
+                      final resp = await showNotification(context, Api.playlistInsert(data['url']!, data['title']));
                       if (resp?.error == null && context.mounted) Navigator.of(context).pop(true);
                     } else {
                       final resp = await showNotification(
                         context,
-                        Api.playlistUpdateById({...data, 'id': widget.item?.id}),
+                        Api.playlistUpdateById(widget.item!.id, data['url']!, data['title']),
                       );
                       if (resp?.error == null && context.mounted) Navigator.of(context).pop(true);
                     }

@@ -18,10 +18,9 @@ import 'dialogs/subtitle.dart';
 import 'mixins/action.dart';
 
 class EpisodeDetail extends StatefulWidget {
-  const EpisodeDetail(this.initialData, {super.key, required this.scrapper});
+  const EpisodeDetail(this.initialData, {super.key});
 
   final TVEpisode initialData;
-  final Scrapper scrapper;
 
   @override
   State<EpisodeDetail> createState() => _EpisodeDetailState();
@@ -226,10 +225,10 @@ class _EpisodeDetailState extends State<EpisodeDetail> with ActionMixin {
                     ).push<SubtitleData>(FadeInPageRoute(builder: (context) => SubtitleListPage(fileId: item.fileId!))),
               ),
               buildDownloadAction(context, item.fileId),
-              if (widget.scrapper.id != null)
+              if (item.scraper.id != null)
                 buildHomeAction(
                   context,
-                  ImdbUri(MediaType.episode, widget.scrapper.id!, season: item.season, episode: item.episode).toUri(),
+                  ImdbUri(MediaType.episode, item.scraper.id!, season: item.season, episode: item.episode).toUri(),
                 ),
               const DividerSettingItem(),
               buildDeleteAction(context, () => Api.tvEpisodeDeleteById(item.id)),
