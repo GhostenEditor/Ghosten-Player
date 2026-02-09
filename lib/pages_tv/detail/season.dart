@@ -311,8 +311,9 @@ class _SeasonPageState extends State<_SeasonPage> {
     super.dispose();
   }
 
-  void _ensureScrollController({required double layoutWidth, required int focusIndex, required bool shouldAutoScroll}) {
-    final itemExtent = (layoutWidth - 16) / 4;
+  void _ensureScrollController({required int focusIndex, required bool shouldAutoScroll}) {
+    const layoutWidth = 576.0;
+    const itemExtent = (layoutWidth - 16) / 4;
     const headerPaddingTop = 32.0;
     const headerHeight = 180.0;
     const headerPaddingBottom = 16.0;
@@ -348,164 +349,156 @@ class _SeasonPageState extends State<_SeasonPage> {
 
         final focusIndex = nextToPlayIndex != -1 ? nextToPlayIndex : 0;
 
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            if (!_initialized) {
-              final shouldAutoScroll = widget.nextToPlay != null && focusIndex > 1;
-              _ensureScrollController(
-                layoutWidth: constraints.maxWidth,
-                focusIndex: focusIndex,
-                shouldAutoScroll: shouldAutoScroll,
-              );
-              _initialized = true;
-              widget.scopeManager.resetItem(1);
+        if (!_initialized) {
+          final shouldAutoScroll = widget.nextToPlay != null && focusIndex > 1;
+          _ensureScrollController(focusIndex: focusIndex, shouldAutoScroll: shouldAutoScroll);
+          _initialized = true;
+          widget.scopeManager.resetItem(1);
+        }
+
+        return FocusScope(
+          node: widget.scopeManager.scopeAt(1),
+          onKeyEvent: (node, event) {
+            if (event is! KeyDownEvent) {
+              return KeyEventResult.ignored;
+            }
+            TraversalDirection? direction;
+            if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+              direction = TraversalDirection.left;
+              final handled = widget.scopeManager.handleDirectionKey(direction, node);
+              if (handled) {
+                return KeyEventResult.handled;
+              }
             }
 
-            return FocusScope(
-              node: widget.scopeManager.scopeAt(1),
-              onKeyEvent: (node, event) {
-                if (event is! KeyDownEvent) {
-                  return KeyEventResult.ignored;
-                }
-                TraversalDirection? direction;
-                if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-                  direction = TraversalDirection.left;
-                  final handled = widget.scopeManager.handleDirectionKey(direction, node);
-                  if (handled) {
-                    return KeyEventResult.handled;
-                  }
-                }
-
-                return KeyEventResult.ignored;
-              },
-              child: CustomScrollView(
-                controller: _scrollController,
-                cacheExtent: 1000,
-                slivers: [
-                  SliverPadding(
-                    padding: const EdgeInsets.only(top: 32, left: 8, right: 8, bottom: 16),
-                    sliver: SliverToBoxAdapter(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        spacing: 16,
-                        children: [
-                          FocusableImage(poster: item.poster, width: 120, height: 180, onTap: () {}),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
+            return KeyEventResult.ignored;
+          },
+          child: CustomScrollView(
+            controller: _scrollController,
+            cacheExtent: 1000,
+            slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.only(top: 32, left: 8, right: 8, bottom: 16),
+                sliver: SliverToBoxAdapter(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 16,
+                    children: [
+                      FocusableImage(poster: item.poster, width: 120, height: 180, onTap: () {}),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Row(
                               children: [
-                                Row(
-                                  children: [
-                                    if (item.episodeCount != null)
-                                      Text(
-                                        '${item.episodes.length} / ${AppLocalizations.of(context)!.episodeCount(item.episodeCount!)}',
-                                      )
-                                    else
-                                      Text(AppLocalizations.of(context)!.episodeCount(item.episodes.length)),
-                                    const SizedBox(width: 16),
-                                    if (item.airDate != null)
-                                      Text(item.airDate!.format(), style: Theme.of(context).textTheme.labelSmall),
-                                    const Spacer(),
-                                    if (item.watched)
-                                      TVIconButton.filledTonal(
-                                        icon: const Icon(Icons.check_rounded, size: 16),
-                                        visualDensity: VisualDensity.compact,
-                                        padding: EdgeInsets.zero,
-                                        minimumSize: const Size.square(32),
-                                        onPressed: () async {
-                                          await Api.markWatched(MediaType.season, item.id, !item.watched);
-                                          if (context.mounted) setState(() {});
-                                        },
-                                      )
-                                    else
-                                      TVIconButton(
-                                        icon: const Icon(Icons.check_rounded, size: 16),
-                                        visualDensity: VisualDensity.compact,
-                                        padding: EdgeInsets.zero,
-                                        minimumSize: const Size.square(32),
-                                        onPressed: () async {
-                                          await Api.markWatched(MediaType.season, item.id, !item.watched);
-                                          if (context.mounted) setState(() {});
-                                        },
-                                      ),
-                                    if (item.favorite)
-                                      TVIconButton.filledTonal(
-                                        icon: const Icon(Icons.favorite_outline, size: 16),
-                                        visualDensity: VisualDensity.compact,
-                                        padding: EdgeInsets.zero,
-                                        minimumSize: const Size.square(32),
-                                        onPressed: () async {
-                                          await Api.markFavorite(MediaType.season, item.id, !item.favorite);
-                                          if (context.mounted) setState(() {});
-                                        },
-                                      )
-                                    else
-                                      TVIconButton(
-                                        icon: const Icon(Icons.favorite_outline, size: 16),
-                                        visualDensity: VisualDensity.compact,
-                                        padding: EdgeInsets.zero,
-                                        minimumSize: const Size.square(32),
-                                        onPressed: () async {
-                                          await Api.markFavorite(MediaType.season, item.id, !item.favorite);
-                                          if (context.mounted) setState(() {});
-                                        },
-                                      ),
-                                  ],
-                                ),
-                                Text(
-                                  item.overview ?? AppLocalizations.of(context)!.noOverview,
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                  textAlign: TextAlign.justify,
-                                  maxLines: 7,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                                if (item.episodeCount != null)
+                                  Text(
+                                    '${item.episodes.length} / ${AppLocalizations.of(context)!.episodeCount(item.episodeCount!)}',
+                                  )
+                                else
+                                  Text(AppLocalizations.of(context)!.episodeCount(item.episodes.length)),
+                                const SizedBox(width: 16),
+                                if (item.airDate != null)
+                                  Text(item.airDate!.format(), style: Theme.of(context).textTheme.labelSmall),
+                                const Spacer(),
+                                if (item.watched)
+                                  TVIconButton.filledTonal(
+                                    icon: const Icon(Icons.check_rounded, size: 16),
+                                    visualDensity: VisualDensity.compact,
+                                    padding: EdgeInsets.zero,
+                                    minimumSize: const Size.square(32),
+                                    onPressed: () async {
+                                      await Api.markWatched(MediaType.season, item.id, !item.watched);
+                                      if (context.mounted) setState(() {});
+                                    },
+                                  )
+                                else
+                                  TVIconButton(
+                                    icon: const Icon(Icons.check_rounded, size: 16),
+                                    visualDensity: VisualDensity.compact,
+                                    padding: EdgeInsets.zero,
+                                    minimumSize: const Size.square(32),
+                                    onPressed: () async {
+                                      await Api.markWatched(MediaType.season, item.id, !item.watched);
+                                      if (context.mounted) setState(() {});
+                                    },
+                                  ),
+                                if (item.favorite)
+                                  TVIconButton.filledTonal(
+                                    icon: const Icon(Icons.favorite_outline, size: 16),
+                                    visualDensity: VisualDensity.compact,
+                                    padding: EdgeInsets.zero,
+                                    minimumSize: const Size.square(32),
+                                    onPressed: () async {
+                                      await Api.markFavorite(MediaType.season, item.id, !item.favorite);
+                                      if (context.mounted) setState(() {});
+                                    },
+                                  )
+                                else
+                                  TVIconButton(
+                                    icon: const Icon(Icons.favorite_outline, size: 16),
+                                    visualDensity: VisualDensity.compact,
+                                    padding: EdgeInsets.zero,
+                                    minimumSize: const Size.square(32),
+                                    onPressed: () async {
+                                      await Api.markFavorite(MediaType.season, item.id, !item.favorite);
+                                      if (context.mounted) setState(() {});
+                                    },
+                                  ),
                               ],
                             ),
-                          ),
-                        ],
+                            Text(
+                              item.overview ?? AppLocalizations.of(context)!.noOverview,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                              textAlign: TextAlign.justify,
+                              maxLines: 7,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                  SliverPadding(
-                    padding: const EdgeInsets.all(8),
-                    sliver: SliverList.separated(
-                      itemCount: item.episodes.length,
-                      itemBuilder:
-                          (context, index) => _EpisodeListTile(
-                            key: UniqueKey(),
-                            autofocus: index == focusIndex,
-                            episode: item.episodes[index],
-                            scrapper: widget.scrapper,
-                            onTap: () async {
-                              await toPlayer(navigatorKey.currentContext!, (
-                                item.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList(),
-                                index,
-                              ), theme: item.themeColor);
-                              widget.needUpdate();
-                            },
-                            onTapMore: () async {
-                              final resp = await navigateTo(
-                                navigatorKey.currentContext!,
-                                EpisodeDetail(item.episodes[index], scrapper: widget.scrapper),
-                              );
-                              if (resp == true) {
-                                setState(() {});
-                                widget.needUpdate();
-                              }
-                            },
-                          ),
-                      separatorBuilder: (context, index) => const SizedBox(height: 16),
-                    ),
-                  ),
-                  CastCrewTitle(mediaCast: item.mediaCast, mediaCrew: item.mediaCrew),
-                  SliverPadding(
-                    padding: const EdgeInsets.all(8),
-                    sliver: CastCrewInner(mediaCast: item.mediaCast, mediaCrew: item.mediaCrew, type: MediaType.season),
-                  ),
-                ],
+                ),
               ),
-            );
-          },
+              SliverPadding(
+                padding: const EdgeInsets.all(8),
+                sliver: SliverList.separated(
+                  itemCount: item.episodes.length,
+                  itemBuilder:
+                      (context, index) => _EpisodeListTile(
+                        key: UniqueKey(),
+                        autofocus: index == focusIndex,
+                        episode: item.episodes[index],
+                        scrapper: widget.scrapper,
+                        onTap: () async {
+                          await toPlayer(navigatorKey.currentContext!, (
+                            item.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList(),
+                            index,
+                          ), theme: item.themeColor);
+                          widget.needUpdate();
+                        },
+                        onTapMore: () async {
+                          final resp = await navigateTo(
+                            navigatorKey.currentContext!,
+                            EpisodeDetail(item.episodes[index], scrapper: widget.scrapper),
+                          );
+                          if (resp == true) {
+                            setState(() {});
+                            widget.needUpdate();
+                          }
+                        },
+                      ),
+                  separatorBuilder: (context, index) => const SizedBox(height: 16),
+                ),
+              ),
+              CastCrewTitle(mediaCast: item.mediaCast, mediaCrew: item.mediaCrew),
+              SliverPadding(
+                padding: const EdgeInsets.all(8),
+                sliver: CastCrewInner(mediaCast: item.mediaCast, mediaCrew: item.mediaCrew, type: MediaType.season),
+              ),
+            ],
+          ),
         );
       },
     );
