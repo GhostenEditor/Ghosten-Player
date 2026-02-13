@@ -116,7 +116,7 @@ class _SystemSettingsAdd extends StatefulWidget {
 
 class _SystemSettingsAddState extends State<_SystemSettingsAdd> {
   final _formKey = GlobalKey<FormState>();
-  String _type = 'emby';
+  ServerType _type = ServerType.emby;
   late final _serverAddress = TextEditingController();
   late final _username = TextEditingController();
   late final _userPassword = TextEditingController();
@@ -144,7 +144,7 @@ class _SystemSettingsAddState extends State<_SystemSettingsAdd> {
                 final resp = await showNotification(
                   context,
                   Api.serverInsert({
-                    'type': _type,
+                    'type': _type.index,
                     'host': _serverAddress.text.trim(),
                     'username': _username.text.trim(),
                     'userPassword': _userPassword.text.trim(),
@@ -169,7 +169,7 @@ class _SystemSettingsAddState extends State<_SystemSettingsAdd> {
             spacing: 12,
             children: [
               DropdownButtonFormField(
-                value: 'emby',
+                value: ServerType.emby,
                 isExpanded: true,
                 decoration: InputDecoration(
                   labelText: AppLocalizations.of(context)!.serverFormItemLabelServerType,
@@ -177,8 +177,8 @@ class _SystemSettingsAddState extends State<_SystemSettingsAdd> {
                   isDense: true,
                 ),
                 items: const [
-                  DropdownMenuItem(value: 'emby', child: Text('Emby')),
-                  DropdownMenuItem(value: 'jellyfin', child: Text('Jellyfin')),
+                  DropdownMenuItem(value: ServerType.emby, child: Text('Emby')),
+                  DropdownMenuItem(value: ServerType.jellyfin, child: Text('Jellyfin')),
                 ],
                 onChanged: (ty) => _type = ty!,
               ),

@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:api/api.dart';
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
@@ -11,7 +10,9 @@ import 'package:video_player/player.dart';
 
 import '../../const.dart';
 import '../../l10n/app_localizations.dart';
+import '../../platform_api.dart';
 import '../../providers/user_config.dart';
+import '../../utils/check_update.dart';
 import '../components/icon_button.dart';
 import '../components/loading.dart';
 import '../components/setting.dart';
@@ -128,10 +129,10 @@ class _SettingsPlayerKernelState extends State<SettingsPlayerKernel> {
   Future<void> _getRemoteMpvLibs() async {
     if (_remoteMpvLibs != null) return;
     setState(() {});
-    final arch = await Api.arch();
+    final arch = await PlatformApi.arch();
     final resp = await Dio(BaseOptions(connectTimeout: const Duration(seconds: 30))).get(libmpvUrl);
     if (!mounted) return;
-    final data = (resp.data as List<dynamic>).cast<Json>().map(UpdateResp.fromJson).toList();
+    final data = (resp.data as List<dynamic>).cast<Map<String, dynamic>>().map(UpdateResp.fromJson).toList();
     _remoteMpvLibs =
         data
             .map(

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../../components/no_data.dart';
 import '../../const.dart';
 import '../../l10n/app_localizations.dart';
+import '../../utils/check_update.dart';
 import '../components/filled_button.dart';
 import '../components/loading.dart';
 import '../components/setting.dart';

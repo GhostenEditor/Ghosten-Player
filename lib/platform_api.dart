@@ -30,6 +30,8 @@ enum DeviceType {
 
 class PlatformApi {
   static const _channelNamespace = 'com.ghosten.player';
+  static const _methodChannel = MethodChannel(_channelNamespace);
+
   static Stream<bool> pipEvent =
       kIsWeb
           ? const Stream.empty()
@@ -52,5 +54,9 @@ class PlatformApi {
 
   static bool isAndroidPhone() {
     return deviceType == DeviceType.androidPhone;
+  }
+
+  static Future<String?> arch() {
+    return _methodChannel.invokeMethod('arch');
   }
 }

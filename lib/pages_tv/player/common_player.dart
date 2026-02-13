@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:api/api.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/player.dart';
@@ -205,14 +206,20 @@ class _CommonPlayerPageState<T> extends State<CommonPlayerPage<T>> {
                           if (item?.source is TVEpisode) {
                             showNotification(
                               context,
-                              Api.downloadTaskCreate((item!.source as TVEpisode).fileId),
+                              Api.downloadTaskCreate(
+                                (item!.source as TVEpisode).fileId,
+                                FilePicker.requestStoragePermission(),
+                              ),
                               successText: AppLocalizations.of(context)!.tipsForDownload,
                               showSuccess: true,
                             );
                           } else if (item?.source is Movie) {
                             showNotification(
                               context,
-                              Api.downloadTaskCreate((item!.source as Movie).fileId),
+                              Api.downloadTaskCreate(
+                                (item!.source as Movie).fileId,
+                                FilePicker.requestStoragePermission(),
+                              ),
                               successText: AppLocalizations.of(context)!.tipsForDownload,
                               showSuccess: true,
                             );

@@ -267,7 +267,6 @@ class _TVDetailState extends State<TVDetail> with ActionMixin<TVDetail> {
                                                     (context) => SeasonDetail(
                                                       id: season.id,
                                                       initialData: season,
-                                                      scrapper: item.data!.scrapper,
                                                       themeColor: season.themeColor,
                                                       controller: _controller,
                                                     ),
@@ -409,8 +408,8 @@ class _TVDetailState extends State<TVDetail> with ActionMixin<TVDetail> {
                       );
                       if ((res ?? false) && context.mounted) context.read<TVSeriesCubit>().update();
                     }),
-                    if (item.scrapper.id != null)
-                      buildHomeAction(context, ImdbUri(MediaType.series, item.scrapper.id!).toUri()),
+                    if (item.scraper.id != null)
+                      buildHomeAction(context, ImdbUri(MediaType.series, item.scraper.id!).toUri()),
                     const PopupMenuDivider(),
                     buildDeleteAction(context, () => Api.tvSeriesDeleteById(item.id)),
                   ],

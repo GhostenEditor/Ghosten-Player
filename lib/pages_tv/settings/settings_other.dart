@@ -255,7 +255,7 @@ class _ScraperSettingSectionState extends State<_ScraperSettingSection> {
           trailing: Text(
             AppLocalizations.of(
               context,
-            )!.scraperBehavior(ScraperBehavior.fromString(widget.settingScraper.behavior.name).name),
+            )!.scraperBehavior(widget.settingScraper.behavior.name),
           ),
           onTap: () async {
             final behavior = await navigateToSlideLeft<ScraperBehavior>(

@@ -202,7 +202,7 @@ class _SearchPageState extends State<SearchPage> {
                   return ImageCard(
                     item.poster,
                     title: Text(item.displayRecentTitle()),
-                    subtitle: Text(item.airDate?.format() ?? ''),
+                    subtitle: Text(item.displayAirDate?.format() ?? ''),
                     onTap: () {
                       navigateTo<bool>(context, TVDetail(item.id, initialData: item));
                     },
@@ -223,7 +223,7 @@ class _SearchPageState extends State<SearchPage> {
                   return ImageCard(
                     item.poster,
                     title: Text(item.displayRecentTitle()),
-                    subtitle: Text(item.airDate?.format() ?? ''),
+                    subtitle: Text(item.displayAirDate?.format() ?? ''),
                     onTap: () {
                       navigateTo<bool>(context, MovieDetail(item.id, initialData: item));
                     },

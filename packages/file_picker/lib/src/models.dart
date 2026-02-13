@@ -1,1 +1,0 @@
-enum FilePickerType { local, remote }

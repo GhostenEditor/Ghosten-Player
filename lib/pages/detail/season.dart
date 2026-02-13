@@ -19,18 +19,10 @@ import 'placeholders/season.dart';
 import 'utils/tmdb_uri.dart';
 
 class SeasonDetail extends StatefulWidget {
-  const SeasonDetail({
-    super.key,
-    required this.id,
-    required this.controller,
-    this.themeColor,
-    required this.scrapper,
-    this.initialData,
-  });
+  const SeasonDetail({super.key, required this.id, required this.controller, this.themeColor, this.initialData});
 
   final dynamic id;
   final TVSeason? initialData;
-  final Scrapper scrapper;
   final int? themeColor;
   final PlayerController<TVEpisode> controller;
 
@@ -168,12 +160,12 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin<SeasonDeta
                                                 }
                                               }
                                             }),
-                                            if (widget.scrapper.id != null)
+                                            if (item.scraper.id != null)
                                               buildHomeAction(
                                                 context,
                                                 ImdbUri(
                                                   MediaType.season,
-                                                  widget.scrapper.id!,
+                                                  item.scraper.id!,
                                                   season: item.season,
                                                 ).toUri(),
                                               ),
@@ -271,7 +263,6 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin<SeasonDeta
                                                             (context) => EpisodeDetail(
                                                               tvEpisodeId: episode.id,
                                                               initialData: episode,
-                                                              scrapper: widget.scrapper,
                                                             ),
                                                       );
                                                       if (context.mounted) context.read<TVSeasonCubit>().update();

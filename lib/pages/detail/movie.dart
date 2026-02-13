@@ -1,4 +1,5 @@
 import 'package:api/api.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
@@ -356,7 +357,7 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
                             : () async {
                               final resp = await showNotification(
                                 context,
-                                Api.downloadTaskCreate(item.fileId),
+                                Api.downloadTaskCreate(item.fileId, FilePicker.requestStoragePermission()),
                                 successText: AppLocalizations.of(context)!.tipsForDownload,
                               );
                               if (resp?.error == null && context.mounted) context.read<MovieCubit>().update();
@@ -371,8 +372,8 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
                       leading: const Icon(Icons.download_outlined),
                     ),
                   ),
-                  if (item.scrapper.id != null)
-                    buildHomeAction(context, ImdbUri(MediaType.series, item.scrapper.id!).toUri()),
+                  if (item.scraper.id != null)
+                    buildHomeAction(context, ImdbUri(MediaType.series, item.scraper.id!).toUri()),
                   const PopupMenuDivider(),
                   buildDeleteAction(context, () => Api.movieDeleteById(widget.id)),
                 ];
@@ -462,7 +463,7 @@ class _PlaylistSidebarState extends State<_PlaylistSidebar> {
                     width: imageWidth,
                     height: imageHeight,
                     title: Text(item.displayTitle()),
-                    subtitle: Text(item.airDate == null ? '' : ' - ${item.airDate?.format()}'),
+                    subtitle: Text(item.displayAirDate == null ? '' : ' - ${item.displayAirDate?.format()}'),
                     description: Text(item.overview ?? ''),
                     floating:
                         widget.activeIndex == index

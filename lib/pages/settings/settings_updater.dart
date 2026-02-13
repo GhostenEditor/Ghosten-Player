@@ -1,4 +1,3 @@
-import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -7,6 +6,7 @@ import '../../components/logo.dart';
 import '../../const.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/user_config.dart';
+import '../../utils/check_update.dart';
 import '../components/updater.dart';
 
 class SystemSettingsUpdater extends StatefulWidget {
@@ -130,11 +130,7 @@ class SystemSettingsUpdaterState extends State<SystemSettingsUpdater> {
                       ? null
                       : () async {
                         setState(() => _loading = true);
-                        final data = await Api.checkUpdate(
-                          '${_userConfig.githubProxy}$updateUrl',
-                          _userConfig.updatePrerelease,
-                          Version.fromString(appVersion),
-                        );
+                        final data = await checkUpdate(_userConfig.updatePrerelease);
                         if (data != null && context.mounted) {
                           await showModalBottomSheet(
                             context: context,

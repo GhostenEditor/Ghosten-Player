@@ -1,4 +1,3 @@
-import 'package:api/api.dart';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +10,7 @@ import '../../components/logo.dart';
 import '../../const.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/user_config.dart';
+import '../../utils/check_update.dart';
 import '../../utils/utils.dart';
 
 class UpdateBottomSheet extends StatefulWidget {
@@ -103,7 +103,7 @@ class _UpdateBottomSheetState extends State<UpdateBottomSheet> {
 
   Future<void> _download() async {
     final proxy = context.read<UserConfig>().githubProxy;
-    await Api.requestStoragePermission();
+    await FilePicker.requestStoragePermission();
     final url = widget.data.url;
     final task = _DownloadTask(url);
     setState(() {

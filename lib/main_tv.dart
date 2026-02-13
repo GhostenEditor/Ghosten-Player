@@ -15,6 +15,7 @@ import 'pages_tv/settings/settings_update.dart';
 import 'providers/shortcut_tv.dart';
 import 'providers/user_config.dart';
 import 'theme.dart';
+import 'utils/check_update.dart';
 import 'utils/utils.dart';
 
 void main() async {
@@ -28,16 +29,13 @@ void main() async {
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
       HttpOverrides.global = MyHttpOverrides();
     }
+    await Api.validate(tmdbApiKey: tmdbApiKey, license: licence);
     final userConfig = await UserConfig.init();
     final shortcutTV = await ShortcutTV.init();
     Provider.debugCheckInvalidValueType = null;
     if (userConfig.shouldCheckUpdate()) {
       Future.microtask(() async {
-        final data = await Api.checkUpdate(
-          '${userConfig.githubProxy}$updateUrl',
-          userConfig.updatePrerelease,
-          Version.fromString(appVersion),
-        );
+        final data = await checkUpdate(userConfig.updatePrerelease);
         if (data != null) {
           navigateTo(navigatorKey.currentContext!, const SettingsUpdate());
         }

@@ -59,7 +59,6 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
           if (item.seasons.isNotEmpty) {
             _switchSeason(
               item.seasons.firstWhere((it) => currentSeason.value == null || it.id == currentSeason.value?.id),
-              widget.initialData.scrapper,
             );
           }
           return DetailScaffold(
@@ -136,7 +135,7 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
                                               if (item.favorite) const Icon(Icons.favorite_outline_rounded),
                                             ],
                                           ),
-                                          onTap: () => _switchSeason(item, snapshot.requireData.scrapper),
+                                          onTap: () => _switchSeason(item),
                                         ),
                                       ),
                                     );
@@ -169,19 +168,14 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
     );
   }
 
-  void _switchSeason(TVSeason item, Scrapper scrapper) {
+  void _switchSeason(TVSeason item) {
     if (currentSeason.value == item) return;
     currentSeason.value = item;
     Future.microtask(() {
       Navigator.of(_navigatorKey.currentContext!).pushAndRemoveUntil(
         FadeInPageRoute(
           builder:
-              (context) => _SeasonPage(
-                key: ValueKey(item.id),
-                seasonId: item.id,
-                scrapper: scrapper,
-                needUpdate: () => refresh = true,
-              ),
+              (context) => _SeasonPage(key: ValueKey(item.id), seasonId: item.id, needUpdate: () => refresh = true),
         ),
         (_) => false,
       );
@@ -226,12 +220,12 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
                             }
                           }
                         }),
-                        if (widget.initialData.scrapper.id != null)
+                        if (widget.initialData.scraper.id != null)
                           buildHomeAction(
                             context,
                             ImdbUri(
                               MediaType.season,
-                              widget.initialData.scrapper.id!,
+                              widget.initialData.scraper.id!,
                               season: currentSeason.value!.season,
                             ).toUri(),
                           ),
@@ -246,10 +240,9 @@ class _SeasonDetailState extends State<SeasonDetail> with ActionMixin {
 }
 
 class _SeasonPage extends StatefulWidget {
-  const _SeasonPage({super.key, required this.seasonId, required this.scrapper, required this.needUpdate});
+  const _SeasonPage({super.key, required this.seasonId, required this.needUpdate});
 
   final dynamic seasonId;
-  final Scrapper scrapper;
   final VoidCallback needUpdate;
 
   @override
@@ -359,7 +352,6 @@ class _SeasonPageState extends State<_SeasonPage> {
                       key: UniqueKey(),
                       autofocus: index == 0,
                       episode: item.episodes[index],
-                      scrapper: widget.scrapper,
                       onTap: () async {
                         await toPlayer(navigatorKey.currentContext!, (
                           item.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList(),
@@ -370,7 +362,7 @@ class _SeasonPageState extends State<_SeasonPage> {
                       onTapMore: () async {
                         final resp = await navigateTo(
                           navigatorKey.currentContext!,
-                          EpisodeDetail(item.episodes[index], scrapper: widget.scrapper),
+                          EpisodeDetail(item.episodes[index]),
                         );
                         if (resp == true) {
                           setState(() {});
@@ -394,17 +386,9 @@ class _SeasonPageState extends State<_SeasonPage> {
 }
 
 class _EpisodeListTile extends StatelessWidget {
-  const _EpisodeListTile({
-    super.key,
-    required this.episode,
-    this.onTap,
-    required this.scrapper,
-    this.autofocus,
-    this.onTapMore,
-  });
+  const _EpisodeListTile({super.key, required this.episode, this.onTap, this.autofocus, this.onTapMore});
 
   final TVEpisode episode;
-  final Scrapper scrapper;
   final bool? autofocus;
   final GestureTapCallback? onTap;
   final GestureTapCallback? onTapMore;
