@@ -195,9 +195,9 @@ class _SearchPageState extends State<SearchPage> {
             slivers: [
               _buildFilterChipsGroup(context),
               _ItemSearchPage(
-                key: const ValueKey('series'),
+                key: const ValueKey(SearchFuzzyType.series),
                 params: _params,
-                searchType: 'series',
+                searchType: SearchFuzzyType.series,
                 itemBuilder: (context, item, index) {
                   return ImageCard(
                     item.poster,
@@ -216,9 +216,9 @@ class _SearchPageState extends State<SearchPage> {
             slivers: [
               _buildFilterChipsGroup(context),
               _ItemSearchPage(
-                key: const ValueKey('movie'),
+                key: const ValueKey(SearchFuzzyType.movie),
                 params: _params,
-                searchType: 'movie',
+                searchType: SearchFuzzyType.movie,
                 itemBuilder: (context, item, index) {
                   return ImageCard(
                     item.poster,
@@ -236,9 +236,9 @@ class _SearchPageState extends State<SearchPage> {
           CustomScrollView(
             slivers: [
               _ItemSearchPage(
-                key: const ValueKey('episode'),
+                key: const ValueKey(SearchFuzzyType.episode),
                 params: _params,
-                searchType: 'episode',
+                searchType: SearchFuzzyType.episode,
                 gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                   maxCrossAxisExtent: 180,
                   childAspectRatio: 1.3,
@@ -265,9 +265,9 @@ class _SearchPageState extends State<SearchPage> {
           CustomScrollView(
             slivers: [
               _ItemSearchPage(
-                key: const ValueKey('cast'),
+                key: const ValueKey(SearchFuzzyType.cast),
                 params: _params,
-                searchType: 'media_cast',
+                searchType: SearchFuzzyType.cast,
                 itemBuilder: (context, item, index) {
                   return ImageCard(
                     item.profile,
@@ -283,9 +283,9 @@ class _SearchPageState extends State<SearchPage> {
           CustomScrollView(
             slivers: [
               _ItemSearchPage(
-                key: const ValueKey('crew'),
+                key: const ValueKey(SearchFuzzyType.crew),
                 params: _params,
-                searchType: 'media_crew',
+                searchType: SearchFuzzyType.crew,
                 itemBuilder: (context, item, index) {
                   return ImageCard(
                     item.profile,
@@ -1007,7 +1007,7 @@ class _ItemSearchPage<T> extends StatefulWidget {
   });
 
   final _SearchParams params;
-  final String searchType;
+  final SearchFuzzyType searchType;
   final ItemWidgetBuilder<T> itemBuilder;
   final PageData<T> Function(SearchFuzzyResult) dataResolve;
   final SliverGridDelegate gridDelegate;

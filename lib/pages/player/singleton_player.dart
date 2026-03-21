@@ -21,7 +21,6 @@ class SingletonPlayer<T> extends StatefulWidget {
 
 class _SingletonPlayerState<T> extends State<SingletonPlayer<T>> {
   late final _controller = PlayerController<T>(
-    Api.log,
     onGetPlayBackInfo: _onGetPlayBackInfo,
     onPlaybackStatusUpdate: _onPlaybackStatusUpdate,
   );

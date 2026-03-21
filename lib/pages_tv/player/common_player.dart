@@ -33,7 +33,6 @@ class CommonPlayerPage<T> extends StatefulWidget {
 class _CommonPlayerPageState<T> extends State<CommonPlayerPage<T>> {
   bool loading = true;
   late final _controller = PlayerController<T>(
-    Api.log,
     onGetPlayBackInfo: _onGetPlayBackInfo,
     onPlaybackStatusUpdate: _onPlaybackStatusUpdate,
   );

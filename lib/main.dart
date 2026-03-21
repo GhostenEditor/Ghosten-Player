@@ -31,6 +31,7 @@ void main(List<String> args) async {
   ScaledWidgetsFlutterBinding.ensureInitialized();
   final initialized = await Api.initialized();
   if (initialized ?? false) {
+    // await Api.setTmdbApiKey("");
     if (kIsWeb) {
       BrowserContextMenu.disableContextMenu();
       PlatformApi.deviceType = DeviceType.web;
@@ -40,7 +41,6 @@ void main(List<String> args) async {
       HttpOverrides.global = MyHttpOverrides();
       PlatformApi.deviceType = DeviceType.fromString(args[0]);
     }
-    await Api.validate(tmdbApiKey: tmdbApiKey, license: licence);
     setPreferredOrientations(false);
     final userConfig = await UserConfig.init();
     ScaledWidgetsFlutterBinding.instance.scaleFactor =

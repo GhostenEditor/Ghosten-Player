@@ -49,7 +49,6 @@ class TVDetail extends StatefulWidget {
 
 class _TVDetailState extends State<TVDetail> with ActionMixin<TVDetail> {
   late final _controller = PlayerController<TVEpisode>(
-    Api.log,
     onGetPlayBackInfo: _onGetPlayBackInfo,
     onPlaybackStatusUpdate: _onPlaybackStatusUpdate,
   );
