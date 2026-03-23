@@ -32,6 +32,10 @@ extension DateTimeExtension on DateTime {
     return formatDate(this, [yyyy, '-', mm, '-', dd, ' ', HH, ':', nn, ':', ss]);
   }
 
+  String formatLog() {
+    return formatDate(this, [mm, '-', dd, ' ', HH, ':', nn, ':', ss, '.', SSS]);
+  }
+
   String formatFullWithoutSec() {
     return formatDate(this, [yyyy, '-', mm, '-', dd, ' ', HH, ':', nn]);
   }

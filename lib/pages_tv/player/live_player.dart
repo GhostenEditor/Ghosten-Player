@@ -32,7 +32,7 @@ class LivePlayerPage extends StatefulWidget {
 
 class _LivePlayerPageState extends State<LivePlayerPage> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  late final _controller = PlayerController<Channel>(Api.log);
+  late final _controller = PlayerController<Channel>();
   final _isShowControls = ValueNotifier(false);
   final _controlsStream = StreamController<ControlsStreamStatus>();
   final _drawerUpdateStream = ValueNotifier(0);

@@ -24,7 +24,7 @@ class LiveListPage extends StatefulWidget {
 }
 
 class _LiveListPageState extends State<LiveListPage> {
-  final _controller = PlayerController<Channel>(Api.log);
+  final _controller = PlayerController<Channel>();
 
   @override
   void dispose() {

@@ -46,7 +46,6 @@ class MovieDetail extends StatefulWidget {
 
 class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail> {
   late final _controller = PlayerController<Movie>(
-    Api.log,
     onGetPlayBackInfo: _onGetPlayBackInfo,
     onPlaybackStatusUpdate: _onPlaybackStatusUpdate,
   );

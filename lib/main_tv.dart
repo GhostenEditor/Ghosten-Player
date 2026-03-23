@@ -29,7 +29,6 @@ void main() async {
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
       HttpOverrides.global = MyHttpOverrides();
     }
-    await Api.validate(tmdbApiKey: tmdbApiKey, license: licence);
     final userConfig = await UserConfig.init();
     final shortcutTV = await ShortcutTV.init();
     Provider.debugCheckInvalidValueType = null;

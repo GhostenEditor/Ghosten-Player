@@ -1,7 +1,7 @@
-import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:logger/logger.dart';
 import 'package:readmore/readmore.dart';
 
 import '../../components/error_message.dart';
@@ -18,9 +18,8 @@ class SettingsLogPage extends StatefulWidget {
 
 class _SettingsLogPageState extends State<SettingsLogPage> {
   final _scrollController = ScrollController();
-  DateTimeRange? _dateTimeRange;
 
-  PagingState<int, Log> _state = PagingState();
+  PagingState<(int, String), Log> _state = PagingState();
 
   Future<void> _fetchNextPage() async {
     if (_state.isLoading) return;
@@ -32,24 +31,15 @@ class _SettingsLogPageState extends State<SettingsLogPage> {
     });
 
     try {
-      final newKey = (_state.keys?.last ?? -1) + 1;
-      final data = await Api.logQueryPage(
-        30,
-        newKey * 30,
-        _dateTimeRange != null
-            ? (
-              _dateTimeRange!.start.millisecondsSinceEpoch,
-              _dateTimeRange!.end.add(const Duration(days: 1)).millisecondsSinceEpoch,
-            )
-            : null,
-      );
+      final key = _state.keys?.last;
+      final data = await Logger.logQueryPage(30, key?.$1, key?.$2);
 
-      final hasNextPage = data.offset + data.limit < data.count;
+      final hasNextPage = !data.isEnd;
 
       setState(() {
         _state = _state.copyWith(
           pages: [...?_state.pages, data.data],
-          keys: [...?_state.keys, newKey],
+          keys: [...?_state.keys, (data.cursor, data.filename)],
           hasNextPage: hasNextPage,
           isLoading: false,
         );
@@ -75,16 +65,16 @@ class _SettingsLogPageState extends State<SettingsLogPage> {
         title: Text(AppLocalizations.of(context)!.settingsItemLog),
         actions: [
           IconButton(
-            icon: const Icon(Icons.calendar_month_outlined),
+            icon: const Icon(Icons.copy),
             onPressed: () async {
-              _dateTimeRange = await showDateRangePicker(
-                context: context,
-                firstDate: DateTime.now().subtract(const Duration(days: 30)),
-                lastDate: DateTime.now(),
-                initialDateRange: _dateTimeRange,
-                initialEntryMode: DatePickerEntryMode.calendarOnly,
+              if (_state.items == null) return;
+              Clipboard.setData(ClipboardData(text: _state.items!.map((el) => el.raw).join('\n')));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(AppLocalizations.of(context)!.tipsForCopiedSuccessfully, textAlign: TextAlign.center),
+                  duration: const Duration(seconds: 1),
+                ),
               );
-              setState(() => _state = PagingState());
             },
           ),
         ],
@@ -117,38 +107,31 @@ class _SettingsLogPageState extends State<SettingsLogPage> {
                   (context, item, index) => ListTile(
                     dense: true,
                     visualDensity: VisualDensity.compact,
-                    title: ReadMoreText(
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      spacing: 8,
+                      children: [
+                        if (item.tag != null) Text(item.tag!),
+                        if (item.time != null)
+                          Text(item.time!.formatLog(), style: Theme.of(context).textTheme.labelSmall),
+                      ],
+                    ),
+                    subtitle: ReadMoreText(
                       item.message,
                       trimLines: 8,
                       colorClickableText: Theme.of(context).colorScheme.primary,
                     ),
-                    subtitle: Text(item.time.formatFull()),
                     leading: Badge(
-                      label: SizedBox(
-                        width: 40,
-                        child: Text(item.level.name.toUpperCase(), textAlign: TextAlign.center),
-                      ),
+                      label: Text(item.level.name.substring(0, 1).toUpperCase(), textAlign: TextAlign.center),
                       textColor: Theme.of(context).colorScheme.surface,
                       backgroundColor: switch (item.level) {
                         LogLevel.error => null,
                         LogLevel.warn => const Color(0xffffab32),
                         LogLevel.info => Theme.of(context).colorScheme.primary,
                         LogLevel.debug => Theme.of(context).colorScheme.secondary,
-                        LogLevel.trace => Theme.of(context).colorScheme.secondary,
+                        LogLevel.trace => Theme.of(context).colorScheme.tertiary,
                       },
                     ),
-                    onLongPress: () {
-                      Clipboard.setData(ClipboardData(text: item.toString()));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            AppLocalizations.of(context)!.tipsForCopiedSuccessfully,
-                            textAlign: TextAlign.center,
-                          ),
-                          duration: const Duration(seconds: 1),
-                        ),
-                      );
-                    },
                   ),
               firstPageErrorIndicatorBuilder: (_) => ErrorMessage(error: _state.error),
               newPageErrorIndicatorBuilder: (_) => ErrorMessage(error: _state.error),

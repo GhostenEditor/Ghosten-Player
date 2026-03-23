@@ -1,6 +1,6 @@
-import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:logger/logger.dart';
 
 import '../../components/error_message.dart';
 import '../../components/no_data.dart';
@@ -17,9 +17,8 @@ class SettingsLogPage extends StatefulWidget {
 
 class _SettingsLogPageState extends State<SettingsLogPage> {
   final _scrollController = ScrollController();
-  DateTimeRange? _dateTimeRange;
 
-  PagingState<int, Log> _state = PagingState();
+  PagingState<(int, String), Log> _state = PagingState();
 
   Future<void> _fetchNextPage() async {
     if (_state.isLoading) return;
@@ -31,24 +30,15 @@ class _SettingsLogPageState extends State<SettingsLogPage> {
     });
 
     try {
-      final newKey = (_state.keys?.last ?? -1) + 1;
-      final data = await Api.logQueryPage(
-        30,
-        newKey * 30,
-        _dateTimeRange != null
-            ? (
-              _dateTimeRange!.start.millisecondsSinceEpoch,
-              _dateTimeRange!.end.add(const Duration(days: 1)).millisecondsSinceEpoch,
-            )
-            : null,
-      );
+      final key = _state.keys?.last;
+      final data = await Logger.logQueryPage(30, key?.$1, key?.$2);
 
-      final hasNextPage = data.offset + data.limit < data.count;
+      final hasNextPage = !data.isEnd;
 
       setState(() {
         _state = _state.copyWith(
           pages: [...?_state.pages, data.data],
-          keys: [...?_state.keys, newKey],
+          keys: [...?_state.keys, (data.cursor, data.filename)],
           hasNextPage: hasNextPage,
           isLoading: false,
         );
@@ -83,20 +73,23 @@ class _SettingsLogPageState extends State<SettingsLogPage> {
               itemBuilder:
                   (context, item, index) => ButtonSettingItem(
                     dense: true,
-                    title: Text(item.message),
-                    subtitle: Text(item.time.formatFull()),
+                    title: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (item.tag != null) Text(item.tag!),
+                        if (item.message.isNotEmpty) Text(item.message),
+                      ],
+                    ),
+                    subtitle: item.time != null ? Text(item.time!.formatLog()) : null,
                     leading: Badge(
-                      label: SizedBox(
-                        width: 24,
-                        child: Text(item.level.name.toUpperCase(), textAlign: TextAlign.center),
-                      ),
+                      label: Text(item.level.name.substring(0, 1).toUpperCase(), textAlign: TextAlign.center),
                       textColor: Theme.of(context).colorScheme.surface,
                       backgroundColor: switch (item.level) {
                         LogLevel.error => null,
                         LogLevel.warn => const Color(0xffffab32),
                         LogLevel.info => Theme.of(context).colorScheme.primary,
                         LogLevel.debug => Theme.of(context).colorScheme.secondary,
-                        LogLevel.trace => Theme.of(context).colorScheme.secondary,
+                        LogLevel.trace => Theme.of(context).colorScheme.tertiary,
                       },
                     ),
                     onTap: () {},
