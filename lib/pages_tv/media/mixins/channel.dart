@@ -15,8 +15,10 @@ class MediaChannel<T> extends StatelessWidget {
     required this.builder,
     required this.future,
     this.loadingBuilder,
+    this.itemExtent,
   });
 
+  final double? itemExtent;
   final String label;
   final double height;
   final Widget Function(BuildContext, T) builder;
@@ -44,12 +46,12 @@ class MediaChannel<T> extends StatelessWidget {
                       ),
                       SizedBox(
                         height: height,
-                        child: ListView.separated(
+                        child: ListView.builder(
                           scrollDirection: Axis.horizontal,
-                          padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 12),
+                          itemExtent: itemExtent,
+                          padding: const EdgeInsets.symmetric(horizontal: 42, vertical: 12),
                           itemCount: 6,
                           itemBuilder: (context, index) => loadingBuilder!(context),
-                          separatorBuilder: (context, _) => const SizedBox(width: 16),
                         ),
                       ),
                     ],
@@ -97,12 +99,12 @@ class MediaChannel<T> extends StatelessWidget {
                             Padding(padding: const EdgeInsets.only(left: 48, right: 48, top: 12), child: Text(label)),
                             SizedBox(
                               height: height,
-                              child: ListView.separated(
+                              child: ListView.builder(
+                                itemExtent: itemExtent,
                                 scrollDirection: Axis.horizontal,
-                                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 12),
+                                padding: const EdgeInsets.symmetric(horizontal: 42, vertical: 12),
                                 itemCount: snapshot.requireData.length,
                                 itemBuilder: (context, index) => builder(context, snapshot.requireData[index]),
-                                separatorBuilder: (context, _) => const SizedBox(width: 16),
                               ),
                             ),
                           ],
@@ -116,9 +118,16 @@ class MediaChannel<T> extends StatelessWidget {
 }
 
 class MediaGridChannel<T> extends StatefulWidget {
-  const MediaGridChannel({super.key, required this.label, required this.itemBuilder, required this.onQuery});
+  const MediaGridChannel({
+    super.key,
+    required this.label,
+    required this.itemBuilder,
+    required this.onQuery,
+    required this.gridDelegate,
+  });
 
   final String label;
+  final SliverGridDelegate gridDelegate;
   final ItemWidgetBuilder<T> itemBuilder;
   final Future<PageData<T>> Function(int) onQuery;
 
@@ -173,7 +182,7 @@ class _MediaGridChannelState<T> extends State<MediaGridChannel<T>> {
                   ),
                 ),
                 SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 42, vertical: 12),
                   sliver: PagedSliverGrid(
                     showNewPageProgressIndicatorAsGridChild: false,
                     showNoMoreItemsIndicatorAsGridChild: false,
@@ -189,15 +198,9 @@ class _MediaGridChannelState<T> extends State<MediaGridChannel<T>> {
                             ),
                           ),
                       firstPageProgressIndicatorBuilder: (context) => const Loading(),
-                      newPageProgressIndicatorBuilder:
-                          (context) => const Padding(padding: EdgeInsets.only(top: 16), child: Loading()),
+                      newPageProgressIndicatorBuilder: (context) => const SizedBox.shrink(),
                     ),
-                    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 180,
-                      childAspectRatio: 0.5,
-                      mainAxisSpacing: 16,
-                      crossAxisSpacing: 16,
-                    ),
+                    gridDelegate: widget.gridDelegate,
                     fetchNextPage: _fetchNextPage,
                     state: _state,
                   ),

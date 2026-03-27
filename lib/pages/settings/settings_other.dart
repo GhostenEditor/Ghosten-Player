@@ -153,6 +153,14 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
             leading: const Icon(Icons.dns_outlined),
             onTap: () => navigateTo(context, const SystemSettingsDNS()),
           ),
+          SwitchListTile(
+            title: const Text('Show Performance Overlay'),
+            value: userConfig.showPerformanceOverlay,
+            onChanged: (value) {
+              userConfig.setShowPerformanceOverlay(value);
+              if (context.mounted) setState(() {});
+            },
+          ),
         ],
       ),
     );

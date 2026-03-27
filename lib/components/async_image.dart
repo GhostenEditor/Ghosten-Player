@@ -41,6 +41,7 @@ class AsyncImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
     final image = Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(borderRadius: radius),
@@ -51,6 +52,8 @@ class AsyncImage extends StatelessWidget {
         filterQuality: FilterQuality.medium,
         width: width,
         height: height,
+        memCacheWidth: width != null ? (devicePixelRatio * width!).toInt() : null,
+        memCacheHeight: height != null ? (devicePixelRatio * height!).toInt() : null,
         httpHeaders:
             src.startsWith('https://media.themoviedb.org')
                 ? httpHeaders ?? const {'referer': 'https://www.themoviedb.org/'}

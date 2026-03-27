@@ -386,7 +386,7 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin<MovieDetail>
   }
 
   Future<bool> _refreshMovie(BuildContext context, Movie item) async {
-    final data = await showDialog<(String, String, String?)>(
+    final data = await showDialog<(String, ScraperType, String?)>(
       context: context,
       builder: (context) => ScraperDialog(item: item),
     );

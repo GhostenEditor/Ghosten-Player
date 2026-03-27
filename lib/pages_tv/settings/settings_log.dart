@@ -64,35 +64,40 @@ class _SettingsLogPageState extends State<SettingsLogPage> {
         controller: _scrollController,
         child: RefreshIndicator(
           onRefresh: () async => setState(() => _state = PagingState()),
-          child: PagedListView.separated(
+          child: PagedListView(
             state: _state,
             fetchNextPage: _fetchNextPage,
             padding: const EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 32),
             scrollController: _scrollController,
             builderDelegate: PagedChildBuilderDelegate<Log>(
               itemBuilder:
-                  (context, item, index) => ButtonSettingItem(
-                    dense: true,
-                    title: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        if (item.tag != null) Text(item.tag!),
-                        if (item.message.isNotEmpty) Text(item.message),
-                      ],
+                  (context, item, index) => Container(
+                    decoration: BoxDecoration(
+                      border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor)),
                     ),
-                    subtitle: item.time != null ? Text(item.time!.formatLog()) : null,
-                    leading: Badge(
-                      label: Text(item.level.name.substring(0, 1).toUpperCase(), textAlign: TextAlign.center),
-                      textColor: Theme.of(context).colorScheme.surface,
-                      backgroundColor: switch (item.level) {
-                        LogLevel.error => null,
-                        LogLevel.warn => const Color(0xffffab32),
-                        LogLevel.info => Theme.of(context).colorScheme.primary,
-                        LogLevel.debug => Theme.of(context).colorScheme.secondary,
-                        LogLevel.trace => Theme.of(context).colorScheme.tertiary,
-                      },
+                    child: ButtonSettingItem(
+                      dense: true,
+                      title: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          if (item.tag != null) Text(item.tag!),
+                          if (item.message.isNotEmpty) Text(item.message),
+                        ],
+                      ),
+                      subtitle: item.time != null ? Text(item.time!.formatLog()) : null,
+                      leading: Badge(
+                        label: Text(item.level.name.substring(0, 1).toUpperCase(), textAlign: TextAlign.center),
+                        textColor: Theme.of(context).colorScheme.surface,
+                        backgroundColor: switch (item.level) {
+                          LogLevel.error => null,
+                          LogLevel.warn => const Color(0xffffab32),
+                          LogLevel.info => Theme.of(context).colorScheme.primary,
+                          LogLevel.debug => Theme.of(context).colorScheme.secondary,
+                          LogLevel.trace => Theme.of(context).colorScheme.tertiary,
+                        },
+                      ),
+                      onTap: () {},
                     ),
-                    onTap: () {},
                   ),
               firstPageErrorIndicatorBuilder: (_) => ErrorMessage(error: _state.error),
               newPageErrorIndicatorBuilder: (_) => ErrorMessage(error: _state.error),
@@ -103,7 +108,6 @@ class _SettingsLogPageState extends State<SettingsLogPage> {
                     child: Text('END', style: Theme.of(context).textTheme.labelMedium, textAlign: TextAlign.center),
                   ),
             ),
-            separatorBuilder: (BuildContext context, int index) => const Divider(indent: 18, endIndent: 12, height: 1),
           ),
         ),
       ),

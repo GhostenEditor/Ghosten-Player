@@ -108,6 +108,14 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
             leading: const Icon(Icons.shortcut_rounded),
             onTap: () => navigateToSlideLeft(context, const SystemSettingsShortcut()),
           ),
+          SwitchSettingItem(
+            title: const Text('Show Performance Overlay'),
+            value: userConfig.showPerformanceOverlay,
+            onChanged: (value) {
+              userConfig.setShowPerformanceOverlay(value);
+              if (context.mounted) setState(() {});
+            },
+          ),
         ],
       ),
     );
@@ -252,11 +260,7 @@ class _ScraperSettingSectionState extends State<_ScraperSettingSection> {
         ButtonSettingItem(
           title: Text(AppLocalizations.of(context)!.settingsItemScraperSettings),
           subtitle: Text(AppLocalizations.of(context)!.settingsItemScraperBehaviorDescription),
-          trailing: Text(
-            AppLocalizations.of(
-              context,
-            )!.scraperBehavior(widget.settingScraper.behavior.name),
-          ),
+          trailing: Text(AppLocalizations.of(context)!.scraperBehavior(widget.settingScraper.behavior.name)),
           onTap: () async {
             final behavior = await navigateToSlideLeft<ScraperBehavior>(
               context,

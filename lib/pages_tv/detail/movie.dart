@@ -271,7 +271,7 @@ class _MovieDetailState extends State<MovieDetail> with ActionMixin {
                 title: Text(AppLocalizations.of(context)!.buttonScraperMediaInfo),
                 leading: const Icon(Icons.info_outline),
                 onTap: () async {
-                  final data = await navigateTo<(String, String, String?)>(
+                  final data = await navigateTo<(String, ScraperType, String?)>(
                     navigatorKey.currentContext!,
                     SearchResultSelect(item: item),
                   );

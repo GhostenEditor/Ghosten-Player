@@ -60,34 +60,36 @@ class _FluidFocusableState extends State<FluidFocusable> with SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (context, child) {
-        return Material(
-          color:
-              widget.selected ?? false
-                  ? (widget.selectedBackgroundColor ?? Theme.of(context).colorScheme.surfaceContainerHighest)
-                  : (widget.backgroundColor ?? Theme.of(context).colorScheme.surfaceContainerLow),
-          shape: GradientRoundedRectangleBorder(
-            side: (widget.focusNode?.hasFocus ?? false) ? const BorderSide(width: 4, strokeAlign: 2) : BorderSide.none,
-            gradient: SweepGradient(
-              colors: const [
-                Color(0xff7068f8),
-                Color(0xffb090d5),
-                Color(0xffece1f6),
-                Color(0xff0966d6),
-                Color(0xff95d1f7),
-                Color(0xffe6f6ff),
-                Color(0xff7068f8),
-              ],
-              transform: GradientRotation(2 * pi * _animation.value),
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _animation,
+        builder: (context, child) {
+          return Material(
+            color:
+                widget.selected ?? false
+                    ? (widget.selectedBackgroundColor ?? Theme.of(context).colorScheme.surfaceContainerHighest)
+                    : (widget.backgroundColor ?? Theme.of(context).colorScheme.surfaceContainerLow),
+            shape: GradientRoundedRectangleBorder(
+              side: (widget.focusNode?.hasFocus ?? false) ? const BorderSide(width: 4, strokeAlign: 2) : BorderSide.none,
+              gradient: SweepGradient(
+                colors: const [
+                  Color(0xff7068f8),
+                  Color(0xffb090d5),
+                  Color(0xffece1f6),
+                  Color(0xff0966d6),
+                  Color(0xff95d1f7),
+                  Color(0xffe6f6ff),
+                  Color(0xff7068f8),
+                ],
+                transform: GradientRotation(2 * pi * _animation.value),
+              ),
+              borderRadius: BorderRadius.circular(6),
             ),
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: child,
-        );
-      },
-      child: widget.child,
+            child: child,
+          );
+        },
+        child: widget.child,
+      ),
     );
   }
 

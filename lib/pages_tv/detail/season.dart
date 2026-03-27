@@ -345,32 +345,35 @@ class _SeasonPageState extends State<_SeasonPage> {
             ),
             SliverPadding(
               padding: const EdgeInsets.all(8),
-              sliver: SliverList.separated(
+              sliver: SliverFixedExtentList.builder(
                 itemCount: item.episodes.length,
+                itemExtent: 156,
                 itemBuilder:
-                    (context, index) => _EpisodeListTile(
-                      key: UniqueKey(),
-                      autofocus: index == 0,
-                      episode: item.episodes[index],
-                      onTap: () async {
-                        await toPlayer(navigatorKey.currentContext!, (
-                          item.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList(),
-                          index,
-                        ), theme: item.themeColor);
-                        widget.needUpdate();
-                      },
-                      onTapMore: () async {
-                        final resp = await navigateTo(
-                          navigatorKey.currentContext!,
-                          EpisodeDetail(item.episodes[index]),
-                        );
-                        if (resp == true) {
-                          setState(() {});
+                    (context, index) => Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: _EpisodeListTile(
+                        key: UniqueKey(),
+                        autofocus: index == 0,
+                        episode: item.episodes[index],
+                        onTap: () async {
+                          await toPlayer(navigatorKey.currentContext!, (
+                            item.episodes.map((episode) => FromMedia.fromEpisode(episode)).toList(),
+                            index,
+                          ), theme: item.themeColor);
                           widget.needUpdate();
-                        }
-                      },
+                        },
+                        onTapMore: () async {
+                          final resp = await navigateTo(
+                            navigatorKey.currentContext!,
+                            EpisodeDetail(item.episodes[index]),
+                          );
+                          if (resp == true) {
+                            setState(() {});
+                            widget.needUpdate();
+                          }
+                        },
+                      ),
                     ),
-                separatorBuilder: (context, index) => const SizedBox(height: 16),
               ),
             ),
             CastCrewTitle(mediaCast: item.mediaCast, mediaCrew: item.mediaCrew),

@@ -14,13 +14,7 @@ import '../../../utils/utils.dart';
 import '../../components/filled_button.dart';
 
 class Carousel extends StatelessWidget {
-  const Carousel({
-    super.key,
-    required this.len,
-    required this.index,
-    required this.child,
-    required this.onChange,
-  });
+  const Carousel({super.key, required this.len, required this.index, required this.child, required this.onChange});
 
   final ValueChanged<int> onChange;
   final int len;
@@ -29,43 +23,45 @@ class Carousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: PageTransitionSwitcher(
-            duration: const Duration(milliseconds: 800),
-            transitionBuilder: (
-              Widget child,
-              Animation<double> primaryAnimation,
-              Animation<double> secondaryAnimation,
-            ) {
-              return SharedAxisTransition(
-                animation: primaryAnimation,
-                secondaryAnimation: secondaryAnimation,
-                transitionType: SharedAxisTransitionType.horizontal,
-                fillColor: Colors.transparent,
-                child: child,
-              );
-            },
-            child: child,
+    return RepaintBoundary(
+      child: Column(
+        children: [
+          Expanded(
+            child: PageTransitionSwitcher(
+              duration: const Duration(milliseconds: 800),
+              transitionBuilder: (
+                Widget child,
+                Animation<double> primaryAnimation,
+                Animation<double> secondaryAnimation,
+              ) {
+                return SharedAxisTransition(
+                  animation: primaryAnimation,
+                  secondaryAnimation: secondaryAnimation,
+                  transitionType: SharedAxisTransitionType.horizontal,
+                  fillColor: Colors.transparent,
+                  child: child,
+                );
+              },
+              child: child,
+            ),
           ),
-        ),
-        CarouselPagination(
-          len: len,
-          index: index,
-          onChange: onChange,
-          onFocusChange: (f) {
-            if (f) {
-              Scrollable.ensureVisible(
-                FocusManager.instance.primaryFocus!.context!,
-                alignment: 1,
-                duration: const Duration(milliseconds: 400),
-                curve: Curves.easeOut,
-              );
-            }
-          },
-        ),
-      ],
+          CarouselPagination(
+            len: len,
+            index: index,
+            onChange: onChange,
+            onFocusChange: (f) {
+              if (f) {
+                Scrollable.ensureVisible(
+                  FocusManager.instance.primaryFocus!.context!,
+                  alignment: 1,
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeOut,
+                );
+              }
+            },
+          ),
+        ],
+      ),
     );
   }
 }
@@ -290,16 +286,33 @@ class _CarouselPaginationState extends State<CarouselPagination> with RouteAware
 }
 
 class CarouselBackground extends StatelessWidget {
-  const CarouselBackground({super.key, required this.src});
+  const CarouselBackground({super.key, required this.src, this.isActive = true});
 
   final String? src;
+  final bool isActive;
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        Padding(
+    return RepaintBoundary(
+      child: ShaderMask(
+        blendMode: BlendMode.dstIn,
+        shaderCallback:
+            (Rect bounds) => RadialGradient(
+              center: const Alignment(1.2, -5.0),
+              colors:
+                  isActive
+                      ? [
+                        Theme.of(context).scaffoldBackgroundColor.withAlpha(0xFF),
+                        Theme.of(context).scaffoldBackgroundColor.withAlpha(0x00),
+                      ]
+                      : [
+                        Theme.of(context).scaffoldBackgroundColor.withAlpha(0x33),
+                        Theme.of(context).scaffoldBackgroundColor.withAlpha(0x00),
+                      ],
+              radius: 3,
+              stops: const [0.7, 1],
+            ).createShader(bounds),
+        child: Padding(
           padding: const EdgeInsets.only(bottom: 1),
           child: PageTransitionSwitcher(
             duration: const Duration(seconds: 2),
@@ -318,11 +331,10 @@ class CarouselBackground extends StatelessWidget {
               );
             },
             child: Container(
-              key: UniqueKey(),
+              key: ValueKey(src),
               child:
                   src != null
                       ? AsyncImage(
-                        key: UniqueKey(),
                         src!,
                         errorWidget:
                             (_, _, _) => Image.asset(switch (Theme.of(context).brightness) {
@@ -337,33 +349,7 @@ class CarouselBackground extends StatelessWidget {
             ),
           ),
         ),
-        DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Theme.of(context).scaffoldBackgroundColor.withAlpha(0xEE),
-                Theme.of(context).scaffoldBackgroundColor.withAlpha(0x66),
-              ],
-              stops: const [0.3, 0.7],
-              begin: Alignment.bottomLeft,
-              end: Alignment.topRight,
-            ),
-          ),
-        ),
-        DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Theme.of(context).scaffoldBackgroundColor.withAlpha(0),
-                Theme.of(context).scaffoldBackgroundColor,
-              ],
-              stops: const [0.7, 1],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

@@ -50,26 +50,12 @@ class _TVListPageState extends State<TVListPage> {
   @override
   Widget build(BuildContext context) {
     return Stack(
-      fit: StackFit.passthrough,
       children: [
         AspectRatio(
           aspectRatio: 2,
           child: ListenableBuilder(
-            listenable: _backdrop,
-            builder: (context, _) => CarouselBackground(src: _backdrop.value),
-          ),
-        ),
-        AspectRatio(
-          aspectRatio: 2,
-          child: ListenableBuilder(
-            listenable: _showBlur,
-            builder:
-                (context, _) => AnimatedOpacity(
-                  opacity: _showBlur.value ? 0.54 : 0.0,
-                  duration: const Duration(milliseconds: 500),
-                  curve: Curves.easeOut,
-                  child: Container(width: 200, height: 200, color: Theme.of(context).scaffoldBackgroundColor),
-                ),
+            listenable: Listenable.merge([_backdrop, _showBlur]),
+            builder: (context, _) => CarouselBackground(src: _backdrop.value, isActive: !_showBlur.value),
           ),
         ),
         CustomScrollView(
@@ -158,12 +144,14 @@ class _TVListPageState extends State<TVListPage> {
               },
             ),
             MediaChannel(
+              itemExtent: 256,
               label: AppLocalizations.of(context)!.watchNow,
               future: Api.tvSeriesNextToPlayQueryAll(),
               height: 240,
               builder: (context, item) => _buildRecentMediaItem(context, item, width: 240, height: 240 / 1.78),
               loadingBuilder:
                   (context) => MediaGridItem(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
                     imageWidth: 240,
                     imageHeight: 240 / 1.78,
                     title: Container(
@@ -190,6 +178,7 @@ class _TVListPageState extends State<TVListPage> {
                   ),
             ),
             MediaChannel(
+              itemExtent: 176,
               label: AppLocalizations.of(context)!.tagFavorite,
               future: Api.tvSeriesQueryAll(
                 const MediaSearchQuery(
@@ -201,6 +190,7 @@ class _TVListPageState extends State<TVListPage> {
               builder: (context, item) => _buildMediaItem(context, item, width: 160, height: 160 / 0.67),
             ),
             MediaChannel(
+              itemExtent: 176,
               label: AppLocalizations.of(context)!.tagNewAdd,
               future: Api.tvSeriesQueryAll(
                 const MediaSearchQuery(
@@ -212,6 +202,7 @@ class _TVListPageState extends State<TVListPage> {
               builder: (context, item) => _buildMediaItem(context, item, width: 160, height: 160 / 0.67),
             ),
             MediaChannel(
+              itemExtent: 176,
               label: AppLocalizations.of(context)!.tagNewRelease,
               future: Api.tvSeriesQueryAll(
                 const MediaSearchQuery(
@@ -232,6 +223,12 @@ class _TVListPageState extends State<TVListPage> {
                       sort: const SortConfig(type: SortType.title, direction: SortDirection.asc),
                     ),
                   ),
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 196,
+                childAspectRatio: 0.5,
+                mainAxisSpacing: 36,
+                mainAxisExtent: 300,
+              ),
               itemBuilder: (context, item, index) => _buildMediaItem(context, item, width: 160, height: 160 / 0.67),
             ),
           ],
@@ -242,6 +239,7 @@ class _TVListPageState extends State<TVListPage> {
 
   Widget _buildRecentMediaItem(BuildContext context, TVEpisode item, {double? width, double? height}) {
     return MediaGridItem(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       imageWidth: width,
       imageHeight: height,
       title: Column(
@@ -309,6 +307,7 @@ class _TVListPageState extends State<TVListPage> {
 
   Widget _buildMediaItem(BuildContext context, TVSeries item, {double? width, double? height}) {
     return MediaGridItem(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       imageWidth: width,
       imageHeight: height,
       imageUrl: item.poster,

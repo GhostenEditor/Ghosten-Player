@@ -421,7 +421,7 @@ class _TVDetailState extends State<TVDetail> with ActionMixin<TVDetail> {
   }
 
   Future<bool> _scraperSeries(BuildContext context, TVSeries item) async {
-    final data = await showDialog<(String, String, String?)>(
+    final data = await showDialog<(String, ScraperType, String?)>(
       context: context,
       builder: (context) => ScraperDialog(item: item),
     );

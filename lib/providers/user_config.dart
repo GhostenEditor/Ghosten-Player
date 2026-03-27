@@ -50,7 +50,8 @@ class UserConfig extends ChangeNotifier {
       playerType = PlayerType.fromString(prefs.getString('playerConfig.playerType')),
       mpvVersion = prefs.getString('playerConfig.mpvVersion'),
       autoForceLandscape = prefs.getBool('playerConfig.autoForceLandscape') ?? false,
-      displayScale = prefs.getDouble('system.displayScale') ?? 1;
+      displayScale = prefs.getDouble('system.displayScale') ?? 1,
+      showPerformanceOverlay = false;
   final SharedPreferences prefs;
   SystemLanguage language;
   ThemeMode themeMode;
@@ -64,6 +65,7 @@ class UserConfig extends ChangeNotifier {
   bool autoForceLandscape;
   bool autoPip;
   double displayScale;
+  bool showPerformanceOverlay;
 
   static Future<UserConfig> init() async {
     final prefs = await SharedPreferences.getInstance();
@@ -137,6 +139,11 @@ class UserConfig extends ChangeNotifier {
       ScaledWidgetsFlutterBinding.instance.scaleFactor = (deviceSize) => max(1, deviceSize.width / 1140) * displayScale;
       prefs.setDouble('system.displayScale', displayScale);
     }
+  }
+
+  void setShowPerformanceOverlay(bool showPerformanceOverlay) {
+    this.showPerformanceOverlay = showPerformanceOverlay;
+    notifyListeners();
   }
 
   bool shouldCheckUpdate() {

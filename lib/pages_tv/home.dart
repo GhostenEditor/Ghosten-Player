@@ -282,7 +282,7 @@ class _HomeAppbarState extends State<_HomeAppbar> {
   }
 
   void _handleScrollNotification(ScrollNotification notification) {
-    if (notification is ScrollUpdateNotification) {
+    if (notification is ScrollUpdateNotification && !Scaffold.of(context).isEndDrawerOpen) {
       final oldShow = _show;
       final metrics = notification.metrics;
       switch (metrics.axisDirection) {

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import 'fluid_focusable.dart';
@@ -59,7 +58,15 @@ class _TVListTileState extends State<TVListTile> with SingleTickerProviderStateM
         focusNode: widget.focusNode ?? _focusNode,
         onFocusChange: widget.onFocusChange,
         title: widget.title,
-        subtitle: widget.subtitle != null ? Opacity(opacity: 0.75, child: widget.subtitle) : null,
+        subtitle:
+            widget.subtitle != null
+                ? DefaultTextStyle(
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall!.copyWith(color: Theme.of(context).colorScheme.secondary),
+                  child: widget.subtitle!,
+                )
+                : null,
         leading: widget.leading,
         trailing: widget.trailing,
       ),
@@ -125,7 +132,15 @@ class _TVRadioListTileState<T> extends State<TVRadioListTile<T>> {
         focusNode: widget.focusNode ?? _focusNode,
         onFocusChange: widget.onFocusChange,
         title: widget.title,
-        subtitle: widget.subtitle != null ? Opacity(opacity: 0.75, child: widget.subtitle) : null,
+        subtitle:
+            widget.subtitle != null
+                ? DefaultTextStyle(
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall!.copyWith(color: Theme.of(context).colorScheme.secondary),
+                  child: widget.subtitle!,
+                )
+                : null,
         onChanged: widget.onChanged,
       ),
     );
@@ -187,7 +202,15 @@ class _TVSwitchListTileState<T> extends State<TVSwitchListTile<T>> {
         focusNode: widget.focusNode ?? _focusNode,
         onFocusChange: widget.onFocusChange,
         title: widget.title,
-        subtitle: widget.subtitle != null ? Opacity(opacity: 0.75, child: widget.subtitle) : null,
+        subtitle:
+            widget.subtitle != null
+                ? DefaultTextStyle(
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall!.copyWith(color: Theme.of(context).colorScheme.secondary),
+                  child: widget.subtitle!,
+                )
+                : null,
         onChanged: widget.onChanged,
       ),
     );

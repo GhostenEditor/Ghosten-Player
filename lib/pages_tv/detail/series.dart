@@ -302,7 +302,7 @@ class _TVDetailState extends State<TVDetail> with ActionMixin {
                 leading: const Icon(Icons.info_outline),
                 title: Text(AppLocalizations.of(context)!.buttonScraperMediaInfo),
                 onTap: () async {
-                  final data = await navigateTo<(String, String, String?)>(
+                  final data = await navigateTo<(String, ScraperType, String?)>(
                     navigatorKey.currentContext!,
                     SearchResultSelect(item: item),
                   );

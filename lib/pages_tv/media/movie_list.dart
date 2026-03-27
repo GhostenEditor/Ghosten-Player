@@ -49,26 +49,12 @@ class _MovieListPageState extends State<MovieListPage> {
   @override
   Widget build(BuildContext context) {
     return Stack(
-      fit: StackFit.expand,
       children: [
         AspectRatio(
           aspectRatio: 2,
           child: ListenableBuilder(
-            listenable: _backdrop,
+            listenable: Listenable.merge([_backdrop, _showBlur]),
             builder: (context, _) => CarouselBackground(src: _backdrop.value),
-          ),
-        ),
-        AspectRatio(
-          aspectRatio: 2,
-          child: ListenableBuilder(
-            listenable: _showBlur,
-            builder:
-                (context, _) => AnimatedOpacity(
-                  opacity: _showBlur.value ? 0.54 : 0.0,
-                  duration: const Duration(milliseconds: 500),
-                  curve: Curves.easeOut,
-                  child: Container(width: 200, height: 200, color: Theme.of(context).scaffoldBackgroundColor),
-                ),
           ),
         ),
         CustomScrollView(
@@ -148,12 +134,14 @@ class _MovieListPageState extends State<MovieListPage> {
               },
             ),
             MediaChannel(
+              itemExtent: 176,
               label: AppLocalizations.of(context)!.watchNow,
               future: Api.movieNextToPlayQueryAll(),
               height: 340,
               builder: (context, item) => _buildRecentMediaItem(context, item, width: 160, height: 160 / 0.67),
               loadingBuilder:
                   (context) => MediaGridItem(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
                     imageWidth: 160,
                     imageHeight: 160 / 0.67,
                     title: Container(
@@ -180,6 +168,7 @@ class _MovieListPageState extends State<MovieListPage> {
                   ),
             ),
             MediaChannel(
+              itemExtent: 176,
               label: AppLocalizations.of(context)!.tagFavorite,
               future: Api.movieQueryAll(
                 const MediaSearchQuery(
@@ -191,6 +180,7 @@ class _MovieListPageState extends State<MovieListPage> {
               builder: (context, item) => _buildMediaItem(context, item, width: 160, height: 160 / 0.67),
             ),
             MediaChannel(
+              itemExtent: 176,
               label: AppLocalizations.of(context)!.tagNewAdd,
               future: Api.movieQueryAll(
                 const MediaSearchQuery(
@@ -202,6 +192,7 @@ class _MovieListPageState extends State<MovieListPage> {
               builder: (context, item) => _buildMediaItem(context, item, width: 160, height: 160 / 0.67),
             ),
             MediaChannel(
+              itemExtent: 176,
               label: AppLocalizations.of(context)!.tagNewRelease,
               future: Api.movieQueryAll(
                 const MediaSearchQuery(
@@ -222,6 +213,12 @@ class _MovieListPageState extends State<MovieListPage> {
                       sort: const SortConfig(type: SortType.title, direction: SortDirection.asc),
                     ),
                   ),
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 196,
+                childAspectRatio: 0.5,
+                mainAxisSpacing: 36,
+                mainAxisExtent: 300,
+              ),
               itemBuilder: (context, item, index) => _buildMediaItem(context, item, width: 160, height: 160 / 0.67),
             ),
           ],
@@ -232,6 +229,7 @@ class _MovieListPageState extends State<MovieListPage> {
 
   Widget _buildRecentMediaItem(BuildContext context, Movie item, {double? width, double? height}) {
     return MediaGridItem(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       imageWidth: width,
       imageHeight: height,
       title: Text(item.displayRecentTitle()),
@@ -284,6 +282,7 @@ class _MovieListPageState extends State<MovieListPage> {
 
   Widget _buildMediaItem(BuildContext context, Movie item, {double? width, double? height}) {
     return MediaGridItem(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       imageWidth: width,
       imageHeight: height,
       imageUrl: item.poster,

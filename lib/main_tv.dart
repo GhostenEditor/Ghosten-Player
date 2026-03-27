@@ -60,6 +60,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      showPerformanceOverlay: context.watch<UserConfig>().showPerformanceOverlay,
       title: appName,
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
