@@ -152,20 +152,23 @@ class _MediaGridChannelState<T> extends State<MediaGridChannel<T>> {
       final newKey = (_state.keys?.last ?? -1) + 1;
       final data = await widget.onQuery(newKey);
       final hasNextPage = data.offset + data.limit < data.count;
-
-      setState(() {
-        _state = _state.copyWith(
-          pages: [...?_state.pages, data.data],
-          keys: [...?_state.keys, newKey],
-          hasNextPage: hasNextPage,
-          isLoading: false,
-        );
-        _count = data.count;
-      });
+      if (mounted) {
+        setState(() {
+          _state = _state.copyWith(
+            pages: [...?_state.pages, data.data],
+            keys: [...?_state.keys, newKey],
+            hasNextPage: hasNextPage,
+            isLoading: false,
+          );
+          _count = data.count;
+        });
+      }
     } catch (error) {
-      setState(() {
-        _state = _state.copyWith(error: error, isLoading: false);
-      });
+      if (mounted) {
+        setState(() {
+          _state = _state.copyWith(error: error, isLoading: false);
+        });
+      }
     }
   }
 
@@ -198,7 +201,8 @@ class _MediaGridChannelState<T> extends State<MediaGridChannel<T>> {
                             ),
                           ),
                       firstPageProgressIndicatorBuilder: (context) => const Loading(),
-                      newPageProgressIndicatorBuilder: (context) => const SizedBox.shrink(),
+                      newPageProgressIndicatorBuilder:
+                          (context) => const Padding(padding: EdgeInsets.only(top: 16), child: Loading()),
                     ),
                     gridDelegate: widget.gridDelegate,
                     fetchNextPage: _fetchNextPage,

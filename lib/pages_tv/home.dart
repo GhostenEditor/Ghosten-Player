@@ -215,17 +215,18 @@ class _HomeTabsState extends State<_HomeTabs> {
                       )
                       .toList(),
             ),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 400),
-              curve: Curves.easeOut,
-              width: _tabFocused ? _lineWidth : _lineWidth * 0.6,
-              height: 2,
-              margin: EdgeInsets.only(left: _tabFocused ? _lineOffset : _lineOffset + _lineWidth * 0.2),
-              decoration: BoxDecoration(
-                color: _tabFocused ? color : Colors.grey,
-                borderRadius: const BorderRadius.only(topLeft: Radius.circular(2), topRight: Radius.circular(2)),
+            if (_lineWidth > 0)
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 400),
+                curve: Curves.easeOut,
+                width: _tabFocused ? _lineWidth : _lineWidth * 0.6,
+                height: 2,
+                margin: EdgeInsets.only(left: _tabFocused ? _lineOffset : _lineOffset + _lineWidth * 0.2),
+                decoration: BoxDecoration(
+                  color: _tabFocused ? color : Colors.grey,
+                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(2), topRight: Radius.circular(2)),
+                ),
               ),
-            ),
           ],
         ),
       ),

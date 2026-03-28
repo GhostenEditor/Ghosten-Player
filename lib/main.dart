@@ -85,6 +85,7 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       title: appName,
       navigatorKey: navigatorKey,
+      showPerformanceOverlay: context.watch<UserConfig>().showPerformanceOverlay,
       debugShowCheckedModeBanner: false,
       theme: lightTheme,
       darkTheme: darkTheme,
