@@ -102,7 +102,7 @@ class _SettingsSyncPageState extends State<SettingsSyncPage> {
                             return ButtonSettingItem(
                               title: Text(device.name ?? AppLocalizations.of(context)!.tagUnknown),
                               subtitle: Text(device.address),
-                              onTap: () => showNotification(context, _startConnection(device)),
+                              onTap: () => showProgressNotification(context, _startConnection(device)),
                               trailing: Icon(
                                 device.isConnected
                                     ? Icons.import_export
@@ -179,7 +179,7 @@ class _SettingsSyncPageState extends State<SettingsSyncPage> {
                 }
               }
             case BlueToothMessageType.text:
-              Bluetooth.write(BluetoothMessage.text(appVersion));
+              Bluetooth.writeText(appVersion);
           }
         });
       },
@@ -220,9 +220,9 @@ class _SettingsSyncPageState extends State<SettingsSyncPage> {
     );
   }
 
-  Future<void> _startConnection(BluetoothDevice device) async {
+  Stream<double> _startConnection(BluetoothDevice device) async* {
     await Bluetooth.connect(device.address);
-    await Bluetooth.write(BluetoothMessage.text(appVersion));
+    await Bluetooth.writeText(appVersion);
     final resp = await Bluetooth.connection().first;
     switch (resp.type) {
       case BlueToothMessageType.text:
@@ -232,7 +232,7 @@ class _SettingsSyncPageState extends State<SettingsSyncPage> {
           await Bluetooth.disconnect();
           if (mounted) throw Exception(AppLocalizations.of(context)!.dataSyncTipOutOfDate(device.name ?? ''));
         } else {
-          await Bluetooth.write(BluetoothMessage.file((await Api.databasePath())!));
+          yield* Bluetooth.writeFile((await Api.databasePath())!);
         }
       case BlueToothMessageType.file:
         if (mounted) throw Exception(AppLocalizations.of(context)!.dataSyncTipSyncError);

@@ -52,17 +52,57 @@ Future<NotificationResponse<T?>?> showNotification<T>(
   return NotificationResponse(data: snapshot?.data, error: snapshot?.error);
 }
 
+Future<NotificationResponse<T?>?> showProgressNotification<T>(
+  BuildContext context,
+  Stream<double> stream, {
+  String? loadingText,
+  String? errorText,
+  String? successText,
+  bool? showSuccess,
+}) async {
+  final snapshot = await showModal<AsyncSnapshot<T>>(
+    context: context,
+    filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+    builder:
+        (context) => StreamBuilder(
+          stream: stream,
+          builder:
+              (context, snapshot) => PopScope(
+                canPop: false,
+                onPopInvokedWithResult: (didPop, _) {
+                  if (!didPop && !snapshot.connectionState.isLoading()) {
+                    Navigator.of(context).pop(true);
+                  }
+                },
+                child: _NotificationLayout(snapshot: snapshot, progressValue: snapshot.data),
+              ),
+        ),
+  );
+  if ((snapshot?.hasError ?? false) && context.mounted) {
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(content: ErrorMessage(error: snapshot?.error)),
+    );
+  }
+  return NotificationResponse(data: snapshot?.data, error: snapshot?.error);
+}
+
 class _NotificationLayout<T> extends StatelessWidget {
-  const _NotificationLayout({super.key, required this.snapshot});
+  const _NotificationLayout({super.key, required this.snapshot, this.progressValue});
 
   final AsyncSnapshot<T> snapshot;
+  final double? progressValue;
 
   @override
   Widget build(BuildContext context) {
     switch (snapshot.connectionState) {
       case ConnectionState.waiting:
       case ConnectionState.active:
-        return const Loading();
+        if (progressValue != null) {
+          return Center(child: CircularProgressIndicator(value: progressValue));
+        } else {
+          return const Loading();
+        }
       case ConnectionState.done:
       case ConnectionState.none:
         Navigator.of(context).pop(snapshot);

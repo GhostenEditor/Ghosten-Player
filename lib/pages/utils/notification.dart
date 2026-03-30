@@ -22,6 +22,7 @@ class _NotificationLayout<T> extends StatelessWidget {
     this.errorText,
     this.successText,
     this.showSuccess,
+    this.progressValue,
   });
 
   final AsyncSnapshot<T> snapshot;
@@ -29,6 +30,7 @@ class _NotificationLayout<T> extends StatelessWidget {
   final String? errorText;
   final String? successText;
   final bool? showSuccess;
+  final double? progressValue;
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +41,7 @@ class _NotificationLayout<T> extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Padding(padding: EdgeInsets.all(17), child: CircularProgressIndicator()),
+            Padding(padding: const EdgeInsets.all(17), child: CircularProgressIndicator(value: progressValue)),
             Text(loadingText ?? AppLocalizations.of(context)!.modalNotificationLoadingText),
           ],
         );
@@ -136,6 +138,43 @@ Future<bool?> showConfirm(BuildContext context, String confirmText) async {
               child: Text(AppLocalizations.of(context)!.buttonCancel),
             ),
           ],
+        ),
+  );
+}
+
+Future<NotificationResponse<T?>?> showProgressNotification<T>(
+  BuildContext context,
+  Stream<double> stream, {
+  String? loadingText,
+  String? errorText,
+  String? successText,
+  bool? showSuccess,
+}) async {
+  return showDialog<NotificationResponse<T?>>(
+    context: context,
+    builder:
+        (_) => AlertDialog(
+          title: Text(AppLocalizations.of(context)!.modalTitleNotification),
+          content: StreamBuilder(
+            stream: stream,
+            builder:
+                (context, snapshot) => PopScope(
+                  canPop: false,
+                  onPopInvokedWithResult: (didPop, _) {
+                    if (!didPop && !snapshot.connectionState.isLoading()) {
+                      Navigator.of(context).pop(NotificationResponse(data: snapshot.data, error: snapshot.error));
+                    }
+                  },
+                  child: _NotificationLayout(
+                    snapshot: snapshot,
+                    loadingText: loadingText,
+                    errorText: errorText,
+                    successText: successText,
+                    showSuccess: showSuccess,
+                    progressValue: snapshot.data,
+                  ),
+                ),
+          ),
         ),
   );
 }
