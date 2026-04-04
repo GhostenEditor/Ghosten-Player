@@ -44,7 +44,7 @@ dependencies:
       url: https://github.com/GhostenEditor/Ghosten-Player-flutter-packages.git
       path: logger
       ref: v0.0.4
-  markdown: ^7.2.0
+  markdown: ^7.3.1
   markdown_widget:
     git:
       url: https://github.com/GhostenEditor/markdown_widget.git
