@@ -199,6 +199,7 @@ class _SystemSettingsAddState extends State<_SystemSettingsAdd> {
                 TextFieldFocus(
                   child: TextFormField(
                     controller: _userPassword,
+                    obscureText: true,
                     decoration: InputDecoration(
                       prefixIcon: const Icon(Icons.password),
                       border: const UnderlineInputBorder(),
