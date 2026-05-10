@@ -158,6 +158,7 @@ class _SystemSettingsAddState extends State<_SystemSettingsAdd> {
                 DropdownButtonFormField(
                   value: ServerType.emby,
                   isExpanded: true,
+                  autofocus: true,
                   decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)!.serverFormItemLabelServerType,
                     prefixIcon: const Icon(Icons.domain),
@@ -185,7 +186,6 @@ class _SystemSettingsAddState extends State<_SystemSettingsAdd> {
                 TextFieldFocus(
                   child: TextFormField(
                     controller: _username,
-                    autofocus: true,
                     decoration: InputDecoration(
                       prefixIcon: const Icon(Icons.account_circle_outlined),
                       border: const UnderlineInputBorder(),
@@ -199,7 +199,6 @@ class _SystemSettingsAddState extends State<_SystemSettingsAdd> {
                 TextFieldFocus(
                   child: TextFormField(
                     controller: _userPassword,
-                    autofocus: true,
                     decoration: InputDecoration(
                       prefixIcon: const Icon(Icons.password),
                       border: const UnderlineInputBorder(),
