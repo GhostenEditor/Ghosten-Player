@@ -140,16 +140,15 @@ class _SystemSettingsAddState extends State<_SystemSettingsAdd> {
           IconButton(
             onPressed: () async {
               if (_formKey.currentState!.validate()) {
-                final userAgent = _userAgent.text.trim();
                 final resp = await showNotification(
                   context,
-                  Api.serverInsert({
-                    'type': _type.index,
-                    'host': _serverAddress.text.trim(),
-                    'username': _username.text.trim(),
-                    'userPassword': _userPassword.text.trim(),
-                    'userAgent': userAgent.isNotEmpty ? userAgent : null,
-                  }),
+                  Api.serverInsert(
+                    type: _type,
+                    host: _serverAddress.text,
+                    username: _username.text,
+                    userPassword: _userPassword.text,
+                    userAgent: _userAgent.text,
+                  ),
                 );
                 if (resp?.error == null && context.mounted) {
                   Navigator.of(context).pop(true);

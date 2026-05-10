@@ -127,7 +127,7 @@ class _SystemSettingsAdd extends StatefulWidget {
 
 class _SystemSettingsAddState extends State<_SystemSettingsAdd> {
   final _formKey = GlobalKey<FormState>();
-  String _type = 'emby';
+  ServerType _type = ServerType.emby;
   late final _serverAddress = TextEditingController();
   late final _username = TextEditingController();
   late final _userPassword = TextEditingController();
@@ -156,7 +156,7 @@ class _SystemSettingsAddState extends State<_SystemSettingsAdd> {
               spacing: 12,
               children: [
                 DropdownButtonFormField(
-                  value: 'emby',
+                  value: ServerType.emby,
                   isExpanded: true,
                   decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)!.serverFormItemLabelServerType,
@@ -164,8 +164,8 @@ class _SystemSettingsAddState extends State<_SystemSettingsAdd> {
                     isDense: true,
                   ),
                   items: const [
-                    DropdownMenuItem(value: 'emby', child: Text('Emby')),
-                    DropdownMenuItem(value: 'jellyfin', child: Text('Jellyfin')),
+                    DropdownMenuItem(value: ServerType.emby, child: Text('Emby')),
+                    DropdownMenuItem(value: ServerType.jellyfin, child: Text('Jellyfin')),
                   ],
                   onChanged: (ty) => _type = ty!,
                 ),
@@ -226,16 +226,15 @@ class _SystemSettingsAddState extends State<_SystemSettingsAdd> {
                   child: Text(AppLocalizations.of(context)!.buttonConfirm),
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      final userAgent = _userAgent.text.trim();
                       final resp = await showNotification(
                         context,
-                        Api.serverInsert({
-                          'type': _type,
-                          'host': _serverAddress.text.trim(),
-                          'username': _username.text.trim(),
-                          'userPassword': _userPassword.text.trim(),
-                          'userAgent': userAgent.isNotEmpty ? userAgent : null,
-                        }),
+                        Api.serverInsert(
+                          type: _type,
+                          host: _serverAddress.text,
+                          username: _username.text,
+                          userPassword: _userPassword.text,
+                          userAgent: _userAgent.text,
+                        ),
                       );
                       if (resp?.error == null && context.mounted) {
                         Navigator.of(context).pop(true);
