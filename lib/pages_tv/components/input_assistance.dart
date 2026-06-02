@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:api/api.dart';
@@ -61,7 +62,7 @@ class InputAssistance extends StatelessWidget {
         case SessionStatus.created:
           yield AppLocalizations.of(context)!.sessionStatusCreated;
         case SessionStatus.data:
-          if (session.data != null) onData(session.data);
+          if (session.data != null) onData(utf8.decode((session.data as List<dynamic>).cast()));
           yield AppLocalizations.of(context)!.sessionStatusConnected;
         case SessionStatus.finished:
           yield AppLocalizations.of(context)!.sessionStatusFinished;
