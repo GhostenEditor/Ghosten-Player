@@ -478,7 +478,7 @@ class _PlayerControlsState extends State<PlayerControls> {
       switch (event.logicalKey) {
         case LogicalKeyboardKey.contextMenu:
           _endSeeking();
-          Scaffold.of(context).openEndDrawer();
+          _scaffoldKey.currentState?.openEndDrawer();
           return KeyEventResult.handled;
         case LogicalKeyboardKey.enter:
         case LogicalKeyboardKey.select:
