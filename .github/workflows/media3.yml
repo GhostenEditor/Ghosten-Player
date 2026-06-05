@@ -49,7 +49,7 @@ jobs:
           FFMPEG_MODULE_PATH="${{ github.workspace }}/media/libraries/decoder_ffmpeg/src/main"
           HOST_PLATFORM="linux-x86_64"
           ANDROID_ABI=21
-          ENABLED_DECODERS="vorbis,opus,flac,mp3,aac,ac3,eac3,dca"
+          ENABLED_DECODERS="vorbis,opus,flac,mp3,aac,ac3,eac3,dca,truehd"
           FFMPEG_PATH=${{ github.workspace }}/FFmpeg
           cd "${FFMPEG_MODULE_PATH}/jni"
           ln -s "$FFMPEG_PATH" ffmpeg
