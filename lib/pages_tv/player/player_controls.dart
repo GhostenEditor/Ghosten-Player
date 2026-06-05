@@ -684,14 +684,14 @@ class PlayerSettings extends StatelessWidget {
                   builder: (context, _) {
                     return ButtonSettingItem(
                       leading: const Icon(Icons.aspect_ratio_rounded),
-                      title: Text(localizations.videoSize),
-                      trailing: Text(controller.aspectRatio.value.label(context)),
+                      title: Text(localizations.videoAspectRatio),
+                      trailing: Text(controller.aspectRatio.value.label()),
                       onTap: () {
                         Navigator.of(context).push(
                           FadeInPageRoute(
                             builder:
                                 (context) => PlayerSubSettings(
-                                  title: localizations.videoSize,
+                                  title: localizations.videoAspectRatio,
                                   items:
                                       AspectRatioType.values
                                           .map(
@@ -699,10 +699,50 @@ class PlayerSettings extends StatelessWidget {
                                               autofocus: aspectRatio == controller.aspectRatio.value,
                                               groupValue: controller.aspectRatio.value,
                                               value: aspectRatio,
-                                              title: Text(aspectRatio.label(context)),
+                                              title: Text(aspectRatio.label()),
                                               onChanged: (_) {
                                                 controller.aspectRatio.value = aspectRatio;
-                                                controller.setAspectRatio(aspectRatio.value(context));
+                                                controller.resizeMode.value = ResizeMode.fit;
+                                                controller.setAspectRatio(aspectRatio.value());
+                                                controller.setResizeMode(ResizeMode.values.indexOf(ResizeMode.fit));
+                                                Navigator.of(context).pop();
+                                              },
+                                            ),
+                                          )
+                                          .toList(),
+                                ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+                ListenableBuilder(
+                  listenable: controller.resizeMode,
+                  builder: (context, _) {
+                    return ButtonSettingItem(
+                      leading: const Icon(Icons.zoom_out_map_rounded),
+                      title: Text(localizations.videoResizeMode),
+                      trailing: Text(controller.resizeMode.value.label()),
+                      onTap: () {
+                        Navigator.of(context).push(
+                          FadeInPageRoute(
+                            builder:
+                                (context) => PlayerSubSettings(
+                                  title: localizations.videoResizeMode,
+                                  items:
+                                      ResizeMode.values
+                                          .map(
+                                            (resizeMode) => RadioSettingItem(
+                                              autofocus: resizeMode == controller.resizeMode.value,
+                                              groupValue: controller.resizeMode.value,
+                                              value: resizeMode,
+                                              title: Text(resizeMode.label()),
+                                              onChanged: (_) {
+                                                controller.resizeMode.value = resizeMode;
+                                                controller.aspectRatio.value = AspectRatioType.auto;
+                                                controller.setAspectRatio(AspectRatioType.auto.value());
+                                                controller.setResizeMode(ResizeMode.values.indexOf(resizeMode));
                                                 Navigator.of(context).pop();
                                               },
                                             ),
@@ -947,7 +987,7 @@ class PlayerSettings extends StatelessWidget {
     return ButtonSettingItem(
       leading: icon,
       title: Text(label),
-      trailing: Text(selectedTrack?.label ?? localizations.videoSettingsNone, overflow: TextOverflow.ellipsis),
+      trailing: Text(selectedTrack?.name ?? localizations.videoSettingsNone, overflow: TextOverflow.ellipsis),
       onTap: () {
         Navigator.of(context).push(
           FadeInPageRoute(
@@ -966,15 +1006,18 @@ class PlayerSettings extends StatelessWidget {
                       },
                     ),
                     ...tracks.map(
-                      (e) => RadioSettingItem(
+                      (e) => RadioSettingItem<String?>(
                         autofocus: e.id == selected,
                         groupValue: selected,
                         value: e.id,
-                        title: Text(e.label ?? localizations.tagUnknown),
-                        onChanged: (value) {
-                          onSelected(value);
-                          Navigator.of(context).pop();
-                        },
+                        title: Text(_getTrackText(e)),
+                        onChanged:
+                            e.supported
+                                ? (value) {
+                                  onSelected(value);
+                                  Navigator.of(context).pop();
+                                }
+                                : null,
                       ),
                     ),
                   ],
@@ -983,6 +1026,29 @@ class PlayerSettings extends StatelessWidget {
         );
       },
     );
+  }
+
+  String _getTrackText(MediaTrack track) {
+    final spans = [];
+    if (track.name?.isNotEmpty ?? false) {
+      spans.add(track.name);
+    }
+    if (track.label?.isNotEmpty ?? false) {
+      spans.add(track.label);
+    }
+    if (track.mimeType?.isNotEmpty ?? false) {
+      final mimes = track.mimeType!.split('/');
+      if (mimes.length >= 2) {
+        spans.add(mimes[1]);
+      }
+    }
+    if (track.rate != null && track.rate! > 0) {
+      spans.add('${track.rate}Hz');
+    }
+    if (track.averageBitrate != null && track.averageBitrate! > 0) {
+      spans.add('${track.rate}Bit/s');
+    }
+    return spans.join(', ');
   }
 }
 

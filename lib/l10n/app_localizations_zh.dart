@@ -1076,6 +1076,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get versionDeprecatedTip => '当前版本过低，请更新至最新版';
 
   @override
+  String get videoAspectRatio => '画面比例';
+
+  @override
+  String get videoResizeMode => '画面缩放模式';
+
+  @override
   String get videoSettingsAudio => '音频';
 
   @override
@@ -1086,9 +1092,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get videoSettingsVideo => '视频';
-
-  @override
-  String get videoSize => '画面尺寸';
 
   @override
   String get watchNow => '继续观看';

@@ -266,13 +266,13 @@ class _TVListPageState extends State<TVListPage> {
             )
           else
             const Spacer(),
-          if (item.duration != null && item.lastPlayedTime != null)
+          if (item.lastPlayedPosition != null && item.duration != null && item.duration!.inSeconds != 0)
             Text('${(item.lastPlayedPosition!.inSeconds / item.duration!.inSeconds * 100).toStringAsFixed(1)}%'),
         ],
       ),
       imageUrl: item.poster,
       floating:
-          item.duration != null && item.duration != Duration.zero && item.lastPlayedTime != null
+          item.lastPlayedPosition != null && item.duration != null && item.duration!.inSeconds != 0
               ? SizedBox(
                 width: 240,
                 child: Align(

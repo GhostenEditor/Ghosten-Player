@@ -1096,6 +1096,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get versionDeprecatedTip => 'The current version is too low, please update to the latest version';
 
   @override
+  String get videoAspectRatio => 'Video Aspect Ratio';
+
+  @override
+  String get videoResizeMode => 'Video Resize Mode';
+
+  @override
   String get videoSettingsAudio => 'Audio';
 
   @override
@@ -1106,9 +1112,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get videoSettingsVideo => 'Video';
-
-  @override
-  String get videoSize => 'Video Size';
 
   @override
   String get watchNow => 'Watch Now';

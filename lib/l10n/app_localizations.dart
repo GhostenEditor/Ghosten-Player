@@ -1826,6 +1826,18 @@ abstract class AppLocalizations {
   /// **'The current version is too low, please update to the latest version'**
   String get versionDeprecatedTip;
 
+  /// No description provided for @videoAspectRatio.
+  ///
+  /// In en, this message translates to:
+  /// **'Video Aspect Ratio'**
+  String get videoAspectRatio;
+
+  /// No description provided for @videoResizeMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Video Resize Mode'**
+  String get videoResizeMode;
+
   /// No description provided for @videoSettingsAudio.
   ///
   /// In en, this message translates to:
@@ -1849,12 +1861,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Video'**
   String get videoSettingsVideo;
-
-  /// No description provided for @videoSize.
-  ///
-  /// In en, this message translates to:
-  /// **'Video Size'**
-  String get videoSize;
 
   /// No description provided for @watchNow.
   ///

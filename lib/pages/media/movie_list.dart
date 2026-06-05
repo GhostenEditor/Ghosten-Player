@@ -144,12 +144,12 @@ class _MovieListPageState extends State<MovieListPage> {
             )
           else
             const Spacer(),
-          if (item.duration != null && item.duration != Duration.zero && item.lastPlayedPosition != null)
+          if (item.lastPlayedPosition != null && item.duration != null && item.duration!.inSeconds != 0)
             Text('${(item.lastPlayedPosition!.inSeconds / item.duration!.inSeconds * 100).toStringAsFixed(1)}%'),
         ],
       ),
       floating:
-          item.duration != null && item.duration != Duration.zero && item.lastPlayedPosition != null
+          item.lastPlayedPosition != null && item.duration != null && item.duration!.inSeconds != 0
               ? Align(
                 alignment: const Alignment(0, 0.95),
                 child: Padding(
