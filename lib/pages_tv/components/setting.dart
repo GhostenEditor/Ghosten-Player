@@ -200,7 +200,7 @@ class RadioSettingItem<T> extends StatelessWidget {
     super.key,
     required this.title,
     required this.value,
-    required this.onChanged,
+    this.onChanged,
     this.groupValue,
     this.autofocus = false,
     this.leading,

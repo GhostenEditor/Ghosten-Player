@@ -947,7 +947,7 @@ class PlayerSettings extends StatelessWidget {
     return ButtonSettingItem(
       leading: icon,
       title: Text(label),
-      trailing: Text(selectedTrack?.label ?? localizations.videoSettingsNone, overflow: TextOverflow.ellipsis),
+      trailing: Text(selectedTrack?.name ?? localizations.videoSettingsNone, overflow: TextOverflow.ellipsis),
       onTap: () {
         Navigator.of(context).push(
           FadeInPageRoute(
@@ -966,15 +966,18 @@ class PlayerSettings extends StatelessWidget {
                       },
                     ),
                     ...tracks.map(
-                      (e) => RadioSettingItem(
+                      (e) => RadioSettingItem<String?>(
                         autofocus: e.id == selected,
                         groupValue: selected,
                         value: e.id,
-                        title: Text(e.label ?? localizations.tagUnknown),
-                        onChanged: (value) {
-                          onSelected(value);
-                          Navigator.of(context).pop();
-                        },
+                        title: Text(_getTrackText(e)),
+                        onChanged:
+                            e.supported
+                                ? (value) {
+                                  onSelected(value);
+                                  Navigator.of(context).pop();
+                                }
+                                : null,
                       ),
                     ),
                   ],
@@ -983,6 +986,29 @@ class PlayerSettings extends StatelessWidget {
         );
       },
     );
+  }
+
+  String _getTrackText(MediaTrack track) {
+    final spans = [];
+    if (track.name?.isNotEmpty ?? false) {
+      spans.add(track.name);
+    }
+    if (track.label?.isNotEmpty ?? false) {
+      spans.add(track.label);
+    }
+    if (track.mimeType?.isNotEmpty ?? false) {
+      final mimes = track.mimeType!.split('/');
+      if (mimes.length >= 2) {
+        spans.add(mimes[1]);
+      }
+    }
+    if (track.rate != null && track.rate! > 0) {
+      spans.add('${track.rate}Hz');
+    }
+    if (track.averageBitrate != null && track.averageBitrate! > 0) {
+      spans.add('${track.rate}Bit/s');
+    }
+    return spans.join(', ');
   }
 }
 
