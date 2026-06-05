@@ -288,11 +288,12 @@
   "updatePrerelease": "Update Prerelease Version",
   "updating": "Updating",
   "versionDeprecatedTip": "The current version is too low, please update to the latest version",
+  "videoAspectRatio": "Video Aspect Ratio",
+  "videoResizeMode": "Video Resize Mode",
   "videoSettingsAudio": "Audio",
   "videoSettingsSpeeding": "Speed",
   "videoSettingsSubtitle": "Subtitle",
   "videoSettingsVideo": "Video",
-  "videoSize": "Video Size",
   "watchNow": "Watch Now",
   "willSkipEnding": "Will Skip the Ending"
 }

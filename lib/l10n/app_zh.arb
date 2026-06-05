@@ -289,11 +289,12 @@
   "updatePrerelease": "更新预览版",
   "updating": "正在更新",
   "versionDeprecatedTip": "当前版本过低，请更新至最新版",
+  "videoAspectRatio": "画面比例",
+  "videoResizeMode": "画面缩放模式",
   "videoSettingsAudio": "音频",
   "videoSettingsSpeeding": "倍速",
   "videoSettingsSubtitle": "字幕",
   "videoSettingsVideo": "视频",
-  "videoSize": "画面尺寸",
   "watchNow": "继续观看",
   "willSkipEnding": "即将跳过片尾"
 }
