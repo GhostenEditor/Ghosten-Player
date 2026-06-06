@@ -3,6 +3,8 @@ name: Build Media3 Extension
 jobs:
   build:
     name: Build Media3 Extension
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - run: git clone https://github.com/androidx/media.git

@@ -4,6 +4,10 @@ on:
   schedule:
     - cron: "0 0 */1 * *"
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   close-need-info:
     runs-on: ubuntu-latest
@@ -23,7 +27,7 @@ jobs:
             If you can offer the additional information, reopen this issue.
 
             Thanks for your contribution.
-            
+
       - name: close-issues(lack of information)
         uses: actions-cool/issues-helper@v3
         with:
