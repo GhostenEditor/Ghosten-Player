@@ -325,7 +325,7 @@ class AppLocalizationsKo extends AppLocalizations {
       '40010': '데이터 형식 오류: $message',
       '40011': '데이터 누락: $message',
       '40012': '데이터 형식 오류: $message',
-      '40013': '잘못된 Http 헤더 값입니다',
+      '40013': '잘못된 Http 헤더 값: $message',
       '40014': '이 DLNA 작업은 지원되지 않습니다',
       '40015': '미디어 파일 이름이 없습니다',
       '40016': '잘못된 계정 유형으로 로그인했습니다',
