@@ -934,7 +934,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String systemLanguage(String language) {
-    String _temp0 = intl.Intl.selectLogic(language, {'zh': '简体中文', 'en': 'English', 'other': '自动'});
+    String _temp0 = intl.Intl.selectLogic(language, {'zh': '简体中文', 'en': 'English', 'ko': '한국어', 'other': '自动'});
     return '$_temp0';
   }
 
