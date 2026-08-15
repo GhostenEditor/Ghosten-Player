@@ -188,9 +188,9 @@ Demo仅作展示用，部分功能受Web限制，并非完整版。Demo可能更
 
 <a href="https://github.com/GhostenEditor/Ghosten-Player">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=GhostenEditor/Ghosten-Player&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=GhostenEditor/Ghosten-Player&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=GhostenEditor/Ghosten-Player&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://star-history.dera.page/svg?repos=GhostenEditor/Ghosten-Player&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://star-history.dera.page/svg?repos=GhostenEditor/Ghosten-Player&type=Date" />
+   <img alt="Star History Chart" src="https://star-history.dera.page/svg?repos=GhostenEditor/Ghosten-Player&type=Date" />
  </picture>
 </a>
 
