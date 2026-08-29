@@ -184,9 +184,9 @@ If you find this project useful, consider buying me a ☕ **coffee** to keep the
 
 <a href="https://github.com/GhostenEditor/Ghosten-Player">  
  <picture>  
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=GhostenEditor/Ghosten-Player&type=Date&theme=dark" />  
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=GhostenEditor/Ghosten-Player&type=Date" />  
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=GhostenEditor/Ghosten-Player&type=Date" />  
+   <source media="(prefers-color-scheme: dark)" srcset="https://star-history.dera.page/svg?repos=GhostenEditor/Ghosten-Player&type=Date&theme=dark" />  
+   <source media="(prefers-color-scheme: light)" srcset="https://star-history.dera.page/svg?repos=GhostenEditor/Ghosten-Player&type=Date" />  
+   <img alt="Star History Chart" src="https://star-history.dera.page/svg?repos=GhostenEditor/Ghosten-Player&type=Date" />  
  </picture>  
 </a>  
 
