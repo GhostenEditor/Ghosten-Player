@@ -248,7 +248,7 @@
   "subtitleSettingExample": "字幕样式示例",
   "subtitleSettingForegroundColor": "文字颜色",
   "subtitleSettingWindowColor": "窗口颜色",
-  "systemLanguage": "{language, select, zh{简体中文} en{English} other{自动}}",
+  "systemLanguage": "{language, select, zh{简体中文} en{English} ko{한국어} other{自动}}",
   "systemTheme": "{theme, select, light{浅色} dark{深色} other{自动}}",
   "tagAll": "全部",
   "tagFavorite": "收藏夹",

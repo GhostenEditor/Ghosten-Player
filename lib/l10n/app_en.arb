@@ -247,7 +247,7 @@
   "subtitleSettingExample": "Subtitle style example",
   "subtitleSettingForegroundColor": "Text Color",
   "subtitleSettingWindowColor": "Window Color",
-  "systemLanguage": "{language, select, zh{简体中文} en{English} other{Auto}}",
+  "systemLanguage": "{language, select, zh{简体中文} en{English} ko{한국어} other{Auto}}",
   "systemTheme": "{theme, select, light{Light} dark{Dark} other{Auto}}",
   "tagAll": "All",
   "tagFavorite": "Favorite",

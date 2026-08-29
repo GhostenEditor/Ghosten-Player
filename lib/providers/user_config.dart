@@ -10,6 +10,7 @@ import '/utils/utils.dart';
 enum SystemLanguage {
   zh,
   en,
+  ko,
   auto;
 
   static SystemLanguage fromString(String? str) {
@@ -177,6 +178,7 @@ class UserConfig extends ChangeNotifier {
     return switch (language) {
       SystemLanguage.zh => const Locale('zh', 'CN'),
       SystemLanguage.en => const Locale('en', 'US'),
+      SystemLanguage.ko => const Locale('ko', 'KR'),
       SystemLanguage.auto => null,
     };
   }

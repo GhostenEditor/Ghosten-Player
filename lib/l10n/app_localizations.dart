@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations_en.dart';
+import 'app_localizations_ko.dart';
 import 'app_localizations_zh.dart';
 
 // ignore_for_file: type=lint
@@ -90,7 +91,7 @@ abstract class AppLocalizations {
   ];
 
   /// A list of this localizations delegate's supported locales.
-  static const List<Locale> supportedLocales = <Locale>[Locale('en'), Locale('zh')];
+  static const List<Locale> supportedLocales = <Locale>[Locale('en'), Locale('ko'), Locale('zh')];
 
   /// No description provided for @accountCreateFormItemLabelClientId.
   ///
@@ -1583,7 +1584,7 @@ abstract class AppLocalizations {
   /// No description provided for @systemLanguage.
   ///
   /// In en, this message translates to:
-  /// **'{language, select, zh{简体中文} en{English} other{Auto}}'**
+  /// **'{language, select, zh{简体中文} en{English} ko{한국어} other{Auto}}'**
   String systemLanguage(String language);
 
   /// No description provided for @systemTheme.
@@ -1884,7 +1885,7 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['en', 'zh'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['en', 'ko', 'zh'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -1895,6 +1896,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   switch (locale.languageCode) {
     case 'en':
       return AppLocalizationsEn();
+    case 'ko':
+      return AppLocalizationsKo();
     case 'zh':
       return AppLocalizationsZh();
   }
