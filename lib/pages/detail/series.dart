@@ -82,7 +82,11 @@ class _TVDetailState extends State<TVDetail> with ActionMixin<TVDetail> {
       _controller.currentItem!.source.id,
       position: position,
       duration: duration,
-      eventType: eventType.name,
+      eventType: switch (eventType) {
+        PlaybackStatusEvent.start => PlayedStatusUpdateEventType.start,
+        PlaybackStatusEvent.progress => PlayedStatusUpdateEventType.progress,
+        PlaybackStatusEvent.stop => PlayedStatusUpdateEventType.stop,
+      },
       others: item.others,
     );
   }

@@ -1,5 +1,6 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../../components/stream_builder_handler.dart';
 import '../../l10n/app_localizations.dart';
@@ -12,7 +13,7 @@ class SettingsDiagnostics extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(AppLocalizations.of(context)!.settingsItemNetworkDiagnostics)),
       body: StreamBuilderHandler(
-        stream: Api.networkDiagnostics(),
+        stream: Api.networkDiagnostics().scan<List<NetworkDiagnostics>>((acc, cur, _) => acc..add(cur), []),
         builder: (context, snapshot) {
           return ListView.builder(
             itemBuilder: (context, index) {

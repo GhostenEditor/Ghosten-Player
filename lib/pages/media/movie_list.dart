@@ -85,10 +85,7 @@ class _MovieListPageState extends State<MovieListPage> {
               icon: const Icon(Icons.chevron_right),
             ),
             future: Api.movieQueryAll(
-              const MediaSearchQuery(
-                sort: SortConfig(type: SortType.createAt, direction: SortDirection.desc, filter: FilterType.favorite),
-                limit: 8,
-              ),
+              const MediaSearchQuery(sort: SortType.createAt, direction: SortDirection.desc, favorite: true, limit: 8),
             ).then((data) => data.data),
             height: 262,
             builder: (context, item, index) => _buildMediaCard(context, item, width: 120, height: 180),
@@ -98,10 +95,7 @@ class _MovieListPageState extends State<MovieListPage> {
             label: AppLocalizations.of(context)!.tagNewAdd,
             height: 262,
             future: Api.movieQueryAll(
-              const MediaSearchQuery(
-                sort: SortConfig(type: SortType.createAt, direction: SortDirection.desc),
-                limit: 8,
-              ),
+              const MediaSearchQuery(sort: SortType.createAt, direction: SortDirection.desc, limit: 8),
             ).then((data) => data.data),
             builder: (context, item, index) => _buildMediaCard(context, item, width: 120, height: 180),
             loadingBuilder: (context) => const ImageCardPlaceholder(width: 120, height: 180),
@@ -110,10 +104,7 @@ class _MovieListPageState extends State<MovieListPage> {
             label: AppLocalizations.of(context)!.tagNewRelease,
             height: 262,
             future: Api.movieQueryAll(
-              const MediaSearchQuery(
-                sort: SortConfig(type: SortType.createAt, direction: SortDirection.desc),
-                limit: 8,
-              ),
+              const MediaSearchQuery(sort: SortType.createAt, direction: SortDirection.desc, limit: 8),
             ).then((data) => data.data),
             builder: (context, item, index) => _buildMediaCard(context, item, width: 120, height: 180),
             loadingBuilder: (context) => const ImageCardPlaceholder(width: 120, height: 180),

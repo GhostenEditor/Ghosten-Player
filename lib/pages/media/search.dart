@@ -11,8 +11,8 @@ import '../../l10n/app_localizations.dart';
 import '../../utils/utils.dart';
 import '../components/image_card.dart';
 import '../components/loading.dart';
-import '../detail/movie.dart';
-import '../detail/series.dart';
+import '../components/media_slider.dart';
+import 'components/channel.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({
@@ -145,161 +145,30 @@ class _SearchPageState extends State<SearchPage> {
             child: Text(AppLocalizations.of(context)!.search),
           ),
         ],
-        bottom: _HomeTabs(
-          activeIndex: _activeIndex,
-          tabs: [
-            _TabItem(title: AppLocalizations.of(context)!.homeTabTV, canFilter: true),
-            _TabItem(title: AppLocalizations.of(context)!.homeTabMovie, canFilter: true),
-            _TabItem(title: AppLocalizations.of(context)!.formLabelEpisode),
-            _TabItem(title: AppLocalizations.of(context)!.titleCasts),
-            _TabItem(title: AppLocalizations.of(context)!.titleCrews),
-          ],
-          onTabChange: (index) {
-            _activeIndex = index;
-            _pageController.jumpToPage(index);
-            setState(() {});
-          },
-          onFilterTap: () {
-            showModalBottomSheet(
-              context: context,
-              builder:
-                  (context) => _SearchFilter(
-                    selectedFilterType: _filterType,
-                    selectedGenre: _selectedGenre,
-                    selectedStudio: _selectedStudio,
-                    selectedKeyword: _selectedKeyword,
-                    selectedCast: _selectedCast,
-                    selectedCrew: _selectedCrew,
-                    onChanged: (value) {
-                      _filterType = value.$1;
-                      _selectedGenre = value.$2;
-                      _selectedStudio = value.$3;
-                      _selectedKeyword = value.$4;
-                      _selectedCast = value.$5;
-                      _selectedCrew = value.$6;
-                      setState(() {});
-                    },
-                  ),
-            );
-          },
-        ),
       ),
-      body: PageView(
-        controller: _pageController,
-        onPageChanged: (index) {
-          _activeIndex = index;
-          setState(() {});
-        },
-        children: [
-          CustomScrollView(
-            slivers: [
-              _buildFilterChipsGroup(context),
-              _ItemSearchPage(
-                key: const ValueKey(SearchFuzzyType.series),
-                params: _params,
-                searchType: SearchFuzzyType.series,
-                itemBuilder: (context, item, index) {
-                  return ImageCard(
-                    item.poster,
-                    title: Text(item.displayRecentTitle()),
-                    subtitle: Text(item.displayAirDate?.format() ?? ''),
-                    onTap: () {
-                      navigateTo<bool>(context, TVDetail(item.id, initialData: item));
-                    },
-                  );
-                },
-                dataResolve: (data) => data.series,
-              ),
-            ],
-          ),
-          CustomScrollView(
-            slivers: [
-              _buildFilterChipsGroup(context),
-              _ItemSearchPage(
-                key: const ValueKey(SearchFuzzyType.movie),
-                params: _params,
-                searchType: SearchFuzzyType.movie,
-                itemBuilder: (context, item, index) {
-                  return ImageCard(
-                    item.poster,
-                    title: Text(item.displayRecentTitle()),
-                    subtitle: Text(item.displayAirDate?.format() ?? ''),
-                    onTap: () {
-                      navigateTo<bool>(context, MovieDetail(item.id, initialData: item));
-                    },
-                  );
-                },
-                dataResolve: (data) => data.movies,
-              ),
-            ],
-          ),
-          CustomScrollView(
-            slivers: [
-              _ItemSearchPage(
-                key: const ValueKey(SearchFuzzyType.episode),
-                params: _params,
-                searchType: SearchFuzzyType.episode,
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 180,
-                  childAspectRatio: 1.3,
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
+      body: FutureBuilderHandler(
+        future: Api.searchFuzzy(MediaSearchQuery(/*search: _searchController.text*/)),
+        builder:
+            (context, snapshot) => CustomScrollView(
+              slivers: [
+                MediaSlider(
+                  items: snapshot.requireData.series.data,
+                  label: 'label',
+                  height: 100,
+                  itemBuilder: (context, index) {
+                    final item = snapshot.requireData.series.data[index];
+                    return ImageCard(
+                      item.poster,
+                      width: 180,
+                      height: 262,
+                      title: Text(item.displayRecentTitle()),
+                      subtitle: Text(item.firstAirDate?.format() ?? ''),
+                      floating: MediaBadges(item: item),
+                    );
+                  },
                 ),
-                itemBuilder: (context, item, index) {
-                  return ImageCard(
-                    item.poster,
-                    title: Text(item.displayTitle()),
-                    subtitle: Text('S${item.season} E${item.episode} ${item.seriesTitle}'),
-                    onTap: () async {
-                      final series = await Api.tvSeriesQueryById(item.seriesId);
-                      if (context.mounted) {
-                        await navigateTo(context, TVDetail(series.id, initialData: series, playingId: item.id));
-                      }
-                    },
-                  );
-                },
-                dataResolve: (data) => data.episodes,
-              ),
-            ],
-          ),
-          CustomScrollView(
-            slivers: [
-              _ItemSearchPage(
-                key: const ValueKey(SearchFuzzyType.cast),
-                params: _params,
-                searchType: SearchFuzzyType.cast,
-                itemBuilder: (context, item, index) {
-                  return ImageCard(
-                    item.profile,
-                    title: Text(item.name, textAlign: TextAlign.center),
-                    noImageIcon: item.gender == 1 ? Icons.person_2 : Icons.person,
-                    onTap: () {},
-                  );
-                },
-                dataResolve: (data) => data.mediaCast,
-              ),
-            ],
-          ),
-          CustomScrollView(
-            slivers: [
-              _ItemSearchPage(
-                key: const ValueKey(SearchFuzzyType.crew),
-                params: _params,
-                searchType: SearchFuzzyType.crew,
-                itemBuilder: (context, item, index) {
-                  return ImageCard(
-                    item.profile,
-                    title: Text(item.name),
-                    subtitle: Text(item.knownForDepartment ?? ''),
-                    noImageIcon: item.gender == 1 ? Icons.person_2 : Icons.person,
-                    onTap: () {},
-                  );
-                },
-                dataResolve: (data) => data.mediaCrew,
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
       ),
     );
   }
@@ -995,7 +864,6 @@ class _ItemSearchPage<T> extends StatefulWidget {
   const _ItemSearchPage({
     super.key,
     required this.params,
-    required this.searchType,
     required this.itemBuilder,
     required this.dataResolve,
     this.gridDelegate = const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -1007,7 +875,6 @@ class _ItemSearchPage<T> extends StatefulWidget {
   });
 
   final _SearchParams params;
-  final SearchFuzzyType searchType;
   final ItemWidgetBuilder<T> itemBuilder;
   final PageData<T> Function(SearchFuzzyResult) dataResolve;
   final SliverGridDelegate gridDelegate;
@@ -1030,20 +897,7 @@ class _ItemSearchPageState<T> extends State<_ItemSearchPage<T>> {
 
     try {
       final newKey = (_state.keys?.last ?? -1) + 1;
-      final data = await Api.searchFuzzy(
-        widget.searchType,
-        limit: 30,
-        offset: newKey * 30,
-        filter: widget.params.filter,
-        genres: widget.params.genres.isNotEmpty ? widget.params.genres : null,
-        studios: widget.params.studios.isNotEmpty ? widget.params.studios : null,
-        keywords: widget.params.keywords.isNotEmpty ? widget.params.keywords : null,
-        mediaCast: widget.params.mediaCast.isNotEmpty ? widget.params.mediaCast : null,
-        mediaCrew: widget.params.mediaCrew.isNotEmpty ? widget.params.mediaCrew : null,
-        watched: widget.params.watched,
-        favorite: widget.params.favorite,
-      ).then(widget.dataResolve);
-
+      final data = await Api.searchFuzzy(MediaSearchQuery(search: widget.params.filter)).then(widget.dataResolve);
       final hasNextPage = data.offset + data.limit < data.count;
 
       setState(() {

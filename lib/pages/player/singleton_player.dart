@@ -64,7 +64,11 @@ class _SingletonPlayerState<T> extends State<SingletonPlayer<T>> {
         source.id,
         position: position,
         duration: duration,
-        eventType: eventType.name,
+        eventType: switch (eventType) {
+          PlaybackStatusEvent.start => PlayedStatusUpdateEventType.start,
+          PlaybackStatusEvent.progress => PlayedStatusUpdateEventType.progress,
+          PlaybackStatusEvent.stop => PlayedStatusUpdateEventType.stop,
+        },
         others: item.others,
       );
     } else if (source is Movie) {
@@ -73,7 +77,11 @@ class _SingletonPlayerState<T> extends State<SingletonPlayer<T>> {
         source.id,
         position: position,
         duration: duration,
-        eventType: eventType.name,
+        eventType: switch (eventType) {
+          PlaybackStatusEvent.start => PlayedStatusUpdateEventType.start,
+          PlaybackStatusEvent.progress => PlayedStatusUpdateEventType.progress,
+          PlaybackStatusEvent.stop => PlayedStatusUpdateEventType.stop,
+        },
         others: item.others,
       );
     } else {

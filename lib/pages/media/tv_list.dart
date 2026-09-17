@@ -85,10 +85,7 @@ class _TVListPageState extends State<TVListPage> {
               icon: const Icon(Icons.chevron_right),
             ),
             future: Api.tvSeriesQueryAll(
-              const MediaSearchQuery(
-                sort: SortConfig(type: SortType.createAt, direction: SortDirection.desc, filter: FilterType.favorite),
-                limit: 8,
-              ),
+              const MediaSearchQuery(sort: SortType.createAt, direction: SortDirection.desc, favorite: true, limit: 8),
             ).then((data) => data.data),
             height: 262,
             builder: (context, item, index) => _buildMediaCard(context, item, width: 120, height: 180),
@@ -98,10 +95,7 @@ class _TVListPageState extends State<TVListPage> {
             label: AppLocalizations.of(context)!.tagNewAdd,
             height: 262,
             future: Api.tvSeriesQueryAll(
-              const MediaSearchQuery(
-                sort: SortConfig(type: SortType.createAt, direction: SortDirection.desc),
-                limit: 8,
-              ),
+              const MediaSearchQuery(sort: SortType.createAt, direction: SortDirection.desc, limit: 8),
             ).then((data) => data.data),
             builder: (context, item, index) => _buildMediaCard(context, item, width: 120, height: 180),
             loadingBuilder: (context) => const ImageCardPlaceholder(width: 120, height: 180),
@@ -110,10 +104,7 @@ class _TVListPageState extends State<TVListPage> {
             label: AppLocalizations.of(context)!.tagNewRelease,
             height: 262,
             future: Api.tvSeriesQueryAll(
-              const MediaSearchQuery(
-                sort: SortConfig(type: SortType.createAt, direction: SortDirection.desc),
-                limit: 8,
-              ),
+              const MediaSearchQuery(sort: SortType.createAt, direction: SortDirection.desc, limit: 8),
             ).then((data) => data.data),
             builder: (context, item, index) => _buildMediaCard(context, item, width: 120, height: 180),
             loadingBuilder: (context) => const ImageCardPlaceholder(width: 120, height: 180),
@@ -162,7 +153,7 @@ class _TVListPageState extends State<TVListPage> {
         ],
       ),
       floating:
-        item.lastPlayedPosition != null && item.duration != null && item.duration!.inSeconds != 0
+          item.lastPlayedPosition != null && item.duration != null && item.duration!.inSeconds != 0
               ? Align(
                 alignment: const Alignment(0, 0.9),
                 child: Padding(

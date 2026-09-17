@@ -1,5 +1,6 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../components/loading.dart';
@@ -14,7 +15,7 @@ class SettingsDiagnostics extends StatelessWidget {
     return SettingPage(
       title: AppLocalizations.of(context)!.settingsItemNetworkDiagnostics,
       child: StreamBuilderHandler(
-        stream: Api.networkDiagnostics(),
+        stream: Api.networkDiagnostics().scan<List<NetworkDiagnostics>>((acc, cur, _) => acc..add(cur), []),
         builder: (context, snapshot) {
           return ListView(
             padding: const EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 32),

@@ -22,7 +22,11 @@ class _ScraperDialogState<T extends MediaBase> extends State<ScraperDialog<T>> {
   late final _controller2 = TextEditingController(text: widget.item.displayAirDate?.year.toString());
   final _formKey = GlobalKey<FormState>();
   List<SearchResult> items = [];
-  late String languageCode = Localizations.localeOf(context).toLanguageTag();
+  late SupportedLanguages languageCode = switch (Localizations.localeOf(context).toLanguageTag()) {
+    'zh' => SupportedLanguages.zhCn,
+    'en' => SupportedLanguages.enUs,
+    _ => SupportedLanguages.unknown,
+  };
   bool loading = false;
   Object? error;
 
@@ -78,11 +82,8 @@ class _ScraperDialogState<T extends MediaBase> extends State<ScraperDialog<T>> {
                 labelText: AppLocalizations.of(context)!.formLabelLanguage,
               ),
               items:
-                  AppLocalizations.supportedLocales
-                      .map(
-                        (locale) =>
-                            DropdownMenuItem(value: locale.toLanguageTag(), child: Text(locale.toLanguageTag())),
-                      )
+                  SupportedLanguages.values
+                      .map((locale) => DropdownMenuItem(value: locale, child: Text(locale.name)))
                       .toList(),
               onChanged: (code) {
                 if (code == null) return;

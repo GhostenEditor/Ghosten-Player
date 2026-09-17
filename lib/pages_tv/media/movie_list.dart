@@ -172,7 +172,9 @@ class _MovieListPageState extends State<MovieListPage> {
               label: AppLocalizations.of(context)!.tagFavorite,
               future: Api.movieQueryAll(
                 const MediaSearchQuery(
-                  sort: SortConfig(type: SortType.createAt, direction: SortDirection.desc, filter: FilterType.favorite),
+                  sort: SortType.createAt,
+                  direction: SortDirection.desc,
+                  favorite: true,
                   limit: 8,
                 ),
               ).then((data) => data.data),
@@ -183,10 +185,7 @@ class _MovieListPageState extends State<MovieListPage> {
               itemExtent: 176,
               label: AppLocalizations.of(context)!.tagNewAdd,
               future: Api.movieQueryAll(
-                const MediaSearchQuery(
-                  sort: SortConfig(type: SortType.createAt, direction: SortDirection.desc),
-                  limit: 8,
-                ),
+                const MediaSearchQuery(sort: SortType.createAt, direction: SortDirection.desc, limit: 8),
               ).then((data) => data.data),
               height: 340,
               builder: (context, item) => _buildMediaItem(context, item, width: 160, height: 160 / 0.67),
@@ -195,10 +194,7 @@ class _MovieListPageState extends State<MovieListPage> {
               itemExtent: 176,
               label: AppLocalizations.of(context)!.tagNewRelease,
               future: Api.movieQueryAll(
-                const MediaSearchQuery(
-                  sort: SortConfig(type: SortType.airDate, direction: SortDirection.desc),
-                  limit: 8,
-                ),
+                const MediaSearchQuery(sort: SortType.airDate, direction: SortDirection.desc, limit: 8),
               ).then((data) => data.data),
               height: 340,
               builder: (context, item) => _buildMediaItem(context, item, width: 160, height: 160 / 0.67),
@@ -207,11 +203,7 @@ class _MovieListPageState extends State<MovieListPage> {
               label: AppLocalizations.of(context)!.tagAll,
               onQuery:
                   (index) => Api.movieQueryAll(
-                    MediaSearchQuery(
-                      limit: 30,
-                      offset: 30 * index,
-                      sort: const SortConfig(type: SortType.title, direction: SortDirection.asc),
-                    ),
+                    MediaSearchQuery(limit: 30, offset: 30 * index, sort: SortType.title, direction: SortDirection.asc),
                   ),
               gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                 maxCrossAxisExtent: 196,

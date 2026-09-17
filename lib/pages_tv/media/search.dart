@@ -197,9 +197,8 @@ class _SearchPageState extends State<SearchPage> {
             slivers: [
               _buildFilterChipsGroup(context),
               _ItemSearchPage(
-                key: const ValueKey(SearchFuzzyType.series),
+                key: UniqueKey(),
                 params: _params,
-                searchType: SearchFuzzyType.series,
                 itemBuilder: (context, item, index) {
                   return MediaGridItem(
                     imageUrl: item.poster,
@@ -219,9 +218,8 @@ class _SearchPageState extends State<SearchPage> {
             slivers: [
               _buildFilterChipsGroup(context),
               _ItemSearchPage(
-                key: const ValueKey(SearchFuzzyType.movie),
+                key: UniqueKey(),
                 params: _params,
-                searchType: SearchFuzzyType.movie,
                 itemBuilder: (context, item, index) {
                   return MediaGridItem(
                     imageUrl: item.poster,
@@ -240,9 +238,8 @@ class _SearchPageState extends State<SearchPage> {
           CustomScrollView(
             slivers: [
               _ItemSearchPage(
-                key: const ValueKey(SearchFuzzyType.episode),
+                key: UniqueKey(),
                 params: _params,
-                searchType: SearchFuzzyType.episode,
                 gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                   maxCrossAxisExtent: 240,
                   childAspectRatio: 1.2,
@@ -268,9 +265,8 @@ class _SearchPageState extends State<SearchPage> {
           CustomScrollView(
             slivers: [
               _ItemSearchPage(
-                key: const ValueKey(SearchFuzzyType.cast),
+                key: UniqueKey(),
                 params: _params,
-                searchType: SearchFuzzyType.cast,
                 itemBuilder: (context, item, index) {
                   return MediaGridItem(
                     imageUrl: item.profile,
@@ -287,9 +283,8 @@ class _SearchPageState extends State<SearchPage> {
           CustomScrollView(
             slivers: [
               _ItemSearchPage(
-                key: const ValueKey(SearchFuzzyType.crew),
+                key: UniqueKey(),
                 params: _params,
-                searchType: SearchFuzzyType.crew,
                 itemBuilder: (context, item, index) {
                   return MediaGridItem(
                     imageUrl: item.profile,
@@ -972,7 +967,6 @@ class _ItemSearchPage<T> extends StatefulWidget {
   const _ItemSearchPage({
     super.key,
     required this.params,
-    required this.searchType,
     required this.itemBuilder,
     required this.dataResolve,
     this.gridDelegate = const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -984,7 +978,6 @@ class _ItemSearchPage<T> extends StatefulWidget {
   });
 
   final _SearchParams params;
-  final SearchFuzzyType searchType;
   final ItemWidgetBuilder<T> itemBuilder;
   final PageData<T> Function(SearchFuzzyResult) dataResolve;
   final SliverGridDelegate gridDelegate;
@@ -1007,19 +1000,7 @@ class _ItemSearchPageState<T> extends State<_ItemSearchPage<T>> {
 
     try {
       final newKey = (_state.keys?.last ?? -1) + 1;
-      final data = await Api.searchFuzzy(
-        widget.searchType,
-        limit: 30,
-        offset: newKey * 30,
-        filter: widget.params.filter,
-        genres: widget.params.genres.isNotEmpty ? widget.params.genres : null,
-        studios: widget.params.studios.isNotEmpty ? widget.params.studios : null,
-        keywords: widget.params.keywords.isNotEmpty ? widget.params.keywords : null,
-        mediaCast: widget.params.mediaCast.isNotEmpty ? widget.params.mediaCast : null,
-        mediaCrew: widget.params.mediaCrew.isNotEmpty ? widget.params.mediaCrew : null,
-        watched: widget.params.watched,
-        favorite: widget.params.favorite,
-      ).then(widget.dataResolve);
+      final data = await Api.searchFuzzy(MediaSearchQuery(search: widget.params.filter)).then(widget.dataResolve);
 
       final hasNextPage = data.offset + data.limit < data.count;
 
