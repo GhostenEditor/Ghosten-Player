@@ -11,7 +11,7 @@ class ListTile extends StatefulWidget {
     this.subtitle,
     this.trailing,
     this.onTap,
-    this.autofocus = false,
+    this.autofocus = true,
     this.enabled = true,
     this.focusNode,
     this.onFocusChange,
@@ -54,7 +54,7 @@ class ListTile extends StatefulWidget {
 }
 
 class _ListTileState extends State<ListTile> {
-  late final m.FocusNode _focusNode = widget.focusNode ?? FocusNode(debugLabel: 'ListTile');
+  late final FocusNode _focusNode = widget.focusNode ?? FocusNode(debugLabel: 'ListTile');
 
   @override
   void dispose() {
@@ -66,31 +66,30 @@ class _ListTileState extends State<ListTile> {
 
   @override
   Widget build(BuildContext context) {
-    return FluidFocusable(
+    final listTile = m.ListTile(
+      dense: widget.dense,
+      selected: widget.selected,
+      enabled: widget.enabled,
+      autofocus: widget.autofocus,
+      onTap: widget.onTap,
+      onLongPress: widget.onLongPress,
       focusNode: _focusNode,
-      backgroundColor: Colors.transparent,
-      child: m.ListTile(
-        dense: widget.dense,
-        selected: widget.selected,
-        enabled: widget.enabled,
-        autofocus: widget.autofocus,
-        onTap: widget.onTap,
-        onLongPress: widget.onLongPress,
-        focusNode: _focusNode,
-        onFocusChange: widget.onFocusChange,
-        title: widget.title,
-        minLeadingWidth: widget.minLeadingWidth,
-        selectedColor: widget.selectedColor,
-        selectedTileColor: widget.selectedTileColor ?? Theme.of(context).colorScheme.secondaryContainer,
-        leadingAndTrailingTextStyle: widget.leadingAndTrailingTextStyle,
-        titleTextStyle: widget.titleTextStyle,
-        contentPadding: widget.contentPadding,
-        subtitle: widget.subtitle,
-        leading: widget.leading,
-        trailing: widget.trailing,
-        minTileHeight: widget.minTileHeight,
-        isThreeLine: widget.isThreeLine,
-      ),
+      onFocusChange: widget.onFocusChange,
+      title: widget.title,
+      minLeadingWidth: widget.minLeadingWidth,
+      selectedColor: widget.selectedColor,
+      selectedTileColor: widget.selectedTileColor ?? Theme.of(context).colorScheme.secondaryContainer,
+      leadingAndTrailingTextStyle: widget.leadingAndTrailingTextStyle,
+      titleTextStyle: widget.titleTextStyle,
+      contentPadding: widget.contentPadding,
+      subtitle: widget.subtitle,
+      leading: widget.leading,
+      trailing: widget.trailing,
+      minTileHeight: widget.minTileHeight,
+      isThreeLine: widget.isThreeLine,
     );
+    return widget.onTap != null
+        ? FluidFocusable(focusNode: _focusNode, backgroundColor: Colors.transparent, child: listTile)
+        : listTile;
   }
 }

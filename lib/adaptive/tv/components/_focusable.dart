@@ -59,12 +59,7 @@ class _FocusableState extends State<Focusable> {
             focusNode: _focusNode,
             autofocus: widget.autofocus ?? false,
             onFocusChange: widget.onFocusChange,
-            child: GestureDetector(
-              onTap: widget.onTap,
-              behavior: HitTestBehavior.opaque,
-              excludeFromSemantics: true,
-              child: widget.child,
-            ),
+            child: widget.child,
           ),
         ),
       ),

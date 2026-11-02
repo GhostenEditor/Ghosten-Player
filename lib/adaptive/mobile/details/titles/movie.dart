@@ -18,7 +18,7 @@ class MovieTitle extends StatelessWidget {
           children: [
             Text(
               item.displayTitle(),
-              style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.w500),
               textAlign: TextAlign.center,
             ),
             MovieSubtitle(item: item, style: Theme.of(context).textTheme.labelSmall, iconSize: 14),

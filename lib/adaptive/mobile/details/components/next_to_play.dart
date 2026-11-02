@@ -15,6 +15,7 @@ class NextToPlaySection extends StatelessWidget {
   Widget build(BuildContext context) {
     final AppTheme theme = Theme.of(context).extension<AppTheme>()!;
     return SliverHorizontalList(
+      allowHalf: true,
       header: Text(AppLocalizations.of(context)!.titlePlaylist),
       cardStyle: theme.episodeCardTheme,
       itemCount: item != null ? 1 : 0,

@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import 'headered_content.dart';
 import 'horizontal_list_theme.dart';
@@ -14,6 +15,8 @@ class HorizontalList extends StatelessWidget {
     required this.header,
     this.onTap,
     this.cardStyle,
+    this.scrollCacheExtent,
+    this.allowHalf = false,
   });
 
   final int itemCount;
@@ -21,6 +24,8 @@ class HorizontalList extends StatelessWidget {
   final Widget header;
   final Widget Function(BuildContext, int, Size) itemBuilder;
   final GestureTapCallback? onTap;
+  final ScrollCacheExtent? scrollCacheExtent;
+  final bool allowHalf;
 
   @override
   Widget build(BuildContext context) {
@@ -37,8 +42,9 @@ class HorizontalList extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final double width = constraints.maxWidth - (themeData.padding?.horizontal ?? 0);
-        assert(width > itemMinWidth);
-        final int crossAxisCount = ((width + itemSpacing) / (itemMinWidth + itemSpacing)).floor();
+        double crossAxisCount = (width + itemSpacing) / (itemMinWidth + itemSpacing);
+        crossAxisCount = allowHalf ? (crossAxisCount * 2).floorToDouble() / 2 : crossAxisCount.floorToDouble();
+        crossAxisCount = max(crossAxisCount, 1);
         final double fixedWidth = (width + itemSpacing) / crossAxisCount - itemSpacing;
         final double fixedHeight = fixedWidth / aspectRatio;
         return HeaderedContent(
@@ -51,6 +57,7 @@ class HorizontalList extends StatelessWidget {
               child: ListView.builder(
                 padding: padding,
                 scrollDirection: Axis.horizontal,
+                scrollCacheExtent: scrollCacheExtent,
                 itemBuilder: (context, index) => index.isEven
                     ? itemBuilder(context, index ~/ 2, Size(fixedWidth, fixedHeight))
                     : SizedBox(width: itemSpacing),
@@ -65,7 +72,7 @@ class HorizontalList extends StatelessWidget {
   }
 }
 
-class SliverHorizontalList extends StatefulWidget {
+class SliverHorizontalList extends StatelessWidget {
   const SliverHorizontalList({
     super.key,
     required this.itemBuilder,
@@ -73,6 +80,7 @@ class SliverHorizontalList extends StatefulWidget {
     required this.header,
     this.onTap,
     this.cardStyle,
+    this.allowHalf = false,
   });
 
   final int itemCount;
@@ -80,75 +88,56 @@ class SliverHorizontalList extends StatefulWidget {
   final Widget header;
   final Widget Function(BuildContext, int, Size) itemBuilder;
   final GestureTapCallback? onTap;
-
-  @override
-  State<SliverHorizontalList> createState() => _SliverHorizontalListState();
-}
-
-class _SliverHorizontalListState extends State<SliverHorizontalList> {
-  Widget? _cachedChild;
-  Size size = .zero;
-
-  @override
-  void didUpdateWidget(covariant SliverHorizontalList oldWidget) {
-    _cachedChild = null;
-    size = .zero;
-    super.didUpdateWidget(oldWidget);
-  }
+  final bool allowHalf;
 
   @override
   Widget build(BuildContext context) {
-    if (widget.itemCount == 0) {
+    if (itemCount == 0) {
       return const SliverToBoxAdapter();
     }
     final HorizontalListThemeData themeData = HorizontalListTheme.of(context);
-    final double heightExtent = widget.cardStyle?.heightExtent ?? 0;
+    final double heightExtent = cardStyle?.heightExtent ?? 0;
     final EdgeInsets padding = themeData.padding ?? .zero;
     final EdgeInsets headerPadding = themeData.headerPadding ?? .zero;
     final double itemSpacing = themeData.itemSpacing ?? 0;
-    final double itemMinWidth = widget.cardStyle?.minWidth ?? 100;
-    final double aspectRatio = widget.cardStyle?.aspectRatio ?? 1;
-    return SliverLayoutBuilder(
-      builder: (context, constraints) {
-        final double width = constraints.crossAxisExtent - (themeData.padding?.horizontal ?? 0);
-        assert(width > itemMinWidth);
-        final int crossAxisCount = ((width + itemSpacing) / (itemMinWidth + itemSpacing)).floor();
-        final double fixedWidth = (width + itemSpacing) / crossAxisCount - itemSpacing;
-        final double fixedHeight = fixedWidth / aspectRatio;
-        final fixedSize = Size(fixedWidth, fixedHeight);
-        if (size != fixedSize) {
-          size = fixedSize;
-          final listView = ListView.builder(
-            key: ValueKey(size),
-            padding: padding,
-            scrollDirection: Axis.horizontal,
-            itemBuilder: (context, index) =>
-                index.isEven ? widget.itemBuilder(context, index ~/ 2, size) : SizedBox(width: itemSpacing),
-            itemCount: max(0, widget.itemCount * 2 - 1),
-            itemExtentBuilder: (index, _) => index.isOdd ? itemSpacing : size.width,
-          );
-          _cachedChild = SliverHeaderedContent(
-            header: widget.header,
-            headerPadding: headerPadding,
-            onTap: widget.onTap,
-            sliver: SliverToBoxAdapter(
-              child: SizedBox(
-                height: size.height + heightExtent + padding.vertical,
-                child: MediaQuery.removePadding(
-                  context: context,
-                  removeBottom: true,
-                  child: Scrollbar(child: listView),
+    final double itemMinWidth = cardStyle?.minWidth ?? 100;
+    final double aspectRatio = cardStyle?.aspectRatio ?? 1;
+    return SliverHeaderedContent(
+      header: header,
+      headerPadding: headerPadding,
+      onTap: onTap,
+      sliver: SliverToBoxAdapter(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final double width = constraints.maxWidth - (themeData.padding?.horizontal ?? 0);
+            double crossAxisCount = (width + itemSpacing) / (itemMinWidth + itemSpacing);
+            crossAxisCount = allowHalf ? (crossAxisCount * 2).floorToDouble() / 2 : crossAxisCount.floorToDouble();
+            crossAxisCount = max(crossAxisCount, 1);
+            final double fixedWidth = (width + itemSpacing) / crossAxisCount - itemSpacing;
+            final double fixedHeight = fixedWidth / aspectRatio;
+            final fixedSize = Size(fixedWidth, fixedHeight);
+            return SizedBox(
+              height: fixedSize.height + heightExtent + padding.vertical,
+              child: MediaQuery.removePadding(
+                context: context,
+                removeBottom: true,
+                child: Scrollbar(
+                  child: FocusScope(
+                    child: ListView.builder(
+                      padding: padding,
+                      scrollDirection: Axis.horizontal,
+                      itemBuilder: (context, index) =>
+                          index.isEven ? itemBuilder(context, index ~/ 2, fixedSize) : SizedBox(width: itemSpacing),
+                      itemCount: max(0, itemCount * 2 - 1),
+                      itemExtentBuilder: (index, _) => index.isOdd ? itemSpacing : fixedSize.width,
+                    ),
+                  ),
                 ),
               ),
-            ),
-          );
-        }
-        if (_cachedChild != null) {
-          return _cachedChild!;
-        } else {
-          return const SliverToBoxAdapter();
-        }
-      },
+            );
+          },
+        ),
+      ),
     );
   }
 }

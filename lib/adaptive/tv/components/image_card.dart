@@ -20,6 +20,7 @@ class ImageCard extends StatelessWidget {
     this.direction,
     this.onLongPress,
     this.autofocus = false,
+    this.backgroundColor,
   });
 
   final String? src;
@@ -35,6 +36,7 @@ class ImageCard extends StatelessWidget {
   final GestureLongPressCallback? onLongPress;
   final Axis? direction;
   final bool autofocus;
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +45,7 @@ class ImageCard extends StatelessWidget {
       height: height,
       onTap: onTap,
       autofocus: autofocus,
+      backgroundColor: backgroundColor,
       child: Stack(
         children: [
           if (src != null)

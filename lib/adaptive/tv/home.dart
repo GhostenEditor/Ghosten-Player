@@ -1,5 +1,4 @@
-import 'package:animations/animations.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide ListTile, RadioListTile;
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
@@ -65,18 +64,11 @@ class _HomePageState extends State<HomePage> {
                 _ => throw UnimplementedError(),
               }),
             ),
-            endDrawer: Container(
-              width: 360,
-              color: Theme.of(context).colorScheme.surfaceContainerLow,
-              child: ListenableBuilder(
-                listenable: initialRoute,
-                builder: (context, _) {
-                  return AppNavigator(
-                    navigatorKey: settingNavigatorKey,
-                    initialRoute: initialRoute.value.name,
-                    onGenerateRoute: onGenerateRoute,
-                  );
-                },
+            endDrawer: Drawer(
+              child: AppNavigator(
+                navigatorKey: settingNavigatorKey,
+                initialRoute: RouteName.settings.name,
+                onGenerateRoute: onGenerateRoute,
               ),
             ),
             body: AppNavigator(
@@ -106,107 +98,41 @@ class _HomeAppbar extends StatefulWidget implements PreferredSizeWidget {
 
 class _HomeAppbarState extends State<_HomeAppbar> {
   int _activeIndex = 0;
-  bool _show = true;
-  ScrollNotificationObserverState? _scrollNotificationObserver;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _scrollNotificationObserver?.removeListener(_handleScrollNotification);
-    final ScaffoldState? scaffoldState = Scaffold.maybeOf(context);
-
-    if (scaffoldState != null && (scaffoldState.isDrawerOpen || scaffoldState.isEndDrawerOpen)) {
-      return;
-    }
-    _scrollNotificationObserver = ScrollNotificationObserver.maybeOf(context);
-    _scrollNotificationObserver?.addListener(_handleScrollNotification);
-  }
-
-  @override
-  void dispose() {
-    if (_scrollNotificationObserver != null) {
-      _scrollNotificationObserver!.removeListener(_handleScrollNotification);
-      _scrollNotificationObserver = null;
-    }
-    super.dispose();
-  }
-
-  void _handleScrollNotification(ScrollNotification notification) {
-    if (notification is ScrollUpdateNotification && !Scaffold.of(context).isEndDrawerOpen) {
-      final bool oldShow = _show;
-      final ScrollMetrics metrics = notification.metrics;
-      switch (metrics.axisDirection) {
-        case AxisDirection.up:
-        case AxisDirection.down:
-          _show = metrics.extentBefore < 100;
-        case AxisDirection.right:
-        case AxisDirection.left:
-          break;
-      }
-      if (_show != oldShow) {
-        setState(() {});
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
-    return PageTransitionSwitcher(
-      reverse: _show,
-      duration: const Duration(milliseconds: 600),
-      transitionBuilder: (Widget child, Animation<double> animation, Animation<double> secondaryAnimation) {
-        return SharedAxisTransition(
-          animation: animation,
-          secondaryAnimation: secondaryAnimation,
-          transitionType: SharedAxisTransitionType.vertical,
-          fillColor: Colors.transparent,
-          child: child,
-        );
-      },
-      child: _show
-          ? Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: switch (Theme.of(context).brightness) {
-                    Brightness.dark => [Colors.black38, Colors.transparent],
-                    Brightness.light => [Colors.white38, Colors.white.withAlpha(0)],
-                  },
-                  begin: .topCenter,
-                  end: .bottomCenter,
-                ),
-              ),
-              child: AppBar(
-                forceMaterialTransparency: true,
-                leading: IconButton.filledTonal(
-                  onPressed: () => context.pushNamed(.search),
-                  icon: const Icon(Icons.search_rounded, size: 20),
-                ),
-                leadingWidth: 136,
-                titleSpacing: 40,
-                title: HomeTabs(
-                  activeIndex: _activeIndex,
-                  tabs: [
-                    AppLocalizations.of(context)!.homeTabTV,
-                    AppLocalizations.of(context)!.homeTabMovie,
-                    AppLocalizations.of(context)!.homeTabLive,
-                  ],
-                  onTabChange: (index) {
-                    _activeIndex = index;
-                    widget.onTabChange(index);
-                  },
-                ),
-                actionsPadding: const EdgeInsets.symmetric(horizontal: 48),
-                actions: [
-                  IconButton(
-                    onPressed: () => homeScaffoldKey.currentState?.openEndDrawer(),
-                    icon: const Icon(Icons.settings_outlined),
-                  ),
-                  const SizedBox(width: 12),
-                  const Clock(),
-                ],
-              ),
-            )
-          : AppBar(forceMaterialTransparency: true, actions: const [SizedBox()]),
+    return UnpinnedAppBar(
+      appbar: AppBar(
+        forceMaterialTransparency: true,
+        leading: IconButton.filledTonal(
+          onPressed: () => context.pushNamed(.search),
+          icon: const Icon(Icons.search_rounded, size: 20),
+        ),
+        leadingWidth: 136,
+        titleSpacing: 40,
+        title: HomeTabs(
+          activeIndex: _activeIndex,
+          tabs: [
+            AppLocalizations.of(context)!.homeTabTV,
+            AppLocalizations.of(context)!.homeTabMovie,
+            AppLocalizations.of(context)!.homeTabLive,
+          ],
+          onTabChange: (index) {
+            _activeIndex = index;
+            widget.onTabChange(index);
+          },
+        ),
+        actionsPadding: const EdgeInsets.symmetric(horizontal: 48),
+        actions: [
+          const ServerSwitcher(),
+          IconButton(
+            onPressed: () => homeScaffoldKey.currentState?.openEndDrawer(),
+            icon: const Icon(Icons.settings_outlined),
+          ),
+          const SizedBox(width: 12),
+          const Clock(),
+        ],
+      ),
     );
   }
 }

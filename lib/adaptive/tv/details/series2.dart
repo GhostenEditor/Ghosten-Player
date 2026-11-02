@@ -1,20 +1,16 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart' hide ListTile;
 
-import '../../../components/components.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../menus/season.dart';
 import '../../../subtitles/season.dart';
 import '../../../utils/utils.dart';
+import '../../../view_models/view_models.dart';
 import '../components/list_tile.dart';
 import 'components/scaffold.dart';
-import 'season.dart';
 
 class Series2Page extends StatefulWidget {
-  const Series2Page({super.key, this.data, required this.id});
-
-  final TVSeries? data;
-  final dynamic id;
+  const Series2Page({super.key});
 
   @override
   State<Series2Page> createState() => _Series2PageState();
@@ -23,8 +19,6 @@ class Series2Page extends StatefulWidget {
 class _Series2PageState extends State<Series2Page> {
   final currentSeason = ValueNotifier<TVSeason?>(null);
   final _navigatorKey = GlobalKey<NavigatorState>();
-  final _drawerNavigatorKey = GlobalKey<NavigatorState>();
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void dispose() {
@@ -34,11 +28,9 @@ class _Series2PageState extends State<Series2Page> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilderHandler(
-      initialData: widget.data,
-      future: Api.tvSeriesQueryById(widget.id),
-      builder: (context, snapshot) {
-        final TVSeries item = snapshot.requireData;
+    return ViewModelConsumer<Series2ViewModel, TVSeries>(
+      useScaffold: true,
+      builder: (context, item, _) {
         if (item.seasons.isNotEmpty) {
           _switchSeason(
             item.seasons.firstWhere((it) => currentSeason.value == null || it.id == currentSeason.value?.id),
@@ -47,8 +39,6 @@ class _Series2PageState extends State<Series2Page> {
         return DetailScaffold(
           item: item,
           navigatorKey: _navigatorKey,
-          scaffoldKey: _scaffoldKey,
-          drawerNavigatorKey: _drawerNavigatorKey,
           menus: currentSeason.value != null ? SeasonMenu(currentSeason.value!) : null,
           builder: (context) => Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -108,7 +98,7 @@ class _Series2PageState extends State<Series2Page> {
                           title: Text(AppLocalizations.of(context)!.buttonMore),
                           onTap: () {
                             if (currentSeason.value != null) {
-                              _scaffoldKey.currentState!.openEndDrawer();
+                              Scaffold.of(context).openEndDrawer();
                             }
                           },
                         ),
@@ -129,10 +119,10 @@ class _Series2PageState extends State<Series2Page> {
       return;
     }
     currentSeason.value = item;
-    Future.microtask(() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       Navigator.of(_navigatorKey.currentContext!).pushAndRemoveUntil(
         FadeInPageRoute(
-          builder: (context) => SeasonPage(key: ValueKey(item.id), id: item.id, data: item),
+          builder: (context) => SeasonViewModel(context, id: item.id, data: item).build(),
         ),
         (_) => false,
       );

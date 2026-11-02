@@ -32,6 +32,37 @@ class MarkdownViewer extends StatelessWidget {
   }
 }
 
+class SliverMarkdownViewer extends StatelessWidget {
+  const SliverMarkdownViewer({
+    super.key,
+    required this.data,
+    this.padding,
+    this.tocController,
+    this.autoScrollController,
+  });
+
+  final String data;
+  final EdgeInsetsGeometry? padding;
+  final TocController? tocController;
+  final AutoScrollController? autoScrollController;
+
+  @override
+  Widget build(BuildContext context) {
+    final generator = MarkdownGenerator(
+      textGenerator: (node, config, visitor) => CustomTextNode(node.textContent, config, visitor),
+    );
+    final MarkdownConfig config = switch (Theme.of(context).brightness) {
+      Brightness.dark => MarkdownConfig.darkConfig.copy(configs: [const PConfig(textStyle: TextStyle(fontSize: 14))]),
+      Brightness.light => MarkdownConfig(configs: [const PConfig(textStyle: TextStyle(fontSize: 14))]),
+    };
+    final List<Widget> widgets = generator.buildWidgets(data, config: config);
+    return SliverPadding(
+      padding: padding ?? .zero,
+      sliver: SliverList.builder(itemCount: widgets.length, itemBuilder: (context, index) => widgets[index]),
+    );
+  }
+}
+
 class CustomTextNode extends ElementNode {
   CustomTextNode(this.text, this.config, this.visitor);
 

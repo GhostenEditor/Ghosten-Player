@@ -1,14 +1,14 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart' hide ListTile, SwitchListTile;
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:provider/provider.dart';
-import 'package:video_player/player.dart';
 
 import '../../components/components.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/user_config.dart';
 import '../../utils/utils.dart';
 import '../adaptive/adaptive.dart';
-import '../extensions/extensions.dart';
+import '../providers/function.dart';
 
 class SystemSettingsOther extends StatefulWidget {
   const SystemSettingsOther({super.key});
@@ -18,42 +18,15 @@ class SystemSettingsOther extends StatefulWidget {
 }
 
 class _SystemSettingsOtherState extends State<SystemSettingsOther> {
-  late final UserConfig userConfig = Provider.of<UserConfig>(context);
-
   @override
   Widget build(BuildContext context) {
-    final AppTheme theme = Theme.of(context).extension<AppTheme>()!;
+    final UserConfig userConfig = context.watch<UserConfig>();
+    final FunctionConfig function = context.watch<FunctionConfig>();
     return SettingPage.list(
       title: Text(AppLocalizations.of(context)!.settingsItemOthers),
       children: [
-        ListTile(title: Text(AppLocalizations.of(context)!.settingsItemPlayerSettings), dense: true),
-        if (theme.functions.autoForceLandscape)
-          SwitchListTile(
-            value: userConfig.autoForceLandscape,
-            title: Text(AppLocalizations.of(context)!.settingsItemAutoForceLandscape),
-            onChanged: userConfig.setAutoForceLandscape,
-          ),
-        if (theme.functions.autoPip)
-          SwitchListTile(
-            value: userConfig.autoPip,
-            title: Text(AppLocalizations.of(context)!.settingsItemAutoPip),
-            subtitle: Text(AppLocalizations.of(context)!.settingsItemAutoPipTip),
-            onChanged: userConfig.setAutoPip,
-          ),
-        ListTile(
-          title: Text(AppLocalizations.of(context)!.settingsItemPlayerKernel),
-          trailing: userConfig.playerType == PlayerType.mpv
-              ? Badge(
-                  label: const Text('Alpha'),
-                  offset: const Offset(0, -14),
-                  child: Text(AppLocalizations.of(context)!.playerType(userConfig.playerType.name)),
-                )
-              : Text(AppLocalizations.of(context)!.playerType(userConfig.playerType.name)),
-          onTap: () => context.pushNamed(.settingsPlayerKernel),
-        ),
-        const Divider(),
-        ListTile(title: Text(AppLocalizations.of(context)!.settingsItemDisplaySettings), dense: true),
-        if (theme.functions.displaySize)
+        ListTile(title: Text(AppLocalizations.of(context)!.settingsGroupDisplaySettings), dense: true),
+        if (function.settingsDisplaySize)
           ListTile(
             isThreeLine: true,
             title: Text(AppLocalizations.of(context)!.settingsItemDisplaySize),
@@ -103,25 +76,65 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
               )
               .toList(),
         ),
-        const Divider(),
-        FutureBuilder(
-          future: Api.settingScraperQuery(),
-          builder: (context, snapshot) {
-            final SettingScraper? data = snapshot.data;
-            return data != null
-                ? _ScraperSettingSection(
-                    settingScraper: data,
-                    onChanged: (SettingScraper value) async {
-                      await Api.settingScraperUpdate(value);
-                      if (context.mounted) {
-                        setState(() {});
-                      }
-                    },
-                  )
-                : const SizedBox();
+        ListTile(
+          title: const Text('主题色'),
+          leading: const Icon(Icons.palette_outlined),
+          trailing: Container(
+            key: ValueKey(userConfig.themeColor),
+            width: 16,
+            height: 16,
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.all(Radius.circular(8)),
+              border: Border.all(color: Theme.of(context).colorScheme.onSurface, width: 2),
+            ),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.all(Radius.circular(8)),
+              child: CustomPaint(painter: IndicatorPainter(Color(userConfig.themeColor))),
+            ),
+          ),
+          onTap: () async {
+            final Color? color = await showModalBottomSheet<Color>(
+              context: context,
+              useSafeArea: true,
+              isScrollControlled: true,
+              builder: (context) {
+                var color = Color(userConfig.themeColor);
+                return EditPage(
+                  title: const Text('主题色'),
+                  onConfirmButtonPressed: () => Navigator.of(context).pop(color),
+                  child: ColorPicker(
+                    pickerColor: Color(userConfig.themeColor),
+                    paletteType: PaletteType.hsl,
+                    onColorChanged: (c) => color = c,
+                  ),
+                );
+              },
+            );
+            if (color != null) {
+              userConfig.setThemeColor(color.toARGB32());
+            }
           },
         ),
-        ListTile(title: Text(AppLocalizations.of(context)!.settingsItemDataSettings), dense: true),
+        const Divider(),
+        if (function.menuScrape)
+          FutureBuilder(
+            future: Api.settingScraperQuery(),
+            builder: (context, snapshot) {
+              final SettingScraper? data = snapshot.data;
+              return data != null
+                  ? _ScraperSettingSection(
+                      settingScraper: data,
+                      onChanged: (SettingScraper value) async {
+                        await Api.settingScraperUpdate(value);
+                        if (context.mounted) {
+                          setState(() {});
+                        }
+                      },
+                    )
+                  : const SizedBox();
+            },
+          ),
+        ListTile(title: Text(AppLocalizations.of(context)!.settingsGroupDataSettings), dense: true),
         ListTile(
           title: Text(AppLocalizations.of(context)!.settingsItemDataSync),
           leading: const Icon(Icons.sync),
@@ -142,12 +155,15 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
           },
         ),
         const Divider(),
-        ListTile(title: Text(AppLocalizations.of(context)!.settingsItemProxySettings), dense: true),
-        ListTile(
-          title: Text(AppLocalizations.of(context)!.settingsItemDNS),
-          leading: const Icon(Icons.dns_outlined),
-          onTap: () => context.pushNamed(.settingsDns),
-        ),
+        if (function.settingsDns) ...[
+          ListTile(title: Text(AppLocalizations.of(context)!.settingsGroupProxySettings), dense: true),
+          ListTile(
+            title: Text(AppLocalizations.of(context)!.settingsItemDNS),
+            leading: const Icon(Icons.dns_outlined),
+            onTap: () => context.pushNamed(.settingsDns),
+          ),
+          const Divider(),
+        ],
         // MenuListTile(
         //   title: Text(AppLocalizations.of(context)!.githubProxy),
         //   trailing: Text(
@@ -168,13 +184,15 @@ class _SystemSettingsOtherState extends State<SystemSettingsOther> {
         //       )
         //       .toList(),
         // ),
-        ListTile(title: Text(AppLocalizations.of(context)!.settingsItemShortcutSettings), dense: true),
-        if (theme.functions.shortcuts)
+        if (function.settingsShortcuts) ...[
+          ListTile(title: Text(AppLocalizations.of(context)!.settingsGroupShortcutSettings), dense: true),
           ListTile(
             title: Text(AppLocalizations.of(context)!.settingsItemShortcuts),
             leading: const Icon(Icons.shortcut_rounded),
             onTap: () => context.pushNamed(.settingsShortcut),
           ),
+          const Divider(),
+        ],
         SwitchListTile(
           title: const Text('Show Performance Overlay'),
           value: userConfig.showPerformanceOverlay,

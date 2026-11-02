@@ -18,7 +18,7 @@ class EpisodeTitle extends StatelessWidget {
           children: [
             Text(
               '${item.episode}. ${item.displayTitle()}',
-              style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.w500),
               textAlign: TextAlign.center,
             ),
             if (item.seriesTitle != null)

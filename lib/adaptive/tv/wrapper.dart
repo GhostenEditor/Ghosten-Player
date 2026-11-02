@@ -21,10 +21,7 @@ class PageWrapper extends StatelessWidget {
         },
       ),
       child: MediaQuery(
-        data: MediaQuery.of(context).scale().copyWith(
-          devicePixelRatio: MediaQuery.of(context).devicePixelRatio,
-          navigationMode: NavigationMode.directional,
-        ),
+        data: MediaQuery.of(context).scale().copyWith(devicePixelRatio: MediaQuery.of(context).devicePixelRatio),
         child: child,
       ),
     );

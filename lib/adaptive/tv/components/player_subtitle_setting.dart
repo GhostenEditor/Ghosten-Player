@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/player.dart';
 
-import '../../../components/components.dart ';
 import '../../../l10n/app_localizations.dart';
 import '_focusable.dart';
+import 'setting_page.dart';
 
 const _subtitleStyles = [
   SubtitleSettings(

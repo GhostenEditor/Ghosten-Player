@@ -26,8 +26,8 @@ extension DurationExtension on Duration {
     }
   }
 
-  String toDisplay() {
-    if (inHours > 0) {
+  String toDisplay({bool showHour = false}) {
+    if (showHour) {
       return '$inHours:${inMinutes.remainder(60).toString().padLeft(2, '0')}:${inSeconds.remainder(60).toString().padLeft(2, '0')}';
     } else {
       return '${inMinutes.remainder(60).toString().padLeft(2, '0')}:${inSeconds.remainder(60).toString().padLeft(2, '0')}';

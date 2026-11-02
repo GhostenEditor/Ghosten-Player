@@ -43,16 +43,19 @@ class HeaderedContent extends StatelessWidget {
 }
 
 class SliverHeaderedContent extends StatelessWidget {
-  const SliverHeaderedContent({super.key, required this.header, required this.sliver, this.onTap, this.headerPadding});
+  const SliverHeaderedContent({super.key, this.header, required this.sliver, this.onTap, this.headerPadding});
 
-  final Widget header;
+  final Widget? header;
   final EdgeInsetsGeometry? headerPadding;
   final Widget sliver;
   final GestureTapCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final title = DefaultTextStyle(style: Theme.of(context).textTheme.titleMedium!, child: header);
+    if (header == null) {
+      return sliver;
+    }
+    final title = DefaultTextStyle(style: Theme.of(context).textTheme.titleMedium!, child: header!);
     return SliverMainAxisGroup(
       slivers: [
         SliverPadding(

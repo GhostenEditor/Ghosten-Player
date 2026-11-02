@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 class TextFormField extends StatefulWidget {
   const TextFormField({
     super.key,
-    this.maxLines,
+    this.maxLines = 1,
     this.validator,
     this.autofocus = false,
     this.obscureText = false,

@@ -51,44 +51,41 @@ class _MainAppState extends State<MainApp> {
         PlatformApi.deeplinkEvent.listen(_scanToLogin);
       }
     }
+
     _stream.listen((data) {
-      if (data.subType == .update) {
-        if (_snackBarController == null) {
-          _snackBarController = ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
-            const SnackBar(
-              content: EventSnackBar(),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
-              // margin: const EdgeInsets.all(10),
-              elevation: 2,
-              showCloseIcon: true,
-              persist: true,
-              width: 360,
-              behavior: .floating,
-            ),
-          );
-          _snackBarController!.closed.whenComplete(() {
-            _snackBarController = null;
-          });
-        }
+      if (_snackBarController == null) {
+        _snackBarController = ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+          SnackBar(
+            content: EventSnackBar(stream: _stream),
+            persist: true,
+            width: 360,
+            behavior: .floating,
+            showCloseIcon: true,
+          ),
+        );
+        _snackBarController!.closed.whenComplete(() {
+          _snackBarController = null;
+        });
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final UserConfig userConfig = context.watch<UserConfig>();
     return MaterialApp(
       title: appName,
       navigatorKey: navigatorKey,
-      showPerformanceOverlay: context.watch<UserConfig>().showPerformanceOverlay,
+      showPerformanceOverlay: userConfig.showPerformanceOverlay,
       debugShowCheckedModeBanner: false,
       theme: lightTheme,
       darkTheme: darkTheme,
       initialRoute: widget.initialized ? RouteName.home.name : RouteName.settingsUpdater.name,
       onGenerateInitialRoutes: widget.onGenerateInitialRoutes,
       onGenerateRoute: onGenerateRoute,
-      themeMode: context.watch<UserConfig>().themeMode,
+      themeMode: userConfig.themeMode,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
-      locale: context.watch<UserConfig>().locale,
+      locale: userConfig.locale,
       supportedLocales: AppLocalizations.supportedLocales,
       navigatorObservers: [routeObserver],
       shortcuts: {

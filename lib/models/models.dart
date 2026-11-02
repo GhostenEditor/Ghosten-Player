@@ -120,7 +120,9 @@ Future<PlaylistData> getPlaylistById(MediaType type, dynamic id) async {
 }
 
 class PlaylistData {
-  const PlaylistData({required this.playlist, this.activeIndex = 0, this.themeColor});
+  const PlaylistData({required this.playlist, this.activeIndex = 0, this.themeColor})
+    : assert(activeIndex >= 0),
+      assert(activeIndex < playlist.length);
 
   final List<PlaylistItem> playlist;
   final int activeIndex;

@@ -21,7 +21,7 @@ class _MediaScaffoldState extends State<MediaScaffold> {
   @override
   void initState() {
     _controller.addListener(() {
-      final double halfHeight = MediaQuery.of(context).size.height / 2;
+      final double halfHeight = MediaQuery.sizeOf(context).height / 2;
       _showBlur.value = _controller.offset > halfHeight;
     });
     super.initState();

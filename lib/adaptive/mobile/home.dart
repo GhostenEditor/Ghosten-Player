@@ -1,8 +1,9 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../components/components.dart';
-import '../../dialogs/event_snack_bar.dart';
 import '../../l10n/app_localizations.dart';
 import '../../routers.dart';
 import '../../utils/utils.dart';
@@ -17,122 +18,92 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _tabIndex = 0;
   final _homeNavigatorKey = GlobalKey<NavigatorState>();
-  static ScaffoldFeatureController<SnackBar, SnackBarClosedReason>? _snackBarController;
 
   @override
   Widget build(BuildContext context) {
     return QuitConfirm(
-      child: Row(
-        children: [
-          Flexible(
-            flex: 2,
-            child: Scaffold(
-              appBar: switch (_tabIndex) {
-                0 || 1 || 2 => AppBar(
-                  systemOverlayStyle: switch (Theme.brightnessOf(context)) {
-                    Brightness.dark => const SystemUiOverlayStyle(
-                      systemNavigationBarIconBrightness: Brightness.light,
-                      systemNavigationBarColor: Color(0x01000000),
-                      statusBarIconBrightness: Brightness.light,
-                      statusBarColor: Colors.transparent,
-                    ),
-                    Brightness.light => const SystemUiOverlayStyle(
-                      systemNavigationBarIconBrightness: Brightness.dark,
-                      systemNavigationBarColor: Color(0x01FFFFFF),
-                      statusBarIconBrightness: Brightness.dark,
-                      statusBarColor: Colors.transparent,
-                    ),
-                  },
-                  forceMaterialTransparency: switch (_tabIndex) {
-                    0 || 1 => true,
-                    _ => false,
-                  },
-                  leading: const Center(child: Logo(size: 32)),
-                  title: _tabIndex == 2 ? Text(AppLocalizations.of(context)!.homeTabLive) : null,
-                  actions: [
-                    IconButton.filledTonal(
-                      onPressed: () {
-                        if (_snackBarController != null) {
-                          _snackBarController!.close();
-                          _snackBarController = null;
-                        } else {
-                          _snackBarController = ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: EventSnackBar(),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
-                              // margin: const EdgeInsets.all(10),
-                              elevation: 2,
-                              showCloseIcon: true,
-                              persist: true,
-                              width: 360,
-                              behavior: .floating,
-                            ),
-                          );
-                          _snackBarController!.closed.whenComplete(() {
-                            _snackBarController = null;
-                          });
-                        }
-                      },
-                      icon: const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 3)),
-                    ),
-                    IconButton(onPressed: () => context.pushNamed(.search), icon: const Icon(Icons.search_rounded)),
-                  ],
+      child: Scaffold(
+        appBar: switch (_tabIndex) {
+          0 || 1 || 2 => UnpinnedAppBar(
+            unpinned: switch (_tabIndex) {
+              0 || 1 => true,
+              _ => false,
+            },
+            appbar: AppBar(
+              systemOverlayStyle: switch (Theme.brightnessOf(context)) {
+                Brightness.dark => const SystemUiOverlayStyle(
+                  systemNavigationBarIconBrightness: Brightness.light,
+                  systemNavigationBarColor: Color(0x01000000),
+                  statusBarIconBrightness: Brightness.light,
+                  statusBarColor: Colors.transparent,
                 ),
+                Brightness.light => const SystemUiOverlayStyle(
+                  systemNavigationBarIconBrightness: Brightness.dark,
+                  systemNavigationBarColor: Color(0x01FFFFFF),
+                  statusBarIconBrightness: Brightness.dark,
+                  statusBarColor: Colors.transparent,
+                ),
+              },
+              forceMaterialTransparency: switch (_tabIndex) {
+                0 || 1 => true,
+                _ => false,
+              },
+              title: switch (_tabIndex) {
+                0 => Text(AppLocalizations.of(context)!.homeTabTV),
+                1 => Text(AppLocalizations.of(context)!.homeTabMovie),
+                2 => Text(AppLocalizations.of(context)!.homeTabLive),
                 _ => null,
               },
-              extendBodyBehindAppBar: _tabIndex != 2,
-              extendBody: true,
-              resizeToAvoidBottomInset: false,
-              bottomNavigationBar: SafeArea(
-                top: false,
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  height: 84,
-                  child: Center(
-                    child: Material(
-                      shape: const StadiumBorder(),
-                      clipBehavior: .antiAlias,
-                      elevation: 4,
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 300),
-                        child: NavigationBar(
-                          selectedIndex: _tabIndex,
-                          labelBehavior: .alwaysHide,
-                          indicatorShape: const CircleBorder(),
-                          onDestinationSelected: _onTabClick,
-                          destinations: _destinations(context)
-                              .map(
-                                (destination) => NavigationDestination(
-                                  label: destination.label,
-                                  icon: Icon(destination.icon),
-                                  selectedIcon: Icon(destination.selectedIcon),
-                                  tooltip: '',
-                                ),
-                              )
-                              .toList(),
-                        ),
-                      ),
-                    ),
+              actions: [
+                const ServerSwitcher(),
+                IconButton(onPressed: () => context.pushNamed(.search), icon: const Icon(Icons.search_rounded)),
+              ],
+            ),
+          ),
+          _ => null,
+        },
+        extendBodyBehindAppBar: _tabIndex != 2,
+        extendBody: true,
+        resizeToAvoidBottomInset: false,
+        bottomNavigationBar: Container(
+          margin: EdgeInsets.only(bottom: max(24, MediaQuery.paddingOf(context).bottom)),
+          height: 60,
+          child: MediaQuery.removePadding(
+            context: context,
+            removeTop: true,
+            removeBottom: true,
+            child: Center(
+              child: Material(
+                shape: StadiumBorder(side: BorderSide(color: Theme.of(context).colorScheme.surfaceContainerHigh)),
+                clipBehavior: .antiAlias,
+                elevation: 4,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 300),
+                  child: NavigationBar(
+                    selectedIndex: _tabIndex,
+                    labelBehavior: .alwaysHide,
+                    indicatorShape: const CircleBorder(),
+                    onDestinationSelected: _onTabClick,
+                    destinations: _destinations(context)
+                        .map(
+                          (destination) => NavigationDestination(
+                            label: destination.label,
+                            icon: Icon(destination.icon),
+                            selectedIcon: Icon(destination.selectedIcon),
+                          ),
+                        )
+                        .toList(),
                   ),
                 ),
               ),
-              body: AppNavigator(
-                initialRoute: RouteName.tv.name,
-                navigatorKey: _homeNavigatorKey,
-                onGenerateRoute: onGenerateRoute,
-              ),
             ),
           ),
-          // Flexible(
-          //   flex: 2,
-          //   child: AppNavigator(
-          //     // navigatorKey: _homeNavigatorKey,
-          //     routeDirectionalTraversalEdgeBehavior: .parentScope,
-          //     onUnknownRoute: (_) => MaterialPageRoute(builder: (context) => const Scaffold(body: NoData())),
-          //     onGenerateRoute: onGenerateRoute,
-          //   ),
-          // ),
-        ],
+        ),
+        body: AppNavigator(
+          initialRoute: RouteName.tv.name,
+          navigatorKey: _homeNavigatorKey,
+          onGenerateRoute: onGenerateRoute,
+        ),
       ),
     );
   }

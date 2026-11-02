@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/shortcut_tv.dart';
 import '../adaptive/adaptive.dart';
-import '../components/components.dart';
 
 class SystemSettingsShortcut extends StatefulWidget {
   const SystemSettingsShortcut({super.key});

@@ -51,10 +51,8 @@ class _EpisodeMetadataState extends State<EpisodeMetadata> {
               'duration': int.parse(_controller5.text),
             }),
           );
-          if (resp?.error == null) {
-            if (context.mounted) {
-              Navigator.pop(context, true);
-            }
+          if (resp?.error == null && context.mounted) {
+            Navigator.pop(context);
           }
         }
       },

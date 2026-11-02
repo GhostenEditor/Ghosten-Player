@@ -2,6 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 
+import '../adaptive/adaptive.dart';
+
 class ImageViewer extends StatelessWidget {
   const ImageViewer({super.key, required this.url, this.title});
 
@@ -11,7 +13,7 @@ class ImageViewer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Theme(
-      data: ThemeData.dark(),
+      data: darkTheme,
       child: Builder(
         builder: (context) {
           return Scaffold(

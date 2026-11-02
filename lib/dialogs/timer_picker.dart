@@ -83,7 +83,7 @@ class _TimerPickerDialogState extends State<TimerPickerDialog> {
                         ),
                       ),
                       DefaultTextStyle(
-                        style: Theme.of(context).textTheme.titleMedium!.copyWith(fontWeight: FontWeight.bold),
+                        style: Theme.of(context).textTheme.titleMedium!,
                         child: Row(
                           spacing: 42,
                           mainAxisAlignment: MainAxisAlignment.spaceAround,

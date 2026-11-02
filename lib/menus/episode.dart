@@ -1,9 +1,11 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../utils/tmdb_uri.dart';
 import '../cards/cards.dart';
 import '../extensions/extensions.dart';
+import '../providers/function.dart';
 import 'abstract.dart';
 
 class EpisodeMenu extends Menu {
@@ -13,9 +15,10 @@ class EpisodeMenu extends Menu {
 
   @override
   List<Widget> build(BuildContext context) {
+    final FunctionConfig function = context.read<FunctionConfig>();
     final AppTheme theme = Theme.of(context).extension<AppTheme>()!;
     return [
-      if (theme.functions.menuShortcuts) ...[
+      if (function.menuShortcuts) ...[
         EpisodeCard(
           item: item,
           size: Size(
@@ -31,12 +34,14 @@ class EpisodeMenu extends Menu {
         buildFavoriteAction(context, item, MediaType.episode),
         const Divider(),
       ],
-      buildSkipFromStartAction(context, item, MediaType.episode, item.skipIntro),
-      buildSkipFromEndAction(context, item, MediaType.episode, item.skipEnding),
-      const Divider(),
+      if (function.menuSetSkipTime) ...[
+        buildSkipFromStartAction(context, item, MediaType.episode, item.skipIntro),
+        buildSkipFromEndAction(context, item, MediaType.episode, item.skipEnding),
+        const Divider(),
+      ],
       buildEditMetadataAction(context, item, .episode),
-      if (item.fileId != null) buildSubtitleAction(context, item.fileId!),
-      if (item.fileId != null) buildDownloadAction(context, item.downloaded),
+      if (item.fileId != null && function.menuSubtitle) buildSubtitleAction(context, item.fileId!),
+      if (item.fileId != null && function.menuDownload) buildDownloadAction(context, item.downloaded),
       if (item.scraper.id != null)
         buildHomeAction(
           context,

@@ -15,7 +15,8 @@ class CarouselItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double imageHeight = max(min(MediaQuery.of(context).size.width / 4, 240.0), 140.0);
+    final Size size = MediaQuery.sizeOf(context);
+    final double imageHeight = max(min(size.width / 4, 240.0), 140.0);
     final double imageWidth = imageHeight * 0.667;
     final MediaRecommendation? item = this.item;
     return item != null
@@ -30,7 +31,7 @@ class CarouselItem extends StatelessWidget {
                     item.themeColor,
                     builder: (context) => Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      spacing: MediaQuery.of(context).size.width / 30,
+                      spacing: size.width / 30,
                       children: [
                         if (item.poster != null)
                           AsyncImage(
@@ -100,11 +101,12 @@ class _CarouselPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double imageHeight = max(min(MediaQuery.of(context).size.width / 4, 240.0), 140.0);
+    final Size size = MediaQuery.sizeOf(context);
+    final double imageHeight = max(min(size.width / 4, 240.0), 140.0);
     final double imageWidth = imageHeight * 0.667;
     return LayoutBuilder(
       builder: (context, constraints) {
-        final double height = min(max(constraints.maxWidth / 2, 200.0), MediaQuery.of(context).size.height * 0.85);
+        final double height = min(max(constraints.maxWidth / 2, 200.0), size.height * 0.7);
         return SizedBox(
           height: height,
           child: Column(
@@ -117,7 +119,7 @@ class _CarouselPlaceholder extends StatelessWidget {
                       constraints: const BoxConstraints(maxWidth: 800),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        spacing: MediaQuery.of(context).size.width / 30,
+                        spacing: size.width / 30,
                         children: [
                           PlaceholderImage(width: imageWidth, height: imageHeight),
                           Expanded(

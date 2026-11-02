@@ -8,7 +8,7 @@ class Carousel extends StatefulWidget {
 
   final ValueChanged<int>? onChange;
   final int itemCount;
-  final NullableIndexedWidgetBuilder itemBuilder;
+  final IndexedWidgetBuilder itemBuilder;
 
   @override
   State<Carousel> createState() => _CarouselState();

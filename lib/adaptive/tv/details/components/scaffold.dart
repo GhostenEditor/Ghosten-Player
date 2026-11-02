@@ -7,6 +7,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../menus/abstract.dart';
 import '../../../../routers.dart';
 import '../../../../utils/utils.dart';
+import '../../components/setting_page.dart';
 
 class DetailScaffold<T extends MediaBase> extends StatefulWidget {
   const DetailScaffold({
@@ -14,16 +15,12 @@ class DetailScaffold<T extends MediaBase> extends StatefulWidget {
     required this.item,
     this.navigatorKey,
     required this.builder,
-    this.scaffoldKey,
     this.showSide,
-    this.drawerNavigatorKey,
     this.menus,
   });
 
   final T item;
   final GlobalKey<NavigatorState>? navigatorKey;
-  final GlobalKey<ScaffoldState>? scaffoldKey;
-  final GlobalKey<NavigatorState>? drawerNavigatorKey;
   final WidgetBuilder builder;
   final ValueNotifier<bool>? showSide;
   final Menu? menus;
@@ -33,6 +30,9 @@ class DetailScaffold<T extends MediaBase> extends StatefulWidget {
 }
 
 class _DetailScaffoldState<T extends MediaBase> extends State<DetailScaffold<T>> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final _drawerNavigatorKey = GlobalKey<NavigatorState>();
+
   @override
   Widget build(BuildContext context) {
     return ThemeBuilder(
@@ -53,8 +53,8 @@ class _DetailScaffoldState<T extends MediaBase> extends State<DetailScaffold<T>>
                 if (event is KeyDownEvent || event is KeyRepeatEvent) {
                   switch (event.logicalKey) {
                     case LogicalKeyboardKey.contextMenu:
-                      if (widget.scaffoldKey?.currentState?.isEndDrawerOpen == false) {
-                        widget.scaffoldKey?.currentState?.openEndDrawer();
+                      if (_scaffoldKey.currentState?.isEndDrawerOpen == false) {
+                        _scaffoldKey.currentState?.openEndDrawer();
                         return KeyEventResult.handled;
                       }
                   }
@@ -67,33 +67,29 @@ class _DetailScaffoldState<T extends MediaBase> extends State<DetailScaffold<T>>
                   if (didPop) {
                     return;
                   }
-                  if (widget.scaffoldKey!.currentState!.isEndDrawerOpen) {
-                    if (!widget.drawerNavigatorKey!.currentState!.canPop()) {
-                      widget.scaffoldKey!.currentState!.closeEndDrawer();
+                  if (_scaffoldKey.currentState!.isEndDrawerOpen) {
+                    if (!_drawerNavigatorKey.currentState!.canPop()) {
+                      _scaffoldKey.currentState!.closeEndDrawer();
                     }
                   } else {
                     Navigator.of(context).pop();
                   }
                 },
                 child: Scaffold(
-                  key: widget.scaffoldKey,
+                  key: _scaffoldKey,
                   backgroundColor: Colors.transparent,
                   resizeToAvoidBottomInset: false,
                   endDrawer: widget.menus != null
                       ? Builder(
-                          builder: (context) => Container(
-                            width: 360,
-                            color: Theme.of(context).colorScheme.surfaceContainerLow,
+                          builder: (context) => Drawer(
                             child: AppNavigator(
-                              navigatorKey: widget.drawerNavigatorKey,
+                              navigatorKey: _drawerNavigatorKey,
                               onGenerateRoute: onGenerateRoute,
                               onUnknownRoute: (settings) => FadeInPageRoute(
                                 settings: settings,
-                                builder: (context) => Builder(
-                                  builder: (context) => SettingPage.list(
-                                    title: Text(AppLocalizations.of(context)!.buttonMore),
-                                    children: widget.menus!.buildSettingItems(context),
-                                  ),
+                                builder: (context) => SettingPage.list(
+                                  title: Text(AppLocalizations.of(context)!.buttonMore),
+                                  children: widget.menus!.buildSettingItems(context),
                                 ),
                               ),
                             ),
@@ -106,7 +102,7 @@ class _DetailScaffoldState<T extends MediaBase> extends State<DetailScaffold<T>>
                         flex: 2,
                         child: Padding(
                           padding: const EdgeInsets.only(left: 32, right: 32, top: 32, bottom: 20),
-                          child: widget.builder(context),
+                          child: Builder(builder: widget.builder),
                         ),
                       ),
                       Flexible(

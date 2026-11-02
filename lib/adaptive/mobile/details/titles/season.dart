@@ -18,7 +18,7 @@ class SeasonTitle extends StatelessWidget {
           children: [
             Text(
               item.title ?? '',
-              style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.w500),
               textAlign: TextAlign.center,
             ),
             Text(item.seriesTitle ?? '', style: Theme.of(context).textTheme.titleMedium, textAlign: TextAlign.center),

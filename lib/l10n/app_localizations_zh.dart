@@ -296,35 +296,31 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String errorCode(String code, Object message) {
     String _temp0 = intl.Intl.selectLogic(code, {
-      '30001': '未选择目标数据，请从列表中选择一项后重试',
       '40000': '错误请求',
       '40001': 'M3U 文件超出解析限制，请调整文件后重试',
       '40002': 'M3U文件无法解析，请检查该文件是否正确',
-      '40003': '',
-      '40004': 'Http Url不正确',
-      '40005': '未知的IO错误: $message',
-      '40006': '数据重复，插入失败',
-      '40007': '其他IO错误: $message',
-      '40008': 'A failure to read or write bytes on an I/O stream',
-      '40009': 'JSON格式语法错误: $message',
-      '40010': '数据格式错误: $message',
-      '40011': '数据缺失: $message',
-      '40012': '数据格式错误: $message',
-      '40013': 'Invalid Http Header Value: $message',
-      '40014': '该DLNA Action不支持',
-      '40015': '媒体文件名缺失',
-      '40016': '登录的账号类型错误',
-      '40017': '账号数据缺失',
-      '40018': '并发数错误',
-      '40019': '不支持Range访问',
-      '40020': '阿里云盘异步任务失败',
-      '40021': '文件重命名冲突',
-      '40022': '媒体库类型错误',
-      '40023': '过滤类型错误',
-      '40024': '',
-      '40025': '更新了$message条数据，数据更新失败',
-      '40026': '数据格式错误: $message',
-      '40101': '登录验证失败: $message',
+      '40003': '未知的IO错误: $message',
+      '40004': '数据冲突',
+      '40005': '其他IO错误: $message',
+      '40006': 'JSON数据错误: $message',
+      '40007': '',
+      '40008': '该DLNA Action不支持',
+      '40009': '该驱动不支持',
+      '40010': '储存登录信息缺失',
+      '40011': '并发数错误',
+      '40012': '不支持Range访问',
+      '40013': '阿里云盘异步任务失败',
+      '40014': '文件重命名冲突',
+      '40015': '',
+      '40016': '',
+      '40017': '',
+      '40018': '',
+      '40019': '',
+      '40020': '',
+      '40021': '',
+      '40022': '',
+      '40100': '权限错误',
+      '40101': '储存权限错误: $message',
       '40102': '登录失败，请确认Webdav的地址以及账号密码是否正确!',
       '40103': 'Server 账号错误，请重新登录！',
       '40301': '禁止访问',
@@ -332,7 +328,11 @@ class AppLocalizationsZh extends AppLocalizations {
       '40402': 'Api Not Found',
       '40403': '文件不存在',
       '40404': '$message',
+      '40405': '没有主题色',
+      '40406': '未查询到数据',
+      '40501': 'Method Not Allowed',
       '40800': '连接超时',
+      '40801': '连接超时',
       '42900': '请求太频繁',
       '50000': '内部错误',
       '50401': '网关超时',
@@ -783,6 +783,30 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sessionStatusUnknown => '未知错误';
 
   @override
+  String get settingsGroupDataSettings => '数据设置';
+
+  @override
+  String get settingsGroupDisplaySettings => '显示设置';
+
+  @override
+  String get settingsGroupManagement => '管理';
+
+  @override
+  String get settingsGroupMiscellaneous => '其他';
+
+  @override
+  String get settingsGroupPlay => '播放';
+
+  @override
+  String get settingsGroupProxySettings => '代理设置';
+
+  @override
+  String get settingsGroupShortcutSettings => '快捷键设置';
+
+  @override
+  String get settingsGroupTools => '工具';
+
+  @override
   String get settingsItemAccount => '账号管理';
 
   @override
@@ -798,19 +822,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsItemAutoPlay => '自动播放';
 
   @override
+  String get settingsItemCookie => 'Cookie';
+
+  @override
   String get settingsItemDNS => 'DNS';
 
   @override
   String get settingsItemDataReset => '数据重置';
 
   @override
-  String get settingsItemDataSettings => '数据设置';
-
-  @override
   String get settingsItemDataSync => '数据同步';
-
-  @override
-  String get settingsItemDisplaySettings => '显示设置';
 
   @override
   String get settingsItemDisplaySize => '显示大小';
@@ -855,9 +876,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsItemPlayerSettings => '播放设置';
 
   @override
-  String get settingsItemProxySettings => '代理设置';
-
-  @override
   String get settingsItemScraperBehavior => '刮削行为';
 
   @override
@@ -868,9 +886,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingsItemServer => '远程服务器设置';
-
-  @override
-  String get settingsItemShortcutSettings => '快捷键设置';
 
   @override
   String get settingsItemShortcuts => '快捷键';

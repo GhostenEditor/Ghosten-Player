@@ -25,10 +25,12 @@ Future<UpdateData?> checkUpdate(bool prerelease) async {
     _ => '',
   };
   final String? arch = await PlatformApi.arch();
-  final String? url = latest.assets.firstWhereOrNull((item) => item.name == 'app-$arch$suffix-release.apk')?.url;
-  if (url != null && currentVersion < latest.version) {
+  final UpdateRespAsset? item = latest.assets.firstWhereOrNull((item) => item.name == 'app-$arch$suffix-release.apk');
+  if (item?.url != null && currentVersion < latest.version) {
     return UpdateData(
-      url: url,
+      name: item!.name,
+      url: item.url,
+      digest: item.digest,
       version: latest.version,
       comment: data
           .where((el) => el.version > currentVersion)
@@ -122,12 +124,21 @@ class Version {
 }
 
 class UpdateData {
-  const UpdateData({required this.url, required this.version, required this.comment, this.createAt});
+  const UpdateData({
+    required this.url,
+    required this.version,
+    required this.comment,
+    this.createAt,
+    this.digest,
+    required this.name,
+  });
 
+  final String name;
   final DateTime? createAt;
   final Version version;
   final String comment;
   final String url;
+  final String? digest;
 }
 
 class UpdateResp {
@@ -150,7 +161,11 @@ class UpdateResp {
 }
 
 class UpdateRespAsset {
-  UpdateRespAsset.fromJson(Map<String, dynamic> json) : name = json['name'], url = json['browser_download_url'];
+  UpdateRespAsset.fromJson(Map<String, dynamic> json)
+    : name = json['name'],
+      url = json['browser_download_url'],
+      digest = json['digest'];
   final String name;
   final String url;
+  final String? digest;
 }

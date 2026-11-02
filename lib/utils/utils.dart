@@ -3,6 +3,7 @@ import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 
 export 'context_menu.dart';
 export 'date_time.dart';
+export 'download.dart';
 export 'duration.dart';
 export 'file_picker.dart';
 export 'int.dart';

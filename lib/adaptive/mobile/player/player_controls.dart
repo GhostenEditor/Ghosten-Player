@@ -3,12 +3,10 @@ import 'dart:async';
 import 'package:animations/animations.dart';
 import 'package:api/api.dart';
 import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide ListTile;
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/player.dart';
 
 import '../../../components/components.dart';
@@ -16,7 +14,7 @@ import '../../../details/playlist.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../platform_api.dart';
 import '../../../previews/previews.dart';
-import '../../../providers/user_config.dart';
+import '../../../providers/player.dart';
 import '../../../utils/utils.dart';
 import 'player_appbar.dart';
 import 'player_controls_gesture.dart';
@@ -65,18 +63,21 @@ class _PlayerControlsState extends State<PlayerControls> {
           _isShowLockButton.value = show;
         });
     _controlsStream.add(ControlsStreamStatus.show);
-    _controller.status.addListener(() {
-      switch (_controller.status.value) {
-        case PlayerStatus.playing:
+    _controller.playbackState.addListener(() {
+      switch (_controller.playbackState.value) {
+        case .ready:
           if (_isShowControls.value) {
             _controlsStream.add(ControlsStreamStatus.show);
           }
-        case PlayerStatus.paused:
-        case PlayerStatus.ended:
-        case PlayerStatus.error:
-        case PlayerStatus.idle:
+        case .ended:
+        case .idle:
           _controlsStream.add(ControlsStreamStatus.showInfinite);
-        case PlayerStatus.buffering:
+        case .buffering:
+      }
+    });
+    _controller.isPlaying.addListener(() {
+      if (!_controller.isPlaying.value) {
+        _controlsStream.add(ControlsStreamStatus.showInfinite);
       }
     });
     _controller.willSkip.addListener(() {
@@ -158,20 +159,20 @@ class _PlayerControlsState extends State<PlayerControls> {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           actions: [
             _SwitchLinkButton(_controller),
-            IconButton(onPressed: () => _controller.requestPip(), icon: const Icon(Icons.picture_in_picture_rounded)),
+            IconButton(onPressed: () => PlatformApi.requestPip(), icon: const Icon(Icons.picture_in_picture_rounded)),
             const EndDrawerButton(),
           ],
         ),
         extendBodyBehindAppBar: true,
-        backgroundColor: kIsWeb ? Colors.black : Colors.transparent,
+        backgroundColor: Colors.transparent,
         endDrawer: Drawer(
           child: Navigator(
             key: _navigatorKey,
-            onGenerateRoute: (settings) => MaterialPageRoute(
-              builder: (context) => FutureBuilderHandler(
-                future: SharedPreferences.getInstance(),
-                builder: (context, snapshot) => PlayerSettings(
-                  prefs: snapshot.requireData,
+            onGenerateRoute: (settings) => FadeInPageRoute(
+              builder: (context) => Theme(
+                data: Theme.of(context)
+                    .copyWith(scaffoldBackgroundColor: Theme.of(context).colorScheme.surfaceContainerLow),
+                child: PlayerSettings(
                   controller: _controller,
                   onSeekSpeedChanged: (speed) {},
                   onShowLiteProgressbarChanged: (value) {},
@@ -282,6 +283,7 @@ class _PlayerControlsState extends State<PlayerControls> {
           top: false,
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: .stretch,
             children: [
               Row(
                 crossAxisAlignment: .end,
@@ -314,7 +316,7 @@ class _PlayerControlsState extends State<PlayerControls> {
                 },
               ),
               Row(
-                spacing: MediaQuery.of(context).size.width / 360,
+                spacing: MediaQuery.sizeOf(context).width / 360,
                 children: [
                   _PreviousButton(_controller),
                   _ToggleButton(_controller),
@@ -376,6 +378,7 @@ class _PlayerInfoView extends StatelessWidget {
                       _controller.title.value!,
                       style: Theme.of(context).textTheme.titleLarge,
                       overflow: TextOverflow.ellipsis,
+                      maxLines: 3,
                     ),
                   Text(
                     _controller.subTitle.value,
@@ -383,10 +386,10 @@ class _PlayerInfoView extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   ListenableBuilder(
-                    listenable: _controller.status,
+                    listenable: _controller.playbackState,
                     builder: (context, _) {
-                      return switch (_controller.status.value) {
-                        PlayerStatus.buffering => ListenableBuilder(
+                      return switch (_controller.playbackState.value) {
+                        PlaybackState.buffering => ListenableBuilder(
                           listenable: _controller.networkSpeed,
                           builder: (context, child) => Text(
                             _controller.networkSpeed.value.toNetworkSpeed(),
@@ -435,10 +438,10 @@ class _PlayerInfoView extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                             ListenableBuilder(
-                              listenable: _controller.status,
+                              listenable: _controller.playbackState,
                               builder: (context, _) {
-                                return switch (_controller.status.value) {
-                                  PlayerStatus.buffering => ListenableBuilder(
+                                return switch (_controller.playbackState.value) {
+                                  PlaybackState.buffering => ListenableBuilder(
                                     listenable: _controller.networkSpeed,
                                     builder: (context, child) => Text(
                                       _controller.networkSpeed.value.toNetworkSpeed(),
@@ -508,7 +511,7 @@ class _ForceLandScapeButtonState extends State<_ForceLandScapeButton> {
   @override
   void initState() {
     super.initState();
-    _forceLandScape = context.read<UserConfig>().autoForceLandscape;
+    _forceLandScape = context.read<PlayerConfig>().autoForceLandscape;
     if (_forceLandScape) {
       SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
     }
@@ -537,7 +540,7 @@ class _ForceLandScapeButtonState extends State<_ForceLandScapeButton> {
 
   void _forceLandScapeChanged(bool flag) {
     _forceLandScape = flag;
-    context.read<UserConfig>().setAutoForceLandscape(flag);
+    context.read<PlayerConfig>().setAutoForceLandscape(flag);
     widget.onChanged(_forceLandScape);
     setState(() {});
   }
@@ -550,7 +553,7 @@ class _PlaylistButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double width = MediaQuery.of(context).size.width;
+    final double width = MediaQuery.sizeOf(context).width;
     return (controller.playlist.value.length > 1 && width >= 400)
         ? IconButton(
             onPressed: () {
@@ -593,13 +596,8 @@ class _PlaylistButton extends StatelessWidget {
 
   Future<void> _play(int index) async {
     await controller.next(index);
-    switch (controller.status.value) {
-      case PlayerStatus.paused:
-      case PlayerStatus.ended:
-      case PlayerStatus.error:
-      case PlayerStatus.idle:
-        await controller.play();
-      default:
+    if (!controller.isPlaying.value) {
+      await controller.play();
     }
   }
 }
@@ -627,14 +625,8 @@ class _SwitchLinkButtonState extends State<_SwitchLinkButton> {
                   widget.controller.currentItem!.copyWith(url: url),
                   widget.controller.index.value!,
                 );
-                switch (widget.controller.status.value) {
-                  case PlayerStatus.paused:
-                  case PlayerStatus.ended:
-                  case PlayerStatus.error:
-                  case PlayerStatus.idle:
-                    await widget.controller.play();
-                  case PlayerStatus.playing:
-                  case PlayerStatus.buffering:
+                if (widget.controller.isPlaying.value) {
+                  await widget.controller.play();
                 }
                 setState(() {});
               },
@@ -666,22 +658,26 @@ class _ToggleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: controller.status,
-      builder: (context, value, _) {
-        return switch (value) {
-          PlayerStatus.playing => IconButton(onPressed: controller.pause, icon: const Icon(Icons.pause_rounded)),
-          PlayerStatus.buffering => SizedBox.square(
+    return ListenableBuilder(
+      listenable: Listenable.merge([controller.playbackState, controller.isPlaying]),
+      builder: (context, _) {
+        return switch (controller.playbackState.value) {
+          .ready =>
+            controller.isPlaying.value
+                ? IconButton(onPressed: controller.pause, icon: const Icon(Icons.pause_rounded))
+                : IconButton(onPressed: controller.play, icon: const Icon(Icons.play_arrow_rounded)),
+          .buffering => SizedBox.square(
             dimension: 48,
             child: Center(child: Transform.scale(scale: 0.5, child: const CircularProgressIndicator())),
           ),
-          PlayerStatus.paused ||
-          PlayerStatus.idle ||
-          PlayerStatus.ended => IconButton(onPressed: controller.play, icon: const Icon(Icons.play_arrow_rounded)),
-          PlayerStatus.error => IconButton(
-            onPressed: null,
-            icon: Icon(Icons.error_rounded, color: Theme.of(context).colorScheme.error),
-          ),
+          .idle =>
+            controller.fatalError.value != null
+                ? IconButton(
+                    onPressed: null,
+                    icon: Icon(Icons.error_rounded, color: Theme.of(context).colorScheme.error),
+                  )
+                : IconButton(onPressed: controller.play, icon: const Icon(Icons.play_arrow_rounded)),
+          .ended => IconButton(onPressed: controller.play, icon: const Icon(Icons.play_arrow_rounded)),
         };
       },
     );
@@ -752,9 +748,9 @@ class _SubtitleButton extends StatelessWidget {
                   ),
                   ...controller.trackGroup.value.sub.map(
                     (e) => CheckedPopupMenuItem(
-                      checked: controller.trackGroup.value.selectedSub == e.id,
+                      checked: controller.trackGroup.value.selectedSub?.id == e.id,
                       value: e.id,
-                      child: Text(e.label ?? AppLocalizations.of(context)!.none),
+                      child: Text(_getTrackText(e)),
                     ),
                   ),
                 ],
@@ -768,6 +764,29 @@ class _SubtitleButton extends StatelessWidget {
             : const SizedBox();
       },
     );
+  }
+
+  String _getTrackText(MediaTrack track) {
+    final List<dynamic> spans = [];
+    if (track.name?.isNotEmpty ?? false) {
+      spans.add(track.name);
+    }
+    if (track.label?.isNotEmpty ?? false) {
+      spans.add(track.label);
+    }
+    if (track.sampleMimeType?.isNotEmpty ?? false) {
+      final List<String> mimes = track.sampleMimeType!.split('/');
+      if (mimes.length >= 2) {
+        spans.add(mimes[1]);
+      }
+    }
+    if (track.sampleRate != null && track.sampleRate! > 0) {
+      spans.add('${track.sampleRate}Hz');
+    }
+    if (track.averageBitrate != null && track.averageBitrate! > 0) {
+      spans.add('${track.averageBitrate}Bit/s');
+    }
+    return spans.join(', ');
   }
 }
 

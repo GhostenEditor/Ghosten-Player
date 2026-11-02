@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart' hide ListTile, TextFormField;
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:webview_cookie_manager_plus/webview_cookie_manager_plus.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -9,7 +10,7 @@ import '../../constants.dart';
 import '../../l10n/app_localizations.dart';
 import '../../utils/utils.dart';
 import '../adaptive/adaptive.dart';
-import '../components/components.dart';
+import '../providers/function.dart';
 import '../validators/validators.dart';
 
 class SettingsHomePage extends StatelessWidget {
@@ -17,16 +18,18 @@ class SettingsHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final FunctionConfig function = context.watch<FunctionConfig>();
     final AppLocalizations localizations = AppLocalizations.of(context)!;
     return SettingPage.list(
       title: Text(localizations.settingsTitle),
       children: [
-        const ListTile(title: Text('管理'), dense: true),
-        ListTile(
-          title: Text(localizations.settingsItemAccount),
-          leading: const Icon(Icons.account_box_outlined),
-          onTap: () => context.pushNamed(.settingsStorage),
-        ),
+        ListTile(title: Text(localizations.settingsGroupManagement), dense: true),
+        if (function.settingsStorage)
+          ListTile(
+            title: Text(localizations.settingsItemAccount),
+            leading: const Icon(Icons.manage_accounts_outlined),
+            onTap: () => context.pushNamed(.settingsStorage),
+          ),
         ListTile(
           title: Text(localizations.settingsItemTV),
           leading: const Icon(Icons.tv),
@@ -43,30 +46,38 @@ class SettingsHomePage extends StatelessWidget {
           onTap: () => context.pushNamed(.settingsServer),
         ),
         const Divider(),
-        const ListTile(title: Text('播放'), dense: true),
+        ListTile(title: Text(localizations.settingsGroupPlay), dense: true),
         ListTile(
           title: Text(localizations.buttonPlay),
           leading: const Icon(Icons.play_arrow_outlined),
           onTap: () => context.pushNamed(.settingsPlay),
         ),
+        if (function.settingsHistory)
+          ListTile(
+            title: Text(localizations.settingsItemPlayerHistory),
+            leading: const Icon(Icons.history_rounded),
+            onTap: () => context.pushNamed(.settingsHistory),
+          ),
+        if (function.settingsDownload)
+          ListTile(
+            title: Text(localizations.settingsItemDownload),
+            leading: const Icon(Icons.download_outlined),
+            enabled: false,
+            // onTap: () => context.pushNamed(.settingsDownload),
+          ),
         ListTile(
-          title: Text(localizations.settingsItemPlayerHistory),
-          leading: const Icon(Icons.history_rounded),
-          onTap: () => context.pushNamed(.settingsHistory),
-        ),
-        ListTile(
-          title: Text(localizations.settingsItemDownload),
-          leading: const Icon(Icons.download_outlined),
-          enabled: false,
-          // onTap: () => context.pushNamed(.settingsDownload),
+          title: Text(localizations.settingsItemPlayerSettings),
+          leading: const Icon(Icons.video_settings),
+          onTap: () => context.pushNamed(.settingsPlayer),
         ),
         const Divider(),
-        const ListTile(title: Text('工具'), dense: true),
-        ListTile(
-          title: Text(localizations.settingsItemNetworkDiagnostics),
-          leading: const Icon(Icons.rule_rounded),
-          onTap: () => context.pushNamed(.settingsDiagnostics),
-        ),
+        ListTile(title: Text(localizations.settingsGroupTools), dense: true),
+        if (function.settingsDiagnostics)
+          ListTile(
+            title: Text(localizations.settingsItemNetworkDiagnostics),
+            leading: const Icon(Icons.rule_rounded),
+            onTap: () => context.pushNamed(.settingsDiagnostics),
+          ),
         ListTile(
           title: Text(localizations.settingsItemLog),
           leading: const Icon(Icons.article_outlined),
@@ -78,7 +89,7 @@ class SettingsHomePage extends StatelessWidget {
           onTap: () => context.pushNamed(.settingsHelp),
         ),
         ListTile(
-          title: const Text('Cookie'),
+          title: Text(localizations.settingsItemCookie),
           leading: const Icon(Icons.cookie_outlined),
           onTap: () => Navigator.of(
             context,
@@ -86,7 +97,7 @@ class SettingsHomePage extends StatelessWidget {
           ).push(MaterialPageRoute(builder: (context) => const _CookiePage())),
         ),
         const Divider(),
-        const ListTile(title: Text('其他'), dense: true),
+        ListTile(title: Text(localizations.settingsGroupMiscellaneous), dense: true),
         ListTile(
           title: Text(localizations.settingsItemOthers),
           leading: const Icon(Icons.more_horiz_rounded),

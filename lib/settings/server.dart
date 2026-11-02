@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:api/api.dart';
 import 'package:flutter/material.dart' hide ListTile;
+import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../components/components.dart';
@@ -9,6 +10,7 @@ import '../../l10n/app_localizations.dart';
 import '../../menus/server.dart';
 import '../../utils/utils.dart';
 import '../adaptive/adaptive.dart';
+import '../view_models/view_models.dart';
 
 class SystemSettingsServer extends StatefulWidget {
   const SystemSettingsServer({super.key});
@@ -41,12 +43,12 @@ class _SystemSettingsServerState extends State<SystemSettingsServer> {
     return SettingPage(
       title: Text(AppLocalizations.of(context)!.settingsItemServer),
       actions: [IconButton(onPressed: () => context.pushNamed(.settingsServerAdd), icon: const Icon(Icons.add))],
-      child: FutureBuilderHandler(
-        future: Api.serverQueryAll(),
-        builder: (context, snapshot) => ListView.builder(
+      child: ListViewModelConsumer<ServerListViewModel, Server>(
+        builder: (context, items, _) => ListView.builder(
           padding: SettingPageTheme.of(context).contentPadding,
+          itemCount: items.length,
           itemBuilder: (context, index) {
-            final Server item = snapshot.requireData[index];
+            final Server item = items[index];
             return ActionListTile(
               leading: IgnorePointer(
                 child: RadioGroup(groupValue: item.active, onChanged: (_) {}, child: const Radio(value: true)),
@@ -69,9 +71,45 @@ class _SystemSettingsServerState extends State<SystemSettingsServer> {
               actions: ServerMenu(item),
             );
           },
-          itemCount: snapshot.requireData.length,
         ),
       ),
     );
+  }
+}
+
+class ServerListViewModel extends ListViewModelBase<Server> {
+  ServerListViewModel() : snapshot = const AsyncSnapshot.waiting() {
+    _subscription = MergeStream([
+      EventDispatcher.where(type: .server, subType: .add),
+      EventDispatcher.where(type: .server, subType: .update),
+      EventDispatcher.where(type: .server, subType: .delete),
+    ]).listen((_) => load());
+  }
+
+  StreamSubscription<EventData>? _subscription;
+
+  @override
+  AsyncSnapshot<List<Server>> snapshot;
+
+  @override
+  Future<void> load() async {
+    try {
+      final List<Server> data = await Api.serverQueryAll();
+      snapshot = AsyncSnapshot.withData(.done, data);
+    } catch (e) {
+      snapshot = AsyncSnapshot.withError(.done, e);
+    }
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build() {
+    return ChangeNotifierProvider(create: (_) => this, child: const SystemSettingsServer());
   }
 }

@@ -21,7 +21,7 @@ class _PlayerPlaylistState<T> extends State<PlayerPlaylist<T>> {
   late final _controller = ScrollController(
     initialScrollOffset: min(
       (widget.activeIndex ?? 0) * 216,
-      max(widget.playlist.length * 216 - MediaQuery.of(context).size.width + 64, 0),
+      max(widget.playlist.length * 216 - MediaQuery.sizeOf(context).width + 64, 0),
     ),
   );
 

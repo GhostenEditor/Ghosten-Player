@@ -53,42 +53,44 @@ class _MediaListPageState extends State<MediaListPage> {
                   titlePadding: theme.mediaListTheme.titlePadding,
                 ),
               ),
-              SliverPadding(
-                padding: theme.mediaListTheme.contentPadding ?? .zero,
-                sliver: switch (widget.data.type) {
-                  FuzzySearchType.movie => AspectRatioSliverGrid(
-                    cardStyle: theme.movieCardTheme,
-                    itemBuilder: (context, item, size) => MovieCard(item: item, size: size),
-                    onQuery: (newKey) => Api.movieQueryAll(query.copyWith(limit: 30, offset: 30 * newKey)),
-                  ),
-                  FuzzySearchType.series => AspectRatioSliverGrid(
-                    cardStyle: theme.seriesCardTheme,
-                    itemBuilder: (context, item, size) => SeriesCard(item: item, size: size),
-                    onQuery: (newKey) => Api.tvSeriesQueryAll(query.copyWith(limit: 30, offset: 30 * newKey)),
-                  ),
-                  FuzzySearchType.episode => AspectRatioSliverGrid(
-                    cardStyle: theme.episodeCardTheme,
-                    itemBuilder: (context, item, size) => EpisodeWatchNowCard(
-                      size: size,
-                      item: item,
-                      onTap: () => context.pushNamed(.detailEpisode, arguments: {'id': item.id, 'data': item}),
+              SliverSafeArea(
+                top: false,
+                sliver: SliverPadding(
+                  padding: theme.mediaListTheme.contentPadding ?? .zero,
+                  sliver: switch (widget.data.type) {
+                    FuzzySearchType.movie => AspectRatioSliverGrid(
+                      cardStyle: theme.movieCardTheme,
+                      itemBuilder: (context, item, size) => MovieCard(item: item, size: size),
+                      onQuery: (newKey) => Api.movieQueryAll(query.copyWith(limit: 30, offset: 30 * newKey)),
                     ),
-                    onQuery: (newKey) =>
-                        Api.tvEpisodeQueryAll(SearchQuery(limit: 30, offset: 30 * newKey, search: query.search)),
-                  ),
-                  FuzzySearchType.cast => AspectRatioSliverGrid(
-                    cardStyle: theme.castCardTheme,
-                    itemBuilder: (context, item, size) => CastCard(item: item, size: size),
-                    onQuery: (newKey) =>
-                        Api.castQueryAll(SearchQuery(limit: 30, offset: 30 * newKey, search: query.search)),
-                  ),
-                  FuzzySearchType.crew => AspectRatioSliverGrid(
-                    cardStyle: theme.crewCardTheme,
-                    itemBuilder: (context, item, size) => CrewCard(item: item, size: size),
-                    onQuery: (newKey) =>
-                        Api.crewQueryAll(SearchQuery(limit: 30, offset: 30 * newKey, search: query.search)),
-                  ),
-                },
+                    FuzzySearchType.series => AspectRatioSliverGrid(
+                      cardStyle: theme.seriesCardTheme,
+                      itemBuilder: (context, item, size) => SeriesCard(item: item, size: size),
+                      onQuery: (newKey) => Api.tvSeriesQueryAll(query.copyWith(limit: 30, offset: 30 * newKey)),
+                    ),
+                    FuzzySearchType.episode => AspectRatioSliverGrid(
+                      cardStyle: theme.episodeCardTheme,
+                      itemBuilder: (context, item, size) => EpisodeWatchNowCard(
+                        size: size,
+                        item: item,
+                        onTap: () => context.pushNamed(.detailEpisode, arguments: {'id': item.id, 'data': item}),
+                      ),
+                      onQuery: (newKey) => Api.tvEpisodeQueryAll(query.copyWith(limit: 30, offset: 30 * newKey)),
+                    ),
+                    FuzzySearchType.cast => AspectRatioSliverGrid(
+                      cardStyle: theme.castCardTheme,
+                      itemBuilder: (context, item, size) => CastCard(item: item, size: size),
+                      onQuery: (newKey) =>
+                          Api.castQueryAll(SearchQuery(limit: 30, offset: 30 * newKey, search: query.search)),
+                    ),
+                    FuzzySearchType.crew => AspectRatioSliverGrid(
+                      cardStyle: theme.crewCardTheme,
+                      itemBuilder: (context, item, size) => CrewCard(item: item, size: size),
+                      onQuery: (newKey) =>
+                          Api.crewQueryAll(SearchQuery(limit: 30, offset: 30 * newKey, search: query.search)),
+                    ),
+                  },
+                ),
               ),
             ],
           ),
@@ -127,12 +129,13 @@ class _SearchFilterState extends State<_SearchFilter> {
             icon: const Icon(Icons.check_rounded),
           ),
         ],
+        backgroundColor: Colors.transparent,
       ),
+      backgroundColor: Colors.transparent,
       body: FilledButtonTheme(
         data: FilledButtonThemeData(
           style: FilledButtonTheme.of(context).style!.copyWith(
             padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 12, vertical: 6)),
-            // minimumSize: WidgetStatePropertyAll(Size.zero),
             fixedSize: const WidgetStatePropertyAll(Size.fromHeight(24)),
             visualDensity: const VisualDensity(vertical: VisualDensity.minimumDensity),
             textStyle: WidgetStatePropertyAll(Theme.of(context).textTheme.labelMedium),
@@ -525,8 +528,14 @@ class _MediaSearchQueryButtonsState extends State<_MediaSearchQueryButtons> {
                   hintText: AppLocalizations.of(context)!.searchHint,
                   hintStyle: Theme.of(context).textTheme.labelSmall,
                 ),
-                onTapOutside: (_) => FocusScope.of(context).unfocus(),
-                onEditingComplete: () => FocusScope.of(context).nextFocus(),
+                onTapOutside: (_) {
+                  _onChanged();
+                  FocusScope.of(context).unfocus();
+                },
+                onEditingComplete: () {
+                  _onChanged();
+                  FocusScope.of(context).nextFocus();
+                },
               ),
             ),
           ),

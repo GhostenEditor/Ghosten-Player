@@ -2,7 +2,6 @@ import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:scaled_app/scaled_app.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:video_player/player.dart';
 
 import '/utils/utils.dart';
 
@@ -27,37 +26,27 @@ extension FromString on ThemeMode {
 }
 
 class UserConfig extends ChangeNotifier {
-  UserConfig._fromPrefs(this.prefs)
+  UserConfig(this.prefs)
     : language = SupportedLanguages.fromString(prefs.getString('system.language')),
       themeMode = FromString.fromString(prefs.getString('system.themeMode')),
+      themeColor = prefs.getInt('system.themeColor') ?? 0xFFFFFFFF,
       autoUpdateFrequency = AutoUpdateFrequency.fromString(prefs.getString('system.autoUpdateFrequency')),
       lastCheckUpdateTime = DateTime.tryParse(prefs.getString('system.lastCheckUpdateTime') ?? ''),
       updatePrerelease = prefs.getBool('system.updatePrerelease') ?? false,
       githubProxy = /*prefs.getString('system.githubProxy') ??*/ '',
-      autoPip = prefs.getBool('playerConfig.autoPip') ?? false,
-      playerType = PlayerType.fromString(prefs.getString('playerConfig.playerType')),
-      mpvVersion = prefs.getString('playerConfig.mpvVersion'),
-      autoForceLandscape = prefs.getBool('playerConfig.autoForceLandscape') ?? false,
       displayScale = prefs.getDouble('system.displayScale') ?? 1,
       showPerformanceOverlay = prefs.getBool('system.showPerformanceOverlay') ?? false;
   final SharedPreferences prefs;
   SupportedLanguages language;
   ThemeMode themeMode;
+  int themeColor;
   AutoUpdateFrequency autoUpdateFrequency;
-  PlayerType playerType;
-  String? mpvVersion;
   bool updatePrerelease;
   String githubProxy;
   DateTime? lastCheckUpdateTime;
-  bool autoForceLandscape;
-  bool autoPip;
+
   double displayScale;
   bool showPerformanceOverlay;
-
-  static Future<UserConfig> init() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return UserConfig._fromPrefs(prefs);
-  }
 
   void setAutoUpdate(AutoUpdateFrequency f) {
     autoUpdateFrequency = f;
@@ -74,44 +63,22 @@ class UserConfig extends ChangeNotifier {
     prefs.setBool('system.updatePrerelease', updatePrerelease);
   }
 
-  void setAutoForceLandscape(bool a) {
-    autoForceLandscape = a;
-    notifyListeners();
-    prefs.setBool('playerConfig.autoForceLandscape', autoForceLandscape);
-  }
-
-  void setAutoPip(bool a) {
-    autoPip = a;
-    notifyListeners();
-    prefs.setBool('playerConfig.autoPip', autoPip);
-  }
-
   void setTheme(ThemeMode themeMode) {
     this.themeMode = themeMode;
     notifyListeners();
     prefs.setString('system.themeMode', themeMode.name);
   }
 
+  void setThemeColor(int themeColor) {
+    this.themeColor = themeColor;
+    notifyListeners();
+    prefs.setInt('system.themeColor', themeColor);
+  }
+
   void setLanguage(SupportedLanguages language) {
     this.language = language;
     notifyListeners();
     prefs.setString('system.language', language.name);
-  }
-
-  void setPlayerType(PlayerType playerType) {
-    this.playerType = playerType;
-    notifyListeners();
-    prefs.setString('playerConfig.playerType', playerType.name);
-  }
-
-  void setMpvVersion(String? mpvVersion) {
-    this.mpvVersion = mpvVersion;
-    notifyListeners();
-    if (mpvVersion != null) {
-      prefs.setString('playerConfig.mpvVersion', mpvVersion);
-    } else {
-      prefs.remove('playerConfig.mpvVersion');
-    }
   }
 
   void setDisplayScale(double s) {

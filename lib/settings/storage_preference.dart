@@ -10,7 +10,7 @@ import '../utils/notification.dart';
 class SettingsStoragePreferencePage extends StatelessWidget {
   const SettingsStoragePreferencePage({super.key, required this.storage});
 
-  final DriverAccount storage;
+  final Storage storage;
 
   @override
   Widget build(BuildContext context) {

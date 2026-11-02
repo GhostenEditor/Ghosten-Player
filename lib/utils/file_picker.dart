@@ -17,14 +17,13 @@ Future<(int, DriverFile)?> showDriverFilePicker(
   FileType? fileType,
   FileType? selectableType,
 }) async {
-  final (DriverAccount, String?)? result = await context.pushNamed<(DriverAccount, String?)>(.storagePicker);
+  final (Storage, String?)? result = await context.pushNamed<(Storage, String?)>(.storagePicker);
 
   if (!context.mounted || result == null) {
     return null;
   }
-  final DriverAccount storage = result.$1;
+  final Storage storage = result.$1;
   final String? path = result.$2;
-
   final DriverFile? file = storage.type == .local
       ? await getDirectoryPath(initialDirectory: path).then((dir) => dir != null ? DriverFile.fromLocalDir(dir) : null)
       : await _showFilePicker(

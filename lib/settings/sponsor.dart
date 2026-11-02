@@ -12,9 +12,10 @@ class SettingsSponsor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final int cacheSize = (MediaQuery.of(context).devicePixelRatio * 240).round();
     return OrientationPage(
       section1: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 32),
+        padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           spacing: 36,
@@ -24,16 +25,13 @@ class SettingsSponsor extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               clipBehavior: Clip.antiAlias,
               child: Builder(
-                builder: (context) {
-                  final int cacheSize = (MediaQuery.of(context).devicePixelRatio * 240).round();
-                  return Image.asset(
-                    'assets/images/sponsor-code.webp',
-                    width: 240,
-                    height: 240,
-                    cacheWidth: cacheSize,
-                    cacheHeight: cacheSize,
-                  );
-                },
+                builder: (context) => Image.asset(
+                  'assets/images/sponsor-code.webp',
+                  width: 240,
+                  height: 240,
+                  cacheWidth: cacheSize,
+                  cacheHeight: cacheSize,
+                ),
               ),
             ),
             Text(

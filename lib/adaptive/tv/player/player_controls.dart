@@ -3,12 +3,13 @@ import 'dart:async';
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/player.dart';
 
 import '../../../components/components.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../providers/player.dart';
 import '../../../utils/utils.dart';
 
 enum _PlayerPanelType { progressbar, playlist, none }
@@ -37,10 +38,9 @@ class _PlayerControlsState extends State<PlayerControls> {
 
   @override
   void initState() {
-    SharedPreferences.getInstance().then((prefs) {
-      _seekStep = Duration(seconds: PlayerConfig.getFastForwardSpeed(prefs));
-      _showLiteProgressbar.value = prefs.getBool('playerConfig.showLiteProgressbar') ?? false;
-    });
+    final PlayerConfig playerConfig = context.read<PlayerConfig>();
+    _seekStep = Duration(seconds: playerConfig.fastForwardSpeed);
+    _showLiteProgressbar.value = playerConfig.showLiteProgressbar;
     _subscription = _controlsStream.stream
         .switchMap((status) {
           switch (status) {
@@ -69,18 +69,14 @@ class _PlayerControlsState extends State<PlayerControls> {
           }
         });
     _controlsStream.add(ControlsStreamStatus.show);
-    widget.controller.status.addListener(() {
-      switch (widget.controller.status.value) {
-        case PlayerStatus.error:
-        case PlayerStatus.idle:
+    widget.controller.playbackState.addListener(() {
+      switch (_controller.playbackState.value) {
+        case .ready:
+          _controlsStream.add(ControlsStreamStatus.show);
+        case .ended:
+        case .idle:
           _controlsStream.add(ControlsStreamStatus.showInfinite);
-        case PlayerStatus.playing:
-        case PlayerStatus.paused:
-        case PlayerStatus.ended:
-        case PlayerStatus.buffering:
-          if (_panelType.value != _PlayerPanelType.none) {
-            _controlsStream.add(ControlsStreamStatus.show);
-          }
+        case .buffering:
       }
     });
 
@@ -191,7 +187,7 @@ class _PlayerControlsState extends State<PlayerControls> {
               ),
             ),
             ListenableBuilder(
-              listenable: _controller.status,
+              listenable: Listenable.merge([_controller.playbackState, _controller.isPlaying]),
               builder: (context, child) => PageTransitionSwitcher(
                 duration: const Duration(milliseconds: 200),
                 layoutBuilder: (List<Widget> entries) {
@@ -205,8 +201,8 @@ class _PlayerControlsState extends State<PlayerControls> {
                     child: child,
                   );
                 },
-                child: switch (_controller.status.value) {
-                  PlayerStatus.buffering => Center(
+                child: switch (_controller.playbackState.value) {
+                  .buffering => Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       spacing: 12,
@@ -222,13 +218,17 @@ class _PlayerControlsState extends State<PlayerControls> {
                       ],
                     ),
                   ),
-                  PlayerStatus.paused => Center(
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: const BoxDecoration(color: Colors.black45, shape: BoxShape.circle),
-                      child: const Icon(Icons.pause, size: 50),
-                    ),
-                  ),
+
+                  .ready =>
+                    !_controller.isPlaying.value
+                        ? Center(
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: const BoxDecoration(color: Colors.black45, shape: BoxShape.circle),
+                              child: const Icon(Icons.pause, size: 50),
+                            ),
+                          )
+                        : const SizedBox(),
                   _ => const SizedBox(),
                 },
               ),
@@ -257,22 +257,14 @@ class _PlayerControlsState extends State<PlayerControls> {
       onPopWithResult: (_) {
         _navigatorKey.currentState!.maybePop();
       },
-      child: Container(
-        width: 360,
-        color: const Color(0xff202124),
+      child: Drawer(
         child: Navigator(
           key: _navigatorKey,
           onGenerateRoute: (settings) => FadeInPageRoute(
-            builder: (context) => FutureBuilderHandler(
-              future: SharedPreferences.getInstance(),
-              builder: (context, snapshot) {
-                return PlayerSettings(
-                  prefs: snapshot.requireData,
-                  controller: _controller,
-                  onSeekSpeedChanged: (speed) => _seekStep = Duration(seconds: speed),
-                  onShowLiteProgressbarChanged: (value) => _showLiteProgressbar.value = value,
-                );
-              },
+            builder: (context) => PlayerSettings(
+              controller: _controller,
+              onSeekSpeedChanged: (speed) => _seekStep = Duration(seconds: speed),
+              onShowLiteProgressbarChanged: (value) => _showLiteProgressbar.value = value,
             ),
             settings: settings,
           ),
@@ -356,10 +348,10 @@ class _PlayerControlsState extends State<PlayerControls> {
                           widget.controller.seekTo(_progressController.cachedPosition);
                           widget.controller.play();
                         } else {
-                          if (widget.controller.status.value == PlayerStatus.playing) {
+                          if (widget.controller.isPlaying.value) {
                             widget.controller.pause();
                             return KeyEventResult.handled;
-                          } else if (widget.controller.status.value == PlayerStatus.paused) {
+                          } else if (!widget.controller.isPlaying.value) {
                             widget.controller.play();
                             return KeyEventResult.handled;
                           }
@@ -395,13 +387,8 @@ class _PlayerControlsState extends State<PlayerControls> {
             activeIndex: widget.controller.index.value,
             onTap: (index) async {
               await widget.controller.next(index);
-              switch (widget.controller.status.value) {
-                case PlayerStatus.paused:
-                case PlayerStatus.ended:
-                case PlayerStatus.error:
-                case PlayerStatus.idle:
-                  await widget.controller.play();
-                default:
+              if (!widget.controller.isPlaying.value) {
+                await widget.controller.play();
               }
               _panelType.value = _PlayerPanelType.progressbar;
             },
@@ -421,15 +408,15 @@ class _PlayerControlsState extends State<PlayerControls> {
         case LogicalKeyboardKey.enter:
         case LogicalKeyboardKey.select:
           if (_panelType.value == _PlayerPanelType.none) {
-            switch (widget.controller.status.value) {
-              case PlayerStatus.playing:
-              case PlayerStatus.buffering:
-                widget.controller.pause();
-              case PlayerStatus.paused:
-                widget.controller.play();
-              case PlayerStatus.ended:
-              case PlayerStatus.error:
-              case PlayerStatus.idle:
+            switch (widget.controller.playbackState.value) {
+              case .ready:
+              case .buffering:
+                if (widget.controller.isPlaying.value) {
+                  widget.controller.pause();
+                } else {
+                  widget.controller.play();
+                }
+              default:
             }
             return KeyEventResult.handled;
           }

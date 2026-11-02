@@ -19,6 +19,7 @@ class ImageCard extends StatelessWidget {
     this.onLongPress,
     this.direction = .vertical,
     this.autofocus = false,
+    this.backgroundColor,
   });
 
   final String? src;
@@ -34,6 +35,7 @@ class ImageCard extends StatelessWidget {
   final GestureLongPressCallback? onLongPress;
   final Axis direction;
   final bool autofocus;
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +57,7 @@ class ImageCard extends StatelessWidget {
           Ink(
             decoration: BoxDecoration(
               borderRadius: const BorderRadius.all(Radius.circular(8)),
-              color: Theme.of(context).colorScheme.surfaceContainer,
+              color: backgroundColor ?? Theme.of(context).colorScheme.surfaceContainer,
             ),
             width: innerWidth,
             height: innerHeight,
@@ -72,6 +74,7 @@ class ImageCard extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 2,
         children: [
           if (title != null)
             DefaultTextStyle(
@@ -147,6 +150,7 @@ class ImageCardPlaceholder extends StatelessWidget {
               widthFactor: 0.9,
               child: PlaceholderRRect(height: 13, borderRadius: BorderRadius.all(Radius.circular(4))),
             ),
+            const SizedBox(height: 2),
             const FractionallySizedBox(
               widthFactor: 0.6,
               child: PlaceholderRRect(height: 10, borderRadius: BorderRadius.all(Radius.circular(3))),

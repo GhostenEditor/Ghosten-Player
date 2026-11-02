@@ -1,15 +1,14 @@
 import 'package:api/api.dart';
-import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart' hide ListTile, SwitchListTile;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 import 'package:video_player/player.dart';
 
 import '../adaptive/adaptive.dart';
 import '../l10n/app_localizations.dart';
 import '../models/models.dart';
+import '../providers/player.dart';
 import '../utils/utils.dart';
-import 'setting_page.dart';
 
 class PlayerSettings extends StatelessWidget {
   const PlayerSettings({
@@ -17,12 +16,10 @@ class PlayerSettings extends StatelessWidget {
     required this.controller,
     required this.onSeekSpeedChanged,
     required this.onShowLiteProgressbarChanged,
-    required this.prefs,
   });
 
-  final SharedPreferences prefs;
   final PlayerController controller;
-  final ValueChanged<int> onSeekSpeedChanged;
+  final ValueChanged<int>? onSeekSpeedChanged;
   final ValueChanged<bool> onShowLiteProgressbarChanged;
 
   @override
@@ -136,99 +133,97 @@ class PlayerSettings extends StatelessWidget {
             },
           ),
         ),
-        ListTile(
-          title: Text(localizations.subtitleSetting),
-          leading: const Icon(Icons.subtitles_outlined),
-          trailing: const Icon(Icons.chevron_right_rounded),
-          onTap: () async {
-            final initialStyle = SubtitleSettings.fromJson(PlayerConfig.getSubtitleSettings(prefs));
-            if (!context.mounted) {
-              return;
-            }
-
-            final List<int>? style = await Navigator.of(context)
-                .push(FadeInPageRoute(builder: (context) => PlayerSubtitleSetting(subtitleSettings: initialStyle)));
-            if (style != null) {
-              PlayerConfig.setSubtitleSettings(prefs, style);
-              await controller.setSubtitleStyle(style);
-            }
-          },
-        ),
-        const Divider(),
-        StatefulBuilder(
-          builder: (context, setState) {
-            final int data = PlayerConfig.getExtensionRendererMode(prefs);
-            return MenuListTile(
-              title: Text(localizations.extensionRendererModeLabel),
-              trailing: Text(
-                localizations.extensionRendererMode(data.toString()),
-                textAlign: TextAlign.end,
-                overflow: TextOverflow.ellipsis,
-              ),
-              itemBuilder: (context) => [0, 1, 2]
-                  .map(
-                    (i) => CheckedPopupMenuItem(
-                      value: i,
-                      checked: data == i,
-                      child: Text(localizations.extensionRendererMode(i.toString())),
-                    ),
-                  )
-                  .toList(),
-              onSelected: (value) async {
-                PlayerConfig.setExtensionRendererMode(prefs, value);
-                await PlayerController.setPlayerOption('extensionRendererMode', value);
-              },
-            );
-          },
-        ),
-        StatefulBuilder(
-          builder: (context, setState) => SwitchListTile(
-            title: Text(localizations.playerEnableDecoderFallback),
-            value: PlayerConfig.getEnableDecoderFallback(prefs),
-            onChanged: (value) async {
-              PlayerConfig.setEnableDecoderFallback(prefs, value);
-              await PlayerController.setPlayerOption('enableDecoderFallback', value);
-              setState(() {});
+        Consumer<PlayerConfig>(
+          builder: (context, config, _) => ListTile(
+            title: Text(localizations.subtitleSetting),
+            leading: const Icon(Icons.subtitles_outlined),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () async {
+              final initialStyle = SubtitleSettings.fromJson(config.subtitleSettings);
+              if (!context.mounted) {
+                return;
+              }
+              final List<int>? style = await Navigator.of(context)
+                  .push(FadeInPageRoute(builder: (context) => PlayerSubtitleSetting(subtitleSettings: initialStyle)));
+              if (style != null) {
+                config.setSubtitleSettings(style);
+                await controller.setSubtitleStyle(style);
+              }
             },
           ),
         ),
-        StatefulBuilder(
-          builder: (context, setState) => SwitchListTile(
-            title: Text(localizations.playerShowLiteProgressbar),
-            value: prefs.getBool('playerConfig.showLiteProgressbar') ?? false,
+        const Divider(),
+        Consumer<PlayerConfig>(
+          builder: (context, config, _) => MenuListTile(
+            title: Text(localizations.extensionRendererModeLabel),
+            trailing: Text(
+              localizations.extensionRendererMode(config.extensionRendererMode.toString()),
+              textAlign: TextAlign.end,
+              overflow: TextOverflow.ellipsis,
+            ),
+            itemBuilder: (context) => [0, 1, 2]
+                .map(
+                  (i) => CheckedPopupMenuItem(
+                    value: i,
+                    checked: config.extensionRendererMode == i,
+                    child: Text(localizations.extensionRendererMode(i.toString())),
+                  ),
+                )
+                .toList(),
+            onSelected: (value) async {
+              config.setExtensionRendererMode(value);
+              await PlayerController.setPlayerOption('extensionRendererMode', value);
+            },
+          ),
+        ),
+        Consumer<PlayerConfig>(
+          builder: (context, config, _) => SwitchListTile(
+            title: Text(localizations.playerEnableDecoderFallback),
+            value: config.enableDecoderFallback,
             onChanged: (value) async {
-              setState(() {
-                prefs.setBool('playerConfig.showLiteProgressbar', value);
-              });
+              config.setEnableDecoderFallback(value);
+              await PlayerController.setPlayerOption('enableDecoderFallback', value);
+            },
+          ),
+        ),
+        Consumer<PlayerConfig>(
+          builder: (context, config, _) => SwitchListTile(
+            title: Text(localizations.playerShowLiteProgressbar),
+            value: config.showLiteProgressbar,
+            onChanged: (value) async {
+              config.setShowLiteProgressbar(value);
               onShowLiteProgressbarChanged(value);
             },
           ),
         ),
         const Divider(),
-        StatefulBuilder(
-          builder: (context, setState) => ListTile(
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(AppLocalizations.of(context)!.playerFastForwardSpeed),
-                Text('${prefs.getInt('playerConfig.fastForwardSpeed') ?? 30} ${AppLocalizations.of(context)!.second}'),
-              ],
-            ),
-            subtitle: Slider(
-              value: prefs.getInt('playerConfig.fastForwardSpeed')?.toDouble() ?? 30,
-              min: 5,
-              max: 100,
-              divisions: 19,
-              label: (prefs.getInt('playerConfig.fastForwardSpeed') ?? 30).toString(),
-              onChanged: (double value) {
-                setState(() {
-                  prefs.setInt('playerConfig.fastForwardSpeed', value.round());
-                });
-                onSeekSpeedChanged(value.round());
-              },
+        if (onSeekSpeedChanged != null)
+          Consumer<PlayerConfig>(
+            builder: (context, config, _) => ListTile(
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(AppLocalizations.of(context)!.playerFastForwardSpeed),
+                  Text('${config.fastForwardSpeed} ${AppLocalizations.of(context)!.second}'),
+                ],
+              ),
+              subtitle: MediaQuery(
+                data: const MediaQueryData(navigationMode: .directional),
+                child: Slider(
+                  value: config.fastForwardSpeed.toDouble(),
+                  min: 5,
+                  max: 100,
+                  divisions: 19,
+                  padding: const .only(top: 24, bottom: 6),
+                  label: config.fastForwardSpeed.toString(),
+                  onChanged: (double value) {
+                    config.setFastForwardSpeed(value.round());
+                    onSeekSpeedChanged!(value.round());
+                  },
+                ),
+              ),
             ),
           ),
-        ),
         const Divider(),
         ValueListenableBuilder(
           valueListenable: controller.index,
@@ -329,77 +324,69 @@ class PlayerSettings extends StatelessWidget {
           },
         ),
         ValueListenableBuilder(
-          valueListenable: controller.mediaInfo,
-          builder: (context, value, _) => value != null
-              ? DefaultTextStyle(
-                  style: Theme.of(context).textTheme.bodySmall!,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                    child: Table(
-                      columnWidths: const <int, TableColumnWidth>{0: FixedColumnWidth(60), 1: FlexColumnWidth()},
-                      children: [
-                        TableRow(
-                          children: [
-                            Text('Video', style: Theme.of(context).textTheme.titleSmall),
-                            Container(),
-                          ],
-                        ),
-                        TableRow(
-                          children: [
-                            const Text('Codecs'),
-                            Text(controller.mediaInfo.value!.videoCodecs ?? localizations.tagUnknown),
-                          ],
-                        ),
-                        TableRow(
-                          children: [
-                            const Text('Mime'),
-                            Text(controller.mediaInfo.value!.videoMime ?? localizations.tagUnknown),
-                          ],
-                        ),
-                        TableRow(
-                          children: [
-                            const Text('FPS'),
-                            Text(controller.mediaInfo.value!.videoFPS?.toString() ?? localizations.tagUnknown),
-                          ],
-                        ),
-                        TableRow(
-                          children: [
-                            const Text('Size'),
-                            Text(controller.mediaInfo.value!.videoSize ?? localizations.tagUnknown),
-                          ],
-                        ),
-                        TableRow(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(top: 8.0),
-                              child: Text('Audio', style: Theme.of(context).textTheme.titleSmall),
-                            ),
-                            Container(),
-                          ],
-                        ),
-                        TableRow(
-                          children: [
-                            const Text('Codecs'),
-                            Text(controller.mediaInfo.value!.audioCodecs ?? localizations.tagUnknown),
-                          ],
-                        ),
-                        TableRow(
-                          children: [
-                            const Text('Mime'),
-                            Text(controller.mediaInfo.value!.audioMime ?? localizations.tagUnknown),
-                          ],
-                        ),
-                        TableRow(
-                          children: [
-                            const Text('Bitrate'),
-                            Text(controller.mediaInfo.value!.audioBitrate?.toString() ?? localizations.tagUnknown),
-                          ],
-                        ),
-                      ],
-                    ),
+          valueListenable: controller.trackGroup,
+          builder: (context, value, _) => DefaultTextStyle(
+            style: Theme.of(context).textTheme.bodySmall!,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+              child: Table(
+                columnWidths: const <int, TableColumnWidth>{0: FixedColumnWidth(60), 1: FlexColumnWidth()},
+                children: [
+                  TableRow(
+                    children: [
+                      Text('Video', style: Theme.of(context).textTheme.titleSmall),
+                      Container(),
+                    ],
                   ),
-                )
-              : const SizedBox(),
+                  TableRow(
+                    children: [const Text('Codecs'), Text(value.selectedVideo?.codecs ?? localizations.tagUnknown)],
+                  ),
+                  TableRow(
+                    children: [
+                      const Text('Mime'),
+                      Text(value.selectedVideo?.sampleMimeType ?? localizations.tagUnknown),
+                    ],
+                  ),
+                  TableRow(
+                    children: [
+                      const Text('FPS'),
+                      Text(value.selectedVideo?.frameRate?.toString() ?? localizations.tagUnknown),
+                    ],
+                  ),
+                  TableRow(
+                    children: [
+                      const Text('Size'),
+                      Text('${value.selectedVideo?.width} x ${value.selectedVideo?.height}'),
+                    ],
+                  ),
+                  TableRow(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Text('Audio', style: Theme.of(context).textTheme.titleSmall),
+                      ),
+                      Container(),
+                    ],
+                  ),
+                  TableRow(
+                    children: [const Text('Codecs'), Text(value.selectedAudio?.codecs ?? localizations.tagUnknown)],
+                  ),
+                  TableRow(
+                    children: [
+                      const Text('Mime'),
+                      Text(value.selectedAudio?.sampleMimeType ?? localizations.tagUnknown),
+                    ],
+                  ),
+                  TableRow(
+                    children: [
+                      const Text('Bitrate'),
+                      Text(value.selectedAudio?.bitrate.toString() ?? localizations.tagUnknown),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
         const Focus(child: SizedBox()),
       ],
@@ -411,23 +398,23 @@ class PlayerSettings extends StatelessWidget {
     required Widget icon,
     required String label,
     required List<MediaTrack> tracks,
-    dynamic selected,
+    MediaTrack? selected,
     required Function(dynamic) onSelected,
   }) {
     if (tracks.isEmpty) {
       return const SizedBox();
     }
-    final MediaTrack? selectedTrack = tracks.firstWhereOrNull((v) => v.id == selected);
     final AppLocalizations localizations = AppLocalizations.of(context)!;
     return MenuListTile(
       leading: icon,
       title: Text(label),
-      initialValue: selected,
-      trailing: Text(selectedTrack?.name ?? localizations.none, overflow: TextOverflow.ellipsis),
+      initialValue: selected?.id,
+      trailing: Text(selected?.name ?? localizations.none, overflow: TextOverflow.ellipsis),
       itemBuilder: (context) => [
         CheckedPopupMenuItem(checked: selected == null, child: Text(localizations.none)),
         ...tracks.map(
-          (e) => CheckedPopupMenuItem<String?>(checked: e.id == selected, value: e.id, child: Text(_getTrackText(e))),
+          (e) =>
+              CheckedPopupMenuItem<String?>(checked: e.id == selected?.id, value: e.id, child: Text(_getTrackText(e))),
         ),
       ],
       onSelected: onSelected,
@@ -442,17 +429,17 @@ class PlayerSettings extends StatelessWidget {
     if (track.label?.isNotEmpty ?? false) {
       spans.add(track.label);
     }
-    if (track.mimeType?.isNotEmpty ?? false) {
-      final List<String> mimes = track.mimeType!.split('/');
+    if (track.sampleMimeType?.isNotEmpty ?? false) {
+      final List<String> mimes = track.sampleMimeType!.split('/');
       if (mimes.length >= 2) {
         spans.add(mimes[1]);
       }
     }
-    if (track.rate != null && track.rate! > 0) {
-      spans.add('${track.rate}Hz');
+    if (track.sampleRate != null && track.sampleRate! > 0) {
+      spans.add('${track.sampleRate}Hz');
     }
     if (track.averageBitrate != null && track.averageBitrate! > 0) {
-      spans.add('${track.rate}Bit/s');
+      spans.add('${track.averageBitrate}Bit/s');
     }
     return spans.join(', ');
   }

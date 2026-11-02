@@ -1,3 +1,6 @@
+import 'dart:ui';
+
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart' hide ListTile, RadioListTile, SwitchListTile;
 import 'package:provider/provider.dart';
 
@@ -64,6 +67,37 @@ class _SettingsAboutPageState extends State<SettingsAboutPage> {
             applicationVersion: appVersion,
             applicationIcon: const Logo(size: 32),
           ),
+        ),
+        FutureBuilderHandler(
+          future: DeviceInfoPlugin().androidInfo,
+          builder: (context, snapshot) {
+            final AndroidDeviceInfo androidInfo = snapshot.requireData;
+            final FlutterView view = PlatformDispatcher.instance.views.first;
+            final Size physicalSize = view.physicalSize;
+            final Size renderSize = MediaQuery.sizeOf(context);
+            return ListTile(
+              enabled: false,
+              isThreeLine: true,
+              leading: const Icon(Icons.android_rounded),
+              title: Row(
+                mainAxisAlignment: .spaceBetween,
+                spacing: 4,
+                children: [
+                  Text(androidInfo.manufacturer),
+                  Text(androidInfo.name, style: const TextStyle(fontSize: 10)),
+                ],
+              ),
+              subtitle: Column(
+                crossAxisAlignment: .stretch,
+                spacing: 2,
+                children: [
+                  Text('Android ${androidInfo.version.release} ${androidInfo.version.codename}'),
+                  Text('Physical Size: ${physicalSize.width.round()} x ${physicalSize.height.round()}'),
+                  Text('Render Size: ${renderSize.width.round()} x ${renderSize.height.round()}'),
+                ],
+              ),
+            );
+          },
         ),
       ],
     );

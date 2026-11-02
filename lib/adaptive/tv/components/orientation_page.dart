@@ -1,15 +1,49 @@
 import 'package:flutter/material.dart';
 
-class OrientationPage extends StatelessWidget {
-  const OrientationPage({super.key, required this.section1, required this.section2, this.title, this.actions});
+import '../../../components/keyboard_scroll.dart';
+
+class OrientationPage extends StatefulWidget {
+  const OrientationPage({
+    super.key,
+    required this.section1,
+    this.section2,
+    this.title,
+    this.actions,
+    this.autoScroll = false,
+  });
 
   final Widget? section1;
   final Widget? section2;
   final Widget? title;
   final List<Widget>? actions;
+  final bool autoScroll;
+
+  @override
+  State<OrientationPage> createState() => _OrientationPageState();
+}
+
+class _OrientationPageState extends State<OrientationPage> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final content = Scrollbar(
+      controller: _scrollController,
+      child: CustomScrollView(
+        controller: _scrollController,
+        slivers: [
+          const SliverSafeArea(bottom: false, sliver: SliverToBoxAdapter()),
+          SliverPadding(padding: const EdgeInsets.symmetric(horizontal: 32), sliver: widget.section2),
+          const SliverSafeArea(top: false, sliver: SliverToBoxAdapter()),
+        ],
+      ),
+    );
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -39,8 +73,8 @@ class OrientationPage extends StatelessWidget {
           appBar: AppBar(
             forceMaterialTransparency: true,
             automaticallyImplyLeading: false,
-            title: title,
-            actions: actions,
+            title: widget.title,
+            actions: widget.actions,
             titleSpacing: 32,
             actionsPadding: const EdgeInsets.only(right: 16),
           ),
@@ -50,18 +84,10 @@ class OrientationPage extends StatelessWidget {
           body: Row(
             children: [
               Expanded(
-                child: Padding(padding: const EdgeInsets.symmetric(horizontal: 32), child: section1),
+                child: Padding(padding: const EdgeInsets.symmetric(horizontal: 32), child: widget.section1),
               ),
               Expanded(
-                child: Scrollbar(
-                  child: CustomScrollView(
-                    slivers: [
-                      const SliverSafeArea(bottom: false, sliver: SliverToBoxAdapter()),
-                      SliverPadding(padding: const EdgeInsets.symmetric(horizontal: 32), sliver: section2),
-                      const SliverSafeArea(top: false, sliver: SliverToBoxAdapter()),
-                    ],
-                  ),
-                ),
+                child: widget.autoScroll ? KeyboardScroll(controller: _scrollController, child: content) : content,
               ),
             ],
           ),

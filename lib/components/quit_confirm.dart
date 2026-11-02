@@ -35,14 +35,15 @@ class _QuitConfirmState extends State<QuitConfirm> {
                 SystemNavigator.pop();
               } else {
                 confirmed = true;
-                final ScaffoldFeatureController<SnackBar, SnackBarClosedReason> controller = ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(AppLocalizations.of(context)!.confirmTextExit, textAlign: TextAlign.center),
-                    duration: const Duration(seconds: 2),
-                    behavior: SnackBarBehavior.floating,
-                    width: 200,
-                  ),
-                );
+                final ScaffoldFeatureController<SnackBar, SnackBarClosedReason> controller =
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(AppLocalizations.of(context)!.confirmTextExit, textAlign: TextAlign.center),
+                        duration: const Duration(seconds: 2),
+                        behavior: SnackBarBehavior.floating,
+                        width: 200,
+                      ),
+                    );
                 controller.closed.then((_) => confirmed = false);
               }
             },

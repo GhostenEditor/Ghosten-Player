@@ -23,32 +23,38 @@ class EditPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: title,
-        titleTextStyle: Theme.of(context).textTheme.titleMedium,
-        centerTitle: true,
-        leading: TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(AppLocalizations.of(context)!.buttonCancel),
+    return ScaffoldMessenger(
+      child: Scaffold(
+        appBar: AppBar(
+          title: title,
+          titleTextStyle: Theme.of(context).textTheme.titleMedium,
+          centerTitle: true,
+          leading: Align(
+            alignment: .centerLeft,
+            child: TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(AppLocalizations.of(context)!.buttonCancel),
+            ),
+          ),
+          leadingWidth: 100,
+          backgroundColor: Colors.transparent,
+          bottom: bottom,
+          actions: [
+            if (onResetButtonPressed != null)
+              TextButton(onPressed: onResetButtonPressed, child: Text(AppLocalizations.of(context)!.buttonReset)),
+            if (onConfirmButtonPressed != null)
+              TextButton(
+                onPressed: onConfirmButtonPressed,
+                child: Text(
+                  AppLocalizations.of(context)!.buttonConfirm,
+                  style: const TextStyle(fontWeight: FontWeight.w500),
+                ),
+              ),
+          ],
         ),
         backgroundColor: Colors.transparent,
-        bottom: bottom,
-        actions: [
-          if (onResetButtonPressed != null)
-            TextButton(onPressed: onResetButtonPressed, child: Text(AppLocalizations.of(context)!.buttonReset)),
-          if (onConfirmButtonPressed != null)
-            TextButton(
-              onPressed: onConfirmButtonPressed,
-              child: Text(
-                AppLocalizations.of(context)!.buttonConfirm,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-        ],
+        body: child,
       ),
-      backgroundColor: Colors.transparent,
-      body: child,
     );
   }
 }

@@ -4,7 +4,6 @@ import '../../components/components.dart';
 import '../../extensions/extensions.dart';
 import '../../medias/media_list_theme.dart';
 
-const fontFamily = 'Roboto Condensed';
 const _bottomSheetTheme = BottomSheetThemeData(
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(12))),
 );
@@ -16,19 +15,23 @@ final _actionIconTheme = ActionIconThemeData(
   backButtonIconBuilder: (context) => const Icon(Icons.chevron_left_rounded),
   endDrawerButtonIconBuilder: (context) => const Icon(Icons.more_vert_rounded),
 );
-final lightColorScheme = ColorScheme.fromSeed(seedColor: const Color(0xFF98C2FF));
-final darkColorScheme = ColorScheme.fromSeed(seedColor: const Color(0xFF98C2FF), brightness: Brightness.dark);
-const _drawerTheme = DrawerThemeData(shape: RoundedRectangleBorder(), endShape: RoundedRectangleBorder());
+final lightColorScheme = ColorScheme.fromSeed(seedColor: const Color(0xFFB6C7BE));
+final darkColorScheme = ColorScheme.fromSeed(seedColor: const Color(0xFFB6C7BE), brightness: Brightness.dark);
+const _drawerTheme = DrawerThemeData(shape: RoundedRectangleBorder(), endShape: RoundedRectangleBorder(), width: 360);
 const _scrollbarTheme = ScrollbarThemeData(radius: Radius.circular(10));
 final _lightButtonStyle = ButtonStyle(
   side: WidgetStateProperty.fromMap({
-    WidgetState.focused: BorderSide(width: 3, color: lightColorScheme.inverseSurface, strokeAlign: 2),
+    WidgetState.focused: BorderSide(width: 3, color: lightColorScheme.inverseSurface, strokeAlign: 2.5),
   }),
 );
 final _darkButtonStyle = ButtonStyle(
   side: WidgetStateProperty.fromMap({
-    WidgetState.focused: BorderSide(width: 3, color: darkColorScheme.inverseSurface, strokeAlign: 2),
+    WidgetState.focused: BorderSide(width: 3, color: darkColorScheme.inverseSurface, strokeAlign: 2.5),
   }),
+);
+const _snackBarTheme = SnackBarThemeData(
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
+  elevation: 2,
 );
 
 final lightTheme = ThemeData(
@@ -39,9 +42,9 @@ final lightTheme = ThemeData(
   drawerTheme: _drawerTheme,
   dividerTheme: const DividerThemeData(color: Colors.black12, indent: 16, endIndent: 16),
   dividerColor: Colors.black12,
-  extensions: [tvAppTheme],
+  elevatedButtonTheme: ElevatedButtonThemeData(style: _lightButtonStyle),
+  extensions: const [tvAppTheme],
   filledButtonTheme: FilledButtonThemeData(style: _lightButtonStyle),
-  fontFamily: fontFamily,
   iconButtonTheme: IconButtonThemeData(style: _lightButtonStyle),
   listTileTheme: const ListTileThemeData(
     subtitleTextStyle: TextStyle(fontSize: 12, color: Color(0xFF666666)),
@@ -49,6 +52,7 @@ final lightTheme = ThemeData(
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(6))),
   ),
   scrollbarTheme: _scrollbarTheme,
+  snackBarTheme: _snackBarTheme,
   textButtonTheme: TextButtonThemeData(style: _lightButtonStyle),
   textTheme: const TextTheme(labelSmall: TextStyle(color: Color(0xFF666666))),
 );
@@ -61,9 +65,9 @@ final darkTheme = ThemeData(
   drawerTheme: _drawerTheme,
   dividerTheme: const DividerThemeData(color: Colors.white12, indent: 16, endIndent: 16),
   dividerColor: Colors.white12,
-  extensions: [tvAppTheme],
+  elevatedButtonTheme: ElevatedButtonThemeData(style: _darkButtonStyle),
+  extensions: const [tvAppTheme],
   filledButtonTheme: FilledButtonThemeData(style: _darkButtonStyle),
-  fontFamily: fontFamily,
   iconButtonTheme: IconButtonThemeData(style: _darkButtonStyle),
   listTileTheme: const ListTileThemeData(
     subtitleTextStyle: TextStyle(fontSize: 12, color: Color(0xFFAAAAAA)),
@@ -72,46 +76,34 @@ final darkTheme = ThemeData(
   ),
   scaffoldBackgroundColor: Colors.black,
   scrollbarTheme: _scrollbarTheme,
+  snackBarTheme: _snackBarTheme,
   textButtonTheme: TextButtonThemeData(style: _darkButtonStyle),
   textTheme: const TextTheme(labelSmall: TextStyle(color: Color(0xFFAAAAAA))),
 );
 
-final tvAppTheme = AppTheme(
-  horizontalListTheme: const HorizontalListThemeData(
+const tvAppTheme = AppTheme(
+  horizontalListTheme: HorizontalListThemeData(
     headerPadding: EdgeInsets.only(left: 48, right: 48, top: 32, bottom: 12),
     padding: EdgeInsets.symmetric(horizontal: 48, vertical: 6),
     itemSpacing: 16,
   ),
-  wrapListTheme: const WrapListThemeData(
+  wrapListTheme: WrapListThemeData(
     headerPadding: EdgeInsets.only(left: 48, right: 48, top: 32, bottom: 12),
     padding: EdgeInsets.symmetric(horizontal: 48, vertical: 6),
     spacing: 4,
     runSpacing: 4,
   ),
-  aspectRatioGridTheme: const AspectRatioGridThemeData(crossAxisSpacing: 16, mainAxisSpacing: 16),
-  movieCardTheme: const MediaCardThemeData(minWidth: 160, aspectRatio: 2 / 3, heightExtent: 66),
-  seriesCardTheme: const MediaCardThemeData(minWidth: 160, aspectRatio: 2 / 3, heightExtent: 66),
-  seasonCardTheme: const MediaCardThemeData(minWidth: 160, aspectRatio: 2 / 3, heightExtent: 66),
-  episodeCardTheme: const MediaCardThemeData(minWidth: 204, aspectRatio: 16 / 9, heightExtent: 82),
-  castCardTheme: const MediaCardThemeData(minWidth: 107, aspectRatio: 2 / 3, heightExtent: 80),
-  crewCardTheme: const MediaCardThemeData(minWidth: 107, aspectRatio: 2 / 3, heightExtent: 80),
-  settingPageTheme: SettingPageThemeData(
-    appbarTheme: (context) => AppBarThemeData(
-      surfaceTintColor: Colors.transparent,
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
-      titleSpacing: 24,
-      toolbarHeight: 80,
-      titleTextStyle: Theme.of(context).textTheme.titleLarge!
-          .copyWith(fontWeight: FontWeight.w500, overflow: TextOverflow.ellipsis),
-      actionsPadding: const EdgeInsets.only(right: 8),
-    ),
-    backgroundColor: (context) => Theme.of(context).colorScheme.surfaceContainerLow,
-    automaticallyImplyLeading: false,
-    contentPadding: const EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 32),
-  ),
-  channelsContentPadding: const EdgeInsets.symmetric(horizontal: 48),
-  channelsListViewPadding: const EdgeInsets.symmetric(horizontal: 6),
-  mediaListTheme: const MediaListThemeData(
+  aspectRatioGridTheme: AspectRatioGridThemeData(crossAxisSpacing: 16, mainAxisSpacing: 16),
+  movieCardTheme: MediaCardThemeData(minWidth: 160, aspectRatio: 2 / 3, heightExtent: 66),
+  seriesCardTheme: MediaCardThemeData(minWidth: 160, aspectRatio: 2 / 3, heightExtent: 66),
+  seasonCardTheme: MediaCardThemeData(minWidth: 160, aspectRatio: 2 / 3, heightExtent: 66),
+  episodeCardTheme: MediaCardThemeData(minWidth: 204, aspectRatio: 16 / 9, heightExtent: 82),
+  castCardTheme: MediaCardThemeData(minWidth: 107, aspectRatio: 2 / 3, heightExtent: 80),
+  crewCardTheme: MediaCardThemeData(minWidth: 107, aspectRatio: 2 / 3, heightExtent: 80),
+  settingPageTheme: SettingPageThemeData(contentPadding: EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 32)),
+  channelsContentPadding: EdgeInsets.symmetric(horizontal: 48),
+  channelsListViewPadding: EdgeInsets.symmetric(horizontal: 6),
+  mediaListTheme: MediaListThemeData(
     automaticallyImplyLeading: false,
     titlePadding: EdgeInsets.only(left: 48, right: 48, top: 32, bottom: 12),
     expandedHeight: 100,
@@ -119,12 +111,5 @@ final tvAppTheme = AppTheme(
     titleTextStyle: TextStyle(fontSize: 36.0, fontWeight: FontWeight.w400),
     contentPadding: EdgeInsets.symmetric(horizontal: 48, vertical: 24),
   ),
-  numberPickerTheme: const NumberPickerThemeData(alwaysShow: false),
-  functions: const Functions(
-    autoForceLandscape: false,
-    autoPip: false,
-    shortcuts: true,
-    menuShortcuts: false,
-    displaySize: false,
-  ),
+  numberPickerTheme: NumberPickerThemeData(alwaysShow: false),
 );

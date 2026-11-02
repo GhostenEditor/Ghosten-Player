@@ -42,7 +42,6 @@ class PlayerZoomWrapperState extends State<PlayerZoomWrapper> {
   @override
   void dispose() {
     _controller.dispose();
-    widget.controller.setTransform([1, 0, 0, 0, 1, 0, 0, 0, 1]);
     super.dispose();
   }
 

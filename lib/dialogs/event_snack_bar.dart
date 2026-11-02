@@ -1,21 +1,16 @@
 import 'package:api/api.dart';
 import 'package:flutter/material.dart';
-import 'package:rxdart/rxdart.dart';
 
 import '../adaptive/adaptive.dart';
 import '../components/components.dart ';
 
-class EventSnackBar extends StatefulWidget {
-  const EventSnackBar({super.key});
+enum _SnackStatus { done, error, pause, loading }
 
-  @override
-  State<EventSnackBar> createState() => _EventSnackBarState();
-}
+class EventSnackBar extends StatelessWidget {
+  const EventSnackBar({super.key, required this.stream});
 
-class _EventSnackBarState extends State<EventSnackBar> {
-  static final _stream = ReplaySubject<ScheduleTaskEventData>(maxSize: 1)
-    ..addStream(Api.scheduleTaskEvent())
-    ..stream.asBroadcastStream();
+  final Stream<ScheduleTaskEventData> stream;
+  static ScheduleTaskEventData? _initialData;
 
   @override
   Widget build(BuildContext context) {
@@ -24,97 +19,108 @@ class _EventSnackBarState extends State<EventSnackBar> {
         Brightness.dark => lightTheme,
         Brightness.light => darkTheme,
       },
-      child: StreamBuilderHandler(
-        stream: _stream,
+      child: StreamBuilder(
+        initialData: _initialData,
+        stream: stream,
         builder: (context, snapshot) {
-          final ScheduleTaskEventData data = snapshot.requireData;
-          switch (data.type) {
-            case ScheduleTaskEventType.syncLibrary:
-              final d = data.data as List<dynamic>;
-              switch (data.subType) {
-                case ScheduleTaskEventStatus.idle:
-                  return Text('媒体库同步暂停', style: Theme.of(context).textTheme.titleSmall!.copyWith(fontWeight: .bold));
-                case ScheduleTaskEventStatus.update:
-                  return Row(
-                    spacing: 16,
-                    children: [
-                      const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 3)),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: .stretch,
-                          spacing: 2,
-                          children: [
-                            Text('媒体库同步中', style: Theme.of(context).textTheme.titleSmall!.copyWith(fontWeight: .bold)),
-                            Text('已同步 ${d[0]} 个文件', style: Theme.of(context).textTheme.bodySmall),
-                          ],
-                        ),
-                      ),
-                    ],
-                  );
-                case ScheduleTaskEventStatus.done:
-                  return Column(
-                    crossAxisAlignment: .stretch,
-                    spacing: 2,
-                    children: [
-                      Text('媒体库同步完成', style: Theme.of(context).textTheme.titleSmall!.copyWith(fontWeight: .bold)),
-                      Text('已同步 ${d[0]} 个文件', style: Theme.of(context).textTheme.bodySmall),
-                    ],
-                  );
-                case ScheduleTaskEventStatus.error:
-                  return Column(
-                    crossAxisAlignment: .stretch,
-                    spacing: 2,
-                    children: [
-                      Text('媒体库同步失败', style: Theme.of(context).textTheme.titleSmall!.copyWith(fontWeight: .bold)),
-                      Text('已同步 ${d[0]} 个文件', style: Theme.of(context).textTheme.bodySmall),
-                    ],
-                  );
-              }
-            case ScheduleTaskEventType.scrapeLibrary:
-              final d = data.data as List<dynamic>;
-              switch (data.subType) {
-                case ScheduleTaskEventStatus.idle:
-                  return Text('媒体库刮削暂停', style: Theme.of(context).textTheme.titleSmall!.copyWith(fontWeight: .bold));
-                case ScheduleTaskEventStatus.update:
-                  return Row(
-                    spacing: 16,
-                    children: [
-                      const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 3)),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: .stretch,
-                          spacing: 2,
-                          children: [
-                            Text(
-                              '媒体库刮削同步中',
-                              style: Theme.of(context).textTheme.titleSmall!.copyWith(fontWeight: .bold),
-                            ),
-                            Text('正在刮削 ${d[1]}', style: Theme.of(context).textTheme.bodySmall),
-                          ],
-                        ),
-                      ),
-                    ],
-                  );
-                case ScheduleTaskEventStatus.done:
-                  return Column(
-                    crossAxisAlignment: .stretch,
-                    spacing: 2,
-                    children: [
-                      Text('媒体库刮削完成', style: Theme.of(context).textTheme.titleSmall!.copyWith(fontWeight: .bold)),
-                      Text('已刮削 ${d[0]} 个媒体', style: Theme.of(context).textTheme.bodySmall),
-                    ],
-                  );
-                case ScheduleTaskEventStatus.error:
-                  return Column(
-                    crossAxisAlignment: .stretch,
-                    spacing: 2,
-                    children: [
-                      Text('媒体库刮削失败', style: Theme.of(context).textTheme.titleSmall!.copyWith(fontWeight: .bold)),
-                      Text('已刮削 ${d[0]} 个媒体', style: Theme.of(context).textTheme.bodySmall),
-                    ],
-                  );
-              }
+          late _SnackStatus status;
+          Widget? title;
+          Widget? content;
+
+          if (snapshot.hasData) {
+            final ScheduleTaskEventData data = snapshot.requireData;
+            _initialData = data;
+            switch (data.type) {
+              case ScheduleTaskEventType.syncLibrary:
+                final d = data.data as List<dynamic>;
+                switch (data.subType) {
+                  case ScheduleTaskEventStatus.idle:
+                    status = _SnackStatus.pause;
+                    title = const Text('媒体库同步开始');
+                  case ScheduleTaskEventStatus.update:
+                    status = _SnackStatus.loading;
+                    title = const Text('媒体库同步中');
+                    content = Text('已同步 ${d[0]} 个文件');
+                  case ScheduleTaskEventStatus.done:
+                    status = _SnackStatus.done;
+                    title = const Text('媒体库同步完成');
+                    content = Text('已同步 ${d[0]} 个文件');
+                  case ScheduleTaskEventStatus.error:
+                    status = _SnackStatus.error;
+                    title = const Text('媒体库同步失败');
+                    content = Text('已同步 ${d[0]} 个文件');
+                }
+              case ScheduleTaskEventType.scrapeLibrary:
+                final d = data.data as List<dynamic>;
+                switch (data.subType) {
+                  case ScheduleTaskEventStatus.idle:
+                    status = _SnackStatus.pause;
+                    title = const Text('媒体库刮削开始');
+                  case ScheduleTaskEventStatus.update:
+                    status = _SnackStatus.loading;
+                    title = const Text('媒体库刮削同步中');
+                    content = Text('正在刮削 ${d[1]}');
+                  case ScheduleTaskEventStatus.done:
+                    status = _SnackStatus.done;
+                    title = const Text('媒体库刮削完成');
+                    content = Text('已刮削 ${d[0]} 个媒体');
+                  case ScheduleTaskEventStatus.error:
+                    status = _SnackStatus.error;
+                    title = const Text('媒体库刮削失败');
+                    content = Text('已刮削 ${d[0]} 个媒体');
+                }
+              case ScheduleTaskEventType.palette:
+                final count = data.data as int;
+                switch (data.subType) {
+                  case ScheduleTaskEventStatus.idle:
+                    status = _SnackStatus.pause;
+                    title = const Text('获取主题色开始');
+                  case ScheduleTaskEventStatus.update:
+                    status = _SnackStatus.loading;
+                    title = const Text('获取主题色中');
+                    content = Text('已获取 $count');
+                  case ScheduleTaskEventStatus.done:
+                    status = _SnackStatus.done;
+                    title = const Text('获取主题色完成');
+                    content = Text('已获取 $count');
+                  case ScheduleTaskEventStatus.error:
+                    status = _SnackStatus.error;
+                    title = const Text('媒体库刮削失败');
+                    content = Text('已获取 $count');
+                }
+            }
+          } else if (snapshot.hasError) {
+            status = _SnackStatus.error;
+            content = ErrorMessage(error: snapshot.error);
+          } else {
+            status = .loading;
           }
+
+          return Row(
+            spacing: 16,
+            children: [
+              switch (status) {
+                _SnackStatus.done => const Icon(Icons.check_circle, color: Colors.lightGreen),
+                _SnackStatus.error => Icon(Icons.error, color: Theme.of(context).colorScheme.error),
+                _SnackStatus.pause => const Icon(Icons.pause_rounded),
+                _SnackStatus.loading => const SizedBox.square(
+                  dimension: 16,
+                  child: CircularProgressIndicator(strokeWidth: 3),
+                ),
+              },
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: .stretch,
+                  spacing: 2,
+                  children: [
+                    if (title != null) DefaultTextStyle(style: Theme.of(context).textTheme.titleSmall!, child: title),
+                    if (content != null)
+                      DefaultTextStyle(style: Theme.of(context).textTheme.bodySmall!, child: content),
+                  ],
+                ),
+              ),
+            ],
+          );
         },
       ),
     );

@@ -18,7 +18,6 @@ class AppTheme extends ThemeExtension<AppTheme> {
     required this.wrapListTheme,
     required this.settingPageTheme,
     required this.mediaListTheme,
-    required this.functions,
     required this.numberPickerTheme,
   });
 
@@ -36,7 +35,6 @@ class AppTheme extends ThemeExtension<AppTheme> {
   final MediaCardThemeData crewCardTheme;
   final EdgeInsets channelsContentPadding;
   final EdgeInsets channelsListViewPadding;
-  final Functions functions;
 
   @override
   AppTheme copyWith({EdgeInsets? settingPageContentPadding}) {
@@ -50,20 +48,4 @@ class AppTheme extends ThemeExtension<AppTheme> {
     }
     return this;
   }
-}
-
-class Functions {
-  const Functions({
-    required this.autoForceLandscape,
-    required this.autoPip,
-    required this.shortcuts,
-    required this.menuShortcuts,
-    required this.displaySize,
-  });
-
-  final bool autoForceLandscape;
-  final bool autoPip;
-  final bool shortcuts;
-  final bool menuShortcuts;
-  final bool displaySize;
 }

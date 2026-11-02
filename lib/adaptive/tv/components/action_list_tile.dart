@@ -69,32 +69,14 @@ class _ActionListTileState extends State<ActionListTile> with SingleTickerProvid
                 ? ActionPane(
                     motion: const BehindMotion(),
                     extentRatio: (56 * actions.length) / constraints.maxWidth,
-                    children: actions.reversed
-                        .map(
-                          (action) => Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            child: Center(
-                              child: IconButton.filledTonal(icon: action.leading!, onPressed: action.onTap),
-                            ),
-                          ),
-                        )
-                        .toList(),
+                    children: actions.reversed.map(_buildAction).toList(),
                   )
                 : null,
             endActionPane: actions.isNotEmpty && widget.actionSide == ActionSide.end
                 ? ActionPane(
                     extentRatio: (56 * actions.length) / constraints.maxWidth,
                     motion: const BehindMotion(),
-                    children: actions
-                        .map(
-                          (action) => Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            child: Center(
-                              child: IconButton.filledTonal(icon: action.leading!, onPressed: action.onTap),
-                            ),
-                          ),
-                        )
-                        .toList(),
+                    children: actions.map(_buildAction).toList(),
                   )
                 : null,
             child: Actions(
@@ -156,6 +138,23 @@ class _ActionListTileState extends State<ActionListTile> with SingleTickerProvid
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildAction(ListTile action) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Center(
+        child: IconButton.filledTonal(
+          icon: action.leading!,
+          onPressed: action.enabled
+              ? () {
+                  action.onTap?.call();
+                  _controller.close(duration: const Duration(milliseconds: 400));
+                }
+              : null,
+        ),
       ),
     );
   }

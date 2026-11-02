@@ -30,49 +30,49 @@ class _SearchBoxState extends State<SearchBox> {
 
   @override
   Widget build(BuildContext context) {
-    return IconButtonTheme(
-      data: IconButtonThemeData(
-        style: IconButton.styleFrom(
-          padding: EdgeInsets.zero,
-          iconSize: 16,
-          minimumSize: Size.zero,
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    return TextField(
+      autofocus: widget.autofocus,
+      focusNode: _focusNode,
+      controller: _searchController,
+      textInputAction: TextInputAction.search,
+      decoration: InputDecoration(
+        border: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(50)),
+          borderSide: BorderSide.none,
         ),
-      ),
-      child: TextField(
-        autofocus: widget.autofocus,
-        focusNode: _focusNode,
-        controller: _searchController,
-        textInputAction: TextInputAction.search,
-        decoration: InputDecoration(
-          border: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(50)),
-            borderSide: BorderSide.none,
-          ),
-          isDense: true,
-          filled: true,
-          hintText: AppLocalizations.of(context)!.searchHint,
-          hintStyle: Theme.of(context).textTheme.labelMedium,
-          contentPadding: EdgeInsets.zero,
-          prefixIcon: const Icon(Icons.search),
-          prefixIconConstraints: const BoxConstraints(maxHeight: 32, minWidth: 32),
-          suffixIconConstraints: const BoxConstraints(minHeight: 36, minWidth: 36),
-          suffixIcon: _filter.isEmpty
-              ? const Icon(null)
-              : IconButton(
-                  focusNode: _clearFocusNode,
-                  onPressed: () {
-                    _searchController.clear();
-                    setState(() {});
-                  },
-                  icon: const Icon(Icons.clear),
-                ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(50),
+          borderSide: BorderSide(color: colorScheme.outlineVariant),
         ),
-        onTap: () {},
-        onChanged: (_) {},
-        onTapOutside: (_) => _focusNode.unfocus(),
-        onSubmitted: widget.onSubmitted,
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(50),
+          borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
+        ),
+        isDense: true,
+        visualDensity: .compact,
+        filled: true,
+        hintText: AppLocalizations.of(context)!.searchHint,
+        hintStyle: Theme.of(context).textTheme.labelMedium,
+        prefixIcon: const Icon(Icons.search),
+        suffixIcon: _filter.isEmpty
+            ? const Icon(null)
+            : IconButton(
+                focusNode: _clearFocusNode,
+                onPressed: () {
+                  _searchController.clear();
+                  widget.onSubmitted?.call(_searchController.text);
+                  setState(() {});
+                },
+                style: const ButtonStyle(tapTargetSize: .shrinkWrap),
+                icon: const Icon(Icons.clear),
+              ),
       ),
+      onChanged: (_) {
+        setState(() {});
+      },
+      onTapOutside: (_) => _focusNode.unfocus(),
+      onSubmitted: widget.onSubmitted,
     );
   }
 }

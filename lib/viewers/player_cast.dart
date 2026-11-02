@@ -14,7 +14,6 @@ import 'package:video_player/player.dart';
 
 import '../components/components.dart ';
 import '../models/models.dart';
-import '../platform_api.dart';
 import '../utils/uri.dart';
 import 'cast_adaptor.dart';
 
@@ -154,7 +153,7 @@ class _PlayerCastState extends State<PlayerCast> {
                                                       Text(
                                                         currentItem.title!,
                                                         style: Theme.of(context).textTheme.titleLarge!
-                                                            .copyWith(fontWeight: FontWeight.bold),
+                                                            .copyWith(fontWeight: FontWeight.w500),
                                                         overflow: TextOverflow.ellipsis,
                                                       ),
                                                     if (currentItem.description != null)
@@ -393,10 +392,7 @@ class _PlayerCastState extends State<PlayerCast> {
     }
     final PlayerFileInfo playlistItem = await _onGetPlayBackInfo(widget.data.playlist[fixedIndex]);
     if (playlistItem.url.host == '127.0.0.1') {
-      await device.setUrl(
-        playlistItem.url.replace(host: await PlatformApi.localIpAddress()),
-        title: currentItem.title ?? '',
-      );
+      await device.setUrl(playlistItem.url.replace(host: await Api.localIpAddress()), title: currentItem.title ?? '');
     } else {
       await device.setUrl(playlistItem.url);
     }
@@ -615,7 +611,7 @@ class _BlurredBackground extends StatefulWidget {
 }
 
 class _BlurredBackgroundState extends State<_BlurredBackground> with SingleTickerProviderStateMixin {
-  late final ui.Size size = MediaQuery.of(context).size;
+  late final ui.Size size = MediaQuery.sizeOf(context);
   final blurSize = 50.0;
   final scaleSize = 4.0;
   Offset offset = Offset.zero;

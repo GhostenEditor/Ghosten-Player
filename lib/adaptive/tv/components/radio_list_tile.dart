@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+import 'package:flutter/material.dart' as m;
 import 'package:flutter/material.dart' hide RadioListTile;
 
 import '_fluid_focusable.dart';
@@ -54,7 +56,7 @@ class _RadioListTileState<T> extends State<RadioListTile<T>> {
     return FluidFocusable(
       focusNode: _focusNode,
       backgroundColor: Colors.transparent,
-      child: RadioListTile(
+      child: m.RadioListTile(
         value: widget.value,
         autofocus: widget.autofocus,
         selected: widget.selected,

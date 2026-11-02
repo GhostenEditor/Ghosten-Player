@@ -8,7 +8,7 @@ import 'package:video_player/player.dart';
 import '../adaptive/adaptive.dart';
 import '../components/components.dart ';
 import '../models/models.dart';
-import '../providers/user_config.dart';
+import '../providers/player.dart';
 import '../utils/utils.dart';
 
 class SingletonPlayer extends StatefulWidget {
@@ -93,36 +93,29 @@ class _SingletonPlayerState extends State<SingletonPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    final UserConfig userConfig = context.read<UserConfig>();
-    return Stack(
-      children: [
-        PlayerPlatformView(
-          playerType: userConfig.playerType,
-          mpvVersion: userConfig.mpvVersion,
-          autoPip: userConfig.autoPip,
-          initialized: () async {
-            try {
-              assert(widget.data.activeIndex.clamp(0, widget.data.playlist.length - 1) == widget.data.activeIndex);
-              _controller.setPlaylist(widget.data.playlist);
-              await _controller.next(widget.data.activeIndex);
-              await _controller.play();
-            } catch (e) {
-              _controller.playlistError.value = e;
-            }
-          },
-          initializeFailed: (e) => _controller.fatalError.value = e.message,
-        ),
-        Theme(
-          data: darkTheme,
-          child: ListenableBuilder(
-            listenable: _controller.playlistError,
-            builder: (context, child) => _controller.playlistError.value == null
-                ? child!
-                : Center(child: ErrorMessage(error: _controller.playlistError.value)),
-            child: ThemeBuilder(widget.data.themeColor, builder: (_) => PlayerControls(controller: _controller)),
-          ),
-        ),
-      ],
+    final int activeIndex = widget.data.activeIndex;
+    final List<PlaylistItem> playlist = widget.data.playlist;
+    final PlayerConfig playerConfig = context.read<PlayerConfig>();
+    final String languageCode = Localizations.localeOf(context).languageCode;
+    return ThemeBuilder(
+      widget.data.themeColor,
+      builder: (context) => PlayerPlatformView(
+        playerType: playerConfig.playerType,
+        mpvVersion: playerConfig.mpvVersion,
+        autoPip: playerConfig.autoPip,
+        initialized: () async {
+          _controller.setPlaylist(playlist);
+          await _controller.next(activeIndex);
+          await _controller.play();
+        },
+        initializeFailed: (e) => _controller.fatalError.value = e.message,
+        extensionRendererMode: playerConfig.extensionRendererMode,
+        enableDecoderFallback: playerConfig.enableDecoderFallback,
+        subtitleStyle: playerConfig.subtitleSettings,
+        preferredSubtitleLanguage: playerConfig.preferredSubtitleLanguage ?? languageCode,
+        preferredAudioLanguage: playerConfig.preferredAudioLanguage ?? languageCode,
+        controls: PlayerControls(controller: _controller),
+      ),
     );
   }
 }

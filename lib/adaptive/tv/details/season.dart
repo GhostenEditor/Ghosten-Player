@@ -2,151 +2,126 @@ import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-import '../../../components/components.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../subtitles/season.dart';
 import '../../../utils/utils.dart';
+import '../../../view_models/view_models.dart';
 import '../components/image_card.dart';
 import 'components/cast_crew.dart';
 
-class SeasonPage extends StatefulWidget {
-  const SeasonPage({super.key, required this.id, this.data});
+class SeasonPage extends StatelessWidget {
+  const SeasonPage({super.key});
 
-  final dynamic id;
-  final TVSeason? data;
-
-  @override
-  State<SeasonPage> createState() => _SeasonPageState();
-}
-
-class _SeasonPageState extends State<SeasonPage> {
   @override
   Widget build(BuildContext context) {
-    return FutureBuilderHandler(
-      future: Api.tvSeasonQueryById(widget.id),
-      initialData: widget.data,
-      builder: (context, snapshot) {
-        final TVSeason item = snapshot.requireData;
-        return CustomScrollView(
-          scrollCacheExtent: const ScrollCacheExtent.pixels(1000),
-          slivers: [
-            SliverPadding(
-              padding: const EdgeInsets.only(top: 32, left: 8, right: 8, bottom: 16),
-              sliver: SliverToBoxAdapter(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 16,
-                  children: [
-                    ImageCard(src: item.poster, width: 120, height: 180, onTap: () {}),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            item.title ?? '',
-                            style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                          Row(
-                            children: [
-                              Expanded(child: SeasonSubtitle(item: item, iconSize: 14)),
-                              if (item.watched)
-                                IconButton.filled(
-                                  icon: const Icon(Icons.check_rounded, size: 16),
-                                  visualDensity: VisualDensity.compact,
-                                  padding: EdgeInsets.zero,
-                                  style: IconButton.styleFrom(minimumSize: const Size.square(32)),
-                                  onPressed: () async {
-                                    await Api.markWatched(MediaType.season, item.id, !item.watched);
-                                    if (context.mounted) {
-                                      setState(() {});
-                                    }
-                                  },
-                                )
-                              else
-                                IconButton.filledTonal(
-                                  icon: const Icon(Icons.check_rounded, size: 16),
-                                  visualDensity: VisualDensity.compact,
-                                  padding: EdgeInsets.zero,
-                                  style: IconButton.styleFrom(minimumSize: const Size.square(32)),
-                                  onPressed: () async {
-                                    await Api.markWatched(MediaType.season, item.id, !item.watched);
-                                    if (context.mounted) {
-                                      setState(() {});
-                                    }
-                                  },
-                                ),
-                              if (item.favorite)
-                                IconButton.filled(
-                                  icon: const Icon(Icons.favorite_rounded, size: 16),
-                                  visualDensity: VisualDensity.compact,
-                                  padding: EdgeInsets.zero,
-                                  style: IconButton.styleFrom(minimumSize: const Size.square(32)),
-                                  onPressed: () async {
-                                    await Api.markFavorite(MediaType.season, item.id, !item.favorite);
-                                    if (context.mounted) {
-                                      setState(() {});
-                                    }
-                                  },
-                                )
-                              else
-                                IconButton.filledTonal(
-                                  icon: const Icon(Icons.favorite_outline_rounded, size: 16),
-                                  visualDensity: VisualDensity.compact,
-                                  padding: EdgeInsets.zero,
-                                  style: IconButton.styleFrom(minimumSize: const Size.square(32)),
-                                  onPressed: () async {
-                                    await Api.markFavorite(MediaType.season, item.id, !item.favorite);
-                                    if (context.mounted) {
-                                      setState(() {});
-                                    }
-                                  },
-                                ),
-                            ],
-                          ),
-                          Text(
-                            item.overview ?? AppLocalizations.of(context)!.noOverview,
-                            style: Theme.of(context).textTheme.bodyMedium,
-                            textAlign: TextAlign.justify,
-                            maxLines: 5,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
+    return ViewModelConsumer<SeasonViewModel, TVSeason>(
+      useScaffold: true,
+      builder: (context, item, _) => CustomScrollView(
+        scrollCacheExtent: const ScrollCacheExtent.pixels(1000),
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.only(top: 32, left: 8, right: 8, bottom: 16),
+            sliver: SliverToBoxAdapter(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 16,
+                children: [
+                  ImageCard(
+                    src: item.poster,
+                    width: 120,
+                    height: 180,
+                    onTap: item.poster != null
+                        ? () => context.pushNamed(.imageViewer, arguments: {'url': Uri.parse(item.poster!)})
+                        : null,
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          item.title ?? '',
+                          style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        Row(
+                          children: [
+                            Expanded(child: SeasonSubtitle(item: item, iconSize: 14)),
+                            if (item.watched)
+                              IconButton.filled(
+                                icon: const Icon(Icons.check_rounded, size: 16),
+                                visualDensity: VisualDensity.compact,
+                                padding: EdgeInsets.zero,
+                                style: IconButton.styleFrom(minimumSize: const Size.square(32)),
+                                onPressed: () => Api.markWatched(MediaType.season, item.id, !item.watched),
+                              )
+                            else
+                              IconButton.filledTonal(
+                                icon: const Icon(Icons.check_rounded, size: 16),
+                                visualDensity: VisualDensity.compact,
+                                padding: EdgeInsets.zero,
+                                style: IconButton.styleFrom(minimumSize: const Size.square(32)),
+                                onPressed: () => Api.markWatched(MediaType.season, item.id, !item.watched),
+                              ),
+                            if (item.favorite)
+                              IconButton.filled(
+                                icon: const Icon(Icons.favorite_rounded, size: 16),
+                                visualDensity: VisualDensity.compact,
+                                padding: EdgeInsets.zero,
+                                style: IconButton.styleFrom(minimumSize: const Size.square(32)),
+                                onPressed: () => Api.markFavorite(MediaType.season, item.id, !item.favorite),
+                              )
+                            else
+                              IconButton.filledTonal(
+                                icon: const Icon(Icons.favorite_outline_rounded, size: 16),
+                                visualDensity: VisualDensity.compact,
+                                padding: EdgeInsets.zero,
+                                style: IconButton.styleFrom(minimumSize: const Size.square(32)),
+                                onPressed: () => Api.markFavorite(MediaType.season, item.id, !item.favorite),
+                              ),
+                          ],
+                        ),
+                        Text(
+                          item.overview ?? AppLocalizations.of(context)!.noOverview,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          textAlign: TextAlign.justify,
+                          maxLines: 5,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-            SliverPadding(
-              padding: const EdgeInsets.all(8),
-              sliver: SliverFixedExtentList.builder(
-                itemCount: item.episodes.length,
-                itemExtent: 156,
-                itemBuilder: (context, index) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: _EpisodeListTile(
-                    key: UniqueKey(),
-                    autofocus: index == 0,
-                    episode: item.episodes[index],
-                    width: 249,
-                    height: 140,
-                    onTap: () => toMediaPlayer(context, .season, item.id),
-                    onTapMore: () => context.pushNamed(
-                      .detailEpisode,
-                      arguments: {'id': item.episodes[index].id, 'data': item.episodes[index]},
-                    ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.all(8),
+            sliver: SliverFixedExtentList.builder(
+              itemCount: item.episodes.length,
+              itemExtent: 156,
+              itemBuilder: (context, index) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: _EpisodeListTile(
+                  key: UniqueKey(),
+                  autofocus: index == 0,
+                  episode: item.episodes[index],
+                  width: 249,
+                  height: 140,
+                  onTap: () => toMediaPlayer(context, .season, item.id),
+                  onTapMore: () => context.pushNamed(
+                    .detailEpisode,
+                    arguments: {'id': item.episodes[index].id, 'data': item.episodes[index]},
                   ),
                 ),
               ),
             ),
-            CastCrewTitle(mediaCast: item.mediaCast, mediaCrew: item.mediaCrew),
-            SliverPadding(
-              padding: const EdgeInsets.all(8),
-              sliver: CastCrewInner(mediaCast: item.mediaCast, mediaCrew: item.mediaCrew, type: MediaType.season),
-            ),
-          ],
-        );
-      },
+          ),
+          CastCrewTitle(mediaCast: item.mediaCast, mediaCrew: item.mediaCrew),
+          SliverPadding(
+            padding: const EdgeInsets.all(8),
+            sliver: CastCrewInner(mediaCast: item.mediaCast, mediaCrew: item.mediaCrew, type: MediaType.season),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,6 +1,8 @@
+import 'dart:async';
+
 import 'package:api/api.dart';
 import 'package:flutter/material.dart' hide ListTile, TextFormField;
-import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:provider/provider.dart';
 import 'package:video_player/player.dart';
 
 import '../../components/components.dart';
@@ -8,6 +10,8 @@ import '../../l10n/app_localizations.dart';
 import '../../utils/utils.dart';
 import '../../validators/validators.dart';
 import '../adaptive/adaptive.dart';
+import '../menus/subtitle.dart';
+import '../view_models/view_models.dart';
 
 class SubtitleManager extends StatefulWidget {
   const SubtitleManager({super.key, required this.fileId});
@@ -25,70 +29,69 @@ class _SubtitleManagerState extends State<SubtitleManager> {
       title: Text(AppLocalizations.of(context)!.buttonSubtitle),
       actions: [
         IconButton(
-          onPressed: () async {
-            final Object? subtitle = await context.pushNamed(.subtitleAdd);
-            if (subtitle is SubtitleData && context.mounted) {
-              final AsyncSnapshot<void>? resp = await showNotification(context, Api.subtitleInsert(widget.fileId, subtitle));
-              if (resp?.error == null && context.mounted) {
-                setState(() {});
-              }
-            }
-          },
+          onPressed: () => context.pushNamed(.subtitleAdd, arguments: widget.fileId),
           icon: const Icon(Icons.add),
         ),
       ],
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return FutureBuilderHandler(
-            future: Api.subtitleQueryById(widget.fileId),
-            builder: (context, snapshot) => snapshot.requireData.isNotEmpty
-                ? ListView.builder(
-                    itemCount: snapshot.requireData.length,
-                    itemBuilder: (context, index) {
-                      final SubtitleData item = snapshot.requireData[index];
-                      return Slidable(
-                        endActionPane: ActionPane(
-                          extentRatio: 48 / constraints.maxWidth,
-                          motion: const BehindMotion(),
-                          children: [
-                            IconButton(
-                              onPressed: () async {
-                                final bool? confirm = await showConfirm(
-                                  context,
-                                  AppLocalizations.of(context)!.deleteConfirmText,
-                                );
-                                if (confirm != true || !context.mounted) {
-                                  return;
-                                }
-                                final AsyncSnapshot<void>? resp = await showNotification(context, Api.subtitleDeleteById(item.id));
-                                if (resp?.error == null && context.mounted) {
-                                  setState(() {});
-                                }
-                              },
-                              icon: const Icon(Icons.delete_outline_rounded),
-                            ),
-                          ],
-                        ),
-                        child: ListTile(
-                          leading: Text(item.mimeType.toString()),
-                          trailing: Text(item.language ?? ''),
-                          title: Text(item.label ?? ''),
-                        ),
-                      );
-                    },
-                  )
-                : const NoData(),
-          );
-        },
+      child: ListViewModelConsumer<SubtitleListViewModel, SubtitleData>(
+        builder: (context, items, _) => ListView.builder(
+          itemCount: items.length,
+          itemBuilder: (context, index) {
+            final SubtitleData item = items[index];
+            return ActionListTile(
+              trailing: Text(item.mimeType.name.toUpperCase()),
+              title: Text(item.label ?? ''),
+              subtitle: item.language != null ? Text(item.language!) : null,
+              actions: SubtitleMenu(item),
+            );
+          },
+        ),
       ),
     );
   }
 }
 
-class SubtitleDialog extends StatefulWidget {
-  const SubtitleDialog({super.key, this.subtitle});
+class SubtitleListViewModel extends ListViewModelBase<SubtitleData> {
+  SubtitleListViewModel({required this.fileId}) : snapshot = const .waiting() {
+    _subscription = EventDispatcher.where(type: .subtitle).listen((_) => load());
+  }
 
-  final SubtitleData? subtitle;
+  StreamSubscription<EventData>? _subscription;
+  final String fileId;
+
+  @override
+  AsyncSnapshot<List<SubtitleData>> snapshot;
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Future<void> load() async {
+    try {
+      final List<SubtitleData> data = await Api.subtitleQueryById(fileId);
+      snapshot = AsyncSnapshot.withData(.done, data);
+    } catch (e) {
+      snapshot = AsyncSnapshot.withError(.done, e);
+    }
+    notifyListeners();
+  }
+
+  @override
+  Widget build() {
+    return ChangeNotifierProvider(
+      create: (_) => this,
+      child: SubtitleManager(fileId: fileId),
+    );
+  }
+}
+
+class SubtitleDialog extends StatefulWidget {
+  const SubtitleDialog({super.key, required this.fileId});
+
+  final String fileId;
 
   @override
   State<SubtitleDialog> createState() => _SubtitleDialogState();
@@ -112,17 +115,24 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
   Widget build(BuildContext context) {
     return EditPage(
       title: Text(AppLocalizations.of(context)!.buttonSubtitle),
-      onConfirmButtonPressed: () {
+      onConfirmButtonPressed: () async {
         if (_formKey.currentState!.validate() && _mimeType != null) {
-          Navigator.of(context).pop(
-            SubtitleData(
-              url: _controller.text,
-              mimeType: _mimeType!,
-              language: _language,
-              label: _filename,
-              selected: selected,
+          final AsyncSnapshot<void>? resp = await showNotification(
+            context,
+            Api.subtitleInsert(
+              widget.fileId,
+              SubtitleData(
+                url: _controller.text,
+                mimeType: _mimeType!,
+                language: _language,
+                label: _filename,
+                selected: selected,
+              ),
             ),
           );
+          if (resp?.error == null && context.mounted) {
+            Navigator.pop(context);
+          }
         }
       },
       child: Form(
@@ -154,7 +164,6 @@ class _SubtitleDialogState extends State<SubtitleDialog> {
                     }
                   },
                 ),
-                hintText: widget.subtitle?.label?.toString(),
                 isDense: true,
                 labelText: AppLocalizations.of(context)!.subtitleFormItemLabelUrl,
               ),

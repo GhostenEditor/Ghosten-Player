@@ -2,10 +2,12 @@ import 'package:animations/animations.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import '../adaptive/adaptive.dart';
 import '../platform_api.dart';
+import '../providers/player.dart';
 
 extension NavigatorExtension on BuildContext {
   Future<T?> pushNamed<T extends Object?>(RouteName routeName, {Object? arguments}) {
@@ -54,57 +56,7 @@ Future<T?> _resolveRoute<T extends Object?>(
   RouteName routeName,
   Future<dynamic> Function(NavigatorState navigatorState) runner,
 ) async {
-  NavigatorState state = Navigator.of(context);
-
-  if (kIsTV) {
-    switch (routeName) {
-      case .player:
-      case .livePlayer:
-      case .castPlayer:
-      case .castSearcher:
-      case .liveEdit:
-      case .storagePicker:
-      case .imageViewer:
-      case .detailSeries:
-      case .detailSeries2:
-      case .detailSeason:
-      case .detailEpisode:
-      case .detailMovie:
-      case .search:
-      case .scrape:
-      case .media:
-      case .subtitleAdd:
-      case .metadataSeries:
-      case .metadataSeason:
-      case .metadataEpisode:
-      case .metadataMovie:
-      case .fileRename:
-      case .settingsStorageAdd:
-      case .settingsPlay:
-      case .settingsServerAdd:
-      case .settingsSponsor:
-      case .settingsSync:
-      case .settingsUpdater:
-        state = Navigator.of(context, rootNavigator: true);
-      case .settingsHistory:
-      case .settingsLibraryTv:
-      case .settingsLibraryMovie:
-        Scaffold.of(context).openEndDrawer();
-        await WidgetsBinding.instance.endOfFrame;
-        state = Navigator.of(settingNavigatorKey.currentContext!);
-      default:
-    }
-  } else {
-    switch (routeName) {
-      case .tv:
-      case .movie:
-      case .live:
-      case .settings:
-        state = Navigator.of(context);
-      default:
-        state = Navigator.of(context, rootNavigator: true);
-    }
-  }
+  final NavigatorState state = await getNavigatorState(context, routeName);
   if (routeName == .player) {
     await _setPreferredOrientations(true);
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
@@ -174,6 +126,7 @@ enum RouteName {
   settingsDiagnostics,
   settingsLog,
   settingsOther,
+  settingsPlayer,
   settingsPlayerKernel,
   settingsSync,
   settingsDns,
@@ -191,8 +144,49 @@ enum RouteName {
   }
 }
 
+enum RouteType {
+  material,
+  player,
+  noTransition,
+  fadeIn,
+  modalBottomSheet,
+  modalBottomSheetWithHandle,
+  modalBottomSheetFull,
+}
+
 Future<T?> navigateToSlideLeft<T extends Object?>(BuildContext context, Widget page) {
   return Navigator.of(context).push(FadeInPageRoute<T>(builder: (context) => page));
+}
+
+class PlayerPageRoute<T> extends MaterialPageRoute<T> {
+  PlayerPageRoute({required super.builder, super.settings});
+
+  @override
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    final ThemeData theme = switch (context.read<PlayerConfig>().themeMode) {
+      ThemeMode.system => switch (Theme.brightnessOf(context)) {
+        Brightness.dark => darkTheme.copyWith(scaffoldBackgroundColor: Colors.black),
+        Brightness.light => lightTheme,
+      },
+      ThemeMode.light => lightTheme,
+      ThemeMode.dark => darkTheme.copyWith(scaffoldBackgroundColor: Colors.black),
+    };
+    return Theme(
+      data: theme,
+      child: Builder(
+        builder: (context) => PageTransitionsTheme(
+          builders: {
+            TargetPlatform.android: FadeForwardsPageTransitionsBuilder(backgroundColor: theme.scaffoldBackgroundColor),
+          },
+        ).buildTransitions<T>(this, context, animation, ReverseAnimation(animation), child),
+      ),
+    );
+  }
 }
 
 class NoTransitionPageRoute<T> extends PageRoute<T> {
@@ -217,36 +211,8 @@ class NoTransitionPageRoute<T> extends PageRoute<T> {
   }
 }
 
-class FadeInPageRoute<T> extends PageRoute<T> {
-  FadeInPageRoute({required this.builder, super.settings});
-
-  @override
-  final Duration transitionDuration = const Duration(milliseconds: 650);
-
-  @override
-  final Duration reverseTransitionDuration = const Duration(milliseconds: 650);
-
-  @override
-  final bool opaque = true;
-
-  @override
-  final bool barrierDismissible = false;
-
-  @override
-  final Color? barrierColor = null;
-
-  @override
-  final String? barrierLabel = null;
-
-  @override
-  final bool maintainState = true;
-
-  final WidgetBuilder builder;
-
-  @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    return builder(context);
-  }
+class FadeInPageRoute<T> extends MaterialPageRoute<T> {
+  FadeInPageRoute({required super.builder, super.settings});
 
   @override
   Widget buildTransitions(
@@ -255,12 +221,13 @@ class FadeInPageRoute<T> extends PageRoute<T> {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    return SharedAxisTransition(
-      animation: animation,
-      secondaryAnimation: secondaryAnimation,
-      transitionType: SharedAxisTransitionType.horizontal,
-      fillColor: Colors.transparent,
-      child: child,
-    );
+    return const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: SharedAxisPageTransitionsBuilder(
+          transitionType: .horizontal,
+          fillColor: Colors.transparent,
+        ),
+      },
+    ).buildTransitions<T>(this, context, animation, secondaryAnimation, child);
   }
 }

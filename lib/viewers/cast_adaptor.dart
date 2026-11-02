@@ -47,7 +47,12 @@ class CastDevice extends PlayerBaseController {
   @override
   final ValueNotifier<Duration> bufferedPosition = ValueNotifier(Duration.zero);
   @override
-  final ValueNotifier<PlayerStatus> status = ValueNotifier(PlayerStatus.idle);
+  final ValueNotifier<PlaybackState> playbackState = ValueNotifier(PlaybackState.idle);
+  @override
+  final ValueNotifier<String?> fatalError = ValueNotifier(null);
+  @override
+  final ValueNotifier<bool> isPlaying = ValueNotifier(false);
+
   @override
   final ValueNotifier<dynamic> error = ValueNotifier(null);
 

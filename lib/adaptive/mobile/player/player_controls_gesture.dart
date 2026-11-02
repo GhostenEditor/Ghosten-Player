@@ -46,9 +46,7 @@ class _PlayerControlsGestureState extends State<PlayerControlsGesture> {
                   final Offset offset = details.localPosition;
                   final box = context.findRenderObject()! as RenderBox;
                   final Rect validRect = box.paintBounds.deflate(30);
-                  if ((_controller.status.value == PlayerStatus.playing ||
-                          _controller.status.value == PlayerStatus.buffering ||
-                          _controller.status.value == PlayerStatus.paused) &&
+                  if ((_controller.playbackState.value == .ready || _controller.playbackState.value == .buffering) &&
                       _controller.duration.value.inSeconds > 15 &&
                       validRect.contains(offset)) {
                     _gestureMode.value = _GestureMode.seek;
@@ -171,12 +169,14 @@ class _PlayerControlsGestureState extends State<PlayerControlsGesture> {
                     });
                     _controller.seekTo(_controller.position.value + const Duration(seconds: 15));
                   } else {
-                    switch (_controller.status.value) {
-                      case PlayerStatus.playing:
-                      case PlayerStatus.buffering:
-                        _controller.pause();
-                      case PlayerStatus.paused:
-                        _controller.play();
+                    switch (_controller.playbackState.value) {
+                      case .ready:
+                      case .buffering:
+                        if (_controller.isPlaying.value) {
+                          _controller.pause();
+                        } else {
+                          _controller.play();
+                        }
                       default:
                     }
                   }
@@ -203,44 +203,57 @@ class _PlayerControlsGestureState extends State<PlayerControlsGesture> {
                 _GestureMode.seek => Center(
                   child: ListenableBuilder(
                     listenable: _gestureValue,
-                    builder: (context, _) => Container(
-                      clipBehavior: Clip.antiAlias,
-                      constraints: const BoxConstraints(maxWidth: 160),
-                      decoration: BoxDecoration(color: Colors.black87, borderRadius: BorderRadius.circular(8)),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const SizedBox(height: 8),
-                          Builder(
-                            builder: (context) {
-                              final Duration delta =
-                                  Duration(seconds: _gestureValue.value?.toInt() ?? 0) - _controller.position.value;
-                              return Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                spacing: 16,
-                                children: [
-                                  Icon(delta.isNegative ? Icons.fast_rewind_rounded : null, size: 16),
-                                  Text(delta.abs().toDisplay(), style: Theme.of(context).textTheme.labelSmall),
-                                  Icon(!delta.isNegative ? Icons.fast_forward_rounded : null, size: 16),
-                                ],
-                              );
-                            },
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: Text(
-                              '${Duration(seconds: _gestureValue.value?.toInt() ?? 0).toDisplay()} / ${_controller.duration.value.toDisplay()}',
-                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                              overflow: TextOverflow.ellipsis,
+                    builder: (context, _) {
+                      final bool showHour = widget.controller.duration.value.inHours > 1;
+                      return Container(
+                        clipBehavior: Clip.antiAlias,
+                        constraints: const BoxConstraints(maxWidth: 160),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surfaceDim.withAlpha(0xEE),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const SizedBox(height: 8),
+                            Builder(
+                              builder: (context) {
+                                final Duration delta =
+                                    Duration(seconds: _gestureValue.value?.toInt() ?? 0) - _controller.position.value;
+                                return Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  spacing: 16,
+                                  children: [
+                                    Icon(delta.isNegative ? Icons.fast_rewind_rounded : null, size: 16),
+                                    Text(
+                                      delta.abs().toDisplay(showHour: showHour),
+                                      style: Theme.of(context).textTheme.labelSmall!.copyWith(fontFamily: 'monospace'),
+                                    ),
+                                    Icon(!delta.isNegative ? Icons.fast_forward_rounded : null, size: 16),
+                                  ],
+                                );
+                              },
                             ),
-                          ),
-                          LinearProgressIndicator(
-                            value: (_gestureValue.value?.toInt() ?? 0) / _controller.duration.value.inSeconds,
-                            minHeight: 4,
-                          ),
-                        ],
-                      ),
-                    ),
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Text(
+                                '${Duration(seconds: _gestureValue.value?.toInt() ?? 0).toDisplay(showHour: showHour)} / ${_controller.duration.value.toDisplay(showHour: showHour)}',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  fontFamily: 'monospace',
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            LinearProgressIndicator(
+                              value: (_gestureValue.value?.toInt() ?? 0) / _controller.duration.value.inSeconds,
+                              minHeight: 4,
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                 ),
                 _GestureMode.volume => Center(

@@ -14,7 +14,7 @@ import 'abstract.dart';
 class StorageMenu extends Menu {
   const StorageMenu(this.item);
 
-  final DriverAccount item;
+  final Storage item;
 
   @override
   List<Widget> build(BuildContext context) {
@@ -113,7 +113,6 @@ class StorageMenu extends Menu {
 
 class _FileViewer extends StatelessWidget {
   const _FileViewer({
-    super.key,
     required this.item,
     required this.onPage,
     required this.onRefresh,

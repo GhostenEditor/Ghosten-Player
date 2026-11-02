@@ -99,7 +99,7 @@ class _ScraperDialogState<T extends MediaBase> extends State<ScraperDialog<T>> {
                 : null,
             child: Text(
               AppLocalizations.of(context)!.buttonConfirm,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: const TextStyle(fontWeight: FontWeight.w500),
             ),
           ),
         ),

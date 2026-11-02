@@ -29,6 +29,7 @@ class FormItem extends FormItemBase<String> {
     this.obscureText = false,
     this.maxLines = 1,
     TextEditingController? controller,
+    this.keyboardType,
   }) : controller = controller ?? TextEditingController(text: value);
   late final TextEditingController controller;
 
@@ -40,6 +41,7 @@ class FormItem extends FormItemBase<String> {
   final Widget? suffixIcon;
   final FormFieldValidator<String?>? validator;
   final bool obscureText;
+  final TextInputType? keyboardType;
 
   @override
   String? get value => controller.text.isEmpty ? null : controller.text;
@@ -253,6 +255,7 @@ class _FormGroupState extends State<FormGroup> {
               maxLines: item.maxLines,
               obscureText: item.obscureText,
               validator: item.validator,
+              keyboardType: item.keyboardType,
               onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
             ),
             final DateFormItem item => TextFormField(

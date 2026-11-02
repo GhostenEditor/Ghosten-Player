@@ -298,35 +298,31 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String errorCode(String code, Object message) {
     String _temp0 = intl.Intl.selectLogic(code, {
-      '30001': 'No target data selected, please select an item from the list and try again',
       '40000': 'Bad Request',
       '40001': 'The M3U file exceeds the parsing limit, please adjust the file and try again.',
       '40002': 'M3U file cannot be parsed, please check if the file is correct',
-      '40003': '',
-      '40004': 'Http Url invalid',
-      '40005': 'Unknown IO error: $message',
-      '40006': 'Duplicate data, insertion failed',
-      '40007': 'Other IO error: $message',
-      '40008': 'A failure to read or write bytes on an I/O stream',
-      '40009': 'JSON format syntax error: $message',
-      '40010': 'Data format error: $message',
-      '40011': 'Data missed: $message',
-      '40012': 'Data format error: $message',
-      '40013': 'Invalid Http Header Value: $message',
-      '40014': 'This DLNA Action is not supported',
-      '40015': 'Media file name is missing',
-      '40016': 'Wrong account type logged in',
-      '40017': 'Account data is missing',
-      '40018': 'Concurrency error',
-      '40019': 'Range access is not supported',
-      '40020': 'Aliyun async task failed',
-      '40021': 'File rename conflict',
-      '40022': 'Wrong Media library type',
-      '40023': 'Wrong filter type',
-      '40024': '',
-      '40025': 'Updated $message data, data update failed',
-      '40026': 'Data format error: $message',
-      '40101': 'Login verification failed: $message',
+      '40003': 'Unknown IO error: $message',
+      '40004': 'Data Conflict',
+      '40005': 'Other IO error: $message',
+      '40006': 'JSON data error: $message',
+      '40007': '',
+      '40008': 'This DLNA Action is not supported',
+      '40009': 'This drive is not supported',
+      '40010': 'Storage Login Data Missed',
+      '40011': 'Concurrency error',
+      '40012': 'Range access is not supported',
+      '40013': 'Alipan async task failed',
+      '40014': 'File rename conflict',
+      '40015': '',
+      '40016': '',
+      '40017': '',
+      '40018': '',
+      '40019': '',
+      '40020': '',
+      '40021': '',
+      '40022': '',
+      '40100': 'Unauthorized',
+      '40101': 'Storage unauthorized: $message',
       '40102': 'Login failed, please confirm whether the Webdav address and account password are correct!',
       '40103': 'Server account error, please log in again!',
       '40301': 'Forbidden',
@@ -334,7 +330,11 @@ class AppLocalizationsEn extends AppLocalizations {
       '40402': 'Api Not Found',
       '40403': 'File Not Found',
       '40404': '$message',
+      '40405': 'No Palette Color',
+      '40406': 'No data found',
+      '40501': 'Method Not Allowed',
       '40800': 'Connect Timeout',
+      '40801': 'Connect Timeout',
       '42900': 'Too Many Requests',
       '50000': 'Internal Error',
       '50401': 'Gateway timeout',
@@ -795,6 +795,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sessionStatusUnknown => 'Unknown Error';
 
   @override
+  String get settingsGroupDataSettings => 'Data Settings';
+
+  @override
+  String get settingsGroupDisplaySettings => 'Display Settings';
+
+  @override
+  String get settingsGroupManagement => 'Management';
+
+  @override
+  String get settingsGroupMiscellaneous => 'Miscellaneous';
+
+  @override
+  String get settingsGroupPlay => 'Play';
+
+  @override
+  String get settingsGroupProxySettings => 'Proxy Settings';
+
+  @override
+  String get settingsGroupShortcutSettings => 'Shortcut Settings';
+
+  @override
+  String get settingsGroupTools => 'Tools';
+
+  @override
   String get settingsItemAccount => 'Account';
 
   @override
@@ -811,19 +835,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsItemAutoPlay => 'Auto Play';
 
   @override
+  String get settingsItemCookie => 'Cookie';
+
+  @override
   String get settingsItemDNS => 'DNS';
 
   @override
   String get settingsItemDataReset => 'Data Reset';
 
   @override
-  String get settingsItemDataSettings => 'Data Settings';
-
-  @override
   String get settingsItemDataSync => 'Data Sync';
-
-  @override
-  String get settingsItemDisplaySettings => 'Display Settings';
 
   @override
   String get settingsItemDisplaySize => 'Display Size';
@@ -868,9 +889,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsItemPlayerSettings => 'Player Settings';
 
   @override
-  String get settingsItemProxySettings => 'Proxy Settings';
-
-  @override
   String get settingsItemScraperBehavior => 'Scraper Behavior';
 
   @override
@@ -881,9 +899,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsItemServer => 'Server Settings';
-
-  @override
-  String get settingsItemShortcutSettings => 'Shortcut Settings';
 
   @override
   String get settingsItemShortcuts => 'Shortcuts';

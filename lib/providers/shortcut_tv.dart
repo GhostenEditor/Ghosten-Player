@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ShortcutTV extends ChangeNotifier {
-  ShortcutTV._fromPrefs(this.prefs)
+  ShortcutTV(this.prefs)
     : menu = LogicalKeyboardKey(prefs.getInt('shortcut.tv.menu') ?? LogicalKeyboardKey.contextMenu.keyId),
       previousChannel = LogicalKeyboardKey(
         prefs.getInt('shortcut.tv.previousChannel') ?? LogicalKeyboardKey.arrowDown.keyId,
@@ -22,11 +22,6 @@ class ShortcutTV extends ChangeNotifier {
   LogicalKeyboardKey nextChannel;
   LogicalKeyboardKey switchLinePanel;
   LogicalKeyboardKey channelsPanel;
-
-  static Future<ShortcutTV> init() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return ShortcutTV._fromPrefs(prefs);
-  }
 
   void setMenu(LogicalKeyboardKey k) {
     menu = k;

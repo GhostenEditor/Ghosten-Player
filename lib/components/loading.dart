@@ -27,7 +27,7 @@ class _LoadingState extends State<Loading> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: SpinKitFadingCircle(controller: _loadingController, color: Theme.of(context).colorScheme.secondary),
+      child: SpinKitFadingCircle(controller: _loadingController, color: Theme.of(context).colorScheme.onSurfaceVariant),
     );
   }
 }

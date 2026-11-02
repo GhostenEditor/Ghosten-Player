@@ -5,16 +5,8 @@ import '../extensions/extensions.dart';
 
 @immutable
 class SettingPageThemeData with Diagnosticable {
-  const SettingPageThemeData({
-    this.automaticallyImplyLeading,
-    this.backgroundColor,
-    this.appbarTheme,
-    this.contentPadding,
-  });
+  const SettingPageThemeData({this.contentPadding});
 
-  final bool? automaticallyImplyLeading;
-  final Color? Function(BuildContext)? backgroundColor;
-  final AppBarThemeData? Function(BuildContext)? appbarTheme;
   final EdgeInsets? contentPadding;
 }
 

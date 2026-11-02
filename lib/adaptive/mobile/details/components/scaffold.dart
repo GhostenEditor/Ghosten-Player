@@ -35,7 +35,7 @@ class _DetailScaffoldState extends State<DetailScaffold> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final double w = MediaQuery.of(context).size.width;
+    final double w = MediaQuery.sizeOf(context).width;
     _scrollController.addListener(() {
       if (_scrollController.hasClients) {
         _bgOffset.value = (_scrollController.offset / w).clamp(0, 1);

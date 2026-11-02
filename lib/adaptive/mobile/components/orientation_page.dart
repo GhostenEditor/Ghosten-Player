@@ -1,12 +1,22 @@
 import 'package:flutter/material.dart';
 
 class OrientationPage extends StatelessWidget {
-  const OrientationPage({super.key, this.section1, this.section2, this.title, this.actions});
+  const OrientationPage({
+    super.key,
+    this.section1,
+    this.section2,
+    this.title,
+    this.actions,
+    this.scrollController,
+    this.autoScroll = false,
+  });
 
   final Widget? section1;
   final Widget? section2;
   final Widget? title;
   final List<Widget>? actions;
+  final ScrollController? scrollController;
+  final bool autoScroll;
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +28,9 @@ class OrientationPage extends StatelessWidget {
               appBar: AppBar(forceMaterialTransparency: true, title: title, actions: actions),
               extendBodyBehindAppBar: true,
               body: Scrollbar(
+                controller: scrollController,
                 child: CustomScrollView(
+                  controller: scrollController,
                   slivers: [
                     const SliverSafeArea(bottom: false, sliver: SliverToBoxAdapter()),
                     SliverToBoxAdapter(child: section1),
@@ -42,7 +54,9 @@ class OrientationPage extends StatelessWidget {
                   const VerticalDivider(indent: 60, endIndent: 60),
                   Expanded(
                     child: Scrollbar(
+                      controller: scrollController,
                       child: CustomScrollView(
+                        controller: scrollController,
                         slivers: [
                           if (section2 != null)
                             SliverPadding(

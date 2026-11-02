@@ -30,20 +30,22 @@ class PlaylistChannelsPage extends StatelessWidget {
         ),
       ),
     );
-    return !kIsTV
-        ? Scaffold(
-            appBar: AppBar(
-              title: Column(
-                crossAxisAlignment: .start,
-                children: [
-                  if (item.title != null) Text(item.title!),
-                  Text(item.url, style: Theme.of(context).textTheme.labelSmall),
-                ],
-              ),
-            ),
-            body: child,
-          )
-        : child;
+    return DeviceOrientationBuilder(
+      builder: (context, orientation) => Scaffold(
+        appBar: orientation == .portrait
+            ? AppBar(
+                title: Column(
+                  crossAxisAlignment: .start,
+                  children: [
+                    if (item.title != null) Text(item.title!),
+                    Text(item.url, style: Theme.of(context).textTheme.labelSmall),
+                  ],
+                ),
+              )
+            : null,
+        body: child,
+      ),
+    );
   }
 }
 

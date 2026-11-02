@@ -31,6 +31,7 @@ enum DeviceType {
 class PlatformApi {
   static const _channelNamespace = 'com.ghosten.player';
   static const _methodChannel = MethodChannel(_channelNamespace);
+  static const _notificationMethodChannel = MethodChannel('com.ghosten.player/notification');
 
   static Stream<bool> pipEvent = kIsWeb
       ? const Stream.empty()
@@ -63,7 +64,24 @@ class PlatformApi {
     return _methodChannel.invokeMethod('arch');
   }
 
-  static Future<String?> localIpAddress() {
-    return _methodChannel.invokeMethod('localIpAddress');
+  static Future<bool?> canPip() {
+    return _methodChannel.invokeMethod('canPip');
+  }
+
+  static Future<bool?> requestPip() {
+    return _methodChannel.invokeMethod('requestPip');
+  }
+
+  static Future<List<dynamic>?> initialized() {
+    return _methodChannel.invokeMethod('initialized');
+  }
+
+  static void progressNotification(String method, {required int id, String? title, String? content, double? progress}) {
+    final Future<dynamic> _ = _notificationMethodChannel.invokeMethod(method, {
+      'id': id,
+      'title': title,
+      'content': content,
+      'progress': progress,
+    });
   }
 }

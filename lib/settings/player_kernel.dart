@@ -11,11 +11,11 @@ import 'package:video_player/player.dart';
 import '../../constants.dart';
 import '../../l10n/app_localizations.dart';
 import '../../platform_api.dart';
-import '../../providers/user_config.dart';
 import '../../utils/check_update.dart';
 import '../../utils/utils.dart';
 import '../adaptive/adaptive.dart';
 import '../components/components.dart';
+import '../providers/player.dart';
 
 class SettingsPlayerKernel extends StatefulWidget {
   const SettingsPlayerKernel({super.key});
@@ -27,7 +27,7 @@ class SettingsPlayerKernel extends StatefulWidget {
 class _SettingsPlayerKernelState extends State<SettingsPlayerKernel> {
   List<_MpvLib> _localMpvLibs = [];
   List<_MpvLib>? _remoteMpvLibs;
-  late final UserConfig userConfig = Provider.of<UserConfig>(context);
+  late final PlayerConfig _playerConfig = Provider.of<PlayerConfig>(context);
   static final Map<String, CancelToken> _downloadTasks = {};
 
   @override
@@ -38,18 +38,18 @@ class _SettingsPlayerKernelState extends State<SettingsPlayerKernel> {
 
   @override
   Widget build(BuildContext context) {
-    final String? mpvVersion = userConfig.mpvVersion;
+    final String? mpvVersion = _playerConfig.mpvVersion;
     return SettingPage(
       title: Text(AppLocalizations.of(context)!.settingsItemPlayerKernel),
       child: RadioGroup(
         onChanged: (value) {
           if (value == .media3) {
-            userConfig.setPlayerType(.media3);
-            userConfig.setMpvVersion(null);
+            _playerConfig.setPlayerType(.media3);
+            _playerConfig.setMpvVersion(null);
             setState(() {});
           }
         },
-        groupValue: userConfig.playerType,
+        groupValue: _playerConfig.playerType,
         child: ListView(
           padding: SettingPageTheme.of(context).contentPadding,
           children: [
@@ -75,20 +75,21 @@ class _SettingsPlayerKernelState extends State<SettingsPlayerKernel> {
                 },
                 children: [
                   ..._localMpvLibs.map((lib) => _buildMpvListTile(lib, mpvVersion)),
-                  if (_remoteMpvLibs == null)
-                    const Padding(padding: EdgeInsets.all(8.0), child: Loading())
-                  else
-                    ..._remoteMpvLibs!.map((lib) => _buildMpvListTile(lib, mpvVersion)),
+                  if (_remoteMpvLibs != null) ..._remoteMpvLibs!.map((lib) => _buildMpvListTile(lib, mpvVersion)),
                   Center(
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: IconButton.filledTonal(
-                        onPressed: () {
-                          _remoteMpvLibs = null;
-                          _getLocalMpvLibs();
-                          _getRemoteMpvLibs();
-                        },
-                        icon: const Icon(Icons.refresh),
+                        onPressed: _remoteMpvLibs != null
+                            ? () {
+                                _remoteMpvLibs = null;
+                                _getLocalMpvLibs();
+                                _getRemoteMpvLibs();
+                              }
+                            : null,
+                        icon: _remoteMpvLibs == null
+                            ? const SizedBox.square(dimension: 20, child: CircularProgressIndicator())
+                            : const Icon(Icons.refresh),
                       ),
                     ),
                   ),
@@ -144,7 +145,7 @@ class _SettingsPlayerKernelState extends State<SettingsPlayerKernel> {
     }
     setState(() {});
     final String? arch = await PlatformApi.arch();
-    final Response<dynamic> resp = await Dio(BaseOptions(connectTimeout: const Duration(seconds: 30))).get(libmpvUrl);
+    final Response<dynamic> resp = await cacheHttpClient.get(libmpvUrl);
     if (!mounted) {
       return;
     }
@@ -153,12 +154,15 @@ class _SettingsPlayerKernelState extends State<SettingsPlayerKernel> {
         .map(UpdateResp.fromJson)
         .toList();
     _remoteMpvLibs = data
-        .map(
-          (it) => _MpvLib(
-            version: it.tagName,
-            downloadUrl: it.assets.firstWhereOrNull((item) => item.name == '$arch.zip')?.url,
-          ),
-        )
+        .map((it) {
+          final UpdateRespAsset? item = it.assets.firstWhereOrNull((item) => item.name == '$arch.zip');
+          if (item != null) {
+            return _MpvLib(version: it.tagName, downloadUrl: item.url, digest: item.digest, name: item.name);
+          } else {
+            return null;
+          }
+        })
+        .nonNulls
         .where((it) => _localMpvLibs.firstWhereOrNull((i) => i.version == it.version) == null)
         .toList();
     setState(() {});
@@ -179,74 +183,83 @@ class _SettingsPlayerKernelState extends State<SettingsPlayerKernel> {
 
   Future<void> _downloadMpvLib(_MpvLib lib) async {
     if (_downloadTasks.containsKey(lib.version)) {
-      return;
-    }
-    lib.downloading = true;
-    setState(() {});
-    final cachedFilePath = '${(await FilePicker.cachePath)!}/${lib.version}.zip';
-    final cancelToken = CancelToken();
-    _downloadTasks.putIfAbsent(lib.version, () => cancelToken);
-    try {
-      await Dio().download(
-        lib.downloadUrl!,
-        cachedFilePath,
-        cancelToken: cancelToken,
-        onReceiveProgress: (count, total) {
-          if (total > 0 && mounted) {
-            lib.downloadProgress = count.toDouble() / total.toDouble();
-            setState(() {});
-          }
-        },
-      );
-    } catch (e) {
+      final CancelToken? cancelToken = _downloadTasks[lib.version];
+      cancelToken!.cancel();
       _downloadTasks.remove(lib.version);
       lib.downloadProgress = null;
       lib.downloading = false;
       lib.downloaded = false;
-      if (mounted) {
-        setState(() {});
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.downloaderLabelDownloadFailed),
-            duration: const Duration(seconds: 2),
-            behavior: SnackBarBehavior.floating,
-            width: 200,
-          ),
-        );
-      }
+      setState(() {});
       return;
     }
+    lib.downloading = true;
+    final cancelToken = CancelToken();
+    setState(() {});
+    _downloadTasks.putIfAbsent(lib.version, () => cancelToken);
+    final String directory = (await FilePicker.cachePath)!;
+    final File? file = await download(
+      digest: lib.digest!,
+      url: lib.downloadUrl!,
+      directory: directory,
+      filename: '${lib.version}-${lib.name}',
+      cancelToken: cancelToken,
+      onProgress: (progress) {
+        lib.downloadProgress = progress;
+        setState(() {});
+      },
+      onError: (error) {
+        _downloadTasks.remove(lib.version);
+        lib.downloadProgress = null;
+        lib.downloading = false;
+        lib.downloaded = false;
+        if (mounted) {
+          setState(() {});
+          if (error.type == .cancel) {
+            ScaffoldMessenger.of(context)
+                .showSnackBar(const SnackBar(content: Text('下载已取消'), behavior: SnackBarBehavior.floating, width: 200));
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(AppLocalizations.of(context)!.downloaderLabelDownloadFailed),
+                behavior: SnackBarBehavior.floating,
+                width: 200,
+              ),
+            );
+          }
+        }
+      },
+    );
+    setState(() {});
+
     _downloadTasks.remove(lib.version);
-    final zipFile = File(cachedFilePath);
-    final destinationDir = Directory('${(await FilePicker.filePath)!}/mpv/${lib.version}');
-    try {
-      await ZipFile.extractToDirectory(zipFile: zipFile, destinationDir: destinationDir);
-    } catch (e) {
-      await zipFile.delete();
+    if (file != null) {
+      final destinationDir = Directory('${(await FilePicker.filePath)!}/mpv/${lib.version}');
+      try {
+        await ZipFile.extractToDirectory(zipFile: file, destinationDir: destinationDir);
+      } catch (e) {
+        await file.delete();
+        lib.downloadProgress = null;
+        lib.downloading = false;
+        lib.downloaded = false;
+        if (mounted) {
+          setState(() {});
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.downloaderLabelDownloadFailed),
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+              width: 200,
+            ),
+          );
+        }
+        return;
+      }
       lib.downloadProgress = null;
       lib.downloading = false;
-      lib.downloaded = false;
+      lib.downloaded = true;
       if (mounted) {
         setState(() {});
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.downloaderLabelDownloadFailed),
-            duration: const Duration(seconds: 2),
-            behavior: SnackBarBehavior.floating,
-            width: 200,
-          ),
-        );
       }
-      return;
-    }
-    if (zipFile.existsSync()) {
-      await zipFile.delete();
-    }
-    lib.downloadProgress = null;
-    lib.downloading = false;
-    lib.downloaded = true;
-    if (mounted) {
-      setState(() {});
     }
   }
 
@@ -263,8 +276,8 @@ class _SettingsPlayerKernelState extends State<SettingsPlayerKernel> {
     if (!lib.downloaded) {
       return;
     }
-    userConfig.setPlayerType(PlayerType.mpv);
-    userConfig.setMpvVersion(version);
+    _playerConfig.setPlayerType(PlayerType.mpv);
+    _playerConfig.setMpvVersion(version);
     if (!mounted) {
       return;
     }
@@ -273,10 +286,12 @@ class _SettingsPlayerKernelState extends State<SettingsPlayerKernel> {
 }
 
 class _MpvLib {
-  _MpvLib({required this.version, this.downloadUrl, this.downloaded = false});
+  _MpvLib({required this.version, this.downloadUrl, this.downloaded = false, this.digest, this.name});
 
+  final String? name;
   final String version;
   final String? downloadUrl;
+  final String? digest;
   bool downloaded;
   bool downloading = false;
   double? downloadProgress;

@@ -15,11 +15,7 @@ import 'dialogs/series_metadata.dart';
 import 'dialogs/storage_picker.dart';
 import 'dialogs/subtitle.dart';
 import 'dialogs/timer_picker.dart';
-import 'medias/live_list.dart';
 import 'medias/media_list.dart';
-import 'medias/movie_list.dart';
-import 'medias/search.dart';
-import 'medias/tv_list.dart';
 import 'settings/about.dart';
 import 'settings/diagnostics.dart';
 import 'settings/dns.dart';
@@ -30,6 +26,7 @@ import 'settings/library.dart';
 import 'settings/log.dart';
 import 'settings/other.dart';
 import 'settings/play.dart';
+import 'settings/player.dart';
 import 'settings/player_history.dart';
 import 'settings/player_kernel.dart';
 import 'settings/server.dart';
@@ -42,37 +39,42 @@ import 'settings/storage_preference.dart';
 import 'settings/sync.dart';
 import 'settings/updater.dart';
 import 'utils/navigator.dart';
+import 'view_models/view_models.dart';
 import 'viewers/image_viewer.dart';
 import 'viewers/player_cast.dart';
 import 'viewers/singleton_player.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
+final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
 
 Route<dynamic>? onGenerateRoute(RouteSettings settings) {
   final RouteName? routeName = RouteName.fromStringOrNull(settings.name);
   if (routeName == null) {
     return null;
   }
-  final Widget Function(dynamic)? pageBuilder = _routesMap[routeName];
+  final Widget Function(BuildContext, dynamic)? pageBuilder = _routesMap[routeName];
   if (pageBuilder != null) {
-    Widget builder(context) => pageBuilder(settings.arguments as dynamic);
-    final _RouteType type = _routeByType(routeName);
+    Widget builder(context) => pageBuilder(context, settings.arguments as dynamic);
+    final RouteType type = getRouteType(routeName);
     return switch (type) {
-      _RouteType.material => MaterialPageRoute(builder: builder, settings: settings),
-      _RouteType.noTransition => NoTransitionPageRoute(builder: builder, settings: settings),
-      _RouteType.fadeIn => FadeInPageRoute(builder: builder, settings: settings),
-      _RouteType.modalBottomSheet => ModalBottomSheetRoute(
+      RouteType.material => MaterialPageRoute(builder: builder, settings: settings),
+      RouteType.player => PlayerPageRoute(builder: builder, settings: settings),
+      RouteType.noTransition => NoTransitionPageRoute(builder: builder, settings: settings),
+      RouteType.fadeIn => FadeInPageRoute(builder: builder, settings: settings),
+      RouteType.modalBottomSheet => ModalBottomSheetRoute(
         builder: builder,
         settings: settings,
         isScrollControlled: true,
         useSafeArea: true,
       ),
-      _RouteType.modalBottomSheetWithHandle => ModalBottomSheetRoute(
+      RouteType.modalBottomSheetWithHandle => ModalBottomSheetRoute(
         builder: builder,
         settings: settings,
         isScrollControlled: true,
         useSafeArea: true,
         showDragHandle: true,
       ),
-      _RouteType.modalBottomSheetFull => ModalBottomSheetRoute(
+      RouteType.modalBottomSheetFull => ModalBottomSheetRoute(
         builder: (context) => MediaQuery(data: MediaQuery.of(navigatorKey.currentContext!), child: builder(context)),
         constraints: const .expand(),
         settings: settings,
@@ -84,106 +86,61 @@ Route<dynamic>? onGenerateRoute(RouteSettings settings) {
   }
 }
 
-_RouteType _routeByType(RouteName routeName) => kIsTV
-    ? switch (routeName) {
-        .tv ||
-        .movie ||
-        .live ||
-        .setSkipTime ||
-        .settings ||
-        .settingsStorage ||
-        .settingsStoragePreference ||
-        .settingsLibraryTv ||
-        .settingsLibraryMovie ||
-        .settingsHistory ||
-        .settingsDownload ||
-        .settingsServer ||
-        .settingsDiagnostics ||
-        .settingsLog ||
-        .settingsOther ||
-        .settingsHelp ||
-        .settingsHelpDetail ||
-        .settingsPlayerKernel ||
-        .settingsDns ||
-        .settingsDnsEdit ||
-        .settingsShortcut ||
-        .settingsAbout => .fadeIn,
-        .player => .noTransition,
-        .storagePicker => .modalBottomSheet,
-        _ => .material,
-      }
-    : switch (routeName) {
-        .metadataSeries ||
-        .metadataSeason ||
-        .metadataEpisode ||
-        .metadataMovie ||
-        .fileRename ||
-        .setSkipTime ||
-        .subtitleAdd ||
-        .liveEdit ||
-        .settingsStorageAdd ||
-        .settingsStoragePreference ||
-        .settingsServerAdd ||
-        .settingsPlay => .modalBottomSheet,
-        .castSearcher || .storagePicker => .modalBottomSheetWithHandle,
-        .castPlayer => .modalBottomSheetFull,
-        .tv || .movie || .live || .settings || .player => .noTransition,
-        _ => .material,
-      };
-
-enum _RouteType { material, noTransition, fadeIn, modalBottomSheet, modalBottomSheetWithHandle, modalBottomSheetFull }
-
-final Map<RouteName, Widget Function(dynamic)> _routesMap = {
-  .home: (arguments) => const HomePage(),
-  .tv: (arguments) => const TVListPage(),
-  .movie: (arguments) => const MovieListPage(),
-  .live: (arguments) => const LiveListPage(),
-  .liveEdit: (arguments) => const LiveEditPage(),
-  .liveDetail: (arguments) => PlaylistChannelsPage(item: arguments),
-  .settings: (arguments) => const SettingsHomePage(),
-  .detailSeries: (arguments) => SeriesPage(id: arguments['id'], data: arguments['data']),
-  .detailSeries2: (arguments) => Series2Page(id: arguments['id'], data: arguments['data']),
-  .detailSeason: (arguments) => SeasonPage(id: arguments['id'], data: arguments['data']),
-  .detailEpisode: (arguments) => EpisodePage(id: arguments['id'], data: arguments['data']),
-  .detailMovie: (arguments) => MoviePage(id: arguments['id'], data: arguments['data']),
-  .search: (arguments) => const SearchPage(),
-  .scrape: (arguments) => ScraperDialog(item: arguments),
-  .media: (arguments) => MediaListPage(data: arguments),
-  .player: (arguments) => SingletonPlayer(data: arguments),
-  .livePlayer: (arguments) => LivePlayerPage(data: arguments),
-  .castPlayer: (arguments) => PlayerCast(data: arguments['data'], device: arguments['device']),
-  .castSearcher: (arguments) => const PlayerCastSearcher(),
-  .subtitle: (arguments) => SubtitleManager(fileId: arguments),
-  .subtitleAdd: (arguments) => const SubtitleDialog(),
-  .setSkipTime: (arguments) => TimerPickerDialog(data: arguments),
-  .imageViewer: (arguments) => ImageViewer(url: arguments['url'], title: arguments['title']),
-  .storagePicker: (arguments) => const StoragePickDialog(),
-  .metadataSeries: (arguments) => SeriesMetadata(series: arguments),
-  .metadataSeason: (arguments) => SeasonMetadata(season: arguments),
-  .metadataEpisode: (arguments) => EpisodeMetadata(episode: arguments),
-  .metadataMovie: (arguments) => MovieMetadata(movie: arguments),
-  .fileRename: (arguments) => FilenameDialog(dialogTitle: arguments['dialogTitle'], filename: arguments['filename']),
-  .settingsStorage: (arguments) => const SettingsStoragePage(),
-  .settingsStorageAdd: (arguments) => const SettingsStorageAddPage(),
-  .settingsStoragePreference: (arguments) => SettingsStoragePreferencePage(storage: arguments),
-  .settingsLibraryTv: (arguments) => const SettingsLibraryPage(type: LibraryType.tv),
-  .settingsLibraryMovie: (arguments) => const SettingsLibraryPage(type: LibraryType.movie),
-  .settingsPlay: (arguments) => const SettingsPlayPage(),
-  .settingsHistory: (arguments) => const SystemSettingsPlayerHistory(),
-  .settingsDownload: (arguments) => const SystemSettingsDownloader(),
-  .settingsServer: (arguments) => const SystemSettingsServer(),
-  .settingsServerAdd: (arguments) => const SettingsServerAddPage(),
-  .settingsDiagnostics: (arguments) => const SettingsDiagnostics(),
-  .settingsLog: (arguments) => const SettingsLogPage(),
-  .settingsOther: (arguments) => const SystemSettingsOther(),
-  .settingsPlayerKernel: (arguments) => const SettingsPlayerKernel(),
-  .settingsSync: (arguments) => const SettingsSyncPage(),
-  .settingsDns: (arguments) => const SystemSettingsDNS(),
-  .settingsShortcut: (arguments) => const SystemSettingsShortcut(),
-  .settingsDnsEdit: (arguments) => SystemSettingsDNSEdit(item: arguments),
-  .settingsHelp: (arguments) => const SettingsHelp(),
-  .settingsHelpDetail: (arguments) => HelperDetail(page: arguments),
-  .settingsSponsor: (arguments) => const SettingsSponsor(),
-  .settingsAbout: (arguments) => const SettingsAboutPage(),
-  .settingsUpdater: (arguments) => const SettingsUpdater(),
+final Map<RouteName, Widget Function(BuildContext, dynamic)> _routesMap = {
+  .home: (context, arguments) => const HomePage(),
+  .tv: (context, arguments) => TvListViewModel().build(),
+  .movie: (context, arguments) => MovieListViewModel().build(),
+  .live: (context, arguments) => LiveListViewModel().build(),
+  .liveEdit: (context, arguments) => const LiveEditPage(),
+  .liveDetail: (context, arguments) => PlaylistChannelsPage(item: arguments),
+  .settings: (context, arguments) => const SettingsHomePage(),
+  .detailSeries: (context, arguments) => SeriesViewModel(context, id: arguments['id'], data: arguments['data']).build(),
+  .detailSeries2: (context, arguments) =>
+      Series2ViewModel(context, id: arguments['id'], data: arguments['data']).build(),
+  .detailSeason: (context, arguments) => SeasonViewModel(context, id: arguments['id'], data: arguments['data']).build(),
+  .detailEpisode: (context, arguments) =>
+      EpisodeViewModel(context, id: arguments['id'], data: arguments['data']).build(),
+  .detailMovie: (context, arguments) => MovieViewModel(context, id: arguments['id'], data: arguments['data']).build(),
+  .search: (context, arguments) => SearchViewModel().build(),
+  .scrape: (context, arguments) => ScraperDialog(item: arguments),
+  .media: (context, arguments) => MediaListPage(data: arguments),
+  .player: (context, arguments) => SingletonPlayer(data: arguments),
+  .livePlayer: (context, arguments) => LivePlayerPage(data: arguments),
+  .castPlayer: (context, arguments) => PlayerCast(data: arguments['data'], device: arguments['device']),
+  .castSearcher: (context, arguments) => const PlayerCastSearcher(),
+  .subtitle: (context, arguments) => SubtitleListViewModel(fileId: arguments).build(),
+  .subtitleAdd: (context, arguments) => SubtitleDialog(fileId: arguments),
+  .setSkipTime: (context, arguments) => TimerPickerDialog(data: arguments),
+  .imageViewer: (context, arguments) => ImageViewer(url: arguments['url'], title: arguments['title']),
+  .storagePicker: (context, arguments) => const StoragePickDialog(),
+  .metadataSeries: (context, arguments) => SeriesMetadata(series: arguments),
+  .metadataSeason: (context, arguments) => SeasonMetadata(season: arguments),
+  .metadataEpisode: (context, arguments) => EpisodeMetadata(episode: arguments),
+  .metadataMovie: (context, arguments) => MovieMetadata(movie: arguments),
+  .fileRename: (context, arguments) =>
+      FilenameDialog(dialogTitle: arguments['dialogTitle'], filename: arguments['filename']),
+  .settingsStorage: (context, arguments) => StorageListViewModel().build(),
+  .settingsStorageAdd: (context, arguments) => const SettingsStorageAddPage(),
+  .settingsStoragePreference: (context, arguments) => SettingsStoragePreferencePage(storage: arguments),
+  .settingsLibraryTv: (context, arguments) => LibraryListViewModel(type: LibraryType.tv).build(),
+  .settingsLibraryMovie: (context, arguments) => LibraryListViewModel(type: LibraryType.movie).build(),
+  .settingsPlay: (context, arguments) => const SettingsPlayPage(),
+  .settingsHistory: (context, arguments) => PlayerHistoryListViewModel().build(),
+  .settingsDownload: (context, arguments) => const SystemSettingsDownloader(),
+  .settingsServer: (context, arguments) => ServerListViewModel().build(),
+  .settingsServerAdd: (context, arguments) => const SettingsServerAddPage(),
+  .settingsDiagnostics: (context, arguments) => const SettingsDiagnostics(),
+  .settingsLog: (context, arguments) => const SettingsLogPage(),
+  .settingsOther: (context, arguments) => const SystemSettingsOther(),
+  .settingsPlayer: (context, arguments) => const SettingsPlayer(),
+  .settingsPlayerKernel: (context, arguments) => const SettingsPlayerKernel(),
+  .settingsSync: (context, arguments) => const SettingsSyncPage(),
+  .settingsDns: (context, arguments) => DNDListViewModel().build(),
+  .settingsShortcut: (context, arguments) => const SystemSettingsShortcut(),
+  .settingsDnsEdit: (context, arguments) => SystemSettingsDNSEdit(item: arguments),
+  .settingsHelp: (context, arguments) => HelpListViewModel().build(),
+  .settingsHelpDetail: (context, arguments) => HelperDetail(page: arguments),
+  .settingsSponsor: (context, arguments) => const SettingsSponsor(),
+  .settingsAbout: (context, arguments) => const SettingsAboutPage(),
+  .settingsUpdater: (context, arguments) => const SettingsUpdater(),
 };

@@ -12,9 +12,10 @@ import '../../../components/components.dart';
 import '../../../details/playlist.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/models.dart';
+import '../../../providers/player.dart';
 import '../../../providers/shortcut_tv.dart';
-import '../../../providers/user_config.dart';
 import '../components/radio_list_tile.dart';
+import '../components/setting_page.dart';
 import '../theme.dart';
 
 class LivePlayerPage extends StatefulWidget {
@@ -68,8 +69,9 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
 
   @override
   Widget build(BuildContext context) {
-    final ShortcutTV shortcuts = context.watch<ShortcutTV>();
-    final UserConfig userConfig = context.read<UserConfig>();
+    final ShortcutTV shortcuts = context.read<ShortcutTV>();
+    final PlayerConfig playerConfig = context.read<PlayerConfig>();
+    final String languageCode = Localizations.localeOf(context).languageCode;
     return Theme(
       data: darkTheme,
       child: Scaffold(
@@ -77,7 +79,7 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
         backgroundColor: Colors.transparent,
         drawerScrimColor: Colors.transparent,
         drawer: Container(
-          height: MediaQuery.of(context).size.height,
+          height: MediaQuery.sizeOf(context).height,
           decoration: const BoxDecoration(
             gradient: LinearGradient(colors: [Colors.black87, Colors.transparent], stops: [0.2, 0.8]),
           ),
@@ -90,9 +92,7 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
                 showEpg: true,
                 onTap: (index) async {
                   await _controller.next(index);
-                  if (_controller.status.value == PlayerStatus.idle ||
-                      _controller.status.value == PlayerStatus.error ||
-                      _controller.status.value == PlayerStatus.ended) {
+                  if (!_controller.isPlaying.value) {
                     await _controller.play();
                   }
                 },
@@ -100,8 +100,7 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
             },
           ),
         ),
-        endDrawer: SizedBox(
-          width: 300,
+        endDrawer: Drawer(
           child: SettingPage(
             title: Text(AppLocalizations.of(context)!.playerBroadcastLine),
             child: StatefulBuilder(
@@ -114,14 +113,8 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
                     onChanged: (url) async {
                       final PlaylistItem currentItem = _controller.currentItem!;
                       await _controller.updateSource(currentItem.copyWith(url: url), _controller.index.value!);
-                      switch (_controller.status.value) {
-                        case PlayerStatus.paused:
-                        case PlayerStatus.ended:
-                        case PlayerStatus.error:
-                        case PlayerStatus.idle:
-                          await _controller.play();
-                        case PlayerStatus.playing:
-                        case PlayerStatus.buffering:
+                      if (!_controller.isPlaying.value) {
+                        await _controller.play();
                       }
                       setState(() {});
                     },
@@ -143,150 +136,150 @@ class _LivePlayerPageState extends State<LivePlayerPage> {
             ),
           ),
         ),
-        body: Stack(
-          fit: StackFit.expand,
-          children: [
-            PlayerPlatformView(
-              playerType: userConfig.playerType,
-              mpvVersion: userConfig.mpvVersion,
-              initialized: () async {
-                _controller.setPlaylist(widget.data.playlist.cast());
-                await _controller.next(widget.data.activeIndex);
-                await _controller.play();
-              },
-              initializeFailed: (e) => _controller.fatalError.value = e.message,
-            ),
-            PopScope(
-              canPop: false,
-              onPopInvokedWithResult: (didPop, _) {
-                if (didPop) {
-                  return;
-                }
-                if (_scaffoldKey.currentState!.isDrawerOpen) {
-                  return _scaffoldKey.currentState!.closeDrawer();
-                }
-                if (_scaffoldKey.currentState!.isEndDrawerOpen) {
-                  return _scaffoldKey.currentState!.closeEndDrawer();
-                }
-                if (_isShowControls.value) {
-                  _controlsStream.add(ControlsStreamStatus.hide);
-                } else {
-                  if (context.mounted) {
-                    Navigator.pop(context);
+        body: PlayerPlatformView(
+          playerType: playerConfig.playerType,
+          mpvVersion: playerConfig.mpvVersion,
+          initialized: () async {
+            _controller.setPlaylist(widget.data.playlist.cast());
+            await _controller.next(widget.data.activeIndex);
+            await _controller.play();
+          },
+          initializeFailed: (e) => _controller.fatalError.value = e.message,
+          extensionRendererMode: playerConfig.extensionRendererMode,
+          enableDecoderFallback: playerConfig.enableDecoderFallback,
+          subtitleStyle: playerConfig.subtitleSettings,
+          preferredSubtitleLanguage: playerConfig.preferredSubtitleLanguage ?? languageCode,
+          preferredAudioLanguage: playerConfig.preferredAudioLanguage ?? languageCode,
+          controls: Stack(
+            children: [
+              PopScope(
+                canPop: false,
+                onPopInvokedWithResult: (didPop, _) {
+                  if (didPop) {
+                    return;
                   }
-                }
-              },
-              child: FocusScope(
-                autofocus: true,
-                onKeyEvent: (node, event) {
-                  if (event is KeyUpEvent) {
-                    if (event.logicalKey == shortcuts.nextChannel) {
-                      if (_controller.index.value != null) {
-                        _controller.next(_controller.index.value! + 1);
-                      }
-                      if (_controller.status.value == PlayerStatus.idle ||
-                          _controller.status.value == PlayerStatus.error ||
-                          _controller.status.value == PlayerStatus.ended) {
-                        _controller.play();
-                      }
-                      return KeyEventResult.handled;
-                    } else if (event.logicalKey == shortcuts.previousChannel) {
-                      if (_controller.index.value != null) {
-                        _controller.next(_controller.index.value! - 1);
-                      }
-                      if (_controller.status.value == PlayerStatus.idle ||
-                          _controller.status.value == PlayerStatus.error ||
-                          _controller.status.value == PlayerStatus.ended) {
-                        _controller.play();
-                      }
-                      return KeyEventResult.handled;
-                    } else if (event.logicalKey == LogicalKeyboardKey.select) {
-                      _controlsStream.add(
-                        _isShowControls.value ? ControlsStreamStatus.hide : ControlsStreamStatus.show,
-                      );
-                      return KeyEventResult.handled;
-                    } else if (event.logicalKey == shortcuts.switchLinePanel) {
-                      if (_controller.currentItem != null &&
-                          (_controller.currentItem!.source as Channel).links.length > 1) {
-                        _scaffoldKey.currentState!.openEndDrawer();
-                      }
-                      return KeyEventResult.handled;
-                    } else if (event.logicalKey == shortcuts.channelsPanel) {
-                      if (_controller.index.value != null) {
-                        _drawerUpdateStream.value = 170 * (_controller.index.value! ~/ 2);
-                      }
-                      _scrollController.dispose();
-                      _scrollController = ScrollController(initialScrollOffset: _drawerUpdateStream.value.toDouble());
-                      _scaffoldKey.currentState!.openDrawer();
-                      return KeyEventResult.handled;
-                    } else if (event.logicalKey == LogicalKeyboardKey.goBack) {
-                      if (_isShowControls.value) {
-                        _controlsStream.add(ControlsStreamStatus.hide);
-                        return KeyEventResult.handled;
-                      }
+                  if (_scaffoldKey.currentState!.isDrawerOpen) {
+                    return _scaffoldKey.currentState!.closeDrawer();
+                  }
+                  if (_scaffoldKey.currentState!.isEndDrawerOpen) {
+                    return _scaffoldKey.currentState!.closeEndDrawer();
+                  }
+                  if (_isShowControls.value) {
+                    _controlsStream.add(ControlsStreamStatus.hide);
+                  } else {
+                    if (context.mounted) {
+                      Navigator.pop(context);
                     }
                   }
-                  return KeyEventResult.ignored;
                 },
-                child: ValueListenableBuilder(
-                  valueListenable: _isShowControls,
-                  builder: (context, value, child) => PageTransitionSwitcher(
-                    reverse: !value,
-                    duration: const Duration(milliseconds: 500),
-                    transitionBuilder: (child, animation, secondaryAnimation) => SharedAxisTransition(
-                      animation: animation,
-                      secondaryAnimation: secondaryAnimation,
-                      transitionType: SharedAxisTransitionType.vertical,
-                      fillColor: Colors.transparent,
-                      child: child,
-                    ),
-                    child: _isShowControls.value ? child! : const SizedBox.expand(),
-                  ),
-                  child: Container(
-                    height: MediaQuery.of(context).size.height,
-                    padding: const EdgeInsets.symmetric(horizontal: 72, vertical: 12),
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Colors.transparent, Colors.black87],
-                        stops: [0.4, 0.8],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
+                child: FocusScope(
+                  autofocus: true,
+                  onKeyEvent: (node, event) {
+                    if (event is KeyUpEvent) {
+                      if (event.logicalKey == shortcuts.nextChannel) {
+                        if (_controller.index.value != null) {
+                          _controller.next(_controller.index.value! + 1);
+                        }
+                        if (!_controller.isPlaying.value) {
+                          _controller.play();
+                        }
+                        return KeyEventResult.handled;
+                      } else if (event.logicalKey == shortcuts.previousChannel) {
+                        if (_controller.index.value != null) {
+                          _controller.next(_controller.index.value! - 1);
+                        }
+                        if (!_controller.isPlaying.value) {
+                          _controller.play();
+                        }
+                        return KeyEventResult.handled;
+                      } else if (event.logicalKey == LogicalKeyboardKey.select) {
+                        _controlsStream.add(
+                          _isShowControls.value ? ControlsStreamStatus.hide : ControlsStreamStatus.show,
+                        );
+                        return KeyEventResult.handled;
+                      } else if (event.logicalKey == shortcuts.switchLinePanel) {
+                        if (_controller.currentItem != null &&
+                            (_controller.currentItem!.source as Channel).links.length > 1) {
+                          _scaffoldKey.currentState!.openEndDrawer();
+                        }
+                        return KeyEventResult.handled;
+                      } else if (event.logicalKey == shortcuts.channelsPanel) {
+                        if (_controller.index.value != null) {
+                          _drawerUpdateStream.value = 170 * (_controller.index.value! ~/ 2);
+                        }
+                        _scrollController.dispose();
+                        _scrollController = ScrollController(initialScrollOffset: _drawerUpdateStream.value.toDouble());
+                        _scaffoldKey.currentState!.openDrawer();
+                        return KeyEventResult.handled;
+                      } else if (event.logicalKey == LogicalKeyboardKey.goBack) {
+                        if (_isShowControls.value) {
+                          _controlsStream.add(ControlsStreamStatus.hide);
+                          return KeyEventResult.handled;
+                        }
+                      }
+                    }
+                    return KeyEventResult.ignored;
+                  },
+                  child: ValueListenableBuilder(
+                    valueListenable: _isShowControls,
+                    builder: (context, value, child) => PageTransitionSwitcher(
+                      reverse: !value,
+                      duration: const Duration(milliseconds: 500),
+                      transitionBuilder: (child, animation, secondaryAnimation) => SharedAxisTransition(
+                        animation: animation,
+                        secondaryAnimation: secondaryAnimation,
+                        transitionType: SharedAxisTransitionType.vertical,
+                        fillColor: Colors.transparent,
+                        child: child,
                       ),
+                      child: _isShowControls.value ? child! : const SizedBox.expand(),
                     ),
-                    child: Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ValueListenableBuilder(
-                            valueListenable: _controller.fatalError,
-                            builder: (context, value, _) => value != null
-                                ? Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                                    child: Text(
-                                      value,
-                                      style: TextStyle(color: Theme.of(context).colorScheme.error),
-                                      maxLines: 6,
-                                    ),
-                                  )
-                                : const SizedBox(),
-                          ),
-                          _PlayerInfo(controller: _controller),
-                        ],
+                    child: Container(
+                      height: MediaQuery.sizeOf(context).height,
+                      padding: const EdgeInsets.symmetric(horizontal: 72, vertical: 12),
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Colors.transparent, Colors.black87],
+                          stops: [0.4, 0.8],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
+                      ),
+                      child: Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ValueListenableBuilder(
+                              valueListenable: _controller.fatalError,
+                              builder: (context, value, _) => value != null
+                                  ? Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                                      child: Text(
+                                        value,
+                                        style: TextStyle(color: Theme.of(context).colorScheme.error),
+                                        maxLines: 6,
+                                      ),
+                                    )
+                                  : const SizedBox(),
+                            ),
+                            _PlayerInfo(controller: _controller),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-            ValueListenableBuilder(
-              valueListenable: _controller.status,
-              builder: (context, value, _) => switch (value) {
-                PlayerStatus.buffering => const Loading(),
-                _ => const SizedBox(),
-              },
-            ),
-          ],
+              ValueListenableBuilder(
+                valueListenable: _controller.playbackState,
+                builder: (context, value, _) => switch (value) {
+                  .buffering => const Loading(),
+                  _ => const SizedBox(),
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -338,7 +331,7 @@ class _PlayerInfo extends StatelessWidget {
             DefaultTextStyle(
               style: Theme.of(context).textTheme.labelMedium!,
               child: ValueListenableBuilder(
-                valueListenable: controller.mediaInfo,
+                valueListenable: controller.trackGroup,
                 builder: (context, value, _) => Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -351,11 +344,11 @@ class _PlayerInfo extends StatelessWidget {
                           textColor: Colors.black,
                         ),
                         const SizedBox(width: 12),
-                        Text(value?.videoMime ?? ''),
+                        Text(value.selectedVideo?.sampleMimeType ?? ''),
                         const SizedBox(width: 12),
-                        Text(value?.videoSize ?? ''),
+                        Text('${value.selectedVideo?.width} x ${value.selectedVideo?.height}'),
                         const SizedBox(width: 12),
-                        Text('${value?.videoFPS ?? ''} fps / ${value?.videoBitrate} bps'),
+                        Text('${value.selectedVideo?.frameRate ?? ''} fps / ${value.selectedVideo?.bitrate} bps'),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -363,9 +356,9 @@ class _PlayerInfo extends StatelessWidget {
                       children: [
                         const Badge(label: Text('Audio'), backgroundColor: Colors.greenAccent, textColor: Colors.black),
                         const SizedBox(width: 12),
-                        Text(value?.audioMime ?? ''),
+                        Text(value.selectedAudio?.sampleMimeType ?? ''),
                         const SizedBox(width: 12),
-                        Text('${value?.audioBitrate ?? ''} bps'),
+                        Text('${value.selectedAudio?.sampleRate ?? ''} bps'),
                       ],
                     ),
                   ],

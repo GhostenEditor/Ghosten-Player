@@ -605,7 +605,7 @@ abstract class AppLocalizations {
   /// No description provided for @errorCode.
   ///
   /// In en, this message translates to:
-  /// **'{code, select, 30001{No target data selected, please select an item from the list and try again} 40000{Bad Request} 40001{The M3U file exceeds the parsing limit, please adjust the file and try again.} 40002{M3U file cannot be parsed, please check if the file is correct} 40003{} 40004{Http Url invalid} 40005{Unknown IO error: {message}} 40006{Duplicate data, insertion failed} 40007{Other IO error: {message}} 40008{A failure to read or write bytes on an I/O stream} 40009{JSON format syntax error: {message}} 40010{Data format error: {message}} 40011{Data missed: {message}} 40012{Data format error: {message}} 40013{Invalid Http Header Value: {message}} 40014{This DLNA Action is not supported} 40015{Media file name is missing} 40016{Wrong account type logged in} 40017{Account data is missing} 40018{Concurrency error} 40019{Range access is not supported} 40020{Aliyun async task failed} 40021{File rename conflict} 40022{Wrong Media library type} 40023{Wrong filter type} 40024{} 40025{Updated {message} data, data update failed} 40026{Data format error: {message}} 40101{Login verification failed: {message}} 40102{Login failed, please confirm whether the Webdav address and account password are correct!}  40103{Server account error, please log in again!} 40301{Forbidden} 40401{Not Found} 40402{Api Not Found} 40403{File Not Found} 40404{{message}} 40800{Connect Timeout} 42900{Too Many Requests} 50000{Internal Error} 50401{Gateway timeout} 60001{No Data to Rollback} 60002{Can\'t obtain storage permission} 60003{Please ensure the Bluetooth is on} 60004{No Bluetooth Adaptor Found} other{Unknown Error {message}}}'**
+  /// **'{code, select, 40000{Bad Request} 40001{The M3U file exceeds the parsing limit, please adjust the file and try again.} 40002{M3U file cannot be parsed, please check if the file is correct} 40003{Unknown IO error: {message}} 40004{Data Conflict} 40005{Other IO error: {message}} 40006{JSON data error: {message}} 40007{} 40008{This DLNA Action is not supported} 40009{This drive is not supported} 40010{Storage Login Data Missed} 40011{Concurrency error} 40012{Range access is not supported} 40013{Alipan async task failed} 40014{File rename conflict} 40015{} 40016{} 40017{} 40018{} 40019{} 40020{} 40021{} 40022{} 40100{Unauthorized} 40101{Storage unauthorized: {message}} 40102{Login failed, please confirm whether the Webdav address and account password are correct!}  40103{Server account error, please log in again!} 40301{Forbidden} 40401{Not Found} 40402{Api Not Found} 40403{File Not Found} 40404{{message}} 40405{No Palette Color} 40406{No data found} 40501{Method Not Allowed} 40800{Connect Timeout} 40801{Connect Timeout} 42900{Too Many Requests} 50000{Internal Error} 50401{Gateway timeout} 60001{No Data to Rollback} 60002{Can\'t obtain storage permission} 60003{Please ensure the Bluetooth is on} 60004{No Bluetooth Adaptor Found} other{Unknown Error {message}}}'**
   String errorCode(String code, Object message);
 
   /// No description provided for @errorDetails.
@@ -1286,6 +1286,54 @@ abstract class AppLocalizations {
   /// **'Unknown Error'**
   String get sessionStatusUnknown;
 
+  /// No description provided for @settingsGroupDataSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Data Settings'**
+  String get settingsGroupDataSettings;
+
+  /// No description provided for @settingsGroupDisplaySettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Display Settings'**
+  String get settingsGroupDisplaySettings;
+
+  /// No description provided for @settingsGroupManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Management'**
+  String get settingsGroupManagement;
+
+  /// No description provided for @settingsGroupMiscellaneous.
+  ///
+  /// In en, this message translates to:
+  /// **'Miscellaneous'**
+  String get settingsGroupMiscellaneous;
+
+  /// No description provided for @settingsGroupPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get settingsGroupPlay;
+
+  /// No description provided for @settingsGroupProxySettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy Settings'**
+  String get settingsGroupProxySettings;
+
+  /// No description provided for @settingsGroupShortcutSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Shortcut Settings'**
+  String get settingsGroupShortcutSettings;
+
+  /// No description provided for @settingsGroupTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Tools'**
+  String get settingsGroupTools;
+
   /// No description provided for @settingsItemAccount.
   ///
   /// In en, this message translates to:
@@ -1316,6 +1364,12 @@ abstract class AppLocalizations {
   /// **'Auto Play'**
   String get settingsItemAutoPlay;
 
+  /// No description provided for @settingsItemCookie.
+  ///
+  /// In en, this message translates to:
+  /// **'Cookie'**
+  String get settingsItemCookie;
+
   /// No description provided for @settingsItemDNS.
   ///
   /// In en, this message translates to:
@@ -1328,23 +1382,11 @@ abstract class AppLocalizations {
   /// **'Data Reset'**
   String get settingsItemDataReset;
 
-  /// No description provided for @settingsItemDataSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'Data Settings'**
-  String get settingsItemDataSettings;
-
   /// No description provided for @settingsItemDataSync.
   ///
   /// In en, this message translates to:
   /// **'Data Sync'**
   String get settingsItemDataSync;
-
-  /// No description provided for @settingsItemDisplaySettings.
-  ///
-  /// In en, this message translates to:
-  /// **'Display Settings'**
-  String get settingsItemDisplaySettings;
 
   /// No description provided for @settingsItemDisplaySize.
   ///
@@ -1430,12 +1472,6 @@ abstract class AppLocalizations {
   /// **'Player Settings'**
   String get settingsItemPlayerSettings;
 
-  /// No description provided for @settingsItemProxySettings.
-  ///
-  /// In en, this message translates to:
-  /// **'Proxy Settings'**
-  String get settingsItemProxySettings;
-
   /// No description provided for @settingsItemScraperBehavior.
   ///
   /// In en, this message translates to:
@@ -1459,12 +1495,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Server Settings'**
   String get settingsItemServer;
-
-  /// No description provided for @settingsItemShortcutSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'Shortcut Settings'**
-  String get settingsItemShortcutSettings;
 
   /// No description provided for @settingsItemShortcuts.
   ///

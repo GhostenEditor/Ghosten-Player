@@ -125,9 +125,9 @@ class _CarouselPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 48, right: 48, top: 48),
+      padding: const EdgeInsets.only(left: 48, right: 48, bottom: 32),
       child: SizedBox(
-        height: 402,
+        height: 392,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

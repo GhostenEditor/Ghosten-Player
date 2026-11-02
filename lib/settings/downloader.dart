@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../components/components.dart';
 import '../../l10n/app_localizations.dart';
+import '../adaptive/adaptive.dart';
 
 class SystemSettingsDownloader extends StatefulWidget {
   const SystemSettingsDownloader({super.key});

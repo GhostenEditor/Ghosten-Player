@@ -1,14 +1,16 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart' hide ListTile, Scrollbar;
+import 'package:provider/provider.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
-import '../../components/components.dart';
-import '../../components/markdown_viewer.dart';
 import '../../constants.dart';
 import '../../l10n/app_localizations.dart';
 import '../../utils/utils.dart';
 import '../adaptive/adaptive.dart';
+import '../components/components.dart ';
+import '../view_models/view_models.dart';
+import '../viewers/markdown_viewer.dart';
 
 class SettingsHelp extends StatelessWidget {
   const SettingsHelp({super.key});
@@ -17,15 +19,12 @@ class SettingsHelp extends StatelessWidget {
   Widget build(BuildContext context) {
     return SettingPage(
       title: Text(AppLocalizations.of(context)!.settingsItemHelp),
-      child: FutureBuilderHandler<List<WikiPage>>(
-        future: cacheHttpClient
-            .get(wikiUrl)
-            .then((resp) => (jsonDecode(resp.data) as List<dynamic>).map(WikiPage.fromJson).toList()),
-        builder: (context, snapshot) => ListView.builder(
+      child: ListViewModelConsumer<HelpListViewModel, WikiPage>(
+        builder: (context, items, _) => ListView.builder(
           padding: SettingPageTheme.of(context).contentPadding,
-          itemCount: snapshot.requireData.length,
+          itemCount: items.length,
           itemBuilder: (context, index) {
-            final WikiPage item = snapshot.requireData[index];
+            final WikiPage item = items[index];
             if (item.subs != null) {
               return ExpansionTile(
                 title: Text(item.title),
@@ -84,6 +83,7 @@ class _HelperDetailState extends State<HelperDetail> {
       title: Text(widget.page.title),
       child: Scrollbar(
         child: FutureBuilderHandler(
+          loadingBuilder: (context, _) => const LinearProgressIndicator(),
           future: cacheHttpClient
               .get<String>('https://raw.githubusercontent.com/wiki/$repoAuthor/$repoName/${widget.page.path}')
               .then((resp) => resp.data),
@@ -92,12 +92,37 @@ class _HelperDetailState extends State<HelperDetail> {
             controller: _autoScrollController,
             child: MarkdownViewer(
               autoScrollController: _autoScrollController,
-              padding: SettingPageTheme.of(context).contentPadding,
+              padding: const .symmetric(horizontal: 16, vertical: 8),
               data: snapshot.requireData!,
             ),
           ),
         ),
       ),
     );
+  }
+}
+
+class HelpListViewModel extends ListViewModelBase<WikiPage> {
+  HelpListViewModel() : snapshot = const AsyncSnapshot.waiting();
+
+  @override
+  AsyncSnapshot<List<WikiPage>> snapshot;
+
+  @override
+  Future<void> load() async {
+    try {
+      final List<WikiPage> data = await cacheHttpClient
+          .get(wikiUrl)
+          .then((resp) => (jsonDecode(resp.data) as List<dynamic>).map(WikiPage.fromJson).toList());
+      snapshot = AsyncSnapshot.withData(.done, data);
+    } catch (e) {
+      snapshot = AsyncSnapshot.withError(.done, e);
+    }
+    notifyListeners();
+  }
+
+  @override
+  Widget build() {
+    return ChangeNotifierProvider(create: (_) => this, child: const SettingsHelp());
   }
 }

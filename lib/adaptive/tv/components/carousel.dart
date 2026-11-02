@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:animations/animations.dart';
-import 'package:api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../previews/previews.dart';
+import '../../../routers.dart';
 
 class Carousel extends StatefulWidget {
   const Carousel({
@@ -17,7 +17,7 @@ class Carousel extends StatefulWidget {
   });
 
   final int itemCount;
-  final NullableIndexedWidgetBuilder itemBuilder;
+  final IndexedWidgetBuilder itemBuilder;
   final ValueChanged<int>? onChange;
   final bool autofocus;
 
